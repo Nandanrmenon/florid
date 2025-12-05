@@ -6,6 +6,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../models/fdroid_app.dart';
 import '../providers/app_provider.dart';
 import '../providers/download_provider.dart';
+import 'permissions_screen.dart';
 
 class AppDetailsScreen extends StatelessWidget {
   final FDroidApp app;
@@ -143,76 +144,116 @@ class AppDetailsScreen extends StatelessWidget {
             ],
           ),
           SliverToBoxAdapter(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // App info header
-                Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    spacing: 16,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Hero(
-                        tag: 'app-icon-${app.packageName}',
-                        child: Material(
-                          child: SizedBox(
-                            width: 100,
-                            height: 100,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                spacing: 16,
+                children: [
+                  // App info header
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    child: Column(
+                      spacing: 16,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Hero(
+                          tag: 'app-icon-${app.packageName}',
+                          child: Material(
+                            child: SizedBox(
+                              width: 100,
+                              height: 100,
 
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(16),
-                              child: _AppDetailsIcon(app: app),
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(16),
+                                child: _AppDetailsIcon(app: app),
+                              ),
                             ),
                           ),
                         ),
-                      ),
 
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        spacing: 4,
-                        children: [
-                          Text(
-                            app.name,
-                            style: Theme.of(context).textTheme.titleLarge,
-                          ),
-                          Text(
-                            'by ${app.authorName ?? 'Unknown'}',
-                            style: Theme.of(context).textTheme.bodyMedium
-                                ?.copyWith(
-                                  color: Theme.of(
-                                    context,
-                                  ).colorScheme.onSurfaceVariant,
-                                ),
-                          ),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          spacing: 4,
+                          children: [
+                            Text(
+                              app.name,
+                              style: Theme.of(context).textTheme.titleLarge,
+                            ),
+                            Text(
+                              'by ${app.authorName ?? 'Unknown'}',
+                              style: Theme.of(context).textTheme.bodyMedium
+                                  ?.copyWith(
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.onSurfaceVariant,
+                                  ),
+                            ),
+                          ],
+                        ),
+                        if (app.categories?.isNotEmpty == true) ...[
+                          Chip(label: Text(app.categories!.first)),
                         ],
-                      ),
-                      if (app.categories?.isNotEmpty == true) ...[
-                        Chip(label: Text(app.categories!.first)),
+
+                        _DownloadSection(app: app),
                       ],
-
-                      _DownloadSection(app: app),
-                    ],
+                    ),
                   ),
-                ),
 
-                // Description
-                _DescriptionSection(app: app),
+                  // Description
+                  _DescriptionSection(app: app),
+                  Divider(),
 
-                // Download section
-                // _DownloadSection(app: app),
+                  // Download section
+                  // _DownloadSection(app: app),
 
-                // App details
-                _AppInfoSection(app: app),
+                  // App details
+                  _AppInfoSection(app: app),
+                  Divider(),
 
-                // Version info
-                if (app.latestVersion != null)
-                  _VersionInfoSection(version: app.latestVersion!)
-                else
-                  const _NoVersionInfoSection(),
+                  // Version info
+                  if (app.latestVersion != null)
+                    _VersionInfoSection(version: app.latestVersion!)
+                  else
+                    const _NoVersionInfoSection(),
+                  Divider(),
+                  // All versions history
+                  if (app.packages != null && app.packages!.isNotEmpty)
+                    _AllVersionsSection(app: app)
+                  else
+                    const SizedBox.shrink(),
+                  Divider(),
+                  // Permissions section
+                  if (app.latestVersion?.permissions?.isNotEmpty == true)
+                    ListTile(
+                      leading: Icon(
+                        Icons.security,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                      title: Text(
+                        'Permissions (${app.latestVersion!.permissions!.length})',
+                        style: Theme.of(context).textTheme.titleMedium
+                            ?.copyWith(fontWeight: FontWeight.w600),
+                      ),
+                      trailing: const Icon(Icons.arrow_forward),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => PermissionsScreen(
+                              permissions: app.latestVersion!.permissions!,
+                              appName: app.name,
+                            ),
+                          ),
+                        );
+                      },
+                    )
+                  else
+                    const SizedBox.shrink(),
 
-                const SizedBox(height: 24),
-              ],
+                  const SizedBox(height: 24),
+                ],
+              ),
             ),
           ),
         ],
@@ -517,25 +558,22 @@ class _AppInfoSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'App Information',
-            style: Theme.of(
-              context,
-            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
-          ),
-          const SizedBox(height: 12),
-          _InfoRow('Package Name', app.packageName),
-          _InfoRow('License', app.license),
-          if (app.added != null) _InfoRow('Added', _formatDate(app.added!)),
-          if (app.lastUpdated != null)
-            _InfoRow('Last Updated', _formatDate(app.lastUpdated!)),
-        ],
-      ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'App Information',
+          style: Theme.of(
+            context,
+          ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
+        ),
+        const SizedBox(height: 12),
+        _InfoRow('Package Name', app.packageName),
+        _InfoRow('License', app.license),
+        if (app.added != null) _InfoRow('Added', _formatDate(app.added!)),
+        if (app.lastUpdated != null)
+          _InfoRow('Last Updated', _formatDate(app.lastUpdated!)),
+      ],
     );
   }
 
@@ -544,28 +582,104 @@ class _AppInfoSection extends StatelessWidget {
   }
 }
 
-class _DescriptionSection extends StatelessWidget {
+class _DescriptionSection extends StatefulWidget {
   final FDroidApp app;
 
   const _DescriptionSection({required this.app});
 
   @override
+  State<_DescriptionSection> createState() => _DescriptionSectionState();
+}
+
+class _DescriptionSectionState extends State<_DescriptionSection>
+    with SingleTickerProviderStateMixin {
+  bool _isExpanded = false;
+  late AnimationController _animationController;
+  late Animation<double> _heightAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _animationController = AnimationController(
+      duration: const Duration(milliseconds: 300),
+      vsync: this,
+    );
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Description',
-            style: Theme.of(
-              context,
-            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
-          ),
-          const SizedBox(height: 12),
-          Text(app.description, style: Theme.of(context).textTheme.bodyMedium),
-        ],
+    final maxLines = _isExpanded ? null : 3;
+    final description = widget.app.description;
+
+    // Check if text would overflow with 3 lines
+    final textPainter = TextPainter(
+      text: TextSpan(
+        text: description,
+        style: Theme.of(context).textTheme.bodyMedium,
       ),
+      maxLines: 3,
+      textDirection: TextDirection.ltr,
+    );
+    textPainter.layout(maxWidth: MediaQuery.of(context).size.width - 32);
+    final isOverflowing = textPainter.didExceedMaxLines;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      spacing: 8,
+      children: [
+        Text(
+          'Description',
+          style: Theme.of(
+            context,
+          ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
+        ),
+        Stack(
+          children: [
+            AnimatedSize(
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeInOut,
+              child: Text(
+                description,
+                style: Theme.of(context).textTheme.bodyMedium,
+                maxLines: maxLines,
+                overflow: _isExpanded
+                    ? TextOverflow.visible
+                    : TextOverflow.ellipsis,
+              ),
+            ),
+          ],
+        ),
+        if (isOverflowing)
+          Padding(
+            padding: const EdgeInsets.only(top: 12),
+            child: AnimatedDefaultTextStyle(
+              duration: const Duration(milliseconds: 300),
+              style: Theme.of(context).textTheme.labelMedium!.copyWith(
+                color: Theme.of(context).colorScheme.primary,
+                fontWeight: FontWeight.w600,
+              ),
+              child: TextButton(
+                onPressed: () {
+                  setState(() {
+                    _isExpanded = !_isExpanded;
+                    if (_isExpanded) {
+                      _animationController.forward();
+                    } else {
+                      _animationController.reverse();
+                    }
+                  });
+                },
+                child: Text(_isExpanded ? 'Show less' : 'Show more'),
+              ),
+            ),
+          ),
+      ],
     );
   }
 }
@@ -577,49 +691,25 @@ class _VersionInfoSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Version Information',
-            style: Theme.of(
-              context,
-            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
-          ),
-          const SizedBox(height: 12),
-          _InfoRow('Version Name', version.versionName),
-          _InfoRow('Version Code', version.versionCode.toString()),
-          _InfoRow('Size', version.sizeString),
-          if (version.minSdkVersion != null)
-            _InfoRow('Min SDK', version.minSdkVersion!),
-          if (version.targetSdkVersion != null)
-            _InfoRow('Target SDK', version.targetSdkVersion!),
-          _InfoRow('Added', _formatDate(version.added)),
-          if (version.permissions?.isNotEmpty == true)
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const SizedBox(height: 8),
-                Text(
-                  'Permissions:',
-                  style: Theme.of(context).textTheme.labelLarge,
-                ),
-                const SizedBox(height: 4),
-                ...version.permissions!.map(
-                  (permission) => Padding(
-                    padding: const EdgeInsets.only(left: 16, top: 2),
-                    child: Text(
-                      '• $permission',
-                      style: Theme.of(context).textTheme.bodySmall,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-        ],
-      ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Version Information',
+          style: Theme.of(
+            context,
+          ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
+        ),
+        const SizedBox(height: 12),
+        _InfoRow('Version Name', version.versionName),
+        _InfoRow('Version Code', version.versionCode.toString()),
+        _InfoRow('Size', version.sizeString),
+        if (version.minSdkVersion != null)
+          _InfoRow('Min SDK', version.minSdkVersion!),
+        if (version.targetSdkVersion != null)
+          _InfoRow('Target SDK', version.targetSdkVersion!),
+        _InfoRow('Added', _formatDate(version.added)),
+      ],
     );
   }
 
@@ -633,52 +723,49 @@ class _NoVersionInfoSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Version Information',
-            style: Theme.of(
-              context,
-            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Version Information',
+          style: Theme.of(
+            context,
+          ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
+        ),
+        const SizedBox(height: 12),
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.surfaceContainerHighest,
+            borderRadius: BorderRadius.circular(8),
           ),
-          const SizedBox(height: 12),
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surfaceContainerHighest,
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Column(
-              children: [
-                Icon(
-                  Icons.info_outline,
+          child: Column(
+            children: [
+              Icon(
+                Icons.info_outline,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                size: 32,
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'No Version Information Available',
+                style: Theme.of(context).textTheme.titleSmall?.copyWith(
                   color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  size: 32,
                 ),
-                const SizedBox(height: 8),
-                Text(
-                  'No Version Information Available',
-                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                'This app doesn\'t have detailed version information in the F-Droid repository.',
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  'This app doesn\'t have detailed version information in the F-Droid repository.',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-              ],
-            ),
+                textAlign: TextAlign.center,
+              ),
+            ],
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
@@ -798,5 +885,126 @@ class _AppDetailsIconState extends State<_AppDetailsIcon> {
         );
       },
     );
+  }
+}
+
+class _AllVersionsSection extends StatelessWidget {
+  final FDroidApp app;
+
+  const _AllVersionsSection({required this.app});
+
+  @override
+  Widget build(BuildContext context) {
+    final versions = app.packages?.values.toList() ?? [];
+    if (versions.isEmpty) return const SizedBox.shrink();
+
+    // Sort versions by version code descending
+    versions.sort((a, b) => b.versionCode.compareTo(a.versionCode));
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'All Versions',
+          style: Theme.of(
+            context,
+          ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
+        ),
+        ListView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          itemCount: versions.length,
+          itemBuilder: (context, index) {
+            final version = versions[index];
+            final isLatest = index == 0;
+
+            return Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: isLatest
+                    ? Theme.of(context).colorScheme.primaryContainer
+                    : Theme.of(context).colorScheme.surfaceContainer,
+                borderRadius: BorderRadius.circular(16),
+                border: isLatest
+                    ? Border.all(
+                        color: Theme.of(context).colorScheme.primary,
+                        width: 1,
+                      )
+                    : null,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              version.versionName,
+                              style: Theme.of(context).textTheme.bodyMedium
+                                  ?.copyWith(fontWeight: FontWeight.w600),
+                            ),
+                            Text(
+                              'Code: ${version.versionCode}',
+                              style: Theme.of(context).textTheme.bodySmall
+                                  ?.copyWith(
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.onSurfaceVariant,
+                                  ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      if (isLatest)
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).colorScheme.primary,
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          child: Text(
+                            'Latest',
+                            style: Theme.of(context).textTheme.labelSmall
+                                ?.copyWith(
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.onPrimary,
+                                ),
+                          ),
+                        ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      Text(
+                        'Size: ${version.sizeString}',
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
+                      const SizedBox(width: 16),
+                      Text(
+                        'Released: ${_formatDate(version.added)}',
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            );
+          },
+        ),
+      ],
+    );
+  }
+
+  String _formatDate(DateTime date) {
+    return '${date.day}/${date.month}/${date.year}';
   }
 }

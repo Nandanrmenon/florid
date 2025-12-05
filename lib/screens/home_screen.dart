@@ -28,6 +28,11 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
+    // Load installed apps once at startup so install status is available.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final appProvider = context.read<AppProvider>();
+      appProvider.fetchInstalledApps();
+    });
   }
 
   final List<NavigationDestination> _destinations = const [
@@ -150,7 +155,11 @@ class _HomeScreenState extends State<HomeScreen> {
       context: context,
       applicationName: 'Florid',
       applicationVersion: '1.0.0',
-      applicationIcon: const Icon(Symbols.android, size: 48, color: Colors.green),
+      applicationIcon: const Icon(
+        Symbols.android,
+        size: 48,
+        color: Colors.green,
+      ),
       children: const [
         Text('A modern F-Droid client built with Flutter.'),
         SizedBox(height: 16),

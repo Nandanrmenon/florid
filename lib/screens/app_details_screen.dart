@@ -156,68 +156,112 @@ class AppDetailsScreen extends StatelessWidget {
                   // App info header
                   Padding(
                     padding: const EdgeInsets.symmetric(vertical: 16),
-                    child: Column(
-                      spacing: 16,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          spacing: 8,
-                          children: [
-                            Hero(
-                              tag: 'app-icon-${app.packageName}',
-                              child: Material(
-                                child: SizedBox(
-                                  width: 100,
-                                  height: 100,
+                    child: Consumer<AppProvider>(
+                      builder: (context, appProvider, _) {
+                        final isInstalled = appProvider.isAppInstalled(
+                          app.packageName,
+                        );
+                        final installedApp = appProvider.getInstalledApp(
+                          app.packageName,
+                        );
 
-                                  child: ClipRRect(
-                                    borderRadius: BorderRadius.circular(16),
-                                    child: _AppDetailsIcon(app: app),
+                        return Column(
+                          spacing: 16,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+
+                          children: [
+                            Row(
+                              spacing: 8,
+                              children: [
+                                Hero(
+                                  tag: 'app-icon-${app.packageName}',
+                                  child: Material(
+                                    child: SizedBox(
+                                      width: 100,
+                                      height: 100,
+
+                                      child: ClipRRect(
+                                        borderRadius: BorderRadius.circular(16),
+                                        child: _AppDetailsIcon(app: app),
+                                      ),
+                                    ),
                                   ),
                                 ),
-                              ),
-                            ),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                spacing: 4,
-                                children: [
-                                  Text(
-                                    app.name,
-                                    style: Theme.of(
-                                      context,
-                                    ).textTheme.titleLarge,
-                                  ),
-                                  Text(
-                                    'by ${app.authorName ?? 'Unknown'}',
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .bodyMedium
-                                        ?.copyWith(
-                                          color: Theme.of(
-                                            context,
-                                          ).colorScheme.onSurfaceVariant,
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    mainAxisSize: MainAxisSize.max,
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    spacing: 4,
+                                    children: [
+                                      Text(
+                                        app.name,
+                                        style: Theme.of(
+                                          context,
+                                        ).textTheme.titleLarge,
+                                      ),
+                                      Text(
+                                        'by ${app.authorName ?? 'Unknown'}',
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodyMedium
+                                            ?.copyWith(
+                                              color: Theme.of(
+                                                context,
+                                              ).colorScheme.onSurfaceVariant,
+                                            ),
+                                      ),
+                                      if (isInstalled)
+                                        Row(
+                                          children: [
+                                            Icon(
+                                              Symbols.check_circle,
+                                              color: Theme.of(
+                                                context,
+                                              ).colorScheme.primary,
+                                              size: 20,
+                                            ),
+                                            const SizedBox(width: 8),
+                                            Text(
+                                              'Installed${installedApp?.versionName != null ? ' (${installedApp!.versionName})' : ''}',
+                                              style: Theme.of(context)
+                                                  .textTheme
+                                                  .bodyMedium
+                                                  ?.copyWith(
+                                                    color: Theme.of(context)
+                                                        .colorScheme
+                                                        .onSurfaceVariant,
+                                                    fontWeight: FontWeight.w600,
+                                                  ),
+                                            ),
+                                          ],
                                         ),
+                                    ],
                                   ),
-                                ],
-                              ),
+                                ),
+                              ],
                             ),
-                          ],
-                        ),
-                        if (app.categories?.isNotEmpty == true) ...[
-                          Chip(label: Text(app.categories!.first)),
-                        ],
 
-                        _DownloadSection(app: app),
-                      ],
+                            _DownloadSection(app: app),
+                          ],
+                        );
+                      },
                     ),
                   ),
+
                   // Screenshots section
                   if (screenshots?.isNotEmpty == true)
                     _ScreenshotsSection(screenshots: screenshots!)
                   else
                     const SizedBox.shrink(),
 
+                  if (app.categories?.isNotEmpty == true) ...[
+                    Chip(
+                      visualDensity: VisualDensity.compact,
+                      label: Text(app.categories!.first),
+                    ),
+                  ],
                   // Description
                   _DescriptionSection(app: app),
                   Divider(),
@@ -451,6 +495,94 @@ class _DownloadSection extends StatelessWidget {
                     ),
                   ],
                 )
+              else if (isInstalled && installedApp != null)
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      spacing: 8,
+                      children: [
+                        Expanded(
+                          child: OutlinedButton.icon(
+                            onPressed: () async {
+                              try {
+                                await downloadProvider.uninstallApp(
+                                  app.packageName,
+                                );
+                                // Give system a moment to complete uninstall, then refresh
+                                await Future.delayed(
+                                  const Duration(seconds: 1),
+                                );
+                                await appProvider.fetchInstalledApps();
+                                if (context.mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                        '${app.name} uninstall initiated',
+                                      ),
+                                    ),
+                                  );
+                                }
+                              } catch (e) {
+                                if (context.mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                        'Uninstall failed: ${e.toString()}',
+                                      ),
+                                    ),
+                                  );
+                                }
+                              }
+                            },
+                            icon: const Icon(Symbols.delete),
+                            label: const Text('Uninstall'),
+                          ),
+                        ),
+                        Expanded(
+                          child: ElevatedButton.icon(
+                            onPressed: () async {
+                              try {
+                                final opened = await appProvider
+                                    .openInstalledApp(app.packageName);
+                                if (!opened && context.mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                        'Unable to open ${app.name}.',
+                                      ),
+                                    ),
+                                  );
+                                }
+                              } catch (e) {
+                                if (context.mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                        'Open failed: ${e.toString()}',
+                                      ),
+                                    ),
+                                  );
+                                }
+                              }
+                            },
+                            icon: const Icon(Symbols.open_in_new),
+                            label: const Text('Open'),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Theme.of(
+                                context,
+                              ).colorScheme.primary,
+                              foregroundColor: Theme.of(
+                                context,
+                              ).colorScheme.onPrimary,
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                )
               else
                 SizedBox(
                   width: double.infinity,
@@ -483,6 +615,11 @@ class _DownloadSection extends StatelessWidget {
                             await downloadProvider.installApk(
                               downloadInfo!.filePath!,
                             );
+                            // Refresh installed apps after successful install (allow system to register)
+                            await Future.delayed(
+                              const Duration(milliseconds: 500),
+                            );
+                            await appProvider.fetchInstalledApps();
                             if (context.mounted) {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
@@ -574,6 +711,12 @@ class _DownloadSection extends StatelessWidget {
                       backgroundColor: Theme.of(context).colorScheme.primary,
                       foregroundColor: Theme.of(context).colorScheme.onPrimary,
                       padding: const EdgeInsets.symmetric(vertical: 12),
+                      disabledForegroundColor: Theme.of(
+                        context,
+                      ).colorScheme.onSurfaceVariant,
+                      disabledBackgroundColor: Theme.of(
+                        context,
+                      ).colorScheme.surfaceContainerHighest,
                     ),
                   ),
                 ),

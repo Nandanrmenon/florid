@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:android_intent_plus/android_intent.dart';
 import 'package:app_installer/app_installer.dart';
 import 'package:flutter/foundation.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -310,6 +311,20 @@ class DownloadProvider extends ChangeNotifier {
       }
     } catch (e) {
       debugPrint('Error deleting APK file: $e');
+    }
+  }
+
+  /// Uninstalls an app by package name
+  Future<void> uninstallApp(String packageName) async {
+    try {
+      const actionDelete = 'android.intent.action.DELETE';
+      final intent = AndroidIntent(
+        action: actionDelete,
+        data: 'package:$packageName',
+      );
+      await intent.launch();
+    } catch (e) {
+      throw Exception('Failed to uninstall app: $e');
     }
   }
 }

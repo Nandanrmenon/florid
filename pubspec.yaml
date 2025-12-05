@@ -77,6 +77,12 @@ dependencies:
   # Share plus for sharing apps
   share_plus: ^7.2.2
 
+  # Detect installed applications on Android
+  installed_apps: ^2.0.0
+
+  # Launch Android intents (used for uninstall)
+  android_intent_plus: ^5.0.2
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

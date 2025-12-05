@@ -1,4 +1,6 @@
 import 'package:flutter/foundation.dart';
+import 'package:installed_apps/app_info.dart' as installed;
+import 'package:installed_apps/installed_apps.dart';
 
 import '../models/fdroid_app.dart';
 import '../services/fdroid_api_service.dart';
@@ -178,9 +180,20 @@ class AppProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      // For now, we'll use an empty list
-      // This can be implemented later with a proper package
-      _installedApps = [];
+      final apps = await InstalledApps.getInstalledApps();
+
+      _installedApps = apps
+          .where((app) => app.packageName.isNotEmpty)
+          .map(
+            (installed.AppInfo app) => AppInfo(
+              packageName: app.packageName,
+              appName: app.name,
+              versionName: app.versionName,
+              versionCode: app.versionCode,
+            ),
+          )
+          .toList();
+
       _installedAppsState = LoadingState.success;
     } catch (e) {
       debugPrint('Error fetching installed apps: $e');
@@ -198,14 +211,28 @@ class AppProvider extends ChangeNotifier {
 
   /// Checks if an app is installed (simplified version)
   bool isAppInstalled(String packageName) {
-    // For now, always return false since we don't have installed apps detection
-    return false;
+    return _installedApps.any((app) => app.packageName == packageName);
   }
 
   /// Gets the installed version of an app (simplified version)
   AppInfo? getInstalledApp(String packageName) {
-    // For now, always return null since we don't have installed apps detection
-    return null;
+    try {
+      return _installedApps.firstWhere((app) => app.packageName == packageName);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  /// Attempts to launch an installed app by package name
+  Future<bool> openInstalledApp(String packageName) async {
+    try {
+      final result = await InstalledApps.startApp(packageName);
+      if (result is bool) return result;
+      return true;
+    } catch (e) {
+      debugPrint('Error opening app $packageName: $e');
+      return false;
+    }
   }
 
   /// Refreshes all data

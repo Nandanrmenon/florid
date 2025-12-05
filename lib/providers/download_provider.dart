@@ -81,26 +81,34 @@ class DownloadProvider extends ChangeNotifier {
   }
 
   /// Requests necessary permissions for downloads
-  /// On Android 13+, storage permission is not needed for app-specific directories
+  /// On Android 13+ (API 33+), storage permission is not needed for app-specific directories.
+  /// On older versions, we need WRITE_EXTERNAL_STORAGE permission.
   Future<bool> requestPermissions() async {
-    // For Android 13+ (API 33+), we don't need storage permission for app-specific storage
-    // The permission_handler package handles this automatically
+    // Check if storage permission is granted
     if (await Permission.storage.isGranted) {
       return true;
     }
 
-    // On Android 13+, storage permission will be denied but we can still use app-specific dirs
+    // Request storage permission
     final status = await Permission.storage.request();
 
-    // If permanently denied or denied, we can still proceed on Android 13+
-    // as we're using app-specific storage via path_provider
     if (status.isGranted) {
       return true;
     }
 
-    // On Android 13+, even if denied, we can write to app-specific directories
-    // So we return true to allow downloads to proceed
-    return true;
+    // On Android 13+, storage permission will be denied/unavailable
+    // but we can still use app-specific storage via getExternalStorageDirectory()
+    // which doesn't require permission
+    if (status.isDenied || status.isPermanentlyDenied || status.isRestricted) {
+      // This is expected on Android 13+
+      // We'll allow the download to proceed using app-specific storage
+      debugPrint(
+        '[DownloadProvider] Storage permission not available (likely Android 13+), using app-specific storage',
+      );
+      return true;
+    }
+
+    return false;
   }
 
   /// Downloads an APK file
@@ -183,9 +191,6 @@ class DownloadProvider extends ChangeNotifier {
       if (_settingsProvider.autoInstallApk) {
         try {
           await installApk(filePath);
-          if (_settingsProvider.autoDeleteApk) {
-            await deleteDownloadedFile(filePath);
-          }
         } catch (e) {
           debugPrint('Auto-install failed: $e');
         }
@@ -267,6 +272,17 @@ class DownloadProvider extends ChangeNotifier {
   /// Installs an APK file
   Future<void> installApk(String filePath) async {
     try {
+      final file = File(filePath);
+      final exists = await file.exists();
+      final size = exists ? await file.length() : -1;
+      debugPrint(
+        '[DownloadProvider] Installing APK at $filePath (exists: $exists, size: $size)',
+      );
+
+      if (!exists || size <= 0) {
+        throw Exception('APK file missing or empty');
+      }
+
       await AppInstaller.installApk(filePath);
     } catch (e) {
       throw Exception('Failed to install APK: $e');

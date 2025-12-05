@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/symbols.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -504,35 +505,47 @@ class _DownloadSection extends StatelessWidget {
                           }
                         }
                       } else {
-                        // Download APK - show permission rationale first
-                        final shouldProceed = await showDialog<bool>(
-                          context: context,
-                          builder: (context) => AlertDialog(
-                            icon: const Icon(Symbols.folder_open, size: 48),
-                            title: const Text('Storage Permission Required'),
-                            content: const Text(
-                              'Florid needs access to your device storage to download and save APK files. This allows you to:\n\n'
-                              '• Download apps from F-Droid\n'
-                              '• Install downloaded apps\n'
-                              '• Manage your downloads\n\n'
-                              'Your files and data remain private and secure.',
-                            ),
-                            actions: [
-                              TextButton(
-                                onPressed: () =>
-                                    Navigator.of(context).pop(false),
-                                child: const Text('Cancel'),
-                              ),
-                              FilledButton(
-                                onPressed: () =>
-                                    Navigator.of(context).pop(true),
-                                child: const Text('Continue'),
-                              ),
-                            ],
-                          ),
-                        );
+                        // Download APK - request permission first
+                        final hasPermission = await downloadProvider
+                            .requestPermissions();
 
-                        if (shouldProceed != true) return;
+                        if (!hasPermission) {
+                          if (context.mounted) {
+                            // Show dialog explaining how to grant permission
+                            await showDialog(
+                              context: context,
+                              builder: (context) => AlertDialog(
+                                icon: const Icon(Symbols.warning, size: 48),
+                                title: const Text(
+                                  'Storage Permission Required',
+                                ),
+                                content: const Text(
+                                  'Florid needs storage permission to download APK files.\n\n'
+                                  'To enable:\n'
+                                  '1. Go to Settings (button below)\n'
+                                  '2. Find "Permissions"\n'
+                                  '3. Enable "Files and media" or "Storage"\n\n'
+                                  'Then try downloading again.',
+                                ),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () =>
+                                        Navigator.of(context).pop(),
+                                    child: const Text('Cancel'),
+                                  ),
+                                  FilledButton(
+                                    onPressed: () async {
+                                      Navigator.of(context).pop();
+                                      await openAppSettings();
+                                    },
+                                    child: const Text('Open Settings'),
+                                  ),
+                                ],
+                              ),
+                            );
+                          }
+                          return;
+                        }
 
                         try {
                           await downloadProvider.downloadApk(app);

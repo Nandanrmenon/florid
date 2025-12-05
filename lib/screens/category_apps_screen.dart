@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:material_symbols_icons/symbols.dart';
 import 'package:provider/provider.dart';
 
 import '../providers/app_provider.dart';
@@ -88,7 +89,7 @@ class _CategoryAppsScreenState extends State<CategoryAppsScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Icon(
-                    Icons.error_outline,
+                    Symbols.error,
                     size: 64,
                     color: Theme.of(context).colorScheme.error,
                   ),
@@ -108,7 +109,7 @@ class _CategoryAppsScreenState extends State<CategoryAppsScreen> {
                   const SizedBox(height: 24),
                   ElevatedButton.icon(
                     onPressed: _loadData,
-                    icon: const Icon(Icons.refresh),
+                    icon: const Icon(Symbols.refresh),
                     label: const Text('Retry'),
                   ),
                 ],
@@ -121,7 +122,7 @@ class _CategoryAppsScreenState extends State<CategoryAppsScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(Icons.apps, size: 64, color: Colors.grey),
+                  const Icon(Symbols.apps, size: 64, color: Colors.grey),
                   const SizedBox(height: 16),
                   Text('No apps found in ${widget.category}'),
                 ],

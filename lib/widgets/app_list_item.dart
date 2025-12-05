@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:material_symbols_icons/symbols.dart';
 import 'package:provider/provider.dart';
 
 import '../models/fdroid_app.dart';
@@ -263,14 +264,14 @@ class _MultiIconState extends State<_MultiIcon> {
     if (_showFallback) {
       return Container(
         color: theme.colorScheme.surfaceContainerHighest,
-        child: Icon(Icons.android, color: theme.colorScheme.onSurfaceVariant),
+        child: Icon(Symbols.android, color: theme.colorScheme.onSurfaceVariant),
       );
     }
 
     if (_index >= _candidates.length) {
       return Container(
         color: theme.colorScheme.surfaceContainerHighest,
-        child: Icon(Icons.apps, color: theme.colorScheme.onSurfaceVariant),
+        child: Icon(Symbols.apps, color: theme.colorScheme.onSurfaceVariant),
       );
     }
 
@@ -284,7 +285,7 @@ class _MultiIconState extends State<_MultiIcon> {
         return Container(
           color: theme.colorScheme.surfaceContainerHighest,
           child: Icon(
-            Icons.image_not_supported,
+            Symbols.image_not_supported,
             color: theme.colorScheme.onSurfaceVariant,
           ),
         );
@@ -410,7 +411,7 @@ class _DownloadButton extends StatelessWidget {
               }
             }
           },
-          icon: Icon(isDownloaded ? Icons.install_mobile : Icons.download),
+          icon: Icon(isDownloaded ? Symbols.install_mobile : Symbols.download),
           tooltip: isDownloaded ? 'Install' : 'Download',
         );
       },

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:material_symbols_icons/symbols.dart';
 import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -85,7 +86,7 @@ class AppDetailsScreen extends StatelessWidget {
             ),
             actions: [
               IconButton(
-                icon: const Icon(Icons.share),
+                icon: const Icon(Symbols.share),
                 onPressed: () {
                   Share.share(
                     'Check out ${app.name} on F-Droid: https://f-droid.org/packages/${app.packageName}/',
@@ -117,7 +118,7 @@ class AppDetailsScreen extends StatelessWidget {
                     const PopupMenuItem(
                       value: 'website',
                       child: ListTile(
-                        leading: Icon(Icons.web),
+                        leading: Icon(Symbols.public),
                         title: Text('Website'),
                         contentPadding: EdgeInsets.zero,
                       ),
@@ -126,7 +127,7 @@ class AppDetailsScreen extends StatelessWidget {
                     const PopupMenuItem(
                       value: 'source',
                       child: ListTile(
-                        leading: Icon(Icons.code),
+                        leading: Icon(Symbols.code),
                         title: Text('Source Code'),
                         contentPadding: EdgeInsets.zero,
                       ),
@@ -135,7 +136,7 @@ class AppDetailsScreen extends StatelessWidget {
                     const PopupMenuItem(
                       value: 'issues',
                       child: ListTile(
-                        leading: Icon(Icons.bug_report),
+                        leading: Icon(Symbols.bug_report),
                         title: Text('Issue Tracker'),
                         contentPadding: EdgeInsets.zero,
                       ),
@@ -244,7 +245,7 @@ class AppDetailsScreen extends StatelessWidget {
                   if (app.latestVersion?.permissions?.isNotEmpty == true)
                     ListTile(
                       leading: Icon(
-                        Icons.security,
+                        Symbols.security,
                         color: Theme.of(context).colorScheme.primary,
                       ),
                       title: Text(
@@ -252,7 +253,7 @@ class AppDetailsScreen extends StatelessWidget {
                         style: Theme.of(context).textTheme.titleMedium
                             ?.copyWith(fontWeight: FontWeight.w600),
                       ),
-                      trailing: const Icon(Icons.arrow_forward),
+                      trailing: const Icon(Symbols.arrow_forward),
                       onTap: () {
                         Navigator.push(
                           context,
@@ -304,7 +305,7 @@ class _DownloadSection extends StatelessWidget {
             Row(
               children: [
                 Icon(
-                  Icons.warning_amber_rounded,
+                  Symbols.warning,
                   color: Theme.of(context).colorScheme.onErrorContainer,
                 ),
                 const SizedBox(width: 8),
@@ -507,7 +508,7 @@ class _DownloadSection extends StatelessWidget {
                         final shouldProceed = await showDialog<bool>(
                           context: context,
                           builder: (context) => AlertDialog(
-                            icon: const Icon(Icons.folder_open, size: 48),
+                            icon: const Icon(Symbols.folder_open, size: 48),
                             title: const Text('Storage Permission Required'),
                             content: const Text(
                               'Florid needs access to your device storage to download and save APK files. This allows you to:\n\n'
@@ -553,7 +554,7 @@ class _DownloadSection extends StatelessWidget {
                       }
                     },
                     icon: Icon(
-                      isDownloaded ? Icons.install_mobile : Icons.download,
+                      isDownloaded ? Symbols.install_mobile : Symbols.download,
                     ),
                     label: Text(isDownloaded ? 'Install' : 'Download'),
                     style: ElevatedButton.styleFrom(
@@ -763,7 +764,7 @@ class _NoVersionInfoSection extends StatelessWidget {
           child: Column(
             children: [
               Icon(
-                Icons.info_outline,
+                Symbols.info,
                 color: Theme.of(context).colorScheme.onSurfaceVariant,
                 size: 32,
               ),
@@ -866,14 +867,14 @@ class _AppDetailsIconState extends State<_AppDetailsIcon> {
     if (_showFallback) {
       return Container(
         color: Colors.white.withOpacity(0.2),
-        child: const Icon(Icons.android, color: Colors.white, size: 40),
+        child: const Icon(Symbols.android, color: Colors.white, size: 40),
       );
     }
 
     if (_index >= _candidates.length) {
       return Container(
         color: Colors.white.withOpacity(0.2),
-        child: const Icon(Icons.apps, color: Colors.white, size: 40),
+        child: const Icon(Symbols.apps, color: Colors.white, size: 40),
       );
     }
 
@@ -886,7 +887,11 @@ class _AppDetailsIconState extends State<_AppDetailsIcon> {
         _next();
         return Container(
           color: Colors.white.withOpacity(0.2),
-          child: const Icon(Icons.broken_image, color: Colors.white, size: 40),
+          child: const Icon(
+            Symbols.broken_image,
+            color: Colors.white,
+            size: 40,
+          ),
         );
       },
       loadingBuilder: (context, child, loadingProgress) {
@@ -1086,7 +1091,7 @@ class _ScreenshotsSection extends StatelessWidget {
                               context,
                             ).colorScheme.surfaceContainer,
                             child: const Center(
-                              child: Icon(Icons.broken_image),
+                              child: Icon(Symbols.broken_image),
                             ),
                           );
                         },
@@ -1165,7 +1170,7 @@ class _FullScreenScreenshotsState extends State<_FullScreenScreenshots> {
         ),
         centerTitle: true,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          icon: const Icon(Symbols.arrow_back, color: Colors.white),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -1195,7 +1200,7 @@ class _FullScreenScreenshotsState extends State<_FullScreenScreenshots> {
                       color: Colors.grey[900],
                       child: const Center(
                         child: Icon(
-                          Icons.broken_image,
+                          Symbols.broken_image,
                           color: Colors.white,
                           size: 48,
                         ),

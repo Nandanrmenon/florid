@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
+import 'package:material_symbols_icons/symbols.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
@@ -122,7 +123,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
               _SectionHeader(label: 'Storage & cache'),
               ListTile(
-                leading: const Icon(Icons.cleaning_services_outlined),
+                leading: const Icon(Symbols.cleaning_services),
                 title: const Text('Clear repository cache'),
                 subtitle: const Text(
                   'Refresh app list and metadata on next load',
@@ -130,7 +131,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 onTap: () => _clearRepoCache(context),
               ),
               ListTile(
-                leading: const Icon(Icons.delete_sweep_outlined),
+                leading: const Icon(Symbols.delete_sweep),
                 title: const Text('Clear APK downloads'),
                 subtitle: const Text(
                   'Remove downloaded installer files from storage',
@@ -138,7 +139,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 onTap: () => _clearApkDownloads(context),
               ),
               ListTile(
-                leading: const Icon(Icons.image_not_supported_outlined),
+                leading: const Icon(Symbols.image_not_supported),
                 title: const Text('Clear image cache'),
                 subtitle: const Text('Remove cached icons and screenshots'),
                 onTap: () => _clearImageCache(context),
@@ -147,12 +148,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
               _SectionHeader(label: 'About'),
               ListTile(
-                leading: const Icon(Icons.info_outline),
+                leading: const Icon(Symbols.info),
                 title: const Text('Version'),
                 subtitle: Text(_appVersion.isEmpty ? 'Loading…' : _appVersion),
               ),
               ListTile(
-                leading: const Icon(Icons.share_outlined),
+                leading: const Icon(Symbols.share),
                 title: const Text('Share Florid'),
                 onTap: () {
                   Share.share('Check out Florid, a modern F-Droid client!');

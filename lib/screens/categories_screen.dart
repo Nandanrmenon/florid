@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:material_symbols_icons/symbols.dart';
 import 'package:provider/provider.dart';
 
 import '../providers/app_provider.dart';
@@ -63,7 +64,7 @@ class _CategoriesScreenState extends State<CategoriesScreen>
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Icon(
-                  Icons.error_outline,
+                  Symbols.error,
                   size: 64,
                   color: Theme.of(context).colorScheme.error,
                 ),
@@ -83,7 +84,7 @@ class _CategoriesScreenState extends State<CategoriesScreen>
                 const SizedBox(height: 24),
                 ElevatedButton.icon(
                   onPressed: _loadData,
-                  icon: const Icon(Icons.refresh),
+                  icon: const Icon(Symbols.refresh),
                   label: const Text('Retry'),
                 ),
               ],
@@ -96,7 +97,7 @@ class _CategoriesScreenState extends State<CategoriesScreen>
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.category, size: 64, color: Colors.grey),
+                Icon(Symbols.category, size: 64, color: Colors.grey),
                 SizedBox(height: 16),
                 Text('No categories found'),
               ],
@@ -144,44 +145,102 @@ class _CategoryCard extends StatelessWidget {
 
   IconData _getCategoryIcon(String category) {
     switch (category.toLowerCase()) {
+      case 'ai chat':
+        return Symbols.robot_2;
+      case 'app store & updater':
+        return Symbols.store;
+      case 'bookmark':
+        return Symbols.bookmark;
+      case 'browser':
+        return Symbols.globe;
+      case 'calculator':
+        return Symbols.calculate;
+      case 'calendar & agenda':
+        return Symbols.calendar_clock;
+      case 'cloud storage & file sync':
+        return Symbols.cloud;
+      case 'dns & hosts':
+        return Symbols.dns;
+      case 'ebook reader':
+        return Symbols.book;
+      case 'draw':
+        return Symbols.draw;
+      case 'email':
+        return Symbols.email;
+      case 'file encryption & vault':
+        return Symbols.encrypted;
+      case 'file transfer':
+        return Symbols.drive_folder_upload;
+      case 'finance manager':
+        return Symbols.finance;
+      case 'forum':
+        return Symbols.forum;
+      case 'gallery':
+        return Symbols.photo_library;
+      case 'habit tracker':
+        return Symbols.fitness_center;
+      case 'icon pack':
+        return Symbols.apps;
+      case 'keyboard & ime':
+        return Symbols.keyboard;
+      case 'launcher':
+        return Symbols.home;
+      case 'local media player':
+        return Symbols.play_circle;
+      case 'location tracker & sharer':
+        return Symbols.gps_fixed;
+      case 'messaging':
+        return Symbols.message;
+      case 'music practice tool':
+        return Symbols.music_note;
+      case 'news':
+        return Symbols.newspaper;
+      case 'note':
+        return Symbols.note;
+      case 'online media player':
+        return Symbols.connected_tv;
+      case 'pass wallet':
+        return Symbols.passkey;
+      case 'password & 2fa':
+        return Symbols.password_2;
       case 'games':
-        return Icons.sports_esports;
+        return Symbols.sports_esports;
       case 'multimedia':
-        return Icons.perm_media;
+        return Symbols.perm_media;
       case 'internet':
-        return Icons.language;
+        return Symbols.language;
       case 'system':
-        return Icons.settings;
+        return Symbols.settings;
       case 'phone & sms':
-        return Icons.phone;
+        return Symbols.phone;
       case 'development':
-        return Icons.code;
+        return Symbols.code;
       case 'office':
-        return Icons.business;
+        return Symbols.business;
       case 'graphics':
-        return Icons.image;
+        return Symbols.palette;
       case 'security':
-        return Icons.security;
+        return Symbols.security;
       case 'reading':
-        return Icons.menu_book;
+        return Symbols.menu_book;
       case 'science & education':
-        return Icons.school;
+        return Symbols.school;
       case 'sports & health':
-        return Icons.fitness_center;
+        return Symbols.fitness_center;
       case 'navigation':
-        return Icons.navigation;
+        return Symbols.navigation;
       case 'money':
-        return Icons.attach_money;
+        return Symbols.attach_money;
       case 'writing':
-        return Icons.edit;
+        return Symbols.edit;
       case 'time':
-        return Icons.access_time;
+        return Symbols.schedule;
       case 'theming':
-        return Icons.palette;
+        return Symbols.palette;
       case 'connectivity':
-        return Icons.wifi;
+        return Symbols.wifi;
       default:
-        return Icons.category;
+        return Symbols.category;
     }
   }
 

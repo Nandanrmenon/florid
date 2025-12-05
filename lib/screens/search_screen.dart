@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:material_symbols_icons/symbols.dart';
 import 'package:provider/provider.dart';
 
 import '../providers/app_provider.dart';
@@ -73,7 +74,7 @@ class _SearchScreenState extends State<SearchScreen> {
             builder: (context, appProvider, child) {
               if (appProvider.searchQuery.isNotEmpty) {
                 return IconButton(
-                  icon: const Icon(Icons.clear),
+                  icon: const Icon(Symbols.close),
                   onPressed: _clearSearch,
                 );
               }
@@ -81,7 +82,7 @@ class _SearchScreenState extends State<SearchScreen> {
             },
           ),
           IconButton(
-            icon: const Icon(Icons.search),
+            icon: const Icon(Symbols.search),
             onPressed: () {
               _performSearch(_searchController.text.trim());
             },
@@ -103,7 +104,7 @@ class _SearchScreenState extends State<SearchScreen> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Icon(
-                      Icons.search,
+                      Symbols.search,
                       size: 64,
                       color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
@@ -153,7 +154,7 @@ class _SearchScreenState extends State<SearchScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Icon(
-                    Icons.error_outline,
+                    Symbols.error,
                     size: 64,
                     color: Theme.of(context).colorScheme.error,
                   ),
@@ -173,7 +174,7 @@ class _SearchScreenState extends State<SearchScreen> {
                   const SizedBox(height: 24),
                   ElevatedButton.icon(
                     onPressed: () => _performSearch(query),
-                    icon: const Icon(Icons.refresh),
+                    icon: const Icon(Symbols.refresh),
                     label: const Text('Retry'),
                   ),
                 ],
@@ -188,7 +189,7 @@ class _SearchScreenState extends State<SearchScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Icon(
-                    Icons.search_off,
+                    Symbols.search_off,
                     size: 64,
                     color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),

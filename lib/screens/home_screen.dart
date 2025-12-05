@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:material_symbols_icons/symbols.dart';
 import 'package:provider/provider.dart';
 
 import '../providers/app_provider.dart';
@@ -31,18 +32,18 @@ class _HomeScreenState extends State<HomeScreen> {
 
   final List<NavigationDestination> _destinations = const [
     NavigationDestination(
-      icon: Icon(Icons.new_releases_outlined),
-      selectedIcon: Icon(Icons.new_releases),
+      icon: Icon(Symbols.new_releases),
+      selectedIcon: Icon(Symbols.new_releases),
       label: 'Latest',
     ),
     NavigationDestination(
-      icon: Icon(Icons.category_outlined),
-      selectedIcon: Icon(Icons.category),
+      icon: Icon(Symbols.category),
+      selectedIcon: Icon(Symbols.category),
       label: 'Categories',
     ),
     NavigationDestination(
-      icon: Icon(Icons.system_update_outlined),
-      selectedIcon: Icon(Icons.system_update),
+      icon: Icon(Symbols.system_update),
+      selectedIcon: Icon(Symbols.system_update),
       label: 'Updates',
     ),
   ];
@@ -54,7 +55,7 @@ class _HomeScreenState extends State<HomeScreen> {
         title: const Text('Florid'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.search),
+            icon: const Icon(Symbols.search),
             onPressed: () {
               Navigator.of(context).push(
                 MaterialPageRoute(builder: (context) => const SearchScreen()),
@@ -79,7 +80,7 @@ class _HomeScreenState extends State<HomeScreen> {
               const PopupMenuItem(
                 value: 'refresh',
                 child: ListTile(
-                  leading: Icon(Icons.refresh),
+                  leading: Icon(Symbols.refresh),
                   title: Text('Refresh'),
                   contentPadding: EdgeInsets.zero,
                 ),
@@ -87,7 +88,7 @@ class _HomeScreenState extends State<HomeScreen> {
               const PopupMenuItem(
                 value: 'settings',
                 child: ListTile(
-                  leading: Icon(Icons.settings),
+                  leading: Icon(Symbols.settings),
                   title: Text('Settings'),
                   contentPadding: EdgeInsets.zero,
                 ),
@@ -95,7 +96,7 @@ class _HomeScreenState extends State<HomeScreen> {
               const PopupMenuItem(
                 value: 'about',
                 child: ListTile(
-                  leading: Icon(Icons.info),
+                  leading: Icon(Symbols.info),
                   title: Text('About'),
                   contentPadding: EdgeInsets.zero,
                 ),
@@ -149,7 +150,7 @@ class _HomeScreenState extends State<HomeScreen> {
       context: context,
       applicationName: 'Florid',
       applicationVersion: '1.0.0',
-      applicationIcon: const Icon(Icons.android, size: 48, color: Colors.green),
+      applicationIcon: const Icon(Symbols.android, size: 48, color: Colors.green),
       children: const [
         Text('A modern F-Droid client built with Flutter.'),
         SizedBox(height: 16),

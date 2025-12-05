@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:material_symbols_icons/symbols.dart';
 import 'package:provider/provider.dart';
 
 import '../providers/app_provider.dart';
@@ -68,7 +69,7 @@ class _UpdatesScreenState extends State<UpdatesScreen>
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Icon(
-                  Icons.error_outline,
+                  Symbols.error,
                   size: 64,
                   color: Theme.of(context).colorScheme.error,
                 ),
@@ -85,7 +86,7 @@ class _UpdatesScreenState extends State<UpdatesScreen>
                 const SizedBox(height: 24),
                 ElevatedButton.icon(
                   onPressed: _loadData,
-                  icon: const Icon(Icons.refresh),
+                  icon: const Icon(Symbols.refresh),
                   label: const Text('Retry'),
                 ),
               ],
@@ -107,7 +108,7 @@ class _UpdatesScreenState extends State<UpdatesScreen>
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Icon(
-                      Icons.check_circle_outline,
+                      Symbols.check_circle,
                       size: 64,
                       color: Colors.green[400],
                     ),
@@ -147,7 +148,7 @@ class _UpdatesScreenState extends State<UpdatesScreen>
                 child: Row(
                   children: [
                     Icon(
-                      Icons.system_update,
+                      Symbols.system_update,
                       color: Theme.of(context).colorScheme.onPrimaryContainer,
                     ),
                     const SizedBox(width: 12),
@@ -242,7 +243,7 @@ class _UpdatesScreenState extends State<UpdatesScreen>
                               child: Row(
                                 children: [
                                   Icon(
-                                    Icons.arrow_upward,
+                                    Symbols.arrow_upward,
                                     size: 16,
                                     color: Theme.of(
                                       context,

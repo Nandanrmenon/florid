@@ -50,6 +50,9 @@ dependencies:
   # Path provider for file storage
   path_provider: ^2.1.2
 
+  # Material Symbols icon pack
+  material_symbols_icons: ^4.2771.0
+
   # Local key-value storage for settings
   shared_preferences: ^2.3.2
   

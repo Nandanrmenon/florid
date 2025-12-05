@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:material_symbols_icons/symbols.dart';
 import 'package:provider/provider.dart';
 
 import '../providers/app_provider.dart';
@@ -64,7 +65,7 @@ class _LatestScreenState extends State<LatestScreen>
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Icon(
-                  Icons.error_outline,
+                  Symbols.error,
                   size: 64,
                   color: Theme.of(context).colorScheme.error,
                 ),
@@ -84,7 +85,7 @@ class _LatestScreenState extends State<LatestScreen>
                 const SizedBox(height: 24),
                 ElevatedButton.icon(
                   onPressed: _loadData,
-                  icon: const Icon(Icons.refresh),
+                  icon: const Icon(Symbols.refresh),
                   label: const Text('Retry'),
                 ),
               ],
@@ -97,7 +98,7 @@ class _LatestScreenState extends State<LatestScreen>
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.apps, size: 64, color: Colors.grey),
+                Icon(Symbols.apps, size: 64, color: Colors.grey),
                 SizedBox(height: 16),
                 Text('No apps found'),
               ],

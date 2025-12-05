@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:material_symbols_icons/symbols.dart';
 
 class PermissionsScreen extends StatelessWidget {
   final List<String> permissions;
@@ -21,7 +22,7 @@ class PermissionsScreen extends StatelessWidget {
           final permission = permissions[index];
           return ListTile(
             leading: Icon(
-              Icons.security,
+              Symbols.security,
               color: Theme.of(context).colorScheme.primary,
             ),
             title: Text(permission),

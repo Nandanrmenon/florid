@@ -39,7 +39,30 @@ class _CategoryAppsScreenState extends State<CategoryAppsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(widget.category), elevation: 0),
+      appBar: AppBar(
+        title: Consumer<AppProvider>(
+          builder: (context, appProvider, child) {
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  widget.category,
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
+                ),
+                Text(
+                  '${appProvider.categoryApps[widget.category]?.length ?? 0} apps',
+                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    fontSize: 12,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ],
+            );
+          },
+        ),
+      ),
       body: Consumer<AppProvider>(
         builder: (context, appProvider, child) {
           final state = appProvider.categoryAppsState;
@@ -108,51 +131,32 @@ class _CategoryAppsScreenState extends State<CategoryAppsScreen> {
 
           return RefreshIndicator(
             onRefresh: _onRefresh,
-            child: Column(
-              children: [
-                // Apps count header
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(16),
-                  child: Text(
-                    '${apps.length} apps in ${widget.category}',
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                ),
-
-                // Apps list
-                Expanded(
-                  child: ListView.builder(
-                    padding: const EdgeInsets.symmetric(horizontal: 8),
-                    itemCount: apps.length,
-                    itemBuilder: (context, index) {
-                      final app = apps[index];
-                      return AppListItem(
-                        app: app,
-                        showCategory:
-                            false, // Don't show category since we're already in a category
-                        onTap: () {
-                          final screenshots = context
-                              .read<AppProvider>()
-                              .getScreenshots(app.packageName);
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (context) => AppDetailsScreen(
-                                app: app,
-                                screenshots: screenshots.isNotEmpty
-                                    ? screenshots
-                                    : null,
-                              ),
-                            ),
-                          );
-                        },
-                      );
-                    },
-                  ),
-                ),
-              ],
+            child: ListView.builder(
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              itemCount: apps.length,
+              itemBuilder: (context, index) {
+                final app = apps[index];
+                return AppListItem(
+                  app: app,
+                  showCategory:
+                      false, // Don't show category since we're already in a category
+                  onTap: () {
+                    final screenshots = context
+                        .read<AppProvider>()
+                        .getScreenshots(app.packageName);
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => AppDetailsScreen(
+                          app: app,
+                          screenshots: screenshots.isNotEmpty
+                              ? screenshots
+                              : null,
+                        ),
+                      ),
+                    );
+                  },
+                );
+              },
             ),
           );
         },

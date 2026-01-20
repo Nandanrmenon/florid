@@ -49,6 +49,9 @@ dependencies:
   
   # Path provider for file storage
   path_provider: ^2.1.2
+  
+  # Path utilities for file paths
+  path: ^1.9.0
 
   # Material Symbols icon pack
   material_symbols_icons: ^4.2771.0

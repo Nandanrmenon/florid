@@ -18,9 +18,21 @@ class FloridApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        Provider<FDroidApiService>(create: (_) => FDroidApiService()),
         ChangeNotifierProvider<SettingsProvider>(
           create: (_) => SettingsProvider(),
+        ),
+        ProxyProvider<SettingsProvider, FDroidApiService>(
+          update: (context, settings, previous) {
+            if (previous != null) {
+              // Update existing service with new locale
+              previous.setLocale(settings.locale);
+              return previous;
+            }
+            // Create new service with current locale
+            final service = FDroidApiService();
+            service.setLocale(settings.locale);
+            return service;
+          },
         ),
         ChangeNotifierProxyProvider<FDroidApiService, AppProvider>(
           create: (context) => AppProvider(
@@ -39,6 +51,9 @@ class FloridApp extends StatelessWidget {
             Provider.of<SettingsProvider>(context, listen: false),
           ),
           update: (context, apiService, settings, previous) {
+            // Update locale when settings change
+            apiService.setLocale(settings.locale);
+            
             if (previous == null) {
               return DownloadProvider(apiService, settings);
             }

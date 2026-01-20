@@ -49,12 +49,18 @@ dependencies:
   
   # Path provider for file storage
   path_provider: ^2.1.2
+  
+  # Path utilities for file paths
+  path: ^1.9.0
 
   # Material Symbols icon pack
   material_symbols_icons: ^4.2771.0
 
   # Local key-value storage for settings
   shared_preferences: ^2.3.2
+  
+  # SQLite database for app data storage
+  sqflite: ^2.3.0
   
   # Permission handler for Android permissions
   permission_handler: ^12.0.1

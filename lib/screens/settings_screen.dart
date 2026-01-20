@@ -102,6 +102,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ),
               const Divider(height: 24),
 
+              _SectionHeader(label: 'Language'),
+              ListTile(
+                leading: const Icon(Symbols.language),
+                title: const Text('App content language'),
+                subtitle: Text(
+                  SettingsProvider.getLocaleDisplayName(settings.locale),
+                ),
+                trailing: const Icon(Symbols.chevron_right),
+                onTap: () => _showLanguageDialog(context, settings),
+              ),
+              const Divider(height: 24),
+
               _SectionHeader(label: 'Downloads'),
               SwitchListTile(
                 title: const Text('Auto-install after download'),
@@ -163,6 +175,63 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
         );
       },
+    );
+  }
+
+  Future<void> _showLanguageDialog(
+    BuildContext context,
+    SettingsProvider settings,
+  ) async {
+    await showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Select Language'),
+        content: SizedBox(
+          width: double.maxFinite,
+          child: ListView.builder(
+            shrinkWrap: true,
+            itemCount: SettingsProvider.availableLocales.length,
+            itemBuilder: (context, index) {
+              final locale = SettingsProvider.availableLocales[index];
+              final displayName = SettingsProvider.getLocaleDisplayName(locale);
+              
+              return RadioListTile<String>(
+                title: Text(displayName),
+                subtitle: Text(locale),
+                value: locale,
+                groupValue: settings.locale,
+                onChanged: (value) async {
+                  if (value != null) {
+                    await settings.setLocale(value);
+                    if (!context.mounted) return;
+                    
+                    // Update API service locale
+                    final apiService = context.read<FDroidApiService>();
+                    apiService.setLocale(value);
+                    
+                    Navigator.pop(context);
+                    
+                    // Show message that data will be refreshed
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text(
+                          'Language changed. Repository will refresh on next load.',
+                        ),
+                      ),
+                    );
+                  }
+                },
+              );
+            },
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Close'),
+          ),
+        ],
+      ),
     );
   }
 }

@@ -2,10 +2,12 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
 
 import '../models/fdroid_app.dart';
+import 'database_service.dart';
 
 class FDroidApiService {
   static const String baseUrl = 'https://f-droid.org';
@@ -17,13 +19,18 @@ class FDroidApiService {
   final http.Client _client;
   final Dio _dio;
   final Map<String, CancelToken> _downloadTokens = {};
+  final DatabaseService _databaseService;
 
   /// Cache raw repository JSON for screenshot extraction
   Map<String, dynamic>? _cachedRawJson;
 
-  FDroidApiService({http.Client? client, Dio? dio})
-    : _client = client ?? http.Client(),
-      _dio = dio ?? Dio();
+  FDroidApiService({
+    http.Client? client,
+    Dio? dio,
+    DatabaseService? databaseService,
+  })  : _client = client ?? http.Client(),
+        _dio = dio ?? Dio(),
+        _databaseService = databaseService ?? DatabaseService();
 
   /// Returns the cache file location for the repo index.
   Future<File> _cacheFile() async {
@@ -59,52 +66,94 @@ class FDroidApiService {
     }
   }
 
-  /// Fetches the complete F-Droid repository index with disk caching.
-  /// Flow: try cache (fresh) -> network -> cache fallback on network failure.
+  /// Fetches the complete F-Droid repository index with database caching.
+  /// Flow: try database (fresh) -> network -> database fallback on network failure.
   Future<FDroidRepository> fetchRepository() async {
-    Map<String, dynamic>? cachedJson = await _tryLoadCache();
+    // Check if database is populated and fresh
+    final isPopulated = await _databaseService.isPopulated();
+    final needsUpdate = await _databaseService.needsUpdate(_fallbackCacheMaxAge);
 
-    // Prefer cache when available.
-    if (cachedJson != null) {
+    // If database is fresh, load from it
+    if (isPopulated && !needsUpdate) {
       try {
-        _cachedRawJson = cachedJson;
-        return FDroidRepository.fromJson(cachedJson);
-      } catch (_) {
-        // If cache is corrupt, fall through to network fetch.
-        cachedJson = null;
+        return await _loadRepositoryFromDatabase();
+      } catch (e) {
+        // If database read fails, try network
+        print('Error loading from database: $e');
       }
     }
 
+    // Try to fetch from network
     try {
       final response = await _client.get(Uri.parse(repoIndexUrl));
 
       if (response.statusCode == 200) {
         final body = response.body;
-        await _saveCache(body);
         final jsonData = json.decode(body);
+        
         // Cache the raw JSON for screenshot extraction
         _cachedRawJson = jsonData as Map<String, dynamic>;
-        // Defensive: ensure expected top-level keys exist, else wrap in structure
-        if ((!jsonData.containsKey('repo') ||
-            !jsonData.containsKey('packages'))) {
-          // Possibly already flattened custom structure; we still attempt parsing
-        }
+        
+        // Parse repository
         final repo = FDroidRepository.fromJson(jsonData);
+        
+        // Store in database asynchronously (don't wait for it)
+        _databaseService.importRepository(repo).catchError((e) {
+          debugPrint('Error importing to database: $e');
+        });
+        
+        // Also save JSON cache for screenshot extraction
+        await _saveCache(body);
+        
         return repo;
       } else {
         throw Exception('Failed to load repository: ${response.statusCode}');
       }
     } catch (e) {
-      // Fall back to cache if available.
+      // Fall back to database if available (even if stale)
+      if (isPopulated) {
+        try {
+          return await _loadRepositoryFromDatabase();
+        } catch (dbError) {
+          debugPrint('Error loading from database fallback: $dbError');
+        }
+      }
+      
+      // Last resort: try JSON cache
+      final cachedJson = await _tryLoadCache();
       if (cachedJson != null) {
         _cachedRawJson = cachedJson;
         return FDroidRepository.fromJson(cachedJson);
       }
+      
       throw Exception('Error fetching repository: $e');
     }
   }
 
-  /// Clears the cached repository index from disk and memory.
+  /// Loads repository data from the database
+  Future<FDroidRepository> _loadRepositoryFromDatabase() async {
+    final apps = await _databaseService.getAllApps();
+    final repoName = await _databaseService.getMetadata('repo_name') ?? 'F-Droid';
+    final repoDescription = await _databaseService.getMetadata('repo_description') ?? '';
+    
+    // Create a map of apps keyed by package name
+    final appsMap = <String, FDroidApp>{};
+    for (final app in apps) {
+      appsMap[app.packageName] = app;
+    }
+    
+    return FDroidRepository(
+      name: repoName,
+      description: repoDescription,
+      icon: '',
+      timestamp: '',
+      version: '',
+      maxage: 0,
+      apps: appsMap,
+    );
+  }
+
+  /// Clears the cached repository index from disk, memory, and database.
   Future<void> clearRepositoryCache() async {
     try {
       final file = await _cacheFile();
@@ -115,6 +164,13 @@ class FDroidApiService {
       // Ignore cache clear failures
     }
     _cachedRawJson = null;
+    
+    // Clear database
+    try {
+      await _databaseService.clearAll();
+    } catch (_) {
+      // Ignore database clear failures
+    }
   }
 
   /// Fetches apps with pagination support
@@ -125,39 +181,66 @@ class FDroidApiService {
     String? search,
   }) async {
     try {
-      final repository = await fetchRepository();
-      List<FDroidApp> apps = repository.appsList;
+      // Use database for better performance if available
+      final isPopulated = await _databaseService.isPopulated();
+      
+      if (isPopulated) {
+        List<FDroidApp> apps;
+        
+        // Use optimized database queries
+        if (search != null && search.isNotEmpty) {
+          apps = await _databaseService.searchApps(search);
+        } else if (category != null && category.isNotEmpty) {
+          apps = await _databaseService.getAppsByCategory(category);
+        } else {
+          apps = await _databaseService.getAllApps();
+        }
+        
+        // Apply pagination
+        if (offset != null) {
+          apps = apps.skip(offset).toList();
+        }
+        if (limit != null) {
+          apps = apps.take(limit).toList();
+        }
+        
+        return apps;
+      } else {
+        // Fallback to repository for backward compatibility
+        final repository = await fetchRepository();
+        List<FDroidApp> apps = repository.appsList;
 
-      // Filter by category if specified
-      if (category != null && category.isNotEmpty) {
-        apps = apps
-            .where((app) => app.categories?.contains(category) ?? false)
-            .toList();
-      }
+        // Filter by category if specified
+        if (category != null && category.isNotEmpty) {
+          apps = apps
+              .where((app) => app.categories?.contains(category) ?? false)
+              .toList();
+        }
 
-      // Filter by search query if specified
-      if (search != null && search.isNotEmpty) {
-        final lowerSearch = search.toLowerCase();
-        apps = apps
-            .where(
-              (app) =>
-                  app.name.toLowerCase().contains(lowerSearch) ||
-                  app.summary.toLowerCase().contains(lowerSearch) ||
-                  app.description.toLowerCase().contains(lowerSearch) ||
-                  app.packageName.toLowerCase().contains(lowerSearch),
-            )
-            .toList();
-      }
+        // Filter by search query if specified
+        if (search != null && search.isNotEmpty) {
+          final lowerSearch = search.toLowerCase();
+          apps = apps
+              .where(
+                (app) =>
+                    app.name.toLowerCase().contains(lowerSearch) ||
+                    app.summary.toLowerCase().contains(lowerSearch) ||
+                    app.description.toLowerCase().contains(lowerSearch) ||
+                    app.packageName.toLowerCase().contains(lowerSearch),
+              )
+              .toList();
+        }
 
-      // Apply pagination
-      if (offset != null) {
-        apps = apps.skip(offset).toList();
-      }
-      if (limit != null) {
-        apps = apps.take(limit).toList();
-      }
+        // Apply pagination
+        if (offset != null) {
+          apps = apps.skip(offset).toList();
+        }
+        if (limit != null) {
+          apps = apps.take(limit).toList();
+        }
 
-      return apps;
+        return apps;
+      }
     } catch (e) {
       throw Exception('Error fetching apps: $e');
     }
@@ -166,8 +249,14 @@ class FDroidApiService {
   /// Fetches the latest apps
   Future<List<FDroidApp>> fetchLatestApps({int limit = 50}) async {
     try {
-      final repository = await fetchRepository();
-      return repository.latestApps.take(limit).toList();
+      final isPopulated = await _databaseService.isPopulated();
+      
+      if (isPopulated) {
+        return await _databaseService.getLatestApps(limit: limit);
+      } else {
+        final repository = await fetchRepository();
+        return repository.latestApps.take(limit).toList();
+      }
     } catch (e) {
       throw Exception('Error fetching latest apps: $e');
     }
@@ -176,8 +265,14 @@ class FDroidApiService {
   /// Fetches apps by category
   Future<List<FDroidApp>> fetchAppsByCategory(String category) async {
     try {
-      final repository = await fetchRepository();
-      return repository.getAppsByCategory(category);
+      final isPopulated = await _databaseService.isPopulated();
+      
+      if (isPopulated) {
+        return await _databaseService.getAppsByCategory(category);
+      } else {
+        final repository = await fetchRepository();
+        return repository.getAppsByCategory(category);
+      }
     } catch (e) {
       throw Exception('Error fetching apps by category: $e');
     }
@@ -186,8 +281,14 @@ class FDroidApiService {
   /// Searches for apps
   Future<List<FDroidApp>> searchApps(String query) async {
     try {
-      final repository = await fetchRepository();
-      return repository.searchApps(query);
+      final isPopulated = await _databaseService.isPopulated();
+      
+      if (isPopulated) {
+        return await _databaseService.searchApps(query);
+      } else {
+        final repository = await fetchRepository();
+        return repository.searchApps(query);
+      }
     } catch (e) {
       throw Exception('Error searching apps: $e');
     }
@@ -196,8 +297,14 @@ class FDroidApiService {
   /// Fetches all available categories
   Future<List<String>> fetchCategories() async {
     try {
-      final repository = await fetchRepository();
-      return repository.categories;
+      final isPopulated = await _databaseService.isPopulated();
+      
+      if (isPopulated) {
+        return await _databaseService.getCategories();
+      } else {
+        final repository = await fetchRepository();
+        return repository.categories;
+      }
     } catch (e) {
       throw Exception('Error fetching categories: $e');
     }
@@ -206,11 +313,22 @@ class FDroidApiService {
   /// Fetches a specific app by package name
   Future<FDroidApp?> fetchApp(String packageName) async {
     try {
-      final repository = await fetchRepository();
-      return repository.apps[packageName];
+      final isPopulated = await _databaseService.isPopulated();
+      
+      if (isPopulated) {
+        return await _databaseService.getApp(packageName);
+      } else {
+        final repository = await fetchRepository();
+        return repository.apps[packageName];
+      }
     } catch (e) {
       throw Exception('Error fetching app: $e');
     }
+  }
+
+  /// Sets the locale for the database service
+  void setLocale(String locale) {
+    _databaseService.setLocale(locale);
   }
 
   /// Downloads an APK file with progress tracking and cancellation support
@@ -496,5 +614,6 @@ class FDroidApiService {
 
   void dispose() {
     _client.close();
+    _databaseService.close();
   }
 }

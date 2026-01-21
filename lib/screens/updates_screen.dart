@@ -98,7 +98,20 @@ class _UpdatesScreenState extends State<UpdatesScreen>
 
         final updatableApps = appProvider.getUpdatableApps();
 
-        if (updatableApps.isEmpty) {
+        // Get all F-Droid apps installed on device
+        final allFDroidApps = installedApps
+            .where(
+              (installedApp) =>
+                  appProvider.repository?.apps[installedApp.packageName] !=
+                  null,
+            )
+            .map(
+              (installedApp) =>
+                  appProvider.repository!.apps[installedApp.packageName]!,
+            )
+            .toList();
+
+        if (allFDroidApps.isEmpty) {
           return RefreshIndicator(
             onRefresh: _onRefresh,
             child: SingleChildScrollView(
@@ -121,9 +134,7 @@ class _UpdatesScreenState extends State<UpdatesScreen>
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      installedApps.isEmpty
-                          ? 'No F-Droid apps are installed on this device'
-                          : 'You have ${installedApps.length} apps installed from F-Droid',
+                      'No F-Droid apps are installed on this device',
                       textAlign: TextAlign.center,
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                         color: Theme.of(context).colorScheme.onSurfaceVariant,
@@ -140,7 +151,7 @@ class _UpdatesScreenState extends State<UpdatesScreen>
           onRefresh: _onRefresh,
           child: Column(
             children: [
-              // Updates available header
+              // Header
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.symmetric(
@@ -148,57 +159,63 @@ class _UpdatesScreenState extends State<UpdatesScreen>
                   vertical: 8,
                 ),
                 decoration: BoxDecoration(
-                  color: Theme.of(
-                    context,
-                  ).colorScheme.primaryContainer.withValues(alpha: 0.5),
+                  color: updatableApps.isNotEmpty
+                      ? Theme.of(
+                          context,
+                        ).colorScheme.primaryContainer.withValues(alpha: 0.5)
+                      : Theme.of(context).colorScheme.surfaceContainerHighest,
                 ),
                 child: Row(
                   children: [
                     Icon(
-                      Symbols.system_update,
-                      color: Theme.of(context).colorScheme.onPrimaryContainer,
+                      updatableApps.isNotEmpty
+                          ? Symbols.system_update
+                          : Symbols.check_circle,
+                      color: updatableApps.isNotEmpty
+                          ? Theme.of(context).colorScheme.onPrimaryContainer
+                          : Theme.of(context).colorScheme.primary,
                     ),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Text(
-                        '${updatableApps.length} updates available',
+                        updatableApps.isNotEmpty
+                            ? '${updatableApps.length} updates available'
+                            : '${allFDroidApps.length} F-Droid apps installed',
                         style: Theme.of(context).textTheme.titleMedium
                             ?.copyWith(
-                              color: Theme.of(
-                                context,
-                              ).colorScheme.onPrimaryContainer,
+                              color: updatableApps.isNotEmpty
+                                  ? Theme.of(
+                                      context,
+                                    ).colorScheme.onPrimaryContainer
+                                  : Theme.of(context).colorScheme.onSurface,
                               fontWeight: FontWeight.w600,
                             ),
                       ),
                     ),
-                    FilledButton(
-                      onPressed: () => _updateAllApps(context, updatableApps),
-                      child: Text(
-                        'Update All',
-                        // style: TextStyle(
-                        //   color: Theme.of(
-                        //     context,
-                        //   ).colorScheme.onPrimaryContainer,
-                        //   fontWeight: FontWeight.w600,
-                        // ),
+                    if (updatableApps.isNotEmpty)
+                      FilledButton(
+                        onPressed: () => _updateAllApps(context, updatableApps),
+                        child: const Text('Update All'),
                       ),
-                    ),
                   ],
                 ),
               ),
 
-              // Updates list
+              // Apps list
               Expanded(
                 child: ListView.builder(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 8,
                     vertical: 8,
                   ),
-                  itemCount: updatableApps.length,
+                  itemCount: allFDroidApps.length,
                   itemBuilder: (context, index) {
-                    final app = updatableApps[index];
+                    final app = allFDroidApps[index];
                     final installedApp = appProvider.getInstalledApp(
                       app.packageName,
+                    );
+                    final hasUpdate = updatableApps.any(
+                      (updateApp) => updateApp.packageName == app.packageName,
                     );
 
                     return Card(
@@ -240,36 +257,60 @@ class _UpdatesScreenState extends State<UpdatesScreen>
                                       ),
                                       child: Row(
                                         children: [
-                                          Text(
-                                            'Update from ${installedApp.versionName ?? 'Unknown'}',
-                                            style: Theme.of(context)
-                                                .textTheme
-                                                .labelMedium
-                                                ?.copyWith(
-                                                  color: Theme.of(
-                                                    context,
-                                                  ).colorScheme.primary,
-                                                ),
-                                          ),
-                                          Icon(
-                                            Symbols.arrow_right_alt,
-                                            size: 16,
-                                            color: Theme.of(
-                                              context,
-                                            ).colorScheme.primary,
-                                          ),
-                                          Text(
-                                            app.latestVersion?.versionName ??
-                                                'Unknown',
-                                            style: Theme.of(context)
-                                                .textTheme
-                                                .labelMedium
-                                                ?.copyWith(
-                                                  color: Theme.of(
-                                                    context,
-                                                  ).colorScheme.primary,
-                                                ),
-                                          ),
+                                          if (hasUpdate) ...[
+                                            Text(
+                                              'Update from ${installedApp.versionName ?? 'Unknown'}',
+                                              style: Theme.of(context)
+                                                  .textTheme
+                                                  .labelMedium
+                                                  ?.copyWith(
+                                                    color: Theme.of(
+                                                      context,
+                                                    ).colorScheme.primary,
+                                                  ),
+                                            ),
+                                            Icon(
+                                              Symbols.arrow_right_alt,
+                                              size: 16,
+                                              color: Theme.of(
+                                                context,
+                                              ).colorScheme.primary,
+                                            ),
+                                            Text(
+                                              app.latestVersion?.versionName ??
+                                                  'Unknown',
+                                              style: Theme.of(context)
+                                                  .textTheme
+                                                  .labelMedium
+                                                  ?.copyWith(
+                                                    color: Theme.of(
+                                                      context,
+                                                    ).colorScheme.primary,
+                                                  ),
+                                            ),
+                                          ] else ...[
+                                            Icon(
+                                              Symbols.check_circle,
+                                              size: 16,
+                                              color: Colors.green[400],
+                                            ),
+                                            const SizedBox(width: 4),
+                                            Expanded(
+                                              child: Text(
+                                                'Up to date (${installedApp.versionName ?? 'Unknown'})',
+                                                maxLines: 1,
+                                                overflow: TextOverflow.ellipsis,
+                                                style: Theme.of(context)
+                                                    .textTheme
+                                                    .labelMedium
+                                                    ?.copyWith(
+                                                      color: Theme.of(context)
+                                                          .colorScheme
+                                                          .onSurfaceVariant,
+                                                    ),
+                                              ),
+                                            ),
+                                          ],
                                         ],
                                       ),
                                     ),
@@ -286,6 +327,16 @@ class _UpdatesScreenState extends State<UpdatesScreen>
                                 final isDownloading =
                                     downloadInfo?.status ==
                                     DownloadStatus.downloading;
+
+                                if (!hasUpdate) {
+                                  return Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Icon(
+                                      Symbols.check_circle,
+                                      color: Colors.green[400],
+                                    ),
+                                  );
+                                }
 
                                 if (isDownloading) {
                                   final progress = downloadProvider.getProgress(
@@ -416,7 +467,6 @@ class _UpdatesScreenState extends State<UpdatesScreen>
     if (confirmed != true) return;
 
     final downloadProvider = context.read<DownloadProvider>();
-    final appProvider = context.read<AppProvider>();
 
     if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(

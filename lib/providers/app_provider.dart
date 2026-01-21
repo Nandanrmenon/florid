@@ -202,11 +202,35 @@ class AppProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Gets apps that have updates available (simplified version)
+  /// Gets apps that have updates available
   List<FDroidApp> getUpdatableApps() {
-    // For now, return empty list since we don't have installed apps detection
-    // This can be implemented later with a proper package
-    return [];
+    if (_repository == null || _installedApps.isEmpty) {
+      return [];
+    }
+
+    final updatableApps = <FDroidApp>[];
+
+    for (final installedApp in _installedApps) {
+      // Check if the app exists in F-Droid repository
+      final fdroidApp = _repository!.apps[installedApp.packageName];
+      if (fdroidApp == null) continue;
+
+      // Check if F-Droid app has a latest version
+      if (fdroidApp.latestVersion == null) continue;
+
+      // Check if installed app has version info
+      if (installedApp.versionCode == null) continue;
+
+      // Compare version codes - if F-Droid has a newer version, it's updatable
+      if (fdroidApp.latestVersion!.versionCode > installedApp.versionCode!) {
+        updatableApps.add(fdroidApp);
+      }
+    }
+
+    // Sort by app name for consistent ordering
+    updatableApps.sort((a, b) => a.name.compareTo(b.name));
+
+    return updatableApps;
   }
 
   /// Checks if an app is installed (simplified version)

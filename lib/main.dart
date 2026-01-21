@@ -1,3 +1,4 @@
+import 'package:florid/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -64,12 +65,13 @@ class FloridApp extends StatelessWidget {
       ],
       child: Consumer<SettingsProvider>(
         builder: (context, settings, _) {
+          
           return MaterialApp(
             title: 'Florid - F-Droid Client',
             debugShowCheckedModeBanner: false,
             theme: ThemeData(
               colorScheme: ColorScheme.fromSeed(
-                seedColor: Colors.green,
+                seedColor: kAppColor,
                 brightness: Brightness.light,
               ),
               appBarTheme: const AppBarTheme(),
@@ -77,7 +79,7 @@ class FloridApp extends StatelessWidget {
             ),
             darkTheme: ThemeData(
               colorScheme: ColorScheme.fromSeed(
-                seedColor: Colors.green,
+                seedColor: kAppColor,
                 brightness: Brightness.dark,
               ),
               appBarTheme: const AppBarTheme(),

@@ -698,6 +698,17 @@ class _DownloadSection extends StatelessWidget {
                               );
                               await appProvider.fetchInstalledApps();
                               if (appProvider.isAppInstalled(app.packageName)) {
+                                // App installed successfully, delete the APK file
+                                final downloadInfo = downloadProvider
+                                    .getDownloadInfo(
+                                      app.packageName,
+                                      app.latestVersion!.versionName,
+                                    );
+                                if (downloadInfo?.filePath != null) {
+                                  await downloadProvider.deleteDownloadedFile(
+                                    downloadInfo!.filePath!,
+                                  );
+                                }
                                 break;
                               }
                             }

@@ -20,167 +20,6 @@ class AppListItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-
-    // return InkWell(
-    //   onTap: onTap,
-    //   borderRadius: BorderRadius.circular(12),
-    //   child: Padding(
-    //     padding: const EdgeInsets.all(12),
-    //     child: Row(
-    //       crossAxisAlignment: CrossAxisAlignment.start,
-    //       children: [
-    //         // App Icon
-    //         Container(
-    //           width: 56,
-    //           height: 56,
-    //           decoration: BoxDecoration(
-    //             borderRadius: BorderRadius.circular(8),
-    //             color: theme.colorScheme.surfaceContainerHighest,
-    //           ),
-    //           child: ClipRRect(
-    //             borderRadius: BorderRadius.circular(8),
-    //             child: _MultiIcon(app: app),
-    //           ),
-    //         ),
-    //         const SizedBox(width: 12),
-
-    //         // App Info
-    //         Expanded(
-    //           child: Column(
-    //             crossAxisAlignment: CrossAxisAlignment.start,
-    //             children: [
-    //               // App Name
-    //               Text(
-    //                 app.name,
-    //                 style: theme.textTheme.titleMedium?.copyWith(
-    //                   fontWeight: FontWeight.w600,
-    //                 ),
-    //                 maxLines: 1,
-    //                 overflow: TextOverflow.ellipsis,
-    //               ),
-    //               const SizedBox(height: 4),
-
-    //               // App Summary
-    //               Text(
-    //                 app.summary,
-    //                 style: theme.textTheme.bodyMedium?.copyWith(
-    //                   color: theme.colorScheme.onSurfaceVariant,
-    //                 ),
-    //                 maxLines: 2,
-    //                 overflow: TextOverflow.ellipsis,
-    //               ),
-    //               const SizedBox(height: 8),
-
-    //               // App Details Row
-    //               Row(
-    //                 children: [
-    //                   // Category
-    //                   if (showCategory &&
-    //                       app.categories?.isNotEmpty == true) ...[
-    //                     Flexible(
-    //                       child: Container(
-    //                         padding: const EdgeInsets.symmetric(
-    //                           horizontal: 8,
-    //                           vertical: 2,
-    //                         ),
-    //                         decoration: BoxDecoration(
-    //                           color: theme.colorScheme.primaryContainer,
-    //                           borderRadius: BorderRadius.circular(12),
-    //                         ),
-    //                         child: Text(
-    //                           app.categories!.first,
-    //                           style: theme.textTheme.labelSmall?.copyWith(
-    //                             color: theme.colorScheme.onPrimaryContainer,
-    //                             fontWeight: FontWeight.w500,
-    //                           ),
-    //                           maxLines: 1,
-    //                           overflow: TextOverflow.ellipsis,
-    //                         ),
-    //                       ),
-    //                     ),
-    //                     const SizedBox(width: 6),
-    //                   ],
-
-    //                   // Version and Size info in a flexible container
-    //                   Expanded(
-    //                     child: Row(
-    //                       mainAxisSize: MainAxisSize.min,
-    //                       children: [
-    //                         // Version
-    //                         Flexible(
-    //                           child: Row(
-    //                             mainAxisSize: MainAxisSize.min,
-    //                             children: [
-    //                               Icon(
-    //                                 Icons.info_outline,
-    //                                 size: 12,
-    //                                 color: theme.colorScheme.onSurfaceVariant,
-    //                               ),
-    //                               const SizedBox(width: 2),
-    //                               Flexible(
-    //                                 child: Text(
-    //                                   app.latestVersion?.versionName ??
-    //                                       'Unknown',
-    //                                   style: theme.textTheme.labelSmall
-    //                                       ?.copyWith(
-    //                                         color: theme
-    //                                             .colorScheme
-    //                                             .onSurfaceVariant,
-    //                                       ),
-    //                                   maxLines: 1,
-    //                                   overflow: TextOverflow.ellipsis,
-    //                                 ),
-    //                               ),
-    //                             ],
-    //                           ),
-    //                         ),
-    //                         const SizedBox(width: 8),
-
-    //                         // Size
-    //                         Flexible(
-    //                           child: Row(
-    //                             mainAxisSize: MainAxisSize.min,
-    //                             children: [
-    //                               Icon(
-    //                                 Icons.storage_outlined,
-    //                                 size: 12,
-    //                                 color: theme.colorScheme.onSurfaceVariant,
-    //                               ),
-    //                               const SizedBox(width: 2),
-    //                               Flexible(
-    //                                 child: Text(
-    //                                   app.latestVersion?.sizeString ??
-    //                                       'Unknown',
-    //                                   style: theme.textTheme.labelSmall
-    //                                       ?.copyWith(
-    //                                         color: theme
-    //                                             .colorScheme
-    //                                             .onSurfaceVariant,
-    //                                       ),
-    //                                   maxLines: 1,
-    //                                   overflow: TextOverflow.ellipsis,
-    //                                 ),
-    //                               ),
-    //                             ],
-    //                           ),
-    //                         ),
-    //                       ],
-    //                     ),
-    //                   ),
-
-    //                   const SizedBox(width: 8),
-
-    //                   // Download Button
-    //                   _DownloadButton(app: app),
-    //                 ],
-    //               ),
-    //             ],
-    //           ),
-    //         ),
-    //       ],
-    //     ),
-    //   ),
-    // );
     return ListTile(
       onTap: onTap,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -205,14 +44,7 @@ class AppListItem extends StatelessWidget {
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
       ),
-      subtitle: Text(
-        app.summary,
-        // style: theme.textTheme.bodyMedium?.copyWith(
-        //   color: theme.colorScheme.onSurfaceVariant,
-        // ),
-        maxLines: 2,
-        overflow: TextOverflow.ellipsis,
-      ),
+      subtitle: Text(app.summary, maxLines: 2, overflow: TextOverflow.ellipsis),
       dense: true,
     );
   }
@@ -300,6 +132,7 @@ class _MultiIconState extends State<_MultiIcon> {
             height: 20,
             child: CircularProgressIndicator(
               strokeWidth: 2,
+              year2023: false,
               value: loadingProgress.expectedTotalBytes != null
                   ? loadingProgress.cumulativeBytesLoaded /
                         (loadingProgress.expectedTotalBytes ?? 1)
@@ -343,7 +176,11 @@ class _DownloadButton extends StatelessWidget {
           return SizedBox(
             width: 32,
             height: 32,
-            child: CircularProgressIndicator(value: progress, strokeWidth: 3),
+            child: CircularProgressIndicator(
+              value: progress,
+              strokeWidth: 3,
+              year2023: false,
+            ),
           );
         }
 

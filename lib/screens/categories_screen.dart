@@ -50,7 +50,7 @@ class _CategoriesScreenState extends State<CategoriesScreen>
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                CircularProgressIndicator(),
+                CircularProgressIndicator(year2023: false,),
                 SizedBox(height: 16),
                 Text('Loading categories...'),
               ],

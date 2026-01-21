@@ -343,9 +343,9 @@ class FDroidRepository {
 
             int size = 0;
             final rawSize = versionData['size'] ?? fileMap?['size'];
-            if (rawSize is int)
+            if (rawSize is int) {
               size = rawSize;
-            else if (rawSize is String)
+            } else if (rawSize is String)
               size = int.tryParse(rawSize) ?? 0;
 
             final added = parseEpochOrIso(

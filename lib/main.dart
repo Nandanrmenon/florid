@@ -53,7 +53,7 @@ class FloridApp extends StatelessWidget {
           update: (context, apiService, settings, previous) {
             // Update locale when settings change
             apiService.setLocale(settings.locale);
-            
+
             if (previous == null) {
               return DownloadProvider(apiService, settings);
             }

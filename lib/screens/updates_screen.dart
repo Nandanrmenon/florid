@@ -54,7 +54,7 @@ class _UpdatesScreenState extends State<UpdatesScreen>
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                CircularProgressIndicator(),
+                CircularProgressIndicator(year2023: false,),
                 SizedBox(height: 16),
                 Text('Checking for updates...'),
               ],
@@ -221,10 +221,11 @@ class _UpdatesScreenState extends State<UpdatesScreen>
                         children: [
                           AppListItem(
                             app: app,
-                            onTap: () {
-                              final screenshots = context
+                            onTap: () async {
+                              final screenshots = await context
                                   .read<AppProvider>()
                                   .getScreenshots(app.packageName);
+                              if (!context.mounted) return;
                               Navigator.of(context).push(
                                 MaterialPageRoute(
                                   builder: (context) => AppDetailsScreen(

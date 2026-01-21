@@ -454,6 +454,7 @@ class _DownloadSection extends StatelessWidget {
                   children: [
                     LinearProgressIndicator(
                       value: progress,
+                      year2023: false,
                       backgroundColor: Theme.of(
                         context,
                       ).colorScheme.onPrimaryContainer.withOpacity(0.3),
@@ -1060,6 +1061,7 @@ class _AppDetailsIconState extends State<_AppDetailsIcon> {
             height: 20,
             child: CircularProgressIndicator(
               strokeWidth: 2,
+              year2023: false,
               valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
             ),
           ),
@@ -1195,11 +1197,24 @@ class _ScreenshotsSection extends StatelessWidget {
     while (path.startsWith('/')) {
       path = path.substring(1);
     }
+    // Handle if already a full URL
+    if (path.startsWith('http')) {
+      return path;
+    }
     return 'https://f-droid.org/repo/$path';
   }
 
   @override
   Widget build(BuildContext context) {
+    debugPrint('Screenshots Section - Count: ${screenshots.length}');
+    for (var i = 0; i < screenshots.length; i++) {
+      debugPrint('Screenshot $i: ${screenshots[i]}');
+    }
+
+    if (screenshots.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -1217,6 +1232,9 @@ class _ScreenshotsSection extends StatelessWidget {
             itemCount: screenshots.length,
             itemBuilder: (context, index) {
               final screenshot = screenshots[index];
+              final url = _getScreenshotUrl(screenshot);
+              debugPrint('Loading screenshot from URL: $url');
+
               return Padding(
                 padding: EdgeInsets.only(
                   right: index != screenshots.length - 1 ? 12 : 0,
@@ -1236,32 +1254,69 @@ class _ScreenshotsSection extends StatelessWidget {
                           ),
                         );
                       },
-                      child: Image.network(
-                        _getScreenshotUrl(screenshot),
-                        fit: BoxFit.cover,
-                        cacheWidth: 300,
-                        cacheHeight: 600,
-                        errorBuilder: (context, error, stackTrace) {
-                          return Container(
-                            color: Theme.of(
-                              context,
-                            ).colorScheme.surfaceContainer,
-                            child: const Center(
-                              child: Icon(Symbols.broken_image),
-                            ),
-                          );
-                        },
-                        loadingBuilder: (context, child, loadingProgress) {
-                          if (loadingProgress == null) return child;
-                          return Container(
-                            color: Theme.of(
-                              context,
-                            ).colorScheme.surfaceContainer,
-                            child: const Center(
-                              child: CircularProgressIndicator(),
-                            ),
-                          );
-                        },
+                      child: AspectRatio(
+                        aspectRatio: 9 / 16,
+                        child: Image.network(
+                          url,
+                          fit: BoxFit.cover,
+                          cacheWidth: 300,
+                          cacheHeight: 600,
+                          errorBuilder: (context, error, stackTrace) {
+                            debugPrint('Screenshot error: $error');
+                            debugPrint('StackTrace: $stackTrace');
+                            return Container(
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.surfaceContainer,
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  const Icon(Symbols.broken_image),
+                                  const SizedBox(height: 8),
+                                  Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Text(
+                                      'Failed to load',
+                                      style: Theme.of(
+                                        context,
+                                      ).textTheme.bodySmall,
+                                      textAlign: TextAlign.center,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+                          },
+                          loadingBuilder: (context, child, loadingProgress) {
+                            if (loadingProgress == null) return child;
+                            return Container(
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.surfaceContainer,
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  const CircularProgressIndicator(
+                                    year2023: false,
+                                  ),
+                                  const SizedBox(height: 12),
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 8.0,
+                                    ),
+                                    child: Text(
+                                      '${(loadingProgress.cumulativeBytesLoaded / (loadingProgress.expectedTotalBytes ?? 1) * 100).toInt()}%',
+                                      style: Theme.of(
+                                        context,
+                                      ).textTheme.bodySmall,
+                                      textAlign: TextAlign.center,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+                          },
+                        ),
                       ),
                     ),
                   ),
@@ -1341,42 +1396,51 @@ class _FullScreenScreenshotsState extends State<_FullScreenScreenshots> {
         itemBuilder: (context, index) {
           final screenshot = widget.screenshots[index];
           return SafeArea(
-            child: Container(
-              color: Colors.black,
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(16),
-                child: Image.network(
-                  _getScreenshotUrl(screenshot),
-                  fit: BoxFit.cover,
-                  cacheWidth: 1080,
-                  cacheHeight: 2160,
-                  errorBuilder: (context, error, stackTrace) {
-                    return Container(
-                      color: Colors.grey[900],
-                      child: const Center(
-                        child: Icon(
-                          Symbols.broken_image,
-                          color: Colors.white,
-                          size: 48,
-                        ),
-                      ),
-                    );
-                  },
-                  loadingBuilder: (context, child, loadingProgress) {
-                    if (loadingProgress == null) return child;
-                    return Center(
-                      child: CircularProgressIndicator(
-                        value: loadingProgress.expectedTotalBytes != null
-                            ? loadingProgress.cumulativeBytesLoaded /
-                                  loadingProgress.expectedTotalBytes!
-                            : null,
-                        valueColor: const AlwaysStoppedAnimation<Color>(
-                          Colors.white,
-                        ),
-                      ),
-                    );
-                  },
+            child: Center(
+              child: AspectRatio(
+                aspectRatio: 9 / 16,
+                child: Container(
+                  color: Colors.black,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(16),
+                    child: Image.network(
+                      _getScreenshotUrl(screenshot),
+                      fit: BoxFit.cover,
+                      cacheWidth: 1080,
+                      cacheHeight: 1920,
+                      errorBuilder: (context, error, stackTrace) {
+                        return Container(
+                          color: Colors.grey[900],
+                          child: const Center(
+                            child: Icon(
+                              Symbols.broken_image,
+                              color: Colors.white,
+                              size: 48,
+                            ),
+                          ),
+                        );
+                      },
+                      loadingBuilder: (context, child, loadingProgress) {
+                        if (loadingProgress == null) return child;
+                        return Center(
+                          child: CircularProgressIndicator(
+                            year2023: false,
+                            value: loadingProgress.expectedTotalBytes != null
+                                ? loadingProgress.cumulativeBytesLoaded /
+                                      loadingProgress.expectedTotalBytes!
+                                : null,
+                            valueColor: const AlwaysStoppedAnimation<Color>(
+                              Colors.white,
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
                 ),
               ),
             ),

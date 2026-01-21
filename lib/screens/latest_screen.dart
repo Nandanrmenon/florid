@@ -51,7 +51,7 @@ class _LatestScreenState extends State<LatestScreen>
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                CircularProgressIndicator(),
+                CircularProgressIndicator(year2023: false,),
                 SizedBox(height: 16),
                 Text('Loading latest apps...'),
               ],
@@ -115,10 +115,11 @@ class _LatestScreenState extends State<LatestScreen>
               final app = apps[index];
               return AppListItem(
                 app: app,
-                onTap: () {
-                  final screenshots = context
+                onTap: () async {
+                  final screenshots = await context
                       .read<AppProvider>()
                       .getScreenshots(app.packageName);
+                  if (!context.mounted) return;
                   Navigator.of(context).push(
                     MaterialPageRoute(
                       builder: (context) => AppDetailsScreen(

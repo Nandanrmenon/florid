@@ -28,9 +28,9 @@ class FDroidApiService {
     http.Client? client,
     Dio? dio,
     DatabaseService? databaseService,
-  })  : _client = client ?? http.Client(),
-        _dio = dio ?? Dio(),
-        _databaseService = databaseService ?? DatabaseService();
+  }) : _client = client ?? http.Client(),
+       _dio = dio ?? Dio(),
+       _databaseService = databaseService ?? DatabaseService();
 
   /// Returns the cache file location for the repo index.
   Future<File> _cacheFile() async {
@@ -69,63 +69,80 @@ class FDroidApiService {
   /// Fetches the complete F-Droid repository index with database caching.
   /// Flow: try database (fresh) -> network -> database fallback on network failure.
   Future<FDroidRepository> fetchRepository() async {
+    debugPrint('=== fetchRepository called ===');
+
     // Check if database is populated and fresh
     final isPopulated = await _databaseService.isPopulated();
-    final needsUpdate = await _databaseService.needsUpdate(_fallbackCacheMaxAge);
+    final needsUpdate = await _databaseService.needsUpdate(
+      _fallbackCacheMaxAge,
+    );
+
+    debugPrint('Database populated: $isPopulated, needs update: $needsUpdate');
 
     // If database is fresh, load from it
     if (isPopulated && !needsUpdate) {
       try {
+        debugPrint('Loading from database (fresh)...');
         return await _loadRepositoryFromDatabase();
       } catch (e) {
         // If database read fails, try network
-        print('Error loading from database: $e');
+        debugPrint('Error loading from database: $e');
       }
     }
 
     // Try to fetch from network
     try {
+      debugPrint('Fetching from network...');
       final response = await _client.get(Uri.parse(repoIndexUrl));
 
       if (response.statusCode == 200) {
         final body = response.body;
         final jsonData = json.decode(body);
-        
+
         // Cache the raw JSON for screenshot extraction
         _cachedRawJson = jsonData as Map<String, dynamic>;
-        
+        debugPrint(
+          'Cached raw JSON, size: ${_cachedRawJson?.length ?? 0} keys',
+        );
+
         // Parse repository
         final repo = FDroidRepository.fromJson(jsonData);
-        
+
         // Store in database asynchronously (don't wait for it)
         _databaseService.importRepository(repo).catchError((e) {
           debugPrint('Error importing to database: $e');
         });
-        
+
         // Also save JSON cache for screenshot extraction
         await _saveCache(body);
-        
+
+        debugPrint('Successfully fetched and cached repository');
         return repo;
       } else {
         throw Exception('Failed to load repository: ${response.statusCode}');
       }
     } catch (e) {
+      debugPrint('Network fetch failed: $e');
+
       // Fall back to database if available (even if stale)
       if (isPopulated) {
         try {
+          debugPrint('Falling back to database...');
           return await _loadRepositoryFromDatabase();
         } catch (dbError) {
           debugPrint('Error loading from database fallback: $dbError');
         }
       }
-      
+
       // Last resort: try JSON cache
+      debugPrint('Trying JSON cache...');
       final cachedJson = await _tryLoadCache();
       if (cachedJson != null) {
         _cachedRawJson = cachedJson;
+        debugPrint('Loaded from JSON cache');
         return FDroidRepository.fromJson(cachedJson);
       }
-      
+
       throw Exception('Error fetching repository: $e');
     }
   }
@@ -133,15 +150,23 @@ class FDroidApiService {
   /// Loads repository data from the database
   Future<FDroidRepository> _loadRepositoryFromDatabase() async {
     final apps = await _databaseService.getAllApps();
-    final repoName = await _databaseService.getMetadata('repo_name') ?? 'F-Droid';
-    final repoDescription = await _databaseService.getMetadata('repo_description') ?? '';
-    
+    final repoName =
+        await _databaseService.getMetadata('repo_name') ?? 'F-Droid';
+    final repoDescription =
+        await _databaseService.getMetadata('repo_description') ?? '';
+
+    // Also try to load the cached JSON for screenshot extraction
+    final cachedJson = await _tryLoadCache();
+    if (cachedJson != null) {
+      _cachedRawJson = cachedJson;
+    }
+
     // Create a map of apps keyed by package name
     final appsMap = <String, FDroidApp>{};
     for (final app in apps) {
       appsMap[app.packageName] = app;
     }
-    
+
     return FDroidRepository(
       name: repoName,
       description: repoDescription,
@@ -164,7 +189,7 @@ class FDroidApiService {
       // Ignore cache clear failures
     }
     _cachedRawJson = null;
-    
+
     // Clear database
     try {
       await _databaseService.clearAll();
@@ -183,10 +208,10 @@ class FDroidApiService {
     try {
       // Use database for better performance if available
       final isPopulated = await _databaseService.isPopulated();
-      
+
       if (isPopulated) {
         List<FDroidApp> apps;
-        
+
         // Use optimized database queries
         if (search != null && search.isNotEmpty) {
           apps = await _databaseService.searchApps(search);
@@ -195,7 +220,7 @@ class FDroidApiService {
         } else {
           apps = await _databaseService.getAllApps();
         }
-        
+
         // Apply pagination
         if (offset != null) {
           apps = apps.skip(offset).toList();
@@ -203,7 +228,7 @@ class FDroidApiService {
         if (limit != null) {
           apps = apps.take(limit).toList();
         }
-        
+
         return apps;
       } else {
         // Fallback to repository for backward compatibility
@@ -250,7 +275,7 @@ class FDroidApiService {
   Future<List<FDroidApp>> fetchLatestApps({int limit = 50}) async {
     try {
       final isPopulated = await _databaseService.isPopulated();
-      
+
       if (isPopulated) {
         return await _databaseService.getLatestApps(limit: limit);
       } else {
@@ -266,7 +291,7 @@ class FDroidApiService {
   Future<List<FDroidApp>> fetchAppsByCategory(String category) async {
     try {
       final isPopulated = await _databaseService.isPopulated();
-      
+
       if (isPopulated) {
         return await _databaseService.getAppsByCategory(category);
       } else {
@@ -282,7 +307,7 @@ class FDroidApiService {
   Future<List<FDroidApp>> searchApps(String query) async {
     try {
       final isPopulated = await _databaseService.isPopulated();
-      
+
       if (isPopulated) {
         return await _databaseService.searchApps(query);
       } else {
@@ -298,7 +323,7 @@ class FDroidApiService {
   Future<List<String>> fetchCategories() async {
     try {
       final isPopulated = await _databaseService.isPopulated();
-      
+
       if (isPopulated) {
         return await _databaseService.getCategories();
       } else {
@@ -314,7 +339,7 @@ class FDroidApiService {
   Future<FDroidApp?> fetchApp(String packageName) async {
     try {
       final isPopulated = await _databaseService.isPopulated();
-      
+
       if (isPopulated) {
         return await _databaseService.getApp(packageName);
       } else {
@@ -499,8 +524,23 @@ class FDroidApiService {
   }
 
   /// Extracts screenshots for a specific app package from cached raw JSON
-  List<String> getScreenshots(String packageName) {
+  /// If the cache is not populated, fetches the repository first
+  Future<List<String>> getScreenshots(String packageName) async {
+    debugPrint('=== getScreenshots called for: $packageName ===');
+
+    // If cache is empty, fetch the repository first
     if (_cachedRawJson == null) {
+      debugPrint('Cache is empty, fetching repository first...');
+      try {
+        await fetchRepository();
+      } catch (e) {
+        debugPrint('Error fetching repository: $e');
+        return [];
+      }
+    }
+
+    if (_cachedRawJson == null) {
+      debugPrint('_cachedRawJson is still null after fetch!');
       return [];
     }
 
@@ -508,13 +548,17 @@ class FDroidApiService {
       final packages = (_cachedRawJson!['packages'] as Map?)
           ?.cast<String, dynamic>();
       if (packages == null) {
+        debugPrint('packages is null!');
         return [];
       }
 
       final pkgData = packages[packageName] as Map?;
       if (pkgData == null) {
+        debugPrint('pkgData is null for $packageName');
         return [];
       }
+
+      debugPrint('pkgData keys: ${pkgData.keys.toList()}');
 
       // Try multiple locations for screenshots
       List<String>? screenshotsList;
@@ -522,24 +566,36 @@ class FDroidApiService {
       // 1. Direct metadata.screenshots
       final metadata = (pkgData['metadata'] as Map?)?.cast<String, dynamic>();
       if (metadata != null) {
+        debugPrint('metadata found! Keys: ${metadata.keys.toList()}');
         screenshotsList = _extractScreenshots(metadata['screenshots']);
         if (screenshotsList.isNotEmpty) {
+          debugPrint(
+            'Found ${screenshotsList.length} screenshots in metadata[screenshots]',
+          );
           return screenshotsList;
         }
-      }
 
-      // 2. Check if screenshots might be in a localized format
-      if (metadata != null) {
+        // 2. Check if screenshots might be in a localized format
         for (final key in metadata.keys) {
           if (key.toString().contains('screenshot')) {
+            debugPrint('Checking key: $key');
             screenshotsList = _extractScreenshots(metadata[key]);
-            if (screenshotsList.isNotEmpty) return screenshotsList;
+            if (screenshotsList.isNotEmpty) {
+              debugPrint(
+                'Found ${screenshotsList.length} screenshots under key: $key',
+              );
+              return screenshotsList;
+            }
           }
         }
+      } else {
+        debugPrint('metadata is null!');
       }
 
+      debugPrint('No screenshots found for $packageName');
       return [];
     } catch (e) {
+      debugPrint('Error extracting screenshots for $packageName: $e');
       return [];
     }
   }
@@ -597,11 +653,28 @@ class FDroidApiService {
         }
       }
 
-      // If no device-type structure found, try localized format
+      // If no device-type structure found, recursively look for screenshot lists
+      // This handles cases where language codes are the keys
       if (screenshots.isEmpty) {
-        for (final value in screenshotData.values) {
+        for (final key in screenshotData.keys) {
+          final value = screenshotData[key];
+
+          // Skip known non-screenshot keys
+          if (key == 'icon' || key == 'iconBase64' || key == 'icon old') {
+            continue;
+          }
+
+          // Recursively extract from nested structures
           if (value is List) {
-            screenshots.addAll(_extractScreenshots(value));
+            final extracted = _extractScreenshots(value);
+            if (extracted.isNotEmpty) {
+              screenshots.addAll(extracted);
+            }
+          } else if (value is Map) {
+            final extracted = _extractScreenshots(value);
+            if (extracted.isNotEmpty) {
+              screenshots.addAll(extracted);
+            }
           } else if (value is String) {
             screenshots.add(value);
           }

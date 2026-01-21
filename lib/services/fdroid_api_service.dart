@@ -108,10 +108,12 @@ class FDroidApiService {
         // Parse repository
         final repo = FDroidRepository.fromJson(jsonData);
 
-        // Store in database asynchronously (don't wait for it)
-        _databaseService.importRepository(repo).catchError((e) {
+        // Store in database and wait for completion to avoid database locks
+        try {
+          await _databaseService.importRepository(repo);
+        } catch (e) {
           debugPrint('Error importing to database: $e');
-        });
+        }
 
         // Also save JSON cache for screenshot extraction
         await _saveCache(body);

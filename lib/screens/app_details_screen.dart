@@ -618,7 +618,7 @@ class _DownloadSection extends StatelessWidget {
                             );
                             // Refresh installed apps after successful install (allow system to register)
                             await Future.delayed(
-                              const Duration(milliseconds: 500),
+                              const Duration(milliseconds: 100),
                             );
                             await appProvider.fetchInstalledApps();
                             if (context.mounted) {
@@ -688,6 +688,20 @@ class _DownloadSection extends StatelessWidget {
                         try {
                           await downloadProvider.downloadApk(app);
                           // No success message - auto-install handles feedback
+
+                          // Poll for app installation to complete (auto-install is async)
+                          if (context.mounted) {
+                            // Wait up to ~12 seconds for the system to register the app
+                            for (int i = 0; i < 15; i++) {
+                              await Future.delayed(
+                                const Duration(milliseconds: 800),
+                              );
+                              await appProvider.fetchInstalledApps();
+                              if (appProvider.isAppInstalled(app.packageName)) {
+                                break;
+                              }
+                            }
+                          }
                         } catch (e) {
                           // Only show error if not cancelled
                           final errorMsg = e.toString();

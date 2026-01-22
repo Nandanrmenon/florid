@@ -64,8 +64,8 @@ class FDroidApp {
       ? '$repositoryUrl/icons-640/$icon'
       : '$repositoryUrl/icons-640/default.png';
 
-  /// Returns multiple candidate icon URLs with improved F-Droid compatibility.
-  /// F-Droid icons are often stored with specific naming patterns.
+  /// Returns a conservative list of candidate icon URLs.
+  /// Tries only the most likely locations to minimize 404 errors.
   List<String> get iconUrls {
     final urls = <String>[];
     final seen = <String>{};
@@ -76,66 +76,28 @@ class FDroidApp {
       urls.add(url);
     }
 
-    String direct(String path) => '$repositoryUrl/$path';
-    String buildFromRepo(String bucket, String path) =>
-        '$repositoryUrl/$bucket/$path';
-
     if (icon != null && icon!.isNotEmpty) {
       final iconPath = icon!;
+
+      // Try the direct path as provided by the index (most likely to succeed)
+      add('$repositoryUrl/$iconPath');
+
+      // Try high-res version with the icon path
+      add('$repositoryUrl/icons-640/$iconPath');
+
+      // Try medium-res as fallback
+      add('$repositoryUrl/icons-320/$iconPath');
+
+      // Extract just the filename if path includes subdirectories
       final parts = iconPath.split('/');
-      final fileName = parts.isNotEmpty ? parts.last : iconPath;
-      final packageDir = parts.isNotEmpty ? parts.first : packageName;
-
-      // Direct path as provided by the index (observed in index-v2).
-      add(direct(iconPath));
-
-      // Path as provided by the index (may include locale subfolders).
-      for (final bucket in const [
-        'icons-640',
-        'icons-320',
-        'icons-160',
-        'icons',
-      ]) {
-        add(buildFromRepo(bucket, iconPath));
-      }
-
-      // Flattened filename (strip directories).
-      for (final bucket in const [
-        'icons-640',
-        'icons-320',
-        'icons-160',
-        'icons',
-      ]) {
-        add(buildFromRepo(bucket, fileName));
-      }
-
-      // Package directory + filename (common F-Droid layout: package/file.png).
-      for (final bucket in const [
-        'icons-640',
-        'icons-320',
-        'icons-160',
-        'icons',
-      ]) {
-        add(buildFromRepo(bucket, '$packageDir/$fileName'));
-      }
-
-      // Direct package dir + filename (mirrors actual hosting seen in sample index).
-      add(direct('$packageDir/$fileName'));
-    }
-
-    // Package-name based fallbacks last, but only if icon metadata exists to avoid noisy 404s on apps without icons.
-    if (icon != null && icon!.isNotEmpty) {
-      for (final bucket in const [
-        'icons-640',
-        'icons-320',
-        'icons-160',
-        'icons',
-      ]) {
-        add(buildFromRepo(bucket, '$packageName.png'));
+      if (parts.length > 1) {
+        final fileName = parts.last;
+        // Try the filename in the package directory
+        add('$repositoryUrl/${parts[0]}/$fileName');
       }
     }
 
-    // Final fallback - reliable default icon.
+    // Final fallback - reliable default icon
     add('https://f-droid.org/assets/fdroid-logo.png');
 
     return urls;

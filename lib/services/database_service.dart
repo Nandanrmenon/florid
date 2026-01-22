@@ -357,7 +357,10 @@ class DatabaseService {
   /// Uses optimized batch loading to avoid N+1 query problem
   Future<List<FDroidApp>> getAllApps() async {
     final db = await database;
-    final appMaps = await db.query(_appsTable);
+    final appMaps = await db.rawQuery('''
+      SELECT a.*, r.url as repository_url FROM $_appsTable a
+      LEFT JOIN $_repositoriesTable r ON a.repository_id = r.id
+    ''');
 
     if (appMaps.isEmpty) return [];
 
@@ -390,6 +393,7 @@ class DatabaseService {
         appMap,
         categoriesByPackage[packageName] ?? [],
         versionsByPackage[packageName] ?? [],
+        repositoryUrl: appMap['repository_url'] as String?,
       );
       apps.add(app);
     }
@@ -400,11 +404,15 @@ class DatabaseService {
   /// Gets latest apps ordered by added date
   Future<List<FDroidApp>> getLatestApps({int limit = 50}) async {
     final db = await database;
-    final appMaps = await db.query(
-      _appsTable,
-      where: 'added IS NOT NULL',
-      orderBy: 'added DESC',
-      limit: limit,
+    final appMaps = await db.rawQuery(
+      '''
+      SELECT a.*, r.url as repository_url FROM $_appsTable a
+      LEFT JOIN $_repositoriesTable r ON a.repository_id = r.id
+      WHERE a.added IS NOT NULL
+      ORDER BY a.added DESC
+      LIMIT ?
+    ''',
+      [limit],
     );
 
     // Get package names from the limited result set
@@ -451,6 +459,7 @@ class DatabaseService {
         appMap,
         categoriesByPackage[packageName] ?? [],
         versionsByPackage[packageName] ?? [],
+        repositoryUrl: appMap['repository_url'] as String?,
       );
       apps.add(app);
     }
@@ -471,7 +480,8 @@ class DatabaseService {
     final db = await database;
     final appMaps = await db.rawQuery(
       '''
-      SELECT a.* FROM $_appsTable a
+      SELECT a.*, r.url as repository_url FROM $_appsTable a
+      LEFT JOIN $_repositoriesTable r ON a.repository_id = r.id
       INNER JOIN $_appCategoriesTable ac ON a.package_name = ac.package_name
       WHERE ac.category = ?
       ORDER BY a.name ASC
@@ -523,6 +533,7 @@ class DatabaseService {
         appMap,
         categoriesByPackage[packageName] ?? [],
         versionsByPackage[packageName] ?? [],
+        repositoryUrl: appMap['repository_url'] as String?,
       );
       apps.add(app);
     }
@@ -554,13 +565,14 @@ class DatabaseService {
     // Search apps from this specific repository
     final appMaps = await db.rawQuery(
       '''
-      SELECT * FROM $_appsTable
-      WHERE repository_id = ?
-        AND (LOWER(name) LIKE ? 
-         OR LOWER(summary) LIKE ? 
-         OR LOWER(description) LIKE ?
-         OR LOWER(package_name) LIKE ?)
-      ORDER BY name ASC
+      SELECT a.*, r.url as repository_url FROM $_appsTable a
+      LEFT JOIN $_repositoriesTable r ON a.repository_id = r.id
+      WHERE a.repository_id = ?
+        AND (LOWER(a.name) LIKE ? 
+         OR LOWER(a.summary) LIKE ? 
+         OR LOWER(a.description) LIKE ?
+         OR LOWER(a.package_name) LIKE ?)
+      ORDER BY a.name ASC
     ''',
       [repositoryId, searchTerm, searchTerm, searchTerm, searchTerm],
     );
@@ -609,6 +621,7 @@ class DatabaseService {
         appMap,
         categoriesByPackage[packageName] ?? [],
         versionsByPackage[packageName] ?? [],
+        repositoryUrl: appMap['repository_url'] as String?,
       );
       apps.add(app);
     }
@@ -622,12 +635,13 @@ class DatabaseService {
     final searchTerm = '%${query.toLowerCase()}%';
     final appMaps = await db.rawQuery(
       '''
-      SELECT * FROM $_appsTable
-      WHERE LOWER(name) LIKE ? 
-         OR LOWER(summary) LIKE ? 
-         OR LOWER(description) LIKE ?
-         OR LOWER(package_name) LIKE ?
-      ORDER BY name ASC
+      SELECT a.*, r.url as repository_url FROM $_appsTable a
+      LEFT JOIN $_repositoriesTable r ON a.repository_id = r.id
+      WHERE LOWER(a.name) LIKE ? 
+         OR LOWER(a.summary) LIKE ? 
+         OR LOWER(a.description) LIKE ?
+         OR LOWER(a.package_name) LIKE ?
+      ORDER BY a.name ASC
     ''',
       [searchTerm, searchTerm, searchTerm, searchTerm],
     );
@@ -676,6 +690,7 @@ class DatabaseService {
         appMap,
         categoriesByPackage[packageName] ?? [],
         versionsByPackage[packageName] ?? [],
+        repositoryUrl: appMap['repository_url'] as String?,
       );
       apps.add(app);
     }
@@ -686,10 +701,13 @@ class DatabaseService {
   /// Gets a specific app by package name
   Future<FDroidApp?> getApp(String packageName) async {
     final db = await database;
-    final results = await db.query(
-      _appsTable,
-      where: 'package_name = ?',
-      whereArgs: [packageName],
+    final results = await db.rawQuery(
+      '''
+      SELECT a.*, r.url as repository_url FROM $_appsTable a
+      LEFT JOIN $_repositoriesTable r ON a.repository_id = r.id
+      WHERE a.package_name = ?
+    ''',
+      [packageName],
     );
 
     if (results.isEmpty) return null;
@@ -701,8 +719,9 @@ class DatabaseService {
   FDroidApp _mapToAppWithData(
     Map<String, dynamic> appMap,
     List<String> categories,
-    List<Map<String, dynamic>> versionMaps,
-  ) {
+    List<Map<String, dynamic>> versionMaps, {
+    String? repositoryUrl,
+  }) {
     final packages = <String, FDroidVersion>{};
     for (final versionMap in versionMaps) {
       final version = FDroidVersion(
@@ -757,6 +776,7 @@ class DatabaseService {
       lastUpdated: appMap['last_updated'] != null
           ? DateTime.fromMillisecondsSinceEpoch(appMap['last_updated'] as int)
           : null,
+      repositoryUrl: repositoryUrl ?? 'https://f-droid.org/repo',
     );
   }
 
@@ -784,7 +804,12 @@ class DatabaseService {
       orderBy: 'version_code DESC',
     );
 
-    return _mapToAppWithData(appMap, categories, versionResults);
+    return _mapToAppWithData(
+      appMap,
+      categories,
+      versionResults,
+      repositoryUrl: appMap['repository_url'] as String?,
+    );
   }
 
   /// Closes the database

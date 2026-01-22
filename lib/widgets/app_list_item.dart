@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:provider/provider.dart';
@@ -61,7 +62,6 @@ class _MultiIcon extends StatefulWidget {
 class _MultiIconState extends State<_MultiIcon> {
   late List<String> _candidates;
   int _index = 0;
-  bool _showFallback = false;
 
   @override
   void initState() {
@@ -69,77 +69,56 @@ class _MultiIconState extends State<_MultiIcon> {
     _candidates = widget.app.iconUrls;
   }
 
-  void _next() {
+  void _tryNext() {
     if (!mounted) return;
-
-    // Always use addPostFrameCallback to avoid setState during build
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-
-      // Move through all candidates before showing a fallback
-      if (_index < _candidates.length - 1) {
-        setState(() {
-          _index++;
-        });
-      } else {
-        setState(() {
-          _showFallback = true;
-        });
-      }
-    });
+    if (_index < _candidates.length - 1) {
+      setState(() {
+        _index++;
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    if (_showFallback) {
+    if (_index >= _candidates.length) {
+      // No more URLs to try, show fallback
       return Container(
         color: theme.colorScheme.surfaceContainerHighest,
         child: Icon(Symbols.android, color: theme.colorScheme.onSurfaceVariant),
       );
     }
 
-    if (_index >= _candidates.length) {
-      return Container(
-        color: theme.colorScheme.surfaceContainerHighest,
-        child: Icon(Symbols.apps, color: theme.colorScheme.onSurfaceVariant),
-      );
-    }
-
     final url = _candidates[_index];
-    return Image.network(
-      url,
+
+    return CachedNetworkImage(
+      imageUrl: url,
       fit: BoxFit.cover,
-      errorBuilder: (context, error, stackTrace) {
-        // Move to next candidate or fallback
-        _next();
+      placeholder: (context, url) => Container(
+        color: theme.colorScheme.surfaceContainerHighest,
+        alignment: Alignment.center,
+        child: const SizedBox(
+          width: 20,
+          height: 20,
+          child: CircularProgressIndicator(strokeWidth: 2, year2023: false),
+        ),
+      ),
+      errorWidget: (context, url, error) {
+        // Try next URL on error
+        Future.microtask(_tryNext);
         return Container(
           color: theme.colorScheme.surfaceContainerHighest,
           child: Icon(
             Symbols.image_not_supported,
             color: theme.colorScheme.onSurfaceVariant,
+            size: 20,
           ),
         );
       },
-      loadingBuilder: (context, child, loadingProgress) {
-        if (loadingProgress == null) return child;
-        return Container(
-          color: theme.colorScheme.surfaceContainerHighest,
-          alignment: Alignment.center,
-          child: SizedBox(
-            width: 20,
-            height: 20,
-            child: CircularProgressIndicator(
-              strokeWidth: 2,
-              year2023: false,
-              value: loadingProgress.expectedTotalBytes != null
-                  ? loadingProgress.cumulativeBytesLoaded /
-                        (loadingProgress.expectedTotalBytes ?? 1)
-                  : null,
-            ),
-          ),
-        );
+      // Suppress error logs
+      errorListener: (error) {
+        // Silently catch errors - no logging
       },
     );
   }

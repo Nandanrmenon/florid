@@ -110,9 +110,9 @@ class _SearchScreenState extends State<SearchScreen> {
             textInputAction: TextInputAction.search,
             onSubmitted: _performSearch,
             onChanged: (query) {
-              // Debounced search - search after user stops typing for 500ms
+              // Debounced search - search after user stops typing
               if (query.trim().isNotEmpty) {
-                Future.delayed(const Duration(milliseconds: 100), () {
+                Future.delayed(const Duration(milliseconds: 500), () {
                   if (_searchController.text.trim() == query.trim()) {
                     _performSearch(query.trim());
                   }

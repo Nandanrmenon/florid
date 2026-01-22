@@ -263,7 +263,6 @@ class AppProvider extends ChangeNotifier {
 
     // Prevent duplicate searches for the same query
     if (_searchQuery == query && _searchState == LoadingState.loading) {
-      debugPrint('Search already in progress for: $query');
       return;
     }
 

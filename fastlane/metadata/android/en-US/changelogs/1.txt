@@ -1,0 +1,9 @@
+Initial release of Florid - A modern F-Droid client for Android.
+
+Features:
+- Browse and search F-Droid apps
+- View detailed app information
+- Download and install apps
+- Manage app categories
+- Notification support
+- Modern UI built with Flutter

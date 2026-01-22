@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:provider/provider.dart';
 
@@ -207,38 +208,45 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
               child: Row(
+                spacing: 16,
                 children: [
-                  TextButton(
-                    onPressed: _isFinishing || _currentPage == 0
-                        ? null
-                        : () {
-                            _pageController.previousPage(
-                              duration: const Duration(milliseconds: 250),
-                              curve: Curves.easeOut,
-                            );
-                          },
-                    child: const Text('Back'),
-                  ),
-                  const Spacer(),
-                  if (_currentPage < 2)
-                    FilledButton.icon(
-                      onPressed: () {
-                        if (_currentPage == 0) {
-                          _pageController.nextPage(
-                            duration: const Duration(milliseconds: 250),
-                            curve: Curves.easeOut,
-                          );
-                        } else if (_currentPage == 1) {
-                          _startSetup();
-                        }
-                      },
-                      icon: Icon(
-                        _currentPage == 1
-                            ? Symbols.check_small
-                            : Symbols.arrow_forward,
+                  if (_currentPage > 0)
+                    Expanded(
+                      child: SizedBox(
+                        height: 48,
+                        child: FilledButton.tonal(
+                          onPressed: _isFinishing || _currentPage == 0
+                              ? null
+                              : () {
+                                  _pageController.previousPage(
+                                    duration: const Duration(milliseconds: 250),
+                                    curve: Curves.easeOut,
+                                  );
+                                },
+                          child: const Text('Back'),
+                        ),
                       ),
-                      label: Text(
-                        _currentPage == 1 ? 'Start Setup' : 'Continue',
+                    ),
+
+                  if (_currentPage < 2)
+                    Expanded(
+                      child: SizedBox(
+                        height: 48,
+                        child: FilledButton(
+                          onPressed: () {
+                            if (_currentPage == 0) {
+                              _pageController.nextPage(
+                                duration: const Duration(milliseconds: 250),
+                                curve: Curves.easeOut,
+                              );
+                            } else if (_currentPage == 1) {
+                              _startSetup();
+                            }
+                          },
+                          child: Text(
+                            _currentPage == 1 ? 'Start Setup' : 'Continue',
+                          ),
+                        ),
                       ),
                     ),
                 ],
@@ -264,38 +272,38 @@ class _IntroStep extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            padding: const EdgeInsets.all(14),
-            decoration: BoxDecoration(
-              color: colorScheme.primaryContainer,
-              borderRadius: BorderRadius.circular(14),
-            ),
-            child: Icon(
-              Symbols.android,
-              color: colorScheme.onPrimaryContainer,
-              size: 32,
-            ),
-          ),
-          const SizedBox(height: 24),
+          Material(
+            borderRadius: BorderRadius.circular(12),
+            clipBehavior: Clip.antiAlias,
+            elevation: 2,
+            child: Image.asset('assets/Florid.png', height: 64),
+          ).animate().fadeIn(duration: 500.ms),
+          const SizedBox(height: 16),
           Text(
             'Welcome to Florid',
             style: Theme.of(context).textTheme.headlineMedium,
-          ),
+          ).animate().fadeIn(duration: 500.ms, delay: 100.ms),
           const SizedBox(height: 12),
           Text(
             'A modern F-Droid client to browse, search, and download open-source Android apps with ease.',
             style: Theme.of(context).textTheme.bodyLarge?.copyWith(
               color: colorScheme.onSurfaceVariant,
             ),
-          ),
+          ).animate().fadeIn(duration: 500.ms, delay: 300.ms),
           const SizedBox(height: 24),
           Wrap(
             spacing: 12,
             runSpacing: 12,
-            children: const [
-              _Pill(text: 'Curated open-source apps'),
-              _Pill(text: 'Safe downloads'),
-              _Pill(text: 'Updates & notifications'),
+            children: [
+              _Pill(
+                text: 'Curated open-source apps',
+              ).animate().fadeIn(duration: 500.ms, delay: 500.ms),
+              _Pill(
+                text: 'Safe downloads',
+              ).animate().fadeIn(duration: 500.ms, delay: 700.ms),
+              _Pill(
+                text: 'Updates & notifications',
+              ).animate().fadeIn(duration: 500.ms, delay: 900.ms),
             ],
           ),
         ],
@@ -317,24 +325,32 @@ class _ReposStep extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.all(24),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+
         children: [
           const SizedBox(height: 12),
-          Text(
-            'Add extra repositories',
-            style: Theme.of(context).textTheme.headlineSmall,
-          ),
+          Row(
+            spacing: 8,
+            children: [
+              Icon(Symbols.dns),
+              Text(
+                'Add extra repositories',
+                style: Theme.of(context).textTheme.headlineSmall,
+              ),
+            ],
+          ).animate().fadeIn(duration: 500.ms),
           const SizedBox(height: 12),
           Text(
             'Florid ships with the official F-Droid repo. You can also include trusted community repos to get more apps.',
             style: Theme.of(context).textTheme.bodyLarge?.copyWith(
               color: colorScheme.onSurfaceVariant,
             ),
-          ),
+          ).animate().fadeIn(duration: 500.ms, delay: 200.ms),
           const SizedBox(height: 24),
           Card(
             elevation: 0,
             color: colorScheme.surfaceContainerHighest,
+            clipBehavior: Clip.antiAlias,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(16),
             ),
@@ -345,14 +361,15 @@ class _ReposStep extends StatelessWidget {
               subtitle: const Text('https://apt.izzysoft.de/fdroid/repo'),
               secondary: const Icon(Symbols.extension),
             ),
-          ),
+          ).animate().fadeIn(duration: 500.ms, delay: 400.ms),
           const Spacer(),
           Text(
             'You can add or remove repositories anytime in Settings.',
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
               color: colorScheme.onSurfaceVariant,
             ),
-          ),
+            textAlign: TextAlign.center,
+          ).animate().fadeIn(duration: 500.ms, delay: 600.ms),
           const SizedBox(height: 12),
         ],
       ),
@@ -425,6 +442,7 @@ class _ProgressStep extends StatelessWidget {
             child: LinearProgressIndicator(
               value: progress,
               minHeight: 8,
+              year2023: false,
               borderRadius: BorderRadius.circular(4),
             ),
           ),

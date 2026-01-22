@@ -92,6 +92,7 @@ dependencies:
   # Local notifications for download progress
   flutter_local_notifications: ^19.5.0
   flutter_native_splash: ^2.4.7
+  flutter_animate: ^4.5.2
 
 dev_dependencies:
   flutter_test:
@@ -120,7 +121,10 @@ flutter:
   uses-material-design: true
 
   # To add assets to your application, add an assets section, like this:
-  # assets:
+  assets:
+    - assets/Florid.png
+    - assets/Foreground.png
+    - assets/Splash.png
   #   - images/a_dot_burr.jpeg
   #   - images/a_dot_ham.jpeg
 

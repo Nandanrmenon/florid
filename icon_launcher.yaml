@@ -4,7 +4,7 @@ icons_launcher:
     android:
       enable: true
       image_path: "assets/Florid.png"
-      notification_image: "assets/monochrome.png"
+      # notification_image: "assets/monochrome.png"
       # adaptive_background_color: '#ffffff'
       adaptive_background_image: "assets/Background.png"
       adaptive_foreground_image: "assets/Foreground.png"

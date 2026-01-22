@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 class NotificationService {
@@ -18,16 +19,32 @@ class NotificationService {
   Future<void> init() async {
     _flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
 
-    const AndroidInitializationSettings androidInitializationSettings =
-        AndroidInitializationSettings('ic_notification');
-
-    const InitializationSettings initializationSettings =
-        InitializationSettings(android: androidInitializationSettings);
-
-    await _flutterLocalNotificationsPlugin.initialize(
-      initializationSettings,
-      onDidReceiveNotificationResponse: _onNotificationTapped,
+    const InitializationSettings customIconSettings = InitializationSettings(
+      android: AndroidInitializationSettings('ic_notification'),
     );
+
+    const InitializationSettings fallbackIconSettings = InitializationSettings(
+      android: AndroidInitializationSettings('@mipmap/ic_launcher'),
+    );
+
+    try {
+      await _flutterLocalNotificationsPlugin.initialize(
+        customIconSettings,
+        onDidReceiveNotificationResponse: _onNotificationTapped,
+      );
+    } on PlatformException catch (e) {
+      if (e.code == 'invalid_icon') {
+        debugPrint(
+          'Notification icon ic_notification missing, falling back to launcher icon: $e',
+        );
+        await _flutterLocalNotificationsPlugin.initialize(
+          fallbackIconSettings,
+          onDidReceiveNotificationResponse: _onNotificationTapped,
+        );
+      } else {
+        rethrow;
+      }
+    }
 
     // Request notification permission on Android 13+
     await requestPermission();

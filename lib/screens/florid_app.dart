@@ -46,8 +46,8 @@ class _FloridAppState extends State<FloridApp> {
 
   final List<NavigationDestination> _destinations = const [
     NavigationDestination(
-      icon: Icon(Symbols.home),
-      selectedIcon: Icon(Symbols.home, fill: 1),
+      icon: Icon(Symbols.newsstand_rounded),
+      selectedIcon: Icon(Symbols.newsstand_rounded, fill: 1),
       label: 'Library',
     ),
     NavigationDestination(

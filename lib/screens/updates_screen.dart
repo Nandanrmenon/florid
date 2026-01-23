@@ -275,6 +275,7 @@ class _UpdatesScreenState extends State<UpdatesScreen>
                                   children: [
                                     AppListItem(
                                       app: app,
+                                      showInstallStatus: false,
                                       onTap: () async {
                                         final screenshots = await context
                                             .read<AppProvider>()
@@ -378,15 +379,15 @@ class _UpdatesScreenState extends State<UpdatesScreen>
                                       downloadInfo?.status ==
                                       DownloadStatus.downloading;
 
-                                  if (!hasUpdate) {
-                                    return Padding(
-                                      padding: const EdgeInsets.all(8.0),
-                                      child: Icon(
-                                        Symbols.check_circle,
-                                        color: Colors.green[400],
-                                      ),
-                                    );
-                                  }
+                                  // if (!hasUpdate) {
+                                  //   return Padding(
+                                  //     padding: const EdgeInsets.all(8.0),
+                                  //     child: Icon(
+                                  //       Symbols.check_circle,
+                                  //       color: Colors.green[400],
+                                  //     ),
+                                  //   );
+                                  // }
 
                                   if (isDownloading) {
                                     final progress = downloadProvider
@@ -424,11 +425,14 @@ class _UpdatesScreenState extends State<UpdatesScreen>
                                       ],
                                     );
                                   }
-
-                                  return OutlinedButton(
-                                    onPressed: () => _updateApp(context, app),
-                                    child: const Text('Update'),
-                                  );
+                                  if (hasUpdate) {
+                                    return OutlinedButton(
+                                      onPressed: () => _updateApp(context, app),
+                                      child: const Text('Update'),
+                                    );
+                                  } else {
+                                    return SizedBox(width: 8);
+                                  }
                                 },
                               ),
                             ],

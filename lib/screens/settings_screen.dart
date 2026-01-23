@@ -7,6 +7,7 @@ import 'package:share_plus/share_plus.dart';
 
 import '../providers/download_provider.dart';
 import '../providers/settings_provider.dart';
+import '../screens/repositories_screen.dart';
 import '../services/fdroid_api_service.dart';
 
 class SettingsScreen extends StatefulWidget {
@@ -114,6 +115,23 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ),
               const Divider(height: 24),
 
+              _SectionHeader(label: 'Repositories'),
+              ListTile(
+                leading: const Icon(Symbols.cloud),
+                title: const Text('Manage repositories'),
+                subtitle: const Text('Add or remove F-Droid repositories'),
+                trailing: const Icon(Symbols.chevron_right),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const RepositoriesScreen(),
+                    ),
+                  );
+                },
+              ),
+              const Divider(height: 24),
+
               _SectionHeader(label: 'Downloads'),
               SwitchListTile(
                 title: const Text('Auto-install after download'),
@@ -194,7 +212,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             itemBuilder: (context, index) {
               final locale = SettingsProvider.availableLocales[index];
               final displayName = SettingsProvider.getLocaleDisplayName(locale);
-              
+
               return RadioListTile<String>(
                 title: Text(displayName),
                 subtitle: Text(locale),
@@ -204,13 +222,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   if (value != null) {
                     await settings.setLocale(value);
                     if (!context.mounted) return;
-                    
+
                     // Update API service locale
                     final apiService = context.read<FDroidApiService>();
                     apiService.setLocale(value);
-                    
+
                     Navigator.pop(context);
-                    
+
                     // Show message that data will be refreshed
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(

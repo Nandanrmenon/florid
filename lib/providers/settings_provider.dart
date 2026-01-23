@@ -6,11 +6,13 @@ class SettingsProvider extends ChangeNotifier {
   static const _autoInstallKey = 'auto_install_apk';
   static const _autoDeleteKey = 'auto_delete_apk';
   static const _localeKey = 'locale';
+  static const _onboardingCompleteKey = 'onboarding_complete';
 
   ThemeMode _themeMode = ThemeMode.system;
   bool _autoInstallApk = true;
   bool _autoDeleteApk = true;
   String _locale = 'en-US';
+  bool _onboardingComplete = false;
   bool _loaded = false;
 
   SettingsProvider() {
@@ -22,6 +24,7 @@ class SettingsProvider extends ChangeNotifier {
   bool get autoInstallApk => _autoInstallApk;
   bool get autoDeleteApk => _autoDeleteApk;
   String get locale => _locale;
+  bool get onboardingComplete => _onboardingComplete;
 
   /// Available locales for F-Droid repository data
   static const List<String> availableLocales = [
@@ -79,6 +82,7 @@ class SettingsProvider extends ChangeNotifier {
     _autoInstallApk = prefs.getBool(_autoInstallKey) ?? true;
     _autoDeleteApk = prefs.getBool(_autoDeleteKey) ?? true;
     _locale = prefs.getString(_localeKey) ?? 'en-US';
+    _onboardingComplete = prefs.getBool(_onboardingCompleteKey) ?? false;
     _loaded = true;
     notifyListeners();
   }
@@ -112,5 +116,12 @@ class SettingsProvider extends ChangeNotifier {
     notifyListeners();
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_localeKey, locale);
+  }
+
+  Future<void> setOnboardingComplete([bool value = true]) async {
+    _onboardingComplete = value;
+    notifyListeners();
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_onboardingCompleteKey, value);
   }
 }

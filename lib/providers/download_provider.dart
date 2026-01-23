@@ -201,6 +201,7 @@ class DownloadProvider extends ChangeNotifier {
       final filePath = await _apiService.downloadApk(
         version,
         app.packageName,
+        app.repositoryUrl,
         onProgress: (progress) {
           _downloads[key] = _downloads[key]!.copyWith(progress: progress);
           notifyListeners();

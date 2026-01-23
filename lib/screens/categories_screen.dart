@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:provider/provider.dart';
 
@@ -44,95 +45,101 @@ class _CategoriesScreenState extends State<CategoriesScreen>
         final state = appProvider.categoriesState;
         final categories = appProvider.categories;
         final error = appProvider.categoriesError;
+        return _buildBody(state, categories, error);
+      },
+    );
+  }
 
-        if (state == LoadingState.loading && categories.isEmpty) {
-          return const Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                CircularProgressIndicator(year2023: false),
-                SizedBox(height: 16),
-                Text('Loading categories...'),
-              ],
-            ),
-          );
-        }
+  Widget _buildBody(
+    LoadingState state,
+    List<String> categories,
+    String? error,
+  ) {
+    if (state == LoadingState.loading && categories.isEmpty) {
+      return const Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            CircularProgressIndicator(year2023: false),
+            SizedBox(height: 16),
+            Text('Loading categories...'),
+          ],
+        ),
+      );
+    }
 
-        if (state == LoadingState.error && categories.isEmpty) {
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  Symbols.error,
-                  size: 64,
-                  color: Theme.of(context).colorScheme.error,
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  'Failed to load categories',
-                  style: Theme.of(context).textTheme.headlineSmall,
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  error ?? 'Unknown error occurred',
-                  textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
-                ),
-                const SizedBox(height: 24),
-                ElevatedButton.icon(
-                  onPressed: _loadData,
-                  icon: const Icon(Symbols.refresh),
-                  label: const Text('Retry'),
-                ),
-              ],
+    if (state == LoadingState.error && categories.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Symbols.error,
+              size: 64,
+              color: Theme.of(context).colorScheme.error,
             ),
-          );
-        }
+            const SizedBox(height: 16),
+            Text(
+              'Failed to load categories',
+              style: Theme.of(context).textTheme.headlineSmall,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              error ?? 'Unknown error occurred',
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+            ),
+            const SizedBox(height: 24),
+            ElevatedButton.icon(
+              onPressed: _loadData,
+              icon: const Icon(Symbols.refresh),
+              label: const Text('Retry'),
+            ),
+          ],
+        ),
+      );
+    }
 
-        if (categories.isEmpty) {
-          return const Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Symbols.category, size: 64, color: Colors.grey),
-                SizedBox(height: 16),
-                Text('No categories found'),
-              ],
-            ),
-          );
-        }
+    if (categories.isEmpty) {
+      return const Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Symbols.category, size: 64, color: Colors.grey),
+            SizedBox(height: 16),
+            Text('No categories found'),
+          ],
+        ),
+      );
+    }
 
-        return RefreshIndicator(
-          onRefresh: _onRefresh,
-          child: GridView.builder(
-            padding: const EdgeInsets.all(16),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-              crossAxisSpacing: 12,
-              mainAxisSpacing: 12,
-              childAspectRatio: 2,
-            ),
-            itemCount: categories.length,
-            itemBuilder: (context, index) {
-              final category = categories[index];
-              return _CategoryCard(
-                category: category,
-                onTap: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (context) =>
-                          CategoryAppsScreen(category: category),
-                    ),
-                  );
-                },
+    return RefreshIndicator(
+      onRefresh: _onRefresh,
+      child: GridView.builder(
+        padding: const EdgeInsets.all(16),
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2,
+          crossAxisSpacing: 12,
+          mainAxisSpacing: 12,
+          childAspectRatio: 2,
+        ),
+        itemCount: categories.length,
+        itemBuilder: (context, index) {
+          final category = categories[index];
+          return _CategoryCard(
+            category: category,
+            onTap: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => CategoryAppsScreen(category: category),
+                ),
               );
             },
-          ),
-        );
-      },
+          ).animate().fadeIn(duration: 300.ms, delay: (10 * index).ms);
+        },
+      ),
     );
   }
 }

@@ -1,3 +1,4 @@
+import 'package:florid/utils/menu_actions.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -5,6 +6,7 @@ import 'package:material_symbols_icons/symbols.dart';
 import 'package:provider/provider.dart';
 
 import '../providers/app_provider.dart';
+import '../providers/repositories_provider.dart';
 import '../widgets/app_list_item.dart';
 import 'app_details_screen.dart';
 
@@ -60,7 +62,8 @@ class _SearchScreenState extends State<SearchScreen> {
 
   void _performSearch(String query) {
     final appProvider = context.read<AppProvider>();
-    appProvider.searchApps(query);
+    final repositoriesProvider = context.read<RepositoriesProvider>();
+    appProvider.searchApps(query, repositoriesProvider: repositoriesProvider);
   }
 
   void _clearSearch() {
@@ -108,9 +111,9 @@ class _SearchScreenState extends State<SearchScreen> {
             textInputAction: TextInputAction.search,
             onSubmitted: _performSearch,
             onChanged: (query) {
-              // Debounced search - search after user stops typing for 500ms
+              // Debounced search - search after user stops typing
               if (query.trim().isNotEmpty) {
-                Future.delayed(const Duration(milliseconds: 100), () {
+                Future.delayed(const Duration(milliseconds: 500), () {
                   if (_searchController.text.trim() == query.trim()) {
                     _performSearch(query.trim());
                   }
@@ -131,6 +134,36 @@ class _SearchScreenState extends State<SearchScreen> {
                 }
                 return const SizedBox.shrink();
               },
+            ),
+            PopupMenuButton<String>(
+              onSelected: (value) {
+                switch (value) {
+                  case 'settings':
+                    MenuActions.showSettings(context);
+                    break;
+                  case 'about':
+                    MenuActions.showAbout(context);
+                    break;
+                }
+              },
+              itemBuilder: (context) => [
+                const PopupMenuItem(
+                  value: 'settings',
+                  child: ListTile(
+                    leading: Icon(Symbols.settings),
+                    title: Text('Settings'),
+                    contentPadding: EdgeInsets.zero,
+                  ),
+                ),
+                const PopupMenuItem(
+                  value: 'about',
+                  child: ListTile(
+                    leading: Icon(Symbols.info),
+                    title: Text('About'),
+                    contentPadding: EdgeInsets.zero,
+                  ),
+                ),
+              ],
             ),
             SizedBox(width: 8),
           ],

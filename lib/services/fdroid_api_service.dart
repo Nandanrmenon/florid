@@ -108,11 +108,11 @@ class FDroidApiService {
         // Parse repository
         final repo = FDroidRepository.fromJson(jsonData);
 
-        // Store in database and wait for completion to avoid database locks
+        // Store in database on a background isolate to avoid blocking UI
         try {
-          await _databaseService.importRepository(repo);
+          _importRepositoryInBackground(repo); // Fire and forget
         } catch (e) {
-          debugPrint('Error importing to database: $e');
+          debugPrint('Error scheduling database import: $e');
         }
 
         // Also save JSON cache for screenshot extraction
@@ -178,6 +178,108 @@ class FDroidApiService {
       maxage: 0,
       apps: appsMap,
     );
+  }
+
+  /// Fetches repository from a custom URL
+  Future<FDroidRepository> fetchRepositoryFromUrl(String url) async {
+    try {
+      // Construct the index URL
+      String indexUrl;
+      if (url.endsWith('index-v2.json')) {
+        // Full URL provided
+        indexUrl = url;
+      } else if (url.endsWith('/repo') || url.endsWith('/repo/')) {
+        // URL already includes /repo path
+        indexUrl = url.endsWith('/')
+            ? '${url}index-v2.json'
+            : '$url/index-v2.json';
+      } else {
+        // Base URL without /repo
+        indexUrl = url.endsWith('/')
+            ? '${url}repo/index-v2.json'
+            : '$url/repo/index-v2.json';
+      }
+
+      // Derive repository base (strip the index file and trailing slash)
+      var repoBase = indexUrl.replaceFirst(RegExp(r'index-v2\.json$'), '');
+      if (repoBase.endsWith('/')) {
+        repoBase = repoBase.substring(0, repoBase.length - 1);
+      }
+
+      debugPrint('Fetching from custom repo: $indexUrl');
+      final response = await _client.get(Uri.parse(indexUrl));
+
+      if (response.statusCode == 200) {
+        final jsonData = json.decode(response.body);
+        final repo = FDroidRepository.fromJson(
+          jsonData,
+          repositoryUrl: repoBase,
+        );
+        debugPrint('Successfully fetched repository from $url');
+        return repo;
+      } else {
+        throw Exception('Failed to load repository: ${response.statusCode}');
+      }
+    } catch (e) {
+      debugPrint('Error fetching from custom repo $url: $e');
+      throw Exception('Error fetching repository from $url: $e');
+    }
+  }
+
+  /// Imports repository asynchronously to avoid blocking UI
+  void _importRepositoryInBackground(
+    FDroidRepository repo, {
+    int? repositoryId,
+  }) {
+    try {
+      debugPrint('Scheduling database import...');
+      // Defer import to run after the current frame without blocking UI
+      Future.microtask(() async {
+        try {
+          await _databaseService.importRepository(
+            repo,
+            repositoryId: repositoryId,
+          );
+          debugPrint('Database import completed in background');
+        } catch (e) {
+          debugPrint('Error importing repository in background: $e');
+        }
+      });
+    } catch (e) {
+      debugPrint('Error scheduling database import: $e');
+    }
+  }
+
+  /// Gets repository ID by URL
+  Future<int?> getRepositoryIdByUrl(String url) async {
+    try {
+      final db = await _databaseService.database;
+      final results = await db.query(
+        'repositories',
+        where: 'url = ?',
+        whereArgs: [url],
+        columns: ['id'],
+      );
+      if (results.isNotEmpty) {
+        return results.first['id'] as int;
+      }
+      return null;
+    } catch (e) {
+      debugPrint('Error getting repository ID: $e');
+      return null;
+    }
+  }
+
+  /// Imports a repository to the database
+  Future<void> importRepositoryToDatabase(
+    FDroidRepository repo, {
+    required int repositoryId,
+  }) async {
+    try {
+      await _databaseService.importRepository(repo, repositoryId: repositoryId);
+    } catch (e) {
+      debugPrint('Error importing repository to database: $e');
+    }
   }
 
   /// Clears the cached repository index from disk, memory, and database.
@@ -321,6 +423,32 @@ class FDroidApiService {
     }
   }
 
+  /// Searches for apps from a specific custom repository using database
+  Future<List<FDroidApp>> searchAppsFromRepositoryUrl(
+    String query,
+    String repositoryUrl,
+  ) async {
+    try {
+      // Try to search from database if repository data is cached there
+      final results = await _databaseService.searchAppsByRepository(
+        query,
+        repositoryUrl,
+      );
+      if (results.isNotEmpty) {
+        return results;
+      }
+
+      // Fallback: fetch from network if not in database
+      debugPrint(
+        'Repository $repositoryUrl not in database, fetching from network...',
+      );
+      final repo = await fetchRepositoryFromUrl(repositoryUrl);
+      return repo.searchApps(query);
+    } catch (e) {
+      throw Exception('Error searching apps from repository: $e');
+    }
+  }
+
   /// Fetches all available categories
   Future<List<String>> fetchCategories() async {
     try {
@@ -361,7 +489,8 @@ class FDroidApiService {
   /// Downloads an APK file with progress tracking and cancellation support
   Future<String> downloadApk(
     FDroidVersion version,
-    String packageName, {
+    String packageName,
+    String repositoryUrl, {
     Function(double)? onProgress,
     CancelToken? cancelToken,
   }) async {
@@ -380,15 +509,16 @@ class FDroidApiService {
       final filePath = '${downloadsDir.path}/$fileName';
 
       // Log download URL and file path
+      final downloadUrl = version.downloadUrl(repositoryUrl);
       print('[FDroidApiService] Downloading APK:');
-      print('  URL: ${version.downloadUrl}');
+      print('  URL: $downloadUrl');
       print('  To: $filePath');
 
       final token = cancelToken ?? CancelToken();
       _downloadTokens[packageName] = token;
 
       final response = await _dio.download(
-        version.downloadUrl,
+        downloadUrl,
         filePath,
         onReceiveProgress: (received, total) {
           if (total > 0 && onProgress != null) {

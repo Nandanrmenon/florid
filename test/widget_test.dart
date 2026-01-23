@@ -11,7 +11,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   testWidgets('App launches smoke test', (WidgetTester tester) async {
     // Build our app and trigger a frame.
-    await tester.pumpWidget(const FloridApp());
+    await tester.pumpWidget(const MainApp());
 
     // Verify that our app loads with the correct title.
     await tester.pumpAndSettle();

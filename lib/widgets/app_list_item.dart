@@ -24,6 +24,7 @@ class AppListItem extends StatelessWidget {
     final theme = Theme.of(context);
     return ListTile(
       onTap: onTap,
+      onLongPress: () => _showQuickViewModal(context),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       leading: Consumer<AppProvider>(
@@ -63,6 +64,16 @@ class AppListItem extends StatelessWidget {
         },
       ),
       dense: true,
+    );
+  }
+
+  void _showQuickViewModal(BuildContext context) {
+    final theme = Theme.of(context);
+    showModalBottomSheet(
+      context: context,
+      showDragHandle: true,
+      isDismissible: true,
+      builder: (context) => _QuickViewModal(app: app, onViewDetails: onTap),
     );
   }
 }
@@ -245,6 +256,252 @@ class _DownloadButton extends StatelessWidget {
           },
           icon: Icon(isDownloaded ? Symbols.install_mobile : Symbols.download),
           tooltip: isDownloaded ? 'Install' : 'Download',
+        );
+      },
+    );
+  }
+}
+
+class _QuickViewModal extends StatelessWidget {
+  final FDroidApp app;
+  final VoidCallback? onViewDetails;
+
+  const _QuickViewModal({required this.app, this.onViewDetails});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Consumer2<AppProvider, DownloadProvider>(
+      builder: (context, appProvider, downloadProvider, _) {
+        final isInstalled = appProvider.isAppInstalled(app.packageName);
+        final version = app.latestVersion;
+        final isDownloading = version != null
+            ? downloadProvider.isDownloading(
+                app.packageName,
+                version.versionName,
+              )
+            : false;
+        final isDownloaded = version != null
+            ? downloadProvider.isDownloaded(
+                app.packageName,
+                version.versionName,
+              )
+            : false;
+        final progress = version != null
+            ? downloadProvider.getProgress(app.packageName, version.versionName)
+            : 0.0;
+
+        return Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Header with app icon and info
+              Row(
+                spacing: 16,
+                children: [
+                  Container(
+                    width: 48,
+                    height: 48,
+                    clipBehavior: Clip.antiAlias,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(12),
+                      color: theme.colorScheme.surfaceContainerHighest,
+                    ),
+                    child: _MultiIcon(app: app),
+                  ),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      spacing: 4,
+                      children: [
+                        Text(
+                          app.name,
+                          style: theme.textTheme.titleSmall?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        Text(
+                          app.packageName,
+                          style: theme.textTheme.labelSmall?.copyWith(
+                            color: theme.colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                        if (version != null)
+                          Text(
+                            'v${version.versionName}',
+                            style: theme.textTheme.labelSmall?.copyWith(
+                              color: theme.colorScheme.onSurfaceVariant,
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
+              // Status badges
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  if (isInstalled)
+                    Chip(
+                      label: const Text('Installed'),
+                      avatar: const Icon(Symbols.check_circle, size: 18),
+                      backgroundColor: theme.colorScheme.primaryContainer,
+                      labelStyle: TextStyle(
+                        color: theme.colorScheme.onPrimaryContainer,
+                      ),
+                    ),
+                  if (version != null && app.license.isNotEmpty)
+                    Chip(
+                      label: Text(app.license),
+                      backgroundColor: theme.colorScheme.secondaryContainer,
+                      labelStyle: TextStyle(
+                        color: theme.colorScheme.onSecondaryContainer,
+                      ),
+                    ),
+                ],
+              ),
+              const SizedBox(height: 20),
+              // Action buttons
+              Padding(
+                padding: const EdgeInsets.only(bottom: 24.0),
+                child: Row(
+                  spacing: 8,
+                  children: [
+                    Expanded(
+                      child: FilledButton.tonal(
+                        onPressed: onViewDetails != null
+                            ? () {
+                                Navigator.pop(context);
+                                onViewDetails!();
+                              }
+                            : null,
+                        child: const Text('View Details'),
+                      ),
+                    ),
+                    if (version != null)
+                      Expanded(
+                        child: isDownloading
+                            ? FilledButton(
+                                onPressed: null,
+                                child: SizedBox(
+                                  height: 20,
+                                  child: CircularProgressIndicator(
+                                    value: progress,
+                                    strokeWidth: 2,
+                                  ),
+                                ),
+                              )
+                            : FilledButton.icon(
+                                onPressed: () async {
+                                  if (isDownloaded) {
+                                    // Install
+                                    try {
+                                      final downloadInfo = downloadProvider
+                                          .getDownloadInfo(
+                                            app.packageName,
+                                            version.versionName,
+                                          );
+                                      if (downloadInfo?.filePath != null) {
+                                        final hasPermission =
+                                            await downloadProvider
+                                                .requestInstallPermission();
+                                        if (!hasPermission) {
+                                          if (context.mounted) {
+                                            ScaffoldMessenger.of(
+                                              context,
+                                            ).showSnackBar(
+                                              const SnackBar(
+                                                content: Text(
+                                                  'Install permission required',
+                                                ),
+                                              ),
+                                            );
+                                          }
+                                          return;
+                                        }
+
+                                        await downloadProvider.installApk(
+                                          downloadInfo!.filePath!,
+                                        );
+                                        if (context.mounted) {
+                                          Navigator.pop(context);
+                                          ScaffoldMessenger.of(
+                                            context,
+                                          ).showSnackBar(
+                                            SnackBar(
+                                              content: Text(
+                                                '${app.name} installation started!',
+                                              ),
+                                            ),
+                                          );
+                                        }
+                                      }
+                                    } catch (e) {
+                                      if (context.mounted) {
+                                        ScaffoldMessenger.of(
+                                          context,
+                                        ).showSnackBar(
+                                          SnackBar(
+                                            content: Text(
+                                              'Installation failed: ${e.toString()}',
+                                            ),
+                                          ),
+                                        );
+                                      }
+                                    }
+                                  } else {
+                                    // Download
+                                    try {
+                                      await downloadProvider.downloadApk(app);
+                                      if (context.mounted) {
+                                        ScaffoldMessenger.of(
+                                          context,
+                                        ).showSnackBar(
+                                          SnackBar(
+                                            content: Text(
+                                              '${app.name} download started!',
+                                            ),
+                                          ),
+                                        );
+                                      }
+                                    } catch (e) {
+                                      if (context.mounted) {
+                                        ScaffoldMessenger.of(
+                                          context,
+                                        ).showSnackBar(
+                                          SnackBar(
+                                            content: Text(
+                                              'Download failed: ${e.toString()}',
+                                            ),
+                                          ),
+                                        );
+                                      }
+                                    }
+                                  }
+                                },
+                                icon: Icon(
+                                  isDownloaded
+                                      ? Symbols.install_mobile
+                                      : Symbols.download,
+                                ),
+                                label: Text(
+                                  isDownloaded ? 'Install' : 'Download',
+                                ),
+                              ),
+                      ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         );
       },
     );

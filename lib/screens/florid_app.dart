@@ -66,15 +66,37 @@ class _FloridAppState extends State<FloridApp> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: IndexedStack(index: _currentIndex, children: _screens),
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: _currentIndex,
-        onDestinationSelected: (index) {
-          setState(() {
-            _currentIndex = index;
-          });
-          _tabNotifier.value = index;
+      bottomNavigationBar: Consumer<AppProvider>(
+        builder: (context, appProvider, child) {
+          final updatableAppsCount = appProvider.getUpdatableApps().length;
+          final destinations = List<NavigationDestination>.from(_destinations);
+
+          // Add badge to Device tab if there are updates
+          if (updatableAppsCount > 0) {
+            destinations[2] = NavigationDestination(
+              icon: Badge.count(
+                count: updatableAppsCount,
+                child: Icon(Symbols.mobile_3),
+              ),
+              selectedIcon: Badge.count(
+                count: updatableAppsCount,
+                child: Icon(Symbols.mobile_3, fill: 1),
+              ),
+              label: 'Device',
+            );
+          }
+
+          return NavigationBar(
+            selectedIndex: _currentIndex,
+            onDestinationSelected: (index) {
+              setState(() {
+                _currentIndex = index;
+              });
+              _tabNotifier.value = index;
+            },
+            destinations: destinations,
+          );
         },
-        destinations: _destinations,
       ),
     );
   }

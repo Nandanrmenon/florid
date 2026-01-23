@@ -56,9 +56,9 @@ class _FloridAppState extends State<FloridApp> {
       label: 'Search',
     ),
     NavigationDestination(
-      icon: Icon(Symbols.system_update),
-      selectedIcon: Icon(Symbols.system_update, fill: 1),
-      label: 'Updates',
+      icon: Icon(Symbols.mobile_3),
+      selectedIcon: Icon(Symbols.mobile_3, fill: 1),
+      label: 'Device',
     ),
   ];
 

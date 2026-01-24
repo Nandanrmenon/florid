@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:material_symbols_icons/symbols.dart';
@@ -18,11 +20,12 @@ class OnboardingScreen extends StatefulWidget {
 
 class _OnboardingScreenState extends State<OnboardingScreen> {
   final PageController _pageController = PageController();
-  bool _addIzzy = true;
+  final Map<String, bool> _selectedRepos = {};
   final bool _isFinishing = false;
   int _currentPage = 0;
   String _progressStatus = 'Initializing...';
   double _progressValue = 0.0;
+  List<Map<String, String>> _presets = [];
 
   @override
   void initState() {
@@ -32,6 +35,35 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       final repos = context.read<RepositoriesProvider>();
       repos.loadRepositories();
     });
+    _loadPresets();
+  }
+
+  Future<void> _loadPresets() async {
+    try {
+      final jsonString = await DefaultAssetBundle.of(
+        context,
+      ).loadString('assets/repositories.json');
+      final jsonData = jsonDecode(jsonString);
+      final repos = (jsonData['repositories'] as List)
+          .map(
+            (e) => {
+              'name': e['name'] as String,
+              'url': e['url'] as String,
+              'description': e['description'] as String? ?? '',
+            },
+          )
+          .toList();
+
+      setState(() {
+        _presets = repos;
+        // Pre-select IzzyOnDroid if it exists
+        for (var repo in repos) {
+          _selectedRepos[repo['url']!] = repo['name'] == 'IzzyOnDroid';
+        }
+      });
+    } catch (e) {
+      debugPrint('Error loading presets: $e');
+    }
   }
 
   @override
@@ -64,17 +96,22 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       await repos.loadRepositories();
       await Future.delayed(const Duration(milliseconds: 300));
 
-      // Step 2: Add IzzyOnDroid if selected
-      if (_addIzzy) {
+      // Step 2: Add selected repositories
+      if (_selectedRepos.values.any((selected) => selected)) {
         setState(() {
-          _progressStatus = 'Adding IzzyOnDroid repository...';
+          _progressStatus = 'Adding selected repositories...';
           _progressValue = 0.2;
         });
-        const izzyUrl = 'https://apt.izzysoft.de/fdroid/repo';
-        const izzyName = 'IzzyOnDroid';
-        final hasIzzy = repos.repositories.any((repo) => repo.url == izzyUrl);
-        if (!hasIzzy) {
-          await repos.addRepository(izzyName, izzyUrl);
+
+        for (var preset in _presets) {
+          if (_selectedRepos[preset['url']] == true) {
+            final hasRepo = repos.repositories.any(
+              (repo) => repo.url == preset['url'],
+            );
+            if (!hasRepo) {
+              await repos.addRepository(preset['name']!, preset['url']!);
+            }
+          }
         }
         await Future.delayed(const Duration(milliseconds: 300));
       }
@@ -121,7 +158,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       }
 
       // Step 5: Fetch custom repos if enabled (after main DB is ready)
-      if (_addIzzy) {
+      if (_selectedRepos.values.any((selected) => selected)) {
         setState(() {
           _progressStatus = 'Loading custom repositories...';
           _progressValue = 0.75;
@@ -194,8 +231,13 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 children: [
                   _IntroStep(colorScheme: colorScheme),
                   _ReposStep(
-                    addIzzy: _addIzzy,
-                    onToggleIzzy: (value) => setState(() => _addIzzy = value),
+                    selectedRepos: _selectedRepos,
+                    presets: _presets,
+                    onToggleRepo: (url, selected) {
+                      setState(() {
+                        _selectedRepos[url] = selected;
+                      });
+                    },
                   ),
                   _ProgressStep(
                     colorScheme: colorScheme,
@@ -313,10 +355,15 @@ class _IntroStep extends StatelessWidget {
 }
 
 class _ReposStep extends StatelessWidget {
-  const _ReposStep({required this.addIzzy, required this.onToggleIzzy});
+  const _ReposStep({
+    required this.selectedRepos,
+    required this.presets,
+    required this.onToggleRepo,
+  });
 
-  final bool addIzzy;
-  final ValueChanged<bool> onToggleIzzy;
+  final Map<String, bool> selectedRepos;
+  final List<Map<String, String>> presets;
+  final Function(String url, bool selected) onToggleRepo;
 
   @override
   Widget build(BuildContext context) {
@@ -326,7 +373,6 @@ class _ReposStep extends StatelessWidget {
       padding: const EdgeInsets.all(24),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
-
         children: [
           const SizedBox(height: 12),
           Row(
@@ -347,21 +393,37 @@ class _ReposStep extends StatelessWidget {
             ),
           ).animate().fadeIn(duration: 500.ms, delay: 200.ms),
           const SizedBox(height: 24),
-          Card(
-            elevation: 0,
-            color: colorScheme.surfaceContainerHighest,
-            clipBehavior: Clip.antiAlias,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: CheckboxListTile(
-              value: addIzzy,
-              onChanged: (value) => onToggleIzzy(value ?? false),
-              title: const Text('IzzyOnDroid'),
-              subtitle: const Text('https://apt.izzysoft.de/fdroid/repo'),
-              secondary: const Icon(Symbols.extension),
-            ),
-          ).animate().fadeIn(duration: 500.ms, delay: 400.ms),
+          if (presets.isEmpty)
+            Center(child: CircularProgressIndicator())
+          else
+            ...List.generate(presets.length, (index) {
+              final preset = presets[index];
+              final url = preset['url']!;
+              final isSelected = selectedRepos[url] ?? false;
+
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child:
+                    Card(
+                      elevation: 0,
+                      color: colorScheme.surfaceContainerHighest,
+                      clipBehavior: Clip.antiAlias,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: CheckboxListTile(
+                        value: isSelected,
+                        onChanged: (value) => onToggleRepo(url, value ?? false),
+                        title: Text(preset['name']!),
+                        subtitle: Text(preset['description']!),
+                        secondary: const Icon(Symbols.extension),
+                      ),
+                    ).animate().fadeIn(
+                      duration: 500.ms,
+                      delay: Duration(milliseconds: 400 + (index * 100)),
+                    ),
+              );
+            }),
           const Spacer(),
           Text(
             'You can add or remove repositories anytime in Settings.',

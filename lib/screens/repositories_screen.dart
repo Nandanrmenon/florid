@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:provider/provider.dart';
@@ -118,6 +120,17 @@ class _RepositoriesScreenState extends State<RepositoriesScreen> {
         onAdd: (name, url) async {
           // Close the add dialog, then run the add flow with a blocking progress dialog.
           Navigator.pop(context);
+          await _runRepositoryActionWithDialog(context, () async {
+            final repoProvider = context.read<RepositoriesProvider>();
+            final apiService = context.read<FDroidApiService>();
+            final appProvider = context.read<AppProvider>();
+
+            await repoProvider.addRepository(name, url);
+            await apiService.clearRepositoryCache();
+            await appProvider.refreshAll(repositoriesProvider: repoProvider);
+          });
+        },
+        onAddPreset: (name, url) async {
           await _runRepositoryActionWithDialog(context, () async {
             final repoProvider = context.read<RepositoriesProvider>();
             final apiService = context.read<FDroidApiService>();
@@ -401,8 +414,9 @@ Future<void> _runRepositoryActionWithDialog(
 
 class _AddRepositoryDialog extends StatefulWidget {
   final Function(String name, String url) onAdd;
+  final Function(String name, String url) onAddPreset;
 
-  const _AddRepositoryDialog({required this.onAdd});
+  const _AddRepositoryDialog({required this.onAdd, required this.onAddPreset});
 
   @override
   State<_AddRepositoryDialog> createState() => _AddRepositoryDialogState();
@@ -411,12 +425,38 @@ class _AddRepositoryDialog extends StatefulWidget {
 class _AddRepositoryDialogState extends State<_AddRepositoryDialog> {
   late TextEditingController _nameController;
   late TextEditingController _urlController;
+  List<Map<String, String>> _presets = [];
+  bool _showPresets = true;
 
   @override
   void initState() {
     super.initState();
     _nameController = TextEditingController();
     _urlController = TextEditingController();
+    _loadPresets();
+  }
+
+  Future<void> _loadPresets() async {
+    try {
+      final jsonString = await DefaultAssetBundle.of(
+        context,
+      ).loadString('assets/repositories.json');
+      final jsonData = jsonDecode(jsonString);
+      final repos = (jsonData['repositories'] as List)
+          .map(
+            (e) => {
+              'name': e['name'] as String,
+              'url': e['url'] as String,
+              'description': e['description'] as String? ?? '',
+            },
+          )
+          .toList();
+      setState(() {
+        _presets = repos;
+      });
+    } catch (e) {
+      debugPrint('Error loading presets: $e');
+    }
   }
 
   @override
@@ -433,12 +473,81 @@ class _AddRepositoryDialogState extends State<_AddRepositoryDialog> {
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            if (_presets.isNotEmpty)
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Preset Repositories',
+                        style: Theme.of(context).textTheme.labelLarge,
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          setState(() => _showPresets = !_showPresets);
+                        },
+                        child: Text(_showPresets ? 'Hide' : 'Show'),
+                      ),
+                    ],
+                  ),
+                  if (_showPresets)
+                    ...List.generate(_presets.length, (index) {
+                      final preset = _presets[index];
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 4),
+                        child: Material(
+                          color: Theme.of(context).colorScheme.surfaceContainer,
+                          borderRadius: BorderRadius.circular(8),
+                          child: ListTile(
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 4,
+                            ),
+                            title: Text(preset['name']!),
+                            subtitle: Text(
+                              preset['description']!,
+                              style: const TextStyle(fontSize: 12),
+                            ),
+                            trailing: IconButton(
+                              icon: const Icon(Symbols.add),
+                              onPressed: () {
+                                widget.onAddPreset(
+                                  preset['name']!,
+                                  preset['url']!,
+                                );
+                                Navigator.pop(context);
+                              },
+                            ),
+                            onTap: () {
+                              widget.onAddPreset(
+                                preset['name']!,
+                                preset['url']!,
+                              );
+                              Navigator.pop(context);
+                            },
+                          ),
+                        ),
+                      );
+                    }),
+                  const SizedBox(height: 16),
+                  const Divider(),
+                  const SizedBox(height: 16),
+                ],
+              ),
+            Text(
+              'Custom Repository',
+              style: Theme.of(context).textTheme.labelLarge,
+            ),
+            const SizedBox(height: 12),
             TextField(
               controller: _nameController,
               decoration: const InputDecoration(
                 labelText: 'Repository Name',
-                hintText: 'e.g., IzzyOnDroid',
+                hintText: 'e.g., MyRepo',
                 border: OutlineInputBorder(),
               ),
             ),

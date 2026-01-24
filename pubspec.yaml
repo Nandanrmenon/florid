@@ -125,6 +125,7 @@ flutter:
     - assets/Florid.png
     - assets/Foreground.png
     - assets/Splash.png
+    - assets/repositories.json
   #   - images/a_dot_burr.jpeg
   #   - images/a_dot_ham.jpeg
 

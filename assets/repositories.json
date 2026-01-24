@@ -1,0 +1,19 @@
+{
+  "repositories": [
+    {
+      "name": "F-Droid",
+      "url": "https://f-droid.org/repo",
+      "description": "Official F-Droid repository"
+    },
+    {
+      "name": "IzzyOnDroid",
+      "url": "https://apt.izzysoft.de/fdroid/repo",
+      "description": "Community repository with curated apps"
+    },
+    {
+      "name": "Guardian Project",
+      "url": "https://guardianproject.info/fdroid/repo",
+      "description": "Security and privacy focused apps"
+    }
+  ]
+}

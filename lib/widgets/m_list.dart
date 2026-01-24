@@ -114,6 +114,72 @@ class MListView extends StatelessWidget {
   }
 }
 
+class MListViewBuilder extends StatelessWidget {
+  final int itemCount;
+  final MListItemData Function(int index) itemBuilder;
+  final bool? enableScroll;
+  final bool? shrinkWrap;
+
+  const MListViewBuilder({
+    super.key,
+    required this.itemCount,
+    required this.itemBuilder,
+    this.enableScroll,
+    this.shrinkWrap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    // Use theme as part of key to force rebuild when theme changes
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
+    return ListView.separated(
+      key: ValueKey(isDarkMode),
+      shrinkWrap: shrinkWrap != null ? false : true,
+      padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+      physics: enableScroll != null 
+          ? AlwaysScrollableScrollPhysics()
+          : NeverScrollableScrollPhysics(),
+      itemCount: itemCount,
+      itemBuilder: (context, index) {
+        final item = itemBuilder(index);
+        final isLastItem = index == itemCount - 1;
+
+        return ClipRRect(
+          borderRadius: BorderRadius.only(
+            topLeft: index == 0 ? Radius.circular(16.0) : Radius.circular(4.0),
+            topRight: index == 0 ? Radius.circular(16.0) : Radius.circular(4.0),
+            bottomLeft: isLastItem
+                ? const Radius.circular(16.0)
+                : const Radius.circular(4.0),
+            bottomRight: isLastItem
+                ? const Radius.circular(16.0)
+                : const Radius.circular(4.0),
+          ),
+          child: Material(
+            color: Theme.of(context).colorScheme.surfaceContainer,
+            clipBehavior: Clip.antiAlias,
+            child: ListTile(
+              contentPadding: EdgeInsets.only(left: 16.0, right: 16.0),
+              title: Text(item.title),
+              leading: item.leading,
+              subtitle: item.subtitle != null && item.subtitle!.isNotEmpty
+                  ? Text(item.subtitle!)
+                  : null,
+              onTap: () => item.onTap(),
+              trailing: item.suffix,
+              selected: item.selected,
+            ),
+          ),
+        );
+      },
+      separatorBuilder: (context, index) {
+        return SizedBox(height: 4);
+      },
+    );
+  }
+}
+
 class MRadioListItemData<T> {
   final String title;
   final String subtitle;

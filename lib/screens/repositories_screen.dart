@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:florid/widgets/m_list.dart';
 import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:provider/provider.dart';
@@ -17,6 +18,8 @@ class RepositoriesScreen extends StatefulWidget {
 }
 
 class _RepositoriesScreenState extends State<RepositoriesScreen> {
+  List<Map<String, String>> _presets = [];
+
   @override
   void initState() {
     super.initState();
@@ -24,6 +27,30 @@ class _RepositoriesScreenState extends State<RepositoriesScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<RepositoriesProvider>().loadRepositories();
     });
+    _loadPresets();
+  }
+
+  Future<void> _loadPresets() async {
+    try {
+      final jsonString = await DefaultAssetBundle.of(
+        context,
+      ).loadString('assets/repositories.json');
+      final jsonData = jsonDecode(jsonString);
+      final repos = (jsonData['repositories'] as List)
+          .map(
+            (e) => {
+              'name': e['name'] as String,
+              'url': e['url'] as String,
+              'description': e['description'] as String? ?? '',
+            },
+          )
+          .toList();
+      setState(() {
+        _presets = repos;
+      });
+    } catch (e) {
+      debugPrint('Error loading presets: $e');
+    }
   }
 
   @override
@@ -67,9 +94,121 @@ class _RepositoriesScreenState extends State<RepositoriesScreen> {
                     ),
                   ),
                 ),
+              // Presets section
+              if (_presets.isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Presets',
+                        style: Theme.of(context).textTheme.titleSmall,
+                      ),
+                      const SizedBox(height: 8),
+                      MListViewBuilder(
+                        itemCount: _presets.length,
+                        itemBuilder: (index) {
+                          final preset = _presets[index];
+                          final isAdded = provider.repositories.any(
+                            (repo) => repo.url == preset['url'],
+                          );
+
+                          return MListItemData(
+                            title: preset['name']!,
+                            subtitle: preset['description']!,
+                            onTap: () {},
+                            suffix: Switch(
+                              value: isAdded,
+                              onChanged: (newValue) async {
+                                if (newValue) {
+                                  // Add the preset
+                                  await _runRepositoryActionWithDialog(
+                                    context,
+                                    () async {
+                                      final repoProvider = context
+                                          .read<RepositoriesProvider>();
+                                      final apiService = context
+                                          .read<FDroidApiService>();
+                                      final appProvider = context
+                                          .read<AppProvider>();
+
+                                      await repoProvider.addRepository(
+                                        preset['name']!,
+                                        preset['url']!,
+                                      );
+                                      await apiService.clearRepositoryCache();
+                                      await appProvider.refreshAll(
+                                        repositoriesProvider: repoProvider,
+                                      );
+                                    },
+                                  );
+                                } else {
+                                  // Remove the preset
+                                  Repository? addedRepo;
+                                  try {
+                                    addedRepo = provider.repositories
+                                        .firstWhere(
+                                          (repo) => repo.url == preset['url'],
+                                        );
+                                  } catch (e) {
+                                    addedRepo = null;
+                                  }
+                                  if (addedRepo != null) {
+                                    await _runRepositoryActionWithDialog(
+                                      context,
+                                      () async {
+                                        final repoProvider = context
+                                            .read<RepositoriesProvider>();
+                                        final apiService = context
+                                            .read<FDroidApiService>();
+                                        final appProvider = context
+                                            .read<AppProvider>();
+
+                                        repoProvider.deleteRepository(
+                                          addedRepo!.id,
+                                        );
+                                        await apiService.clearRepositoryCache();
+                                        await appProvider.refreshAll(
+                                          repositoriesProvider: repoProvider,
+                                        );
+                                      },
+                                    );
+                                  }
+                                }
+                              },
+                            ),
+                          );
+                        },
+                      ),
+                      const SizedBox(height: 8),
+                      const Divider(),
+                      const SizedBox(height: 8),
+                    ],
+                  ),
+                ),
+              // Your repositories section
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    'Your Repositories',
+                    style: Theme.of(context).textTheme.titleSmall,
+                  ),
+                ),
+              ),
               // Repositories list
               Expanded(
-                child: provider.repositories.isEmpty
+                child:
+                    provider.repositories
+                        .where(
+                          (repo) => !_presets.any(
+                            (preset) => preset['url'] == repo.url,
+                          ),
+                        )
+                        .toList()
+                        .isEmpty
                     ? Center(
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -81,7 +220,7 @@ class _RepositoriesScreenState extends State<RepositoriesScreen> {
                             ),
                             const SizedBox(height: 16),
                             Text(
-                              'No repositories added',
+                              'No custom repositories added',
                               style: Theme.of(context).textTheme.titleMedium,
                             ),
                             const SizedBox(height: 8),
@@ -94,9 +233,22 @@ class _RepositoriesScreenState extends State<RepositoriesScreen> {
                         ),
                       )
                     : ListView.builder(
-                        itemCount: provider.repositories.length,
+                        itemCount: provider.repositories
+                            .where(
+                              (repo) => !_presets.any(
+                                (preset) => preset['url'] == repo.url,
+                              ),
+                            )
+                            .length,
                         itemBuilder: (context, index) {
-                          final repo = provider.repositories[index];
+                          final customRepos = provider.repositories
+                              .where(
+                                (repo) => !_presets.any(
+                                  (preset) => preset['url'] == repo.url,
+                                ),
+                              )
+                              .toList();
+                          final repo = customRepos[index];
                           return _RepositoryListItem(repository: repo);
                         },
                       ),

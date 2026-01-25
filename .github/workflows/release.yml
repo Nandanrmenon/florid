@@ -7,6 +7,10 @@ on:
         description: "Release version (e.g., v1.0.0)"
         required: true
         type: string
+      description:
+        description: "Release description/notes"
+        required: false
+        type: string
       prerelease:
         description: "Mark as pre-release"
         required: false
@@ -58,7 +62,8 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           tag_name: ${{ inputs.version }}
-          name: Release ${{ inputs.version }}
+          name: ${{ inputs.version }}
+          body: ${{ inputs.description }}
           draft: false
           prerelease: ${{ inputs.prerelease }}
           generate_release_notes: true

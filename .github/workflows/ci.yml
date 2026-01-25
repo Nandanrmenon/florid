@@ -50,11 +50,16 @@ jobs:
         run: flutter pub get
 
       - name: Build APK
-        run: flutter build apk --release
+        uses: cedvdb/action-flutter-build-android@v1
+        with:
+          keystore-base64: ${{ secrets.ANDROID_RELEASE_KEY }}
+          keystore-password: "${{ secrets.ANDROID_RELEASE_KEY_PASSWORD }}"
+          build-cmd: flutter build apk --release --split-per-abi
+          working-directory: ./
 
-      - name: Upload APK artifact
+      - name: Upload APK artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: app-release.apk
-          path: build/app/outputs/flutter-apk/app-release.apk
+          name: release-apks
+          path: build/app/outputs/flutter-apk/*.apk
           retention-days: 5

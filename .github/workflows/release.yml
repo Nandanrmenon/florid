@@ -17,6 +17,8 @@ jobs:
   build-and-release:
     name: Build and Release APKs
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
 
     steps:
       - uses: actions/checkout@v4

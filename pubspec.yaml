@@ -2,7 +2,7 @@ name: florid
 description: "A modern F-Droid client for Android built with Flutter."
 publish_to: "none"
 
-version: 1.0.3+4
+version: 1.0.4+5
 
 environment:
   sdk: ^3.9.2

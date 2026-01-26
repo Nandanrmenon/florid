@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:florid/screens/permissions_screen.dart';
 import 'package:florid/widgets/m_list.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
@@ -787,27 +788,51 @@ class _DownloadSectionState extends State<_DownloadSection> {
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
                       color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
-                  ),
+                  ).animate().fadeIn(duration: Duration(milliseconds: 300)),
                   if (downloadInfo != null && downloadInfo.totalBytes > 0)
                     Text(
-                      '${downloadInfo.formattedBytesDownloaded} / ${downloadInfo.formattedTotalBytes}',
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
-                    ),
+                          '${downloadInfo.formattedBytesDownloaded} / ${downloadInfo.formattedTotalBytes}',
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onSurfaceVariant,
+                              ),
+                        )
+                        .animate()
+                        .fadeIn(duration: Duration(milliseconds: 300))
+                        .slideY(
+                          begin: 0.5,
+                          end: 0,
+                          duration: Duration(milliseconds: 300),
+                        ),
                 ],
               ),
               const SizedBox(height: 4),
               if (downloadInfo != null)
                 Text(
-                  downloadInfo.formattedSpeed,
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(context).colorScheme.primary,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
+                      downloadInfo.formattedSpeed,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Theme.of(context).colorScheme.primary,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    )
+                    .animate()
+                    .fadeIn(duration: Duration(milliseconds: 300))
+                    .slideY(
+                      begin: 0.5,
+                      end: 0,
+                      duration: Duration(milliseconds: 300),
+                    ),
               const SizedBox(height: 8),
-              LinearProgressIndicator(value: progress, year2023: false),
+              LinearProgressIndicator(value: progress, year2023: false)
+                  .animate()
+                  .fadeIn(duration: Duration(milliseconds: 300))
+                  .slideY(
+                    begin: 0.5,
+                    end: 0,
+                    duration: Duration(milliseconds: 300),
+                  ),
             ],
           ],
         );

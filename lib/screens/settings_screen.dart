@@ -113,14 +113,35 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       MRadioListView(
                         items: [
                           MRadioListItemData<ThemeStyle>(
-                            title: 'Florid style',
-                            subtitle: 'Beta',
-                            value: ThemeStyle.florid,
-                          ),
-                          MRadioListItemData<ThemeStyle>(
                             title: 'Material style',
                             subtitle: '',
                             value: ThemeStyle.material,
+                          ),
+                          MRadioListItemData<ThemeStyle>(
+                            title: 'Florid style',
+                            subtitle: '',
+                            suffix: Container(
+                              margin: const EdgeInsets.only(right: 8.0),
+                              child: Material(
+                                color: Theme.of(context).colorScheme.secondary,
+                                borderRadius: BorderRadius.circular(99.0),
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 12.0,
+                                    vertical: 2.0,
+                                  ),
+                                  child: Text(
+                                    'Beta',
+                                    style: TextStyle(
+                                      color: Theme.of(
+                                        context,
+                                      ).colorScheme.onSecondary,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            value: ThemeStyle.florid,
                           ),
                         ],
                         groupValue: settings.themeStyle,

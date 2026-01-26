@@ -3,6 +3,8 @@ import 'package:florid/providers/repositories_provider.dart';
 import 'package:florid/screens/categories_screen.dart';
 import 'package:florid/screens/home_screen.dart';
 import 'package:florid/utils/menu_actions.dart';
+import 'package:florid/widgets/tabbar.dart';
+import 'package:florid/widgets/theme_aware_tabbar.dart';
 import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/material_symbols_icons.dart';
 import 'package:provider/provider.dart';
@@ -81,30 +83,14 @@ class _LibraryScreenState extends State<LibraryScreen>
             ],
           ),
         ],
-        bottom: TabBar(
+        bottom: ThemeAwareTabBar(
           controller: _tabController,
-          dividerHeight: 0,
-          tabs: [
-            Tab(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Symbols.home, fill: 1),
-                  SizedBox(width: 8),
-                  Text("Home"),
-                ],
-              ),
-            ),
-            Tab(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Symbols.category, fill: 1),
-                  SizedBox(width: 8),
-                  Text("Categories"),
-                ],
-              ),
-            ),
+          onTabChanged: (index) {
+            _tabController.animateTo(index);
+          },
+          items: [
+            FloridTabBarItem(icon: Symbols.home, label: 'Home'),
+            FloridTabBarItem(icon: Symbols.category, label: 'Categories'),
           ],
         ),
       ),

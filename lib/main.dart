@@ -1,7 +1,8 @@
 import 'dart:convert';
 
-import 'package:florid/constants.dart';
+import 'package:florid/providers/settings_provider.dart';
 import 'package:florid/screens/florid_app.dart';
+import 'package:florid/themes/app_themes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
@@ -9,7 +10,6 @@ import 'package:provider/provider.dart';
 import 'providers/app_provider.dart';
 import 'providers/download_provider.dart';
 import 'providers/repositories_provider.dart';
-import 'providers/settings_provider.dart';
 import 'screens/onboarding_screen.dart';
 import 'services/database_service.dart';
 import 'services/fdroid_api_service.dart';
@@ -83,22 +83,12 @@ class MainApp extends StatelessWidget {
           return MaterialApp(
             title: 'Florid - F-Droid Client',
             debugShowCheckedModeBanner: false,
-            theme: ThemeData(
-              colorScheme: ColorScheme.fromSeed(
-                seedColor: kAppColor,
-                brightness: Brightness.light,
-              ),
-              appBarTheme: const AppBarTheme(),
-              useMaterial3: true,
-            ),
-            darkTheme: ThemeData(
-              colorScheme: ColorScheme.fromSeed(
-                seedColor: kAppColor,
-                brightness: Brightness.dark,
-              ),
-              appBarTheme: const AppBarTheme(),
-              useMaterial3: true,
-            ),
+            theme: settings.themeStyle == ThemeStyle.florid
+                ? AppThemes.floridLightTheme()
+                : AppThemes.materialLightTheme(),
+            darkTheme: settings.themeStyle == ThemeStyle.florid
+                ? AppThemes.floridDarkTheme()
+                : AppThemes.materialDarkTheme(),
             themeMode: settings.themeMode,
             home: !settings.isLoaded
                 ? const Scaffold(

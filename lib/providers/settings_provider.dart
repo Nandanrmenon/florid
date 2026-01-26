@@ -1,14 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+enum ThemeStyle { material, florid }
+
 class SettingsProvider extends ChangeNotifier {
   static const _themeModeKey = 'theme_mode';
+  static const _themeStyleKey = 'theme_style';
   static const _autoInstallKey = 'auto_install_apk';
   static const _autoDeleteKey = 'auto_delete_apk';
   static const _localeKey = 'locale';
   static const _onboardingCompleteKey = 'onboarding_complete';
 
   ThemeMode _themeMode = ThemeMode.system;
+  ThemeStyle _themeStyle = ThemeStyle.florid;
   bool _autoInstallApk = true;
   bool _autoDeleteApk = true;
   String _locale = 'en-US';
@@ -21,6 +25,7 @@ class SettingsProvider extends ChangeNotifier {
 
   bool get isLoaded => _loaded;
   ThemeMode get themeMode => _themeMode;
+  ThemeStyle get themeStyle => _themeStyle;
   bool get autoInstallApk => _autoInstallApk;
   bool get autoDeleteApk => _autoDeleteApk;
   String get locale => _locale;
@@ -79,6 +84,11 @@ class SettingsProvider extends ChangeNotifier {
         themeIndex < ThemeMode.values.length) {
       _themeMode = ThemeMode.values[themeIndex];
     }
+    final themeStyleIndex =
+        prefs.getInt(_themeStyleKey) ?? 1; // Default to Florid
+    if (themeStyleIndex >= 0 && themeStyleIndex < ThemeStyle.values.length) {
+      _themeStyle = ThemeStyle.values[themeStyleIndex];
+    }
     _autoInstallApk = prefs.getBool(_autoInstallKey) ?? true;
     _autoDeleteApk = prefs.getBool(_autoDeleteKey) ?? true;
     _locale = prefs.getString(_localeKey) ?? 'en-US';
@@ -92,6 +102,13 @@ class SettingsProvider extends ChangeNotifier {
     notifyListeners();
     final prefs = await SharedPreferences.getInstance();
     await prefs.setInt(_themeModeKey, mode.index);
+  }
+
+  Future<void> setThemeStyle(ThemeStyle style) async {
+    _themeStyle = style;
+    notifyListeners();
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt(_themeStyleKey, style.index);
   }
 
   Future<void> setAutoInstallApk(bool value) async {

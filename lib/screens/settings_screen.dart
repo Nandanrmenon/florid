@@ -85,7 +85,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   Column(
                     spacing: 4,
                     children: [
-                      MListHeader(title: 'Appearance'),
+                      MListHeader(title: 'Theme Mode'),
                       MRadioListView(
                         items: [
                           MRadioListItemData<ThemeMode>(
@@ -107,6 +107,25 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         groupValue: settings.themeMode,
                         onChanged: (mode) {
                           settings.setThemeMode(mode);
+                        },
+                      ),
+                      MListHeader(title: 'Theme Style'),
+                      MRadioListView(
+                        items: [
+                          MRadioListItemData<ThemeStyle>(
+                            title: 'Florid style',
+                            subtitle: 'Beta',
+                            value: ThemeStyle.florid,
+                          ),
+                          MRadioListItemData<ThemeStyle>(
+                            title: 'Material style',
+                            subtitle: '',
+                            value: ThemeStyle.material,
+                          ),
+                        ],
+                        groupValue: settings.themeStyle,
+                        onChanged: (style) {
+                          settings.setThemeStyle(style);
                         },
                       ),
                     ],

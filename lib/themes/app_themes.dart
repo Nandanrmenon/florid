@@ -60,7 +60,7 @@ class AppThemes {
         ).surfaceContainer,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(24),
-          side: BorderSide(width: 0),
+          side: BorderSide(width: 0, style: BorderStyle.none),
         ),
       ),
       chipTheme: ChipThemeData(
@@ -186,8 +186,15 @@ class AppThemes {
         ).onPrimary,
       ),
       cardTheme: CardThemeData(
-        elevation: 1,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        elevation: 0,
+        color: ColorScheme.fromSeed(
+          seedColor: kAppColor,
+          brightness: Brightness.dark,
+        ).surfaceContainer,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(24),
+          side: BorderSide(width: 0, style: BorderStyle.none),
+        ),
       ),
       chipTheme: ChipThemeData(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),

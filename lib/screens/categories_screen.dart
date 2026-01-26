@@ -121,9 +121,9 @@ class _CategoriesScreenState extends State<CategoriesScreen>
         padding: const EdgeInsets.all(16),
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 2,
-          crossAxisSpacing: 12,
-          mainAxisSpacing: 12,
-          childAspectRatio: 2,
+          crossAxisSpacing: 8,
+          mainAxisSpacing: 8,
+          childAspectRatio: 2.5,
         ),
         itemCount: categories.length,
         itemBuilder: (context, index) {
@@ -275,11 +275,11 @@ class _CategoryCard extends StatelessWidget {
 
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(12),
+      borderRadius: BorderRadius.circular(24),
       child: Card(
         margin: EdgeInsets.zero,
         elevation: 0,
-        color: categoryColor.withOpacity(0.1),
+        color: categoryColor.withValues(alpha: 0.2),
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
           child: Row(
@@ -291,7 +291,6 @@ class _CategoryCard extends StatelessWidget {
                 child: Text(
                   category,
                   style: theme.textTheme.titleSmall?.copyWith(
-                    // fontWeight: FontWeight.w600,
                     color: theme.colorScheme.onSurface,
                   ),
                   maxLines: 2,

@@ -1,3 +1,4 @@
+import 'package:florid/providers/settings_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:provider/provider.dart';
@@ -43,8 +44,11 @@ class _CategoryAppsScreenState extends State<CategoryAppsScreen> {
       appBar: AppBar(
         title: Consumer<AppProvider>(
           builder: (context, appProvider, child) {
+            final settings = context.watch<SettingsProvider>();
             return Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: settings.themeStyle == ThemeStyle.florid
+                  ? CrossAxisAlignment.center
+                  : CrossAxisAlignment.start,
               children: [
                 Text(
                   widget.category,

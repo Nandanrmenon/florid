@@ -1,7 +1,7 @@
 import 'package:florid/providers/app_provider.dart';
 import 'package:florid/providers/repositories_provider.dart';
 import 'package:florid/screens/categories_screen.dart';
-import 'package:florid/screens/latest_screen.dart';
+import 'package:florid/screens/home_screen.dart';
 import 'package:florid/utils/menu_actions.dart';
 import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/material_symbols_icons.dart';
@@ -16,7 +16,7 @@ class LibraryScreen extends StatefulWidget {
 
 class _LibraryScreenState extends State<LibraryScreen>
     with TickerProviderStateMixin {
-  final tabs = [LatestScreen(), CategoriesScreen()];
+  final tabs = [HomeScreen(), CategoriesScreen()];
   late TabController _tabController;
 
   @override
@@ -35,7 +35,7 @@ class _LibraryScreenState extends State<LibraryScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Library'),
+        title: const Text('Florid'),
         backgroundColor: Theme.of(context).colorScheme.surfaceContainerLow,
         surfaceTintColor: Theme.of(context).colorScheme.surfaceContainerLow,
         actions: [
@@ -89,9 +89,9 @@ class _LibraryScreenState extends State<LibraryScreen>
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Symbols.new_releases, fill: 1),
+                  Icon(Symbols.home, fill: 1),
                   SizedBox(width: 8),
-                  Text("Latest"),
+                  Text("Home"),
                 ],
               ),
             ),
@@ -131,10 +131,15 @@ class _LibraryScreenState extends State<LibraryScreen>
         final repositoriesProvider = context.read<RepositoriesProvider>();
 
         if (currentIndex == 0) {
-          // Refresh Latest Apps
-          await appProvider.fetchLatestApps(
-            repositoriesProvider: repositoriesProvider,
-          );
+          // Refresh Home (Latest and Recently Updated)
+          await Future.wait([
+            appProvider.fetchLatestApps(
+              repositoriesProvider: repositoriesProvider,
+            ),
+            appProvider.fetchRecentlyUpdatedApps(
+              repositoriesProvider: repositoriesProvider,
+            ),
+          ]);
         } else if (currentIndex == 1) {
           // Refresh Categories
           await appProvider.fetchCategories();

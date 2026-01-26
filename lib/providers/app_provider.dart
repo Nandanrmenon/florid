@@ -33,6 +33,11 @@ class AppProvider extends ChangeNotifier {
   LoadingState _latestAppsState = LoadingState.idle;
   String? _latestAppsError;
 
+  // Recently updated apps state
+  List<FDroidApp> _recentlyUpdatedApps = [];
+  LoadingState _recentlyUpdatedAppsState = LoadingState.idle;
+  String? _recentlyUpdatedAppsError;
+
   // Categories state
   List<String> _categories = [];
   LoadingState _categoriesState = LoadingState.idle;
@@ -60,6 +65,10 @@ class AppProvider extends ChangeNotifier {
   List<FDroidApp> get latestApps => _latestApps;
   LoadingState get latestAppsState => _latestAppsState;
   String? get latestAppsError => _latestAppsError;
+
+  List<FDroidApp> get recentlyUpdatedApps => _recentlyUpdatedApps;
+  LoadingState get recentlyUpdatedAppsState => _recentlyUpdatedAppsState;
+  String? get recentlyUpdatedAppsError => _recentlyUpdatedAppsError;
 
   List<String> get categories => _categories;
   LoadingState get categoriesState => _categoriesState;
@@ -210,6 +219,63 @@ class AppProvider extends ChangeNotifier {
     } catch (e) {
       _latestAppsError = e.toString();
       _latestAppsState = LoadingState.error;
+    }
+    notifyListeners();
+  }
+
+  /// Fetches recently updated apps from F-Droid and custom repositories
+  Future<void> fetchRecentlyUpdatedApps({
+    RepositoriesProvider? repositoriesProvider,
+    int limit = 50,
+  }) async {
+    _recentlyUpdatedAppsState = LoadingState.loading;
+    _recentlyUpdatedAppsError = null;
+    notifyListeners();
+
+    try {
+      List<FDroidApp> apps = [];
+
+      // Try to fetch from custom repositories if available
+      if (repositoriesProvider != null) {
+        // Ensure repositories are loaded before checking enabled ones
+        if (repositoriesProvider.repositories.isEmpty &&
+            !repositoriesProvider.isLoading) {
+          await repositoriesProvider.loadRepositories();
+        }
+
+        final customRepos = repositoriesProvider.enabledRepositories;
+        if (customRepos.isNotEmpty) {
+          final customUrls = customRepos.map((r) => r.url).toList();
+          final mergedRepo = await fetchRepositoriesFromUrls(customUrls);
+          if (mergedRepo != null) {
+            // Get recently updated apps from merged repository
+            final recentlyUpdatedApps = mergedRepo.apps.values.toList();
+            recentlyUpdatedApps.sort((a, b) {
+              final aUpdated = a.lastUpdated?.millisecondsSinceEpoch ?? 0;
+              final bUpdated = b.lastUpdated?.millisecondsSinceEpoch ?? 0;
+              return bUpdated.compareTo(aUpdated); // Most recent first
+            });
+            apps = recentlyUpdatedApps.take(limit).toList();
+            _recentlyUpdatedApps = apps;
+            _recentlyUpdatedAppsState = LoadingState.success;
+            notifyListeners();
+            return;
+          }
+        }
+      }
+
+      // Fall back to official F-Droid
+      final allApps = await _apiService.fetchApps(limit: limit * 2);
+      allApps.sort((a, b) {
+        final aUpdated = a.lastUpdated?.millisecondsSinceEpoch ?? 0;
+        final bUpdated = b.lastUpdated?.millisecondsSinceEpoch ?? 0;
+        return bUpdated.compareTo(aUpdated);
+      });
+      _recentlyUpdatedApps = allApps.take(limit).toList();
+      _recentlyUpdatedAppsState = LoadingState.success;
+    } catch (e) {
+      _recentlyUpdatedAppsError = e.toString();
+      _recentlyUpdatedAppsState = LoadingState.error;
     }
     notifyListeners();
   }

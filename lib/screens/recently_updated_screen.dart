@@ -9,14 +9,14 @@ import '../providers/repositories_provider.dart';
 import '../widgets/app_list_item.dart';
 import 'app_details_screen.dart';
 
-class LatestScreen extends StatefulWidget {
-  const LatestScreen({super.key});
+class RecentlyUpdatedScreen extends StatefulWidget {
+  const RecentlyUpdatedScreen({super.key});
 
   @override
-  State<LatestScreen> createState() => _LatestScreenState();
+  State<RecentlyUpdatedScreen> createState() => _RecentlyUpdatedScreenState();
 }
 
-class _LatestScreenState extends State<LatestScreen>
+class _RecentlyUpdatedScreenState extends State<RecentlyUpdatedScreen>
     with AutomaticKeepAliveClientMixin {
   @override
   bool get wantKeepAlive => true;
@@ -32,13 +32,15 @@ class _LatestScreenState extends State<LatestScreen>
   void _loadData() {
     final appProvider = context.read<AppProvider>();
     final repositoriesProvider = context.read<RepositoriesProvider>();
-    appProvider.fetchLatestApps(repositoriesProvider: repositoriesProvider);
+    appProvider.fetchRecentlyUpdatedApps(
+      repositoriesProvider: repositoriesProvider,
+    );
   }
 
   Future<void> _onRefresh() async {
     final appProvider = context.read<AppProvider>();
     final repositoriesProvider = context.read<RepositoriesProvider>();
-    await appProvider.fetchLatestApps(
+    await appProvider.fetchRecentlyUpdatedApps(
       repositoriesProvider: repositoriesProvider,
     );
   }
@@ -49,9 +51,9 @@ class _LatestScreenState extends State<LatestScreen>
 
     return Consumer<AppProvider>(
       builder: (context, appProvider, child) {
-        final state = appProvider.latestAppsState;
-        final apps = appProvider.latestApps;
-        final error = appProvider.latestAppsError;
+        final state = appProvider.recentlyUpdatedAppsState;
+        final apps = appProvider.recentlyUpdatedApps;
+        final error = appProvider.recentlyUpdatedAppsError;
         return _buildBody(state, apps, error);
       },
     );
@@ -65,7 +67,7 @@ class _LatestScreenState extends State<LatestScreen>
           children: [
             CircularProgressIndicator(year2023: false),
             SizedBox(height: 16),
-            Text('Loading latest apps...'),
+            Text('Loading recently updated apps...'),
           ],
         ),
       );
@@ -106,24 +108,26 @@ class _LatestScreenState extends State<LatestScreen>
     }
 
     if (apps.isEmpty) {
-      return const Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Symbols.apps, size: 64, color: Colors.grey),
-            SizedBox(height: 16),
-            Text('No apps found'),
-          ],
+      return Scaffold(
+        appBar: AppBar(),
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Symbols.update, size: 64, color: Colors.grey),
+              const SizedBox(height: 16),
+              Text(
+                'No recently updated apps',
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+            ],
+          ),
         ),
       );
     }
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Latest Apps'),
-        backgroundColor: Theme.of(context).colorScheme.surfaceContainerLow,
-        surfaceTintColor: Theme.of(context).colorScheme.surfaceContainerLow,
-      ),
+      appBar: AppBar(title: const Text('Recently Updated')),
       body: RefreshIndicator(
         onRefresh: _onRefresh,
         child: ListView.builder(

@@ -60,6 +60,8 @@ class AppProvider extends ChangeNotifier {
 
   // Repository state
   FDroidRepository? _repository;
+  LoadingState _repositoryState = LoadingState.idle;
+  String? _repositoryError;
 
   // Getters
   List<FDroidApp> get latestApps => _latestApps;
@@ -87,16 +89,26 @@ class AppProvider extends ChangeNotifier {
   LoadingState get installedAppsState => _installedAppsState;
 
   FDroidRepository? get repository => _repository;
+  LoadingState get repositoryState => _repositoryState;
+  String? get repositoryError => _repositoryError;
 
   /// Fetches the complete repository (cached for performance)
   Future<void> fetchRepository() async {
     if (_repository != null) return; // Use cached version
 
+    _repositoryState = LoadingState.loading;
+    _repositoryError = null;
+    notifyListeners();
+
     try {
       _repository = await _apiService.fetchRepository();
+      _repositoryState = LoadingState.success;
       notifyListeners();
     } catch (e) {
       debugPrint('Error fetching repository: $e');
+      _repositoryError = e.toString();
+      _repositoryState = LoadingState.error;
+      notifyListeners();
     }
   }
 
@@ -483,6 +495,8 @@ class AppProvider extends ChangeNotifier {
   Future<void> refreshAll({RepositoriesProvider? repositoriesProvider}) async {
     // Clear cached data
     _repository = null;
+    _repositoryState = LoadingState.idle;
+    _repositoryError = null;
     _categoryApps.clear();
 
     // Reload data

@@ -46,6 +46,9 @@ class MainApp extends StatelessWidget {
             // Create new service with current locale
             final service = FDroidApiService();
             service.setLocale(settings.locale);
+            // Set default F-Droid repository immediately (synchronously)
+            service.setRepositoryUrl('https://f-droid.org/repo');
+            // Then try to load from config asynchronously
             _initializeDefaultRepository(service);
             return service;
           },

@@ -58,22 +58,11 @@ class _UpdatesScreenState extends State<UpdatesScreen>
     return Consumer<AppProvider>(
       builder: (context, appProvider, child) {
         final repositoryLoaded = appProvider.repository != null;
+        final repositoryState = appProvider.repositoryState;
+        final repositoryError = appProvider.repositoryError;
         final installedAppsState = appProvider.installedAppsState;
         final installedApps = appProvider.installedApps;
-
-        // Show loading if data is still being fetched
-        if (!repositoryLoaded || installedAppsState == LoadingState.loading) {
-          return const Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                CircularProgressIndicator(year2023: false),
-                SizedBox(height: 16),
-                Text('Checking for updates...'),
-              ],
-            ),
-          );
-        }
+        // Do not block UI on repository loading; render with guarded data.
 
         // Show error if failed to load installed apps
         if (installedAppsState == LoadingState.error) {
@@ -107,7 +96,9 @@ class _UpdatesScreenState extends State<UpdatesScreen>
           );
         }
 
-        final updatableApps = appProvider.getUpdatableApps();
+        final updatableApps = repositoryLoaded
+            ? appProvider.getUpdatableApps()
+            : <FDroidApp>[];
 
         // Get all F-Droid apps installed on device
         final allFDroidApps = installedApps
@@ -170,7 +161,7 @@ class _UpdatesScreenState extends State<UpdatesScreen>
               controller: _tabController,
               tabs: [
                 Tab(
-                  text: updatableApps.isNotEmpty
+                  text: repositoryLoaded && updatableApps.isNotEmpty
                       ? 'Updates (${updatableApps.length})'
                       : 'Updates',
                 ),
@@ -184,7 +175,14 @@ class _UpdatesScreenState extends State<UpdatesScreen>
               controller: _tabController,
               children: [
                 // Tab 1: Updates Only
-                _buildUpdatesTab(context, appProvider, updatableApps),
+                _buildUpdatesTab(
+                  context,
+                  appProvider,
+                  updatableApps,
+                  repositoryLoaded,
+                  repositoryState,
+                  repositoryError,
+                ),
 
                 // Tab 2: All Installed F-Droid Apps
                 _buildInstalledAppsTab(context, appProvider, allFDroidApps),
@@ -200,7 +198,84 @@ class _UpdatesScreenState extends State<UpdatesScreen>
     BuildContext context,
     AppProvider appProvider,
     List<FDroidApp> updatableApps,
+    bool repositoryLoaded,
+    LoadingState repositoryState,
+    String? repositoryError,
   ) {
+    // Show loading state
+    if (repositoryState == LoadingState.loading) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: const [
+            CircularProgressIndicator(year2023: false),
+            SizedBox(height: 12),
+            Text('Loading repository…'),
+          ],
+        ),
+      );
+    }
+
+    // Show error state
+    if (!repositoryLoaded && repositoryState == LoadingState.error) {
+      return SingleChildScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        child: Container(
+          height: MediaQuery.of(context).size.height * 0.7,
+          alignment: Alignment.center,
+          padding: const EdgeInsets.symmetric(horizontal: 24),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            spacing: 16,
+            children: [
+              Icon(
+                Symbols.cloud_off,
+                size: 64,
+                color: Theme.of(context).colorScheme.error,
+              ),
+              Text(
+                'Unable to load repository',
+                style: Theme.of(context).textTheme.headlineSmall,
+                textAlign: TextAlign.center,
+              ),
+              if (repositoryError != null)
+                SelectableText(
+                  repositoryError.replaceAll('Exception: ', ''),
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Theme.of(context).colorScheme.error,
+                  ),
+                ),
+              Text(
+                'Check your connection or repository settings, then try again.',
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  FilledButton.icon(
+                    onPressed: _loadData,
+                    icon: const Icon(Symbols.refresh),
+                    label: const Text('Retry'),
+                  ),
+                  const SizedBox(width: 12),
+                  OutlinedButton.icon(
+                    onPressed: () => MenuActions.showSettings(context),
+                    icon: const Icon(Symbols.settings),
+                    label: const Text('Settings'),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
     if (updatableApps.isEmpty) {
       return SingleChildScrollView(
         physics: const AlwaysScrollableScrollPhysics(),
@@ -294,9 +369,8 @@ class _UpdatesScreenState extends State<UpdatesScreen>
                                 onTap: () async {
                                   Navigator.of(context).push(
                                     MaterialPageRoute(
-                                      builder: (context) => AppDetailsScreen(
-                                        app: app,
-                                      ),
+                                      builder: (context) =>
+                                          AppDetailsScreen(app: app),
                                     ),
                                   );
                                 },
@@ -461,9 +535,7 @@ class _UpdatesScreenState extends State<UpdatesScreen>
                         onTap: () {
                           Navigator.of(context).push(
                             MaterialPageRoute(
-                              builder: (context) => AppDetailsScreen(
-                                app: app,
-                              ),
+                              builder: (context) => AppDetailsScreen(app: app),
                             ),
                           );
                         },

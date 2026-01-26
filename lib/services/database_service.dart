@@ -576,20 +576,53 @@ class DatabaseService {
 
     final repositoryId = repoResults.first['id'] as int;
     final searchTerm = '%${query.toLowerCase()}%';
+    final exactQuery = query.toLowerCase();
+    final startsWithTerm = '${query.toLowerCase()}%';
 
-    // Search apps from this specific repository
+    // Search apps from this specific repository with weighted scoring
     final appMaps = await db.rawQuery(
       '''
-      SELECT a.*, r.url as repository_url FROM $_appsTable a
+      SELECT DISTINCT a.*, r.url as repository_url,
+        CASE
+          WHEN LOWER(a.name) = ? THEN 10000
+          WHEN LOWER(a.name) LIKE ? THEN 5000
+          WHEN LOWER(a.name) LIKE ? THEN 1000
+          WHEN LOWER(a.summary) LIKE ? THEN 100
+          WHEN LOWER(a.description) LIKE ? THEN 50
+          WHEN EXISTS (
+            SELECT 1 FROM $_appCategoriesTable ac 
+            WHERE ac.package_name = a.package_name 
+            AND LOWER(ac.category) LIKE ?
+          ) THEN 25
+          WHEN LOWER(a.package_name) LIKE ? THEN 10
+          ELSE 1
+        END as search_score
+      FROM $_appsTable a
       LEFT JOIN $_repositoriesTable r ON a.repository_id = r.id
+      LEFT JOIN $_appCategoriesTable ac ON a.package_name = ac.package_name
       WHERE a.repository_id = ?
         AND (LOWER(a.name) LIKE ? 
          OR LOWER(a.summary) LIKE ? 
          OR LOWER(a.description) LIKE ?
-         OR LOWER(a.package_name) LIKE ?)
-      ORDER BY a.name ASC
+         OR LOWER(a.package_name) LIKE ?
+         OR LOWER(ac.category) LIKE ?)
+      ORDER BY search_score DESC, a.name ASC
     ''',
-      [repositoryId, searchTerm, searchTerm, searchTerm, searchTerm],
+      [
+        exactQuery,
+        startsWithTerm,
+        searchTerm,
+        searchTerm,
+        searchTerm,
+        searchTerm,
+        searchTerm,
+        repositoryId,
+        searchTerm,
+        searchTerm,
+        searchTerm,
+        searchTerm,
+        searchTerm,
+      ],
     );
 
     if (appMaps.isEmpty) return [];
@@ -648,17 +681,49 @@ class DatabaseService {
   Future<List<FDroidApp>> searchApps(String query) async {
     final db = await database;
     final searchTerm = '%${query.toLowerCase()}%';
+    final exactQuery = query.toLowerCase();
+    final startsWithTerm = '${query.toLowerCase()}%';
     final appMaps = await db.rawQuery(
       '''
-      SELECT a.*, r.url as repository_url FROM $_appsTable a
+      SELECT DISTINCT a.*, r.url as repository_url,
+        CASE
+          WHEN LOWER(a.name) = ? THEN 10000
+          WHEN LOWER(a.name) LIKE ? THEN 5000
+          WHEN LOWER(a.name) LIKE ? THEN 1000
+          WHEN LOWER(a.summary) LIKE ? THEN 100
+          WHEN LOWER(a.description) LIKE ? THEN 50
+          WHEN EXISTS (
+            SELECT 1 FROM $_appCategoriesTable ac 
+            WHERE ac.package_name = a.package_name 
+            AND LOWER(ac.category) LIKE ?
+          ) THEN 25
+          WHEN LOWER(a.package_name) LIKE ? THEN 10
+          ELSE 1
+        END as search_score
+      FROM $_appsTable a
       LEFT JOIN $_repositoriesTable r ON a.repository_id = r.id
+      LEFT JOIN $_appCategoriesTable ac ON a.package_name = ac.package_name
       WHERE LOWER(a.name) LIKE ? 
          OR LOWER(a.summary) LIKE ? 
          OR LOWER(a.description) LIKE ?
          OR LOWER(a.package_name) LIKE ?
-      ORDER BY a.name ASC
+         OR LOWER(ac.category) LIKE ?
+      ORDER BY search_score DESC, a.name ASC
     ''',
-      [searchTerm, searchTerm, searchTerm, searchTerm],
+      [
+        exactQuery,
+        startsWithTerm,
+        searchTerm,
+        searchTerm,
+        searchTerm,
+        searchTerm,
+        searchTerm,
+        searchTerm,
+        searchTerm,
+        searchTerm,
+        searchTerm,
+        searchTerm,
+      ],
     );
 
     if (appMaps.isEmpty) return [];

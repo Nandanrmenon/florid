@@ -639,11 +639,60 @@ class FDroidRepository {
 
   List<FDroidApp> searchApps(String query) {
     final lowerQuery = query.toLowerCase();
-    return appsList.where((app) {
-      return app.name.toLowerCase().contains(lowerQuery) ||
-          app.summary.toLowerCase().contains(lowerQuery) ||
-          app.description.toLowerCase().contains(lowerQuery) ||
-          app.packageName.toLowerCase().contains(lowerQuery);
-    }).toList();
+
+    // Create scored results
+    final scoredResults = <({FDroidApp app, int score})>[];
+
+    for (final app in appsList) {
+      int score = 0;
+      final name = app.name.toLowerCase();
+      final summary = app.summary.toLowerCase();
+      final description = app.description.toLowerCase();
+      final packageName = app.packageName.toLowerCase();
+      final categories =
+          app.categories?.map((c) => c.toLowerCase()).toList() ?? [];
+
+      // Exact name match gets highest priority
+      if (name == lowerQuery) {
+        score = 10000;
+      }
+      // Name starts with query
+      else if (name.startsWith(lowerQuery)) {
+        score = 5000;
+      }
+      // Name contains query
+      else if (name.contains(lowerQuery)) {
+        score = 1000;
+      }
+      // Summary contains query
+      else if (summary.contains(lowerQuery)) {
+        score = 100;
+      }
+      // Description contains query
+      else if (description.contains(lowerQuery)) {
+        score = 50;
+      }
+      // Category contains query
+      else if (categories.any((cat) => cat.contains(lowerQuery))) {
+        score = 25;
+      }
+      // Package name contains query
+      else if (packageName.contains(lowerQuery)) {
+        score = 10;
+      }
+
+      if (score > 0) {
+        scoredResults.add((app: app, score: score));
+      }
+    }
+
+    // Sort by score (descending), then by name (ascending)
+    scoredResults.sort((a, b) {
+      final scoreCompare = b.score.compareTo(a.score);
+      if (scoreCompare != 0) return scoreCompare;
+      return a.app.name.toLowerCase().compareTo(b.app.name.toLowerCase());
+    });
+
+    return scoredResults.map((result) => result.app).toList();
   }
 }

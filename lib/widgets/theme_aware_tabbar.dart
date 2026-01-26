@@ -35,7 +35,7 @@ class ThemeAwareTabBar extends StatelessWidget implements PreferredSizeWidget {
         : null;
 
     final labelColor = isFlorid
-        ? Theme.of(context).colorScheme.onPrimaryContainer
+        ? Theme.of(context).colorScheme.onSurface
         : null;
 
     final unselectedColor = Theme.of(context).colorScheme.onSurfaceVariant;

@@ -36,6 +36,8 @@ class _LibraryScreenState extends State<LibraryScreen>
     return Scaffold(
       appBar: AppBar(
         title: const Text('Library'),
+        backgroundColor: Theme.of(context).colorScheme.surfaceContainerLow,
+        surfaceTintColor: Theme.of(context).colorScheme.surfaceContainerLow,
         actions: [
           PopupMenuButton<String>(
             onSelected: (value) {
@@ -81,6 +83,7 @@ class _LibraryScreenState extends State<LibraryScreen>
         ],
         bottom: TabBar(
           controller: _tabController,
+          dividerHeight: 0,
           tabs: [
             Tab(
               child: Row(

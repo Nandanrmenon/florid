@@ -751,7 +751,70 @@ class _DownloadSectionState extends State<_DownloadSection> {
 
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
+          spacing: 16.0,
           children: [
+            if (isDownloading) ...[
+              Column(
+                spacing: 4.0,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Downloading... ${(progress * 100).toInt()}%',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
+                      ).animate().fadeIn(duration: Duration(milliseconds: 300)),
+                      if (downloadInfo != null && downloadInfo.totalBytes > 0)
+                        Text(
+                              '${downloadInfo.formattedBytesDownloaded} / ${downloadInfo.formattedTotalBytes}',
+                              style: Theme.of(context).textTheme.bodySmall
+                                  ?.copyWith(
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.onSurfaceVariant,
+                                  ),
+                            )
+                            .animate()
+                            .fadeIn(duration: Duration(milliseconds: 300))
+                            .slideY(
+                              begin: 0.5,
+                              end: 0,
+                              duration: Duration(milliseconds: 300),
+                            ),
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  if (downloadInfo != null)
+                    Text(
+                          downloadInfo.formattedSpeed,
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(
+                                color: Theme.of(context).colorScheme.primary,
+                                fontWeight: FontWeight.w600,
+                              ),
+                        )
+                        .animate()
+                        .fadeIn(duration: Duration(milliseconds: 300))
+                        .slideY(
+                          begin: 0.5,
+                          end: 0,
+                          duration: Duration(milliseconds: 300),
+                        ),
+                  const SizedBox(height: 8),
+                  LinearProgressIndicator(value: progress, year2023: false)
+                      .animate()
+                      .fadeIn(duration: Duration(milliseconds: 300))
+                      .slideY(
+                        begin: 0.5,
+                        end: 0,
+                        duration: Duration(milliseconds: 300),
+                      ),
+                ],
+              ),
+            ],
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               spacing: 8,
@@ -859,62 +922,6 @@ class _DownloadSectionState extends State<_DownloadSection> {
                 ),
               ],
             ),
-            if (isDownloading) ...[
-              const SizedBox(height: 16),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Downloading... ${(progress * 100).toInt()}%',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
-                  ).animate().fadeIn(duration: Duration(milliseconds: 300)),
-                  if (downloadInfo != null && downloadInfo.totalBytes > 0)
-                    Text(
-                          '${downloadInfo.formattedBytesDownloaded} / ${downloadInfo.formattedTotalBytes}',
-                          style: Theme.of(context).textTheme.bodySmall
-                              ?.copyWith(
-                                color: Theme.of(
-                                  context,
-                                ).colorScheme.onSurfaceVariant,
-                              ),
-                        )
-                        .animate()
-                        .fadeIn(duration: Duration(milliseconds: 300))
-                        .slideY(
-                          begin: 0.5,
-                          end: 0,
-                          duration: Duration(milliseconds: 300),
-                        ),
-                ],
-              ),
-              const SizedBox(height: 4),
-              if (downloadInfo != null)
-                Text(
-                      downloadInfo.formattedSpeed,
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Theme.of(context).colorScheme.primary,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    )
-                    .animate()
-                    .fadeIn(duration: Duration(milliseconds: 300))
-                    .slideY(
-                      begin: 0.5,
-                      end: 0,
-                      duration: Duration(milliseconds: 300),
-                    ),
-              const SizedBox(height: 8),
-              LinearProgressIndicator(value: progress, year2023: false)
-                  .animate()
-                  .fadeIn(duration: Duration(milliseconds: 300))
-                  .slideY(
-                    begin: 0.5,
-                    end: 0,
-                    duration: Duration(milliseconds: 300),
-                  ),
-            ],
           ],
         );
       },
@@ -1433,6 +1440,8 @@ class _VersionDownloadButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer2<DownloadProvider, AppProvider>(
       builder: (context, downloadProvider, appProvider, child) {
+        final isInstalled = appProvider.isAppInstalled(app.packageName);
+        final installedApp = appProvider.getInstalledApp(app.packageName);
         final downloadInfo = downloadProvider.getDownloadInfo(
           app.packageName,
           version.versionName,
@@ -1452,6 +1461,61 @@ class _VersionDownloadButton extends StatelessWidget {
           app.packageName,
           version.versionName,
         );
+
+        if (isInstalled && installedApp != null) {
+          return Row(
+            spacing: 8,
+            children: [
+              Expanded(
+                child: FilledButton.tonalIcon(
+                  onPressed: () async {
+                    try {
+                      await downloadProvider.uninstallApp(app.packageName);
+                      await Future.delayed(const Duration(milliseconds: 100));
+                      await appProvider.fetchInstalledApps();
+                    } catch (e) {
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Uninstall failed: $e')),
+                        );
+                      }
+                    }
+                  },
+                  icon: const Icon(Symbols.delete_rounded, fill: 1, size: 18),
+                  label: const Text('Uninstall'),
+                  style: FilledButton.styleFrom(
+                    foregroundColor: Theme.of(context).colorScheme.onError,
+                    backgroundColor: Theme.of(context).colorScheme.error,
+                  ),
+                ),
+              ),
+              Expanded(
+                child: FilledButton.icon(
+                  onPressed: () async {
+                    try {
+                      final opened = await appProvider.openInstalledApp(
+                        app.packageName,
+                      );
+                      if (!opened && context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Failed to open ${app.name}')),
+                        );
+                      }
+                    } catch (e) {
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(
+                          context,
+                        ).showSnackBar(SnackBar(content: Text('Error: $e')));
+                      }
+                    }
+                  },
+                  icon: const Icon(Symbols.open_in_new_rounded, size: 18),
+                  label: const Text('Open'),
+                ),
+              ),
+            ],
+          );
+        }
 
         if (isDownloading) {
           return Column(
@@ -1503,6 +1567,8 @@ class _VersionDownloadButton extends StatelessWidget {
               try {
                 if (downloadInfo.filePath != null) {
                   await downloadProvider.installApk(downloadInfo.filePath!);
+                  await Future.delayed(const Duration(milliseconds: 100));
+                  await appProvider.fetchInstalledApps();
                   if (context.mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(content: Text('Installing ${app.name}...')),

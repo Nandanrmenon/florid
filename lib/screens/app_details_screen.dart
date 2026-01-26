@@ -43,125 +43,8 @@ class _AppDetailsScreenState extends State<AppDetailsScreen> {
     return Scaffold(
       body: CustomScrollView(
         slivers: [
-          // SliverAppBar(
-          //   expandedHeight: expandedHeight,
-          //   pinned: true,
-          //   flexibleSpace: LayoutBuilder(
-          //     builder: (context, constraints) {
-          //       final maxHeight = constraints.maxHeight;
-          //       final collapseRange = expandedHeight - kToolbarHeight;
-          //       final t = collapseRange <= 0
-          //           ? 1.0
-          //           : ((expandedHeight - maxHeight) / collapseRange).clamp(
-          //               0.0,
-          //               1.0,
-          //             );
-
-          //       return FlexibleSpaceBar(
-          //         titlePadding: EdgeInsetsDirectional.only(
-          //           start: t < 1 ? 50 : 16,
-          //           bottom: 16,
-          //           end: 100,
-          //         ),
-          //         title: AnimatedOpacity(
-          //           opacity: t,
-          //           duration: const Duration(milliseconds: 150),
-          //           child: Row(
-          //             spacing: 8,
-          //             children: [
-          //               Container(
-          //                 width: 24,
-          //                 height: 24,
-          //                 decoration: BoxDecoration(
-          //                   borderRadius: BorderRadius.circular(8),
-          //                 ),
-          //                 child: ClipRRect(
-          //                   borderRadius: BorderRadius.circular(8),
-          //                   child: _AppDetailsIcon(app: widget.app),
-          //                 ),
-          //               ),
-          //               Expanded(
-          //                 child: Text(
-          //                   widget.app.name,
-          //                   overflow: TextOverflow.ellipsis,
-          //                   maxLines: 1,
-          //                 ),
-          //               ),
-          //             ],
-          //           ),
-          //         ),
-          //         background: Container(
-          //           decoration: BoxDecoration(
-          //             color: Theme.of(context).colorScheme.surfaceContainer,
-          //           ),
-          //         ),
-          //       );
-          //     },
-          //   ),
-          //   actions: [
-          //     IconButton(
-          //       icon: const Icon(Symbols.share),
-          //       onPressed: () {
-          //         Share.share(
-          //           'Check out ${widget.app.name} on F-Droid: https://f-droid.org/packages/${widget.app.packageName}/',
-          //         );
-          //       },
-          //     ),
-          //     PopupMenuButton<String>(
-          //       onSelected: (value) async {
-          //         switch (value) {
-          //           case 'website':
-          //             if (widget.app.webSite != null) {
-          //               await launchUrl(Uri.parse(widget.app.webSite!));
-          //             }
-          //             break;
-          //           case 'source':
-          //             if (widget.app.sourceCode != null) {
-          //               await launchUrl(Uri.parse(widget.app.sourceCode!));
-          //             }
-          //             break;
-          //           case 'issues':
-          //             if (widget.app.issueTracker != null) {
-          //               await launchUrl(Uri.parse(widget.app.issueTracker!));
-          //             }
-          //             break;
-          //         }
-          //       },
-          //       itemBuilder: (context) => [
-          //         if (widget.app.webSite != null)
-          //           const PopupMenuItem(
-          //             value: 'website',
-          //             child: ListTile(
-          //               leading: Icon(Symbols.public),
-          //               title: Text('Website'),
-          //               contentPadding: EdgeInsets.zero,
-          //             ),
-          //           ),
-          //         if (widget.app.sourceCode != null)
-          //           const PopupMenuItem(
-          //             value: 'source',
-          //             child: ListTile(
-          //               leading: Icon(Symbols.code),
-          //               title: Text('Source Code'),
-          //               contentPadding: EdgeInsets.zero,
-          //             ),
-          //           ),
-          //         if (widget.app.issueTracker != null)
-          //           const PopupMenuItem(
-          //             value: 'issues',
-          //             child: ListTile(
-          //               leading: Icon(Symbols.bug_report),
-          //               title: Text('Issue Tracker'),
-          //               contentPadding: EdgeInsets.zero,
-          //             ),
-          //           ),
-          //       ],
-          //     ),
-          //   ],
-          // ),
           SliverAppBar.large(
             pinned: true,
-            // floating: true,
             centerTitle: false,
             title: Row(
               spacing: 16.0,
@@ -373,10 +256,10 @@ class _AppDetailsScreenState extends State<AppDetailsScreen> {
                                           style: FilledButton.styleFrom(
                                             foregroundColor: Theme.of(
                                               context,
-                                            ).colorScheme.onError,
+                                            ).colorScheme.onErrorContainer,
                                             backgroundColor: Theme.of(
                                               context,
-                                            ).colorScheme.error,
+                                            ).colorScheme.errorContainer,
                                           ),
                                         ),
                                       ),

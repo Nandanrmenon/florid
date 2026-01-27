@@ -25,10 +25,13 @@ class FTabBar extends StatelessWidget implements PreferredSizeWidget {
     // Listen so the TabBar updates when the theme style changes.
     final settings = context.watch<SettingsProvider>();
     final isFlorid = settings.themeStyle == ThemeStyle.florid;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     final indicator = isFlorid
         ? BoxDecoration(
-            color: Theme.of(context).colorScheme.surfaceBright,
+            color: isDark
+                ? Theme.of(context).colorScheme.surfaceContainer
+                : Theme.of(context).colorScheme.surfaceBright,
             borderRadius: BorderRadius.circular(99),
           )
         : null;

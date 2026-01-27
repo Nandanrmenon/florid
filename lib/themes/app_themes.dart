@@ -98,17 +98,6 @@ class AppThemes {
           side: BorderSide(width: 0, style: BorderStyle.none),
         ),
       ),
-      tabBarTheme: TabBarThemeData(
-        indicator: BoxDecoration(
-          borderRadius: BorderRadius.circular(16),
-          color: ColorScheme.fromSeed(
-            seedColor: kAppColor,
-            brightness: Brightness.light,
-          ).primaryContainer,
-        ),
-        indicatorSize: TabBarIndicatorSize.tab,
-        splashBorderRadius: BorderRadius.circular(16),
-      ),
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(
           shape: RoundedRectangleBorder(
@@ -268,17 +257,6 @@ class AppThemes {
       ),
       chipTheme: ChipThemeData(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      ),
-      tabBarTheme: TabBarThemeData(
-        indicator: BoxDecoration(
-          borderRadius: BorderRadius.circular(16),
-          color: ColorScheme.fromSeed(
-            seedColor: kAppColor,
-            brightness: Brightness.dark,
-          ).primaryContainer,
-        ),
-        indicatorSize: TabBarIndicatorSize.tab,
-        splashBorderRadius: BorderRadius.circular(16),
       ),
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(

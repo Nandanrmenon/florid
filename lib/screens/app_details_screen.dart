@@ -732,11 +732,17 @@ class _AppDetailsScreenState extends State<AppDetailsScreen> {
                                 ),
                               );
                             },
+                          ).animate().fadeIn(
+                            delay: Duration(milliseconds: 300),
+                            duration: Duration(milliseconds: 300),
                           ),
                           if (widget.app.latestVersion?.whatsNew != null &&
                               widget.app.latestVersion!.whatsNew!.isNotEmpty)
                             ChangelogPreview(
                               text: widget.app.latestVersion!.whatsNew,
+                            ).animate().fadeIn(
+                              delay: Duration(milliseconds: 300),
+                              duration: Duration(milliseconds: 300),
                             ),
                           if (isInstalled)
                             Chip(
@@ -745,6 +751,9 @@ class _AppDetailsScreenState extends State<AppDetailsScreen> {
                               label: Text(
                                 'Installed${installedApp?.versionName != null ? ' (${installedApp!.versionName})' : ''}',
                               ),
+                            ).animate().fadeIn(
+                              delay: Duration(milliseconds: 300),
+                              duration: Duration(milliseconds: 300),
                             ),
 
                           FutureBuilder<IzzyStats>(
@@ -763,6 +772,9 @@ class _AppDetailsScreenState extends State<AppDetailsScreen> {
                                 stats: stats,
                               );
                             },
+                          ).animate().fadeIn(
+                            delay: Duration(milliseconds: 300),
+                            duration: Duration(milliseconds: 300),
                           ),
                         ],
                       );
@@ -788,6 +800,9 @@ class _AppDetailsScreenState extends State<AppDetailsScreen> {
                       screenshots: screenshots,
                     );
                   },
+                ).animate().fadeIn(
+                  delay: Duration(milliseconds: 300),
+                  duration: Duration(milliseconds: 300),
                 ),
 
                 if (widget.app.categories?.isNotEmpty == true) ...[
@@ -797,17 +812,22 @@ class _AppDetailsScreenState extends State<AppDetailsScreen> {
                       visualDensity: VisualDensity.compact,
                       label: Text(widget.app.categories!.first),
                     ),
+                  ).animate().fadeIn(
+                    delay: Duration(milliseconds: 300),
+                    duration: Duration(milliseconds: 300),
                   ),
                 ],
                 // Description
-                _DescriptionSection(app: widget.app),
-                // Divider(),
-
-                // Download section
-                // _DownloadSection(app: app),
+                _DescriptionSection(app: widget.app).animate().fadeIn(
+                  delay: Duration(milliseconds: 300),
+                  duration: Duration(milliseconds: 300),
+                ),
 
                 // App details
-                _AppInfoSection(app: widget.app),
+                _AppInfoSection(app: widget.app).animate().fadeIn(
+                  delay: Duration(milliseconds: 300),
+                  duration: Duration(milliseconds: 300),
+                ),
 
                 FutureBuilder<IzzyStats>(
                   future: _statsFuture,
@@ -832,17 +852,31 @@ class _AppDetailsScreenState extends State<AppDetailsScreen> {
                       stats: stats,
                     );
                   },
+                ).animate().fadeIn(
+                  delay: Duration(milliseconds: 300),
+                  duration: Duration(milliseconds: 300),
                 ),
 
                 // Version info
                 if (widget.app.latestVersion != null)
-                  _VersionInfoSection(version: widget.app.latestVersion!)
+                  _VersionInfoSection(
+                    version: widget.app.latestVersion!,
+                  ).animate().fadeIn(
+                    delay: Duration(milliseconds: 300),
+                    duration: Duration(milliseconds: 300),
+                  )
                 else
-                  const _NoVersionInfoSection(),
+                  const _NoVersionInfoSection().animate().fadeIn(
+                    delay: Duration(milliseconds: 300),
+                    duration: Duration(milliseconds: 300),
+                  ),
                 // All versions history
                 if (widget.app.packages != null &&
                     widget.app.packages!.isNotEmpty)
-                  _AllVersionsSection(app: widget.app)
+                  _AllVersionsSection(app: widget.app).animate().fadeIn(
+                    delay: Duration(milliseconds: 300),
+                    duration: Duration(milliseconds: 300),
+                  )
                 else
                   const SizedBox.shrink(),
                 // Permissions

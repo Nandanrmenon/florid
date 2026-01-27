@@ -90,9 +90,6 @@ class AppThemes {
           side: BorderSide(width: 0, style: BorderStyle.none),
         ),
       ),
-      chipTheme: ChipThemeData(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      ),
       tabBarTheme: TabBarThemeData(
         indicator: BoxDecoration(
           borderRadius: BorderRadius.circular(16),
@@ -106,6 +103,13 @@ class AppThemes {
       ),
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+        ),
+      ),
+      textButtonTheme: TextButtonThemeData(
+        style: TextButton.styleFrom(
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
           ),
@@ -206,6 +210,15 @@ class AppThemes {
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
       ),
+      dialogTheme: DialogThemeData(
+        backgroundColor: ColorScheme.fromSeed(
+          seedColor: kAppColor,
+          brightness: Brightness.dark,
+        ).surfaceContainer,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        alignment: Alignment.bottomCenter,
+        insetPadding: EdgeInsets.all(16),
+      ),
     );
   }
 
@@ -260,6 +273,13 @@ class AppThemes {
           ),
         ),
       ),
+      textButtonTheme: TextButtonThemeData(
+        style: TextButton.styleFrom(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+        ),
+      ),
       switchTheme: SwitchThemeData(
         thumbColor: WidgetStateProperty.resolveWith<Color?>((
           Set<WidgetState> states,
@@ -293,7 +313,7 @@ class AppThemes {
         backgroundColor: ColorScheme.fromSeed(
           seedColor: kAppColor,
           brightness: Brightness.dark,
-        ).primaryContainer,
+        ).onPrimaryFixedVariant,
         iconTheme: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
           if (states.contains(WidgetState.selected)) {
             return IconThemeData(
@@ -358,6 +378,15 @@ class AppThemes {
       snackBarTheme: SnackBarThemeData(
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+      ),
+      dialogTheme: DialogThemeData(
+        backgroundColor: ColorScheme.fromSeed(
+          seedColor: kAppColor,
+          brightness: Brightness.dark,
+        ).surfaceContainer,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        alignment: Alignment.bottomCenter,
+        insetPadding: EdgeInsets.all(16),
       ),
     );
   }

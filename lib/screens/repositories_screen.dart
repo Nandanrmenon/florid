@@ -494,18 +494,18 @@ Future<void> _toggleRepositoryWithDialog(
                     child: Icon(
                       Symbols.sync,
                       size: 48,
-                      color: Theme.of(context).colorScheme.primary,
+                      color: Theme.of(dialogContext).colorScheme.primary,
                     ),
                   ),
                 ),
                 SizedBox(height: 16),
                 Text(
                   'Updating Repository',
-                  style: Theme.of(context).textTheme.titleMedium,
+                  style: Theme.of(dialogContext).textTheme.titleMedium,
                 ),
                 Text(
                   'Now is a great time to touch grass!',
-                  style: Theme.of(context).textTheme.bodyMedium,
+                  style: Theme.of(dialogContext).textTheme.bodyMedium,
                 ),
                 SizedBox(height: 16),
                 LinearProgressIndicator(
@@ -568,18 +568,18 @@ Future<void> _runRepositoryActionWithDialog(
                     child: Icon(
                       Symbols.sync,
                       size: 48,
-                      color: Theme.of(context).colorScheme.primary,
+                      color: Theme.of(dialogContext).colorScheme.primary,
                     ),
                   ),
                 ),
                 SizedBox(height: 16),
                 Text(
                   'Updating Repository',
-                  style: Theme.of(context).textTheme.titleMedium,
+                  style: Theme.of(dialogContext).textTheme.titleMedium,
                 ),
                 Text(
                   'Now is a great time to touch grass!',
-                  style: Theme.of(context).textTheme.bodyMedium,
+                  style: Theme.of(dialogContext).textTheme.bodyMedium,
                 ),
                 SizedBox(height: 16),
                 LinearProgressIndicator(

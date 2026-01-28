@@ -61,52 +61,59 @@ class _AppDetailsScreenState extends State<AppDetailsScreen> {
     final availableRepos = app.availableRepositories;
     final hasMultipleRepos =
         availableRepos != null && availableRepos.length > 1;
+    print('hasMultipleRepos: $hasMultipleRepos');
 
     if (hasMultipleRepos) {
       // Show split button with dropdown for multiple repositories
       return Row(
-        spacing: 1,
+        spacing: 2,
         children: [
           Expanded(
-            child: FilledButton.icon(
-              onPressed: () => _handleInstall(
+            child: SizedBox(
+              height: 48,
+              child: FilledButton.icon(
+                onPressed: () => _handleInstall(
+                  context,
+                  downloadProvider,
+                  appProvider,
+                  isDownloaded,
+                  version,
+                  app.repositoryUrl,
+                ),
+                icon: Icon(
+                  isDownloaded ? Symbols.install_mobile : Symbols.download,
+                ),
+                label: Text(isDownloaded ? 'Install' : 'Download'),
+                style: FilledButton.styleFrom(),
+              ),
+            ),
+          ),
+          SizedBox(
+            height: 48,
+            child: IconButton.filledTonal(
+              onPressed: () => _showRepositorySelection(
                 context,
                 downloadProvider,
                 appProvider,
                 isDownloaded,
                 version,
-                app.repositoryUrl,
+                app,
               ),
-              icon: Icon(
-                isDownloaded ? Symbols.install_mobile : Symbols.download,
-              ),
-              label: Text(isDownloaded ? 'Install' : 'Download'),
-              style: FilledButton.styleFrom(
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(24),
-                  bottomLeft: Radius.circular(24),
-                ),
-              ),
+              icon: Icon(Symbols.arrow_drop_down),
             ),
           ),
-          FilledButton(
-            onPressed: () => _showRepositorySelection(
-              context,
-              downloadProvider,
-              appProvider,
-              isDownloaded,
-              version,
-              app,
-            ),
-            style: FilledButton.styleFrom(
-              padding: const EdgeInsets.symmetric(horizontal: 12),
-              borderRadius: const BorderRadius.only(
-                topRight: Radius.circular(24),
-                bottomRight: Radius.circular(24),
-              ),
-            ),
-            child: const Icon(Symbols.arrow_drop_down),
-          ),
+          // FilledButton(
+          //   onPressed: () => _showRepositorySelection(
+          //     context,
+          //     downloadProvider,
+          //     appProvider,
+          //     isDownloaded,
+          //     version,
+          //     app,
+          //   ),
+          //   style: FilledButton.styleFrom(),
+          //   child: const Icon(Symbols.arrow_drop_down),
+          // ),
         ],
       );
     } else {
@@ -896,22 +903,30 @@ class _AppDetailsScreenState extends State<AppDetailsScreen> {
                                 future: _enrichedAppFuture,
                                 builder: (context, snapshot) {
                                   // Use enriched app if available and loaded, otherwise fall back to widget.app
-                                  final enrichedApp = snapshot.connectionState == ConnectionState.done && snapshot.hasData
+                                  final enrichedApp =
+                                      snapshot.connectionState ==
+                                              ConnectionState.done &&
+                                          snapshot.hasData
                                       ? snapshot.data!
                                       : widget.app;
-                                  
+
                                   // Log error if enrichment failed
                                   if (snapshot.hasError) {
-                                    debugPrint('Error enriching app: ${snapshot.error}');
+                                    debugPrint(
+                                      'Error enriching app: ${snapshot.error}',
+                                    );
                                   }
-                                  
-                                  return _buildInstallButton(
-                                    context,
-                                    downloadProvider,
-                                    appProvider,
-                                    isDownloaded,
-                                    version,
-                                    enrichedApp,
+
+                                  return SizedBox(
+                                    width: double.infinity,
+                                    child: _buildInstallButton(
+                                      context,
+                                      downloadProvider,
+                                      appProvider,
+                                      isDownloaded,
+                                      version,
+                                      enrichedApp,
+                                    ),
                                   );
                                 },
                               );

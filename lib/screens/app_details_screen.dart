@@ -61,16 +61,62 @@ class _AppDetailsScreenState extends State<AppDetailsScreen> {
     final availableRepos = app.availableRepositories;
     final hasMultipleRepos =
         availableRepos != null && availableRepos.length > 1;
-    print('hasMultipleRepos: $hasMultipleRepos');
 
-    if (hasMultipleRepos) {
-      // Show split button with dropdown for multiple repositories
-      return Row(
-        spacing: 2,
-        children: [
-          Expanded(
-            child: SizedBox(
+    return AnimatedSwitcher(
+      duration: const Duration(milliseconds: 300),
+      transitionBuilder: (child, animation) {
+        return ScaleTransition(
+          scale: animation,
+          child: FadeTransition(opacity: animation, child: child),
+        );
+      },
+      child: hasMultipleRepos
+          ? Row(
+              key: const ValueKey('split-button'),
+              spacing: 2,
+              children: [
+                Expanded(
+                  child: SizedBox(
+                    height: 48,
+                    child: FilledButton.icon(
+                      onPressed: () => _handleInstall(
+                        context,
+                        downloadProvider,
+                        appProvider,
+                        isDownloaded,
+                        version,
+                        app.repositoryUrl,
+                      ),
+                      icon: Icon(
+                        isDownloaded
+                            ? Symbols.install_mobile
+                            : Symbols.download,
+                      ),
+                      label: Text(isDownloaded ? 'Install' : 'Download'),
+                      style: FilledButton.styleFrom(),
+                    ),
+                  ),
+                ),
+                SizedBox(
+                  height: 48,
+                  child: IconButton.filledTonal(
+                    onPressed: () => _showRepositorySelection(
+                      context,
+                      downloadProvider,
+                      appProvider,
+                      isDownloaded,
+                      version,
+                      app,
+                    ),
+                    icon: Icon(Symbols.keyboard_arrow_down),
+                  ),
+                ),
+              ],
+            )
+          : SizedBox(
+              key: const ValueKey('simple-button'),
               height: 48,
+              width: double.infinity,
               child: FilledButton.icon(
                 onPressed: () => _handleInstall(
                   context,
@@ -84,53 +130,9 @@ class _AppDetailsScreenState extends State<AppDetailsScreen> {
                   isDownloaded ? Symbols.install_mobile : Symbols.download,
                 ),
                 label: Text(isDownloaded ? 'Install' : 'Download'),
-                style: FilledButton.styleFrom(),
               ),
             ),
-          ),
-          SizedBox(
-            height: 48,
-            child: IconButton.filledTonal(
-              onPressed: () => _showRepositorySelection(
-                context,
-                downloadProvider,
-                appProvider,
-                isDownloaded,
-                version,
-                app,
-              ),
-              icon: Icon(Symbols.arrow_drop_down),
-            ),
-          ),
-          // FilledButton(
-          //   onPressed: () => _showRepositorySelection(
-          //     context,
-          //     downloadProvider,
-          //     appProvider,
-          //     isDownloaded,
-          //     version,
-          //     app,
-          //   ),
-          //   style: FilledButton.styleFrom(),
-          //   child: const Icon(Symbols.arrow_drop_down),
-          // ),
-        ],
-      );
-    } else {
-      // Show simple button for single repository
-      return FilledButton.icon(
-        onPressed: () => _handleInstall(
-          context,
-          downloadProvider,
-          appProvider,
-          isDownloaded,
-          version,
-          app.repositoryUrl,
-        ),
-        icon: Icon(isDownloaded ? Symbols.install_mobile : Symbols.download),
-        label: Text(isDownloaded ? 'Install' : 'Download'),
-      );
-    }
+    );
   }
 
   Future<void> _handleInstall(
@@ -269,110 +271,96 @@ class _AppDetailsScreenState extends State<AppDetailsScreen> {
     // Capture the mounted context before showing dialog
     final scaffoldMessenger = ScaffoldMessenger.of(context);
 
-    await showDialog(
+    await showModalBottomSheet(
       context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: Text(
-          isDownloaded ? 'Install from Repository' : 'Download from Repository',
-        ),
-        content: Column(
+      builder: (dialogContext) => Padding(
+        padding: const EdgeInsets.symmetric(vertical: 24),
+        child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: availableRepos.map((repo) {
-            final isPrimary = repo.url == app.repositoryUrl;
-            return Padding(
-              padding: const EdgeInsets.symmetric(vertical: 4.0),
-              child: OutlinedButton(
-                onPressed: () {
-                  Navigator.of(dialogContext).pop();
-                  _handleInstall(
-                    context,
-                    downloadProvider,
-                    appProvider,
-                    isDownloaded,
-                    version,
-                    repo.url,
-                  );
-                },
-                style: isPrimary
-                    ? OutlinedButton.styleFrom(
-                        side: BorderSide(
-                          color: Theme.of(dialogContext).colorScheme.primary,
-                          width: 2,
-                        ),
-                      )
-                    : null,
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        spacing: 4,
-                        children: [
-                          Row(
-                            children: [
-                              Expanded(
-                                child: Text(
-                                  repo.name,
-                                  style: Theme.of(
-                                    dialogContext,
-                                  ).textTheme.titleMedium,
-                                ),
-                              ),
-                              if (isPrimary)
-                                Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 8,
-                                    vertical: 2,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: Theme.of(
-                                      dialogContext,
-                                    ).colorScheme.primaryContainer,
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                  child: Text(
-                                    'Default',
-                                    style: Theme.of(dialogContext)
-                                        .textTheme
-                                        .labelSmall
-                                        ?.copyWith(
-                                          color: Theme.of(
-                                            dialogContext,
-                                          ).colorScheme.onPrimaryContainer,
-                                        ),
-                                  ),
-                                ),
-                            ],
-                          ),
-                          Text(
-                            repo.url,
-                            style: Theme.of(dialogContext).textTheme.bodySmall
-                                ?.copyWith(
-                                  color: Theme.of(dialogContext)
-                                      .textTheme
-                                      .bodySmall
-                                      ?.color
-                                      ?.withOpacity(0.7),
-                                ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ],
+          spacing: 8.0,
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        isDownloaded
+                            ? 'Install from Repository'
+                            : 'Download from Repository',
+                        style: Theme.of(dialogContext).textTheme.titleLarge,
+                      ),
+                      Text(
+                        'You can choose which repository to use to '
+                        '${isDownloaded ? 'install' : 'download'} this app.',
+                        style: Theme.of(dialogContext).textTheme.labelMedium,
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            MListViewBuilder(
+              itemCount: availableRepos.length,
+              itemBuilder: (index) {
+                final isPrimary =
+                    availableRepos[index].url == app.repositoryUrl;
+                return MListItemData(
+                  selected: isPrimary,
+                  leading: isPrimary ? Icon(Symbols.check) : null,
+                  title: availableRepos[index].name,
+                  onTap: () {
+                    Navigator.of(dialogContext).pop();
+                    _handleInstall(
+                      context,
+                      downloadProvider,
+                      appProvider,
+                      isDownloaded,
+                      version,
+                      availableRepos[index].url,
+                    );
+                  },
+                  suffix: Visibility(
+                    visible: isPrimary,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 2,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Theme.of(
+                          dialogContext,
+                        ).colorScheme.primaryContainer,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        'Default',
+                        style: Theme.of(dialogContext).textTheme.labelSmall
+                            ?.copyWith(
+                              color: Theme.of(
+                                dialogContext,
+                              ).colorScheme.onPrimaryContainer,
+                            ),
                       ),
                     ),
-                  ],
-                ),
+                  ),
+                );
+              },
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: FilledButton.tonal(
+                child: const Text('Cancel'),
+                onPressed: () => Navigator.of(dialogContext).pop(),
               ),
-            );
-          }).toList(),
+            ),
+            SizedBox(height: 24),
+          ],
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(),
-            child: const Text('Cancel'),
-          ),
-        ],
       ),
     );
   }
@@ -499,7 +487,7 @@ class _AppDetailsScreenState extends State<AppDetailsScreen> {
                 // What's New preview from version.whatsNew
                 Padding(
                   padding: const EdgeInsets.symmetric(
-                    vertical: 16,
+                    vertical: 4,
                     horizontal: 16,
                   ),
                   child: Consumer<AppProvider>(

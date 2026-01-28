@@ -43,6 +43,324 @@ class _AppDetailsScreenState extends State<AppDetailsScreen> {
     );
   }
 
+  Widget _buildInstallButton(
+    BuildContext context,
+    DownloadProvider downloadProvider,
+    AppProvider appProvider,
+    bool isDownloaded,
+    FDroidVersion version,
+  ) {
+    final availableRepos = widget.app.availableRepositories;
+    final hasMultipleRepos =
+        availableRepos != null && availableRepos.length > 1;
+    print('hasMultipleRepos: $hasMultipleRepos');
+
+    if (hasMultipleRepos) {
+      // Show split button with dropdown for multiple repositories
+      return Row(
+        spacing: 1,
+        children: [
+          Expanded(
+            child: FilledButton.icon(
+              onPressed: () => _handleInstall(
+                context,
+                downloadProvider,
+                appProvider,
+                isDownloaded,
+                version,
+                widget.app.repositoryUrl,
+              ),
+              icon: Icon(
+                isDownloaded ? Symbols.install_mobile : Symbols.download,
+              ),
+              label: Text(isDownloaded ? 'Install' : 'Download'),
+              style: FilledButton.styleFrom(
+                // borderRadius: const BorderRadius.only(
+                //   topLeft: Radius.circular(24),
+                //   bottomLeft: Radius.circular(24),
+                // ),
+              ),
+            ),
+          ),
+          FilledButton(
+            onPressed: () => _showRepositorySelection(
+              context,
+              downloadProvider,
+              appProvider,
+              isDownloaded,
+              version,
+            ),
+            style: FilledButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              // borderRadius: const BorderRadius.only(
+              //   topRight: Radius.circular(24),
+              //   bottomRight: Radius.circular(24),
+              // ),
+            ),
+            child: const Icon(Symbols.arrow_drop_down),
+          ),
+        ],
+      );
+    } else {
+      // Show simple button for single repository
+      return FilledButton.icon(
+        onPressed: () => _handleInstall(
+          context,
+          downloadProvider,
+          appProvider,
+          isDownloaded,
+          version,
+          widget.app.repositoryUrl,
+        ),
+        icon: Icon(isDownloaded ? Symbols.install_mobile : Symbols.download),
+        label: Text(isDownloaded ? 'Install' : 'Download'),
+      );
+    }
+  }
+
+  Future<void> _handleInstall(
+    BuildContext context,
+    DownloadProvider downloadProvider,
+    AppProvider appProvider,
+    bool isDownloaded,
+    FDroidVersion version,
+    String repositoryUrl,
+  ) async {
+    if (isDownloaded) {
+      try {
+        final downloadInfo = downloadProvider.getDownloadInfo(
+          widget.app.packageName,
+          version.versionName,
+        );
+        if (downloadInfo?.filePath != null) {
+          final hasPermission = await downloadProvider
+              .requestInstallPermission();
+          if (!hasPermission) {
+            if (context.mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text(
+                    'Install permission is required to install APK files',
+                  ),
+                ),
+              );
+            }
+            return;
+          }
+
+          await downloadProvider.installApk(downloadInfo!.filePath!);
+          await Future.delayed(const Duration(milliseconds: 100));
+          await appProvider.fetchInstalledApps();
+          if (context.mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('${widget.app.name} installation started!'),
+              ),
+            );
+          }
+        }
+      } catch (e) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Installation failed: ${e.toString()}')),
+          );
+        }
+      }
+    } else {
+      final hasPermission = await downloadProvider.requestPermissions();
+
+      if (!hasPermission) {
+        if (context.mounted) {
+          await showDialog(
+            context: context,
+            builder: (context) => AlertDialog(
+              icon: const Icon(Symbols.warning, size: 48),
+              title: const Text('Storage Permission Required'),
+              content: const Text(
+                'Florid needs storage permission to download APK files.\n\n'
+                'To enable:\n'
+                '1. Go to Settings (button below)\n'
+                '2. Find "Permissions"\n'
+                '3. Enable "Files and media" or "Storage"\n\n'
+                'Then try downloading again.',
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: const Text('Cancel'),
+                ),
+                FilledButton(
+                  onPressed: () async {
+                    Navigator.of(context).pop();
+                    await openAppSettings();
+                  },
+                  child: const Text('Open Settings'),
+                ),
+              ],
+            ),
+          );
+        }
+        return;
+      }
+
+      try {
+        // Create a copy of the app with the selected repository URL
+        final appWithRepo = widget.app.copyWith(repositoryUrl: repositoryUrl);
+        await downloadProvider.downloadApk(appWithRepo);
+
+        if (context.mounted) {
+          for (int i = 0; i < 15; i++) {
+            await Future.delayed(const Duration(milliseconds: 800));
+            await appProvider.fetchInstalledApps();
+            if (appProvider.isAppInstalled(widget.app.packageName)) {
+              final downloadInfo = downloadProvider.getDownloadInfo(
+                widget.app.packageName,
+                widget.app.latestVersion!.versionName,
+              );
+              if (downloadInfo?.filePath != null) {
+                await downloadProvider.deleteDownloadedFile(
+                  downloadInfo!.filePath!,
+                );
+              }
+              break;
+            }
+          }
+        }
+      } catch (e) {
+        final errorMsg = e.toString();
+        if (!errorMsg.contains('cancelled') &&
+            !errorMsg.contains('Cancelled')) {
+          if (context.mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Download failed: $errorMsg')),
+            );
+          }
+        }
+      }
+    }
+  }
+
+  Future<void> _showRepositorySelection(
+    BuildContext context,
+    DownloadProvider downloadProvider,
+    AppProvider appProvider,
+    bool isDownloaded,
+    FDroidVersion version,
+  ) async {
+    final availableRepos = widget.app.availableRepositories;
+    if (availableRepos == null || availableRepos.isEmpty) return;
+
+    // Capture the mounted context before showing dialog
+    final scaffoldMessenger = ScaffoldMessenger.of(context);
+
+    await showDialog(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(
+          isDownloaded ? 'Install from Repository' : 'Download from Repository',
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: availableRepos.map((repo) {
+            final isPrimary = repo.url == widget.app.repositoryUrl;
+            return Padding(
+              padding: const EdgeInsets.symmetric(vertical: 4.0),
+              child: OutlinedButton(
+                onPressed: () {
+                  Navigator.of(dialogContext).pop();
+                  _handleInstall(
+                    context,
+                    downloadProvider,
+                    appProvider,
+                    isDownloaded,
+                    version,
+                    repo.url,
+                  );
+                },
+                style: isPrimary
+                    ? OutlinedButton.styleFrom(
+                        side: BorderSide(
+                          color: Theme.of(dialogContext).colorScheme.primary,
+                          width: 2,
+                        ),
+                      )
+                    : null,
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        spacing: 4,
+                        children: [
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  repo.name,
+                                  style: Theme.of(
+                                    dialogContext,
+                                  ).textTheme.titleMedium,
+                                ),
+                              ),
+                              if (isPrimary)
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 8,
+                                    vertical: 2,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: Theme.of(
+                                      dialogContext,
+                                    ).colorScheme.primaryContainer,
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: Text(
+                                    'Default',
+                                    style: Theme.of(dialogContext)
+                                        .textTheme
+                                        .labelSmall
+                                        ?.copyWith(
+                                          color: Theme.of(
+                                            dialogContext,
+                                          ).colorScheme.onPrimaryContainer,
+                                        ),
+                                  ),
+                                ),
+                            ],
+                          ),
+                          Text(
+                            repo.url,
+                            style: Theme.of(dialogContext).textTheme.bodySmall
+                                ?.copyWith(
+                                  color: Theme.of(dialogContext)
+                                      .textTheme
+                                      .bodySmall
+                                      ?.color
+                                      ?.withOpacity(0.7),
+                                ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          }).toList(),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(),
+            child: const Text('Cancel'),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -563,16 +881,23 @@ class _AppDetailsScreenState extends State<AppDetailsScreen> {
                                 );
                               }
 
-                              return SizedBox(
-                                width: double.infinity,
-                                height: 48,
-                                child: _buildInstallButton(
-                                  context,
-                                  downloadProvider,
-                                  appProvider,
-                                  isDownloaded,
-                                  version,
-                                ),
+                              // return SizedBox(
+                              //   width: double.infinity,
+                              //   height: 48,
+                              //   child: _buildInstallButton(
+                              //     context,
+                              //     downloadProvider,
+                              //     appProvider,
+                              //     isDownloaded,
+                              //     version,
+                              //   ),
+                              // );
+                              return _buildInstallButton(
+                                context,
+                                downloadProvider,
+                                appProvider,
+                                isDownloaded,
+                                version,
                               );
                             },
                           ).animate().fadeIn(
@@ -1895,307 +2220,6 @@ class _VersionDownloadButton extends StatelessWidget {
           label: const Text('Download'),
         );
       },
-    );
-  }
-
-  Widget _buildInstallButton(
-    BuildContext context,
-    DownloadProvider downloadProvider,
-    AppProvider appProvider,
-    bool isDownloaded,
-    FDroidVersion version,
-  ) {
-    final availableRepos = widget.app.availableRepositories;
-    final hasMultipleRepos = availableRepos != null && availableRepos.length > 1;
-
-    if (hasMultipleRepos) {
-      // Show split button with dropdown for multiple repositories
-      return Row(
-        spacing: 1,
-        children: [
-          Expanded(
-            child: FilledButton.icon(
-              onPressed: () => _handleInstall(
-                context,
-                downloadProvider,
-                appProvider,
-                isDownloaded,
-                version,
-                widget.app.repositoryUrl,
-              ),
-              icon: Icon(
-                isDownloaded ? Symbols.install_mobile : Symbols.download,
-              ),
-              label: Text(
-                isDownloaded ? 'Install' : 'Download',
-              ),
-              style: FilledButton.styleFrom(
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(24),
-                  bottomLeft: Radius.circular(24),
-                ),
-              ),
-            ),
-          ),
-          FilledButton(
-            onPressed: () => _showRepositorySelection(
-              context,
-              downloadProvider,
-              appProvider,
-              isDownloaded,
-              version,
-            ),
-            style: FilledButton.styleFrom(
-              padding: const EdgeInsets.symmetric(horizontal: 12),
-              borderRadius: const BorderRadius.only(
-                topRight: Radius.circular(24),
-                bottomRight: Radius.circular(24),
-              ),
-            ),
-            child: const Icon(Symbols.arrow_drop_down),
-          ),
-        ],
-      );
-    } else {
-      // Show simple button for single repository
-      return FilledButton.icon(
-        onPressed: () => _handleInstall(
-          context,
-          downloadProvider,
-          appProvider,
-          isDownloaded,
-          version,
-          widget.app.repositoryUrl,
-        ),
-        icon: Icon(
-          isDownloaded ? Symbols.install_mobile : Symbols.download,
-        ),
-        label: Text(
-          isDownloaded ? 'Install' : 'Download',
-        ),
-      );
-    }
-  }
-
-  Future<void> _handleInstall(
-    BuildContext context,
-    DownloadProvider downloadProvider,
-    AppProvider appProvider,
-    bool isDownloaded,
-    FDroidVersion version,
-    String repositoryUrl,
-  ) async {
-    if (isDownloaded) {
-      try {
-        final downloadInfo = downloadProvider.getDownloadInfo(
-          widget.app.packageName,
-          version.versionName,
-        );
-        if (downloadInfo?.filePath != null) {
-          final hasPermission = await downloadProvider.requestInstallPermission();
-          if (!hasPermission) {
-            if (context.mounted) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text(
-                    'Install permission is required to install APK files',
-                  ),
-                ),
-              );
-            }
-            return;
-          }
-
-          await downloadProvider.installApk(downloadInfo!.filePath!);
-          await Future.delayed(const Duration(milliseconds: 100));
-          await appProvider.fetchInstalledApps();
-          if (context.mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text('${widget.app.name} installation started!'),
-              ),
-            );
-          }
-        }
-      } catch (e) {
-        if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Installation failed: ${e.toString()}'),
-            ),
-          );
-        }
-      }
-    } else {
-      final hasPermission = await downloadProvider.requestPermissions();
-
-      if (!hasPermission) {
-        if (context.mounted) {
-          await showDialog(
-            context: context,
-            builder: (context) => AlertDialog(
-              icon: const Icon(Symbols.warning, size: 48),
-              title: const Text('Storage Permission Required'),
-              content: const Text(
-                'Florid needs storage permission to download APK files.\n\n'
-                'To enable:\n'
-                '1. Go to Settings (button below)\n'
-                '2. Find "Permissions"\n'
-                '3. Enable "Files and media" or "Storage"\n\n'
-                'Then try downloading again.',
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.of(context).pop(),
-                  child: const Text('Cancel'),
-                ),
-                FilledButton(
-                  onPressed: () async {
-                    Navigator.of(context).pop();
-                    await openAppSettings();
-                  },
-                  child: const Text('Open Settings'),
-                ),
-              ],
-            ),
-          );
-        }
-        return;
-      }
-
-      try {
-        // Create a copy of the app with the selected repository URL
-        final appWithRepo = widget.app.copyWith(repositoryUrl: repositoryUrl);
-        await downloadProvider.downloadApk(appWithRepo);
-
-        if (context.mounted) {
-          for (int i = 0; i < 15; i++) {
-            await Future.delayed(const Duration(milliseconds: 800));
-            await appProvider.fetchInstalledApps();
-            if (appProvider.isAppInstalled(widget.app.packageName)) {
-              final downloadInfo = downloadProvider.getDownloadInfo(
-                widget.app.packageName,
-                widget.app.latestVersion!.versionName,
-              );
-              if (downloadInfo?.filePath != null) {
-                await downloadProvider.deleteDownloadedFile(
-                  downloadInfo!.filePath!,
-                );
-              }
-              break;
-            }
-          }
-        }
-      } catch (e) {
-        final errorMsg = e.toString();
-        if (!errorMsg.contains('cancelled') && !errorMsg.contains('Cancelled')) {
-          if (context.mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Download failed: $errorMsg')),
-            );
-          }
-        }
-      }
-    }
-  }
-
-  Future<void> _showRepositorySelection(
-    BuildContext context,
-    DownloadProvider downloadProvider,
-    AppProvider appProvider,
-    bool isDownloaded,
-    FDroidVersion version,
-  ) async {
-    final availableRepos = widget.app.availableRepositories;
-    if (availableRepos == null || availableRepos.isEmpty) return;
-
-    // Capture the mounted context before showing dialog
-    final scaffoldMessenger = ScaffoldMessenger.of(context);
-    
-    await showDialog(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: Text(isDownloaded ? 'Install from Repository' : 'Download from Repository'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: availableRepos.map((repo) {
-            final isPrimary = repo.url == widget.app.repositoryUrl;
-            return Padding(
-              padding: const EdgeInsets.symmetric(vertical: 4.0),
-              child: OutlinedButton(
-                onPressed: () {
-                  Navigator.of(dialogContext).pop();
-                  _handleInstall(
-                    context,
-                    downloadProvider,
-                    appProvider,
-                    isDownloaded,
-                    version,
-                    repo.url,
-                  );
-                },
-                style: isPrimary ? OutlinedButton.styleFrom(
-                  side: BorderSide(
-                    color: Theme.of(dialogContext).colorScheme.primary,
-                    width: 2,
-                  ),
-                ) : null,
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        spacing: 4,
-                        children: [
-                          Row(
-                            children: [
-                              Expanded(
-                                child: Text(
-                                  repo.name,
-                                  style: Theme.of(dialogContext).textTheme.titleMedium,
-                                ),
-                              ),
-                              if (isPrimary)
-                                Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                                  decoration: BoxDecoration(
-                                    color: Theme.of(dialogContext).colorScheme.primaryContainer,
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                  child: Text(
-                                    'Default',
-                                    style: Theme.of(dialogContext).textTheme.labelSmall?.copyWith(
-                                      color: Theme.of(dialogContext).colorScheme.onPrimaryContainer,
-                                    ),
-                                  ),
-                                ),
-                            ],
-                          ),
-                          Text(
-                            repo.url,
-                            style: Theme.of(dialogContext).textTheme.bodySmall?.copyWith(
-                              color: Theme.of(dialogContext).textTheme.bodySmall?.color?.withOpacity(0.7),
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            );
-          }).toList(),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(),
-            child: const Text('Cancel'),
-          ),
-        ],
-      ),
     );
   }
 }

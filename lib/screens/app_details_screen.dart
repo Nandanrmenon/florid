@@ -15,6 +15,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../models/fdroid_app.dart';
 import '../providers/app_provider.dart';
 import '../providers/download_provider.dart';
+import '../providers/repositories_provider.dart';
 import '../services/izzy_stats_service.dart';
 
 class AppDetailsScreen extends StatefulWidget {
@@ -29,6 +30,7 @@ class AppDetailsScreen extends StatefulWidget {
 class _AppDetailsScreenState extends State<AppDetailsScreen> {
   late Future<List<String>> _screenshotsFuture;
   late Future<IzzyStats> _statsFuture;
+  late Future<FDroidApp> _enrichedAppFuture;
 
   @override
   void initState() {
@@ -41,6 +43,11 @@ class _AppDetailsScreenState extends State<AppDetailsScreen> {
     _statsFuture = context.read<IzzyStatsService>().fetchStatsForPackage(
       widget.app.packageName,
     );
+    // Enrich app with repository information
+    _enrichedAppFuture = context.read<AppProvider>().enrichAppWithRepositories(
+      widget.app,
+      context.read<RepositoriesProvider>(),
+    );
   }
 
   Widget _buildInstallButton(
@@ -49,11 +56,11 @@ class _AppDetailsScreenState extends State<AppDetailsScreen> {
     AppProvider appProvider,
     bool isDownloaded,
     FDroidVersion version,
+    FDroidApp app,
   ) {
-    final availableRepos = widget.app.availableRepositories;
+    final availableRepos = app.availableRepositories;
     final hasMultipleRepos =
         availableRepos != null && availableRepos.length > 1;
-    print('hasMultipleRepos: $hasMultipleRepos');
 
     if (hasMultipleRepos) {
       // Show split button with dropdown for multiple repositories
@@ -68,17 +75,17 @@ class _AppDetailsScreenState extends State<AppDetailsScreen> {
                 appProvider,
                 isDownloaded,
                 version,
-                widget.app.repositoryUrl,
+                app.repositoryUrl,
               ),
               icon: Icon(
                 isDownloaded ? Symbols.install_mobile : Symbols.download,
               ),
               label: Text(isDownloaded ? 'Install' : 'Download'),
               style: FilledButton.styleFrom(
-                // borderRadius: const BorderRadius.only(
-                //   topLeft: Radius.circular(24),
-                //   bottomLeft: Radius.circular(24),
-                // ),
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(24),
+                  bottomLeft: Radius.circular(24),
+                ),
               ),
             ),
           ),
@@ -89,13 +96,14 @@ class _AppDetailsScreenState extends State<AppDetailsScreen> {
               appProvider,
               isDownloaded,
               version,
+              app,
             ),
             style: FilledButton.styleFrom(
               padding: const EdgeInsets.symmetric(horizontal: 12),
-              // borderRadius: const BorderRadius.only(
-              //   topRight: Radius.circular(24),
-              //   bottomRight: Radius.circular(24),
-              // ),
+              borderRadius: const BorderRadius.only(
+                topRight: Radius.circular(24),
+                bottomRight: Radius.circular(24),
+              ),
             ),
             child: const Icon(Symbols.arrow_drop_down),
           ),
@@ -110,7 +118,7 @@ class _AppDetailsScreenState extends State<AppDetailsScreen> {
           appProvider,
           isDownloaded,
           version,
-          widget.app.repositoryUrl,
+          app.repositoryUrl,
         ),
         icon: Icon(isDownloaded ? Symbols.install_mobile : Symbols.download),
         label: Text(isDownloaded ? 'Install' : 'Download'),
@@ -246,8 +254,9 @@ class _AppDetailsScreenState extends State<AppDetailsScreen> {
     AppProvider appProvider,
     bool isDownloaded,
     FDroidVersion version,
+    FDroidApp app,
   ) async {
-    final availableRepos = widget.app.availableRepositories;
+    final availableRepos = app.availableRepositories;
     if (availableRepos == null || availableRepos.isEmpty) return;
 
     // Capture the mounted context before showing dialog
@@ -263,7 +272,7 @@ class _AppDetailsScreenState extends State<AppDetailsScreen> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: availableRepos.map((repo) {
-            final isPrimary = repo.url == widget.app.repositoryUrl;
+            final isPrimary = repo.url == app.repositoryUrl;
             return Padding(
               padding: const EdgeInsets.symmetric(vertical: 4.0),
               child: OutlinedButton(
@@ -892,12 +901,23 @@ class _AppDetailsScreenState extends State<AppDetailsScreen> {
                               //     version,
                               //   ),
                               // );
-                              return _buildInstallButton(
-                                context,
-                                downloadProvider,
-                                appProvider,
-                                isDownloaded,
-                                version,
+                              return FutureBuilder<FDroidApp>(
+                                future: _enrichedAppFuture,
+                                builder: (context, snapshot) {
+                                  // Use enriched app if available and loaded, otherwise fall back to widget.app
+                                  final enrichedApp = snapshot.connectionState == ConnectionState.done && snapshot.hasData
+                                      ? snapshot.data!
+                                      : widget.app;
+                                  
+                                  return _buildInstallButton(
+                                    context,
+                                    downloadProvider,
+                                    appProvider,
+                                    isDownloaded,
+                                    version,
+                                    enrichedApp,
+                                  );
+                                },
                               );
                             },
                           ).animate().fadeIn(

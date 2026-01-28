@@ -163,13 +163,50 @@ class AppProvider extends ChangeNotifier {
     }
   }
 
-  /// Merges multiple repositories into one
+  /// Merges multiple repositories into one, tracking all available sources
   FDroidRepository _mergeRepositories(List<FDroidRepository> repos) {
     final mergedApps = <String, FDroidApp>{};
 
     // Merge all apps from all repositories
     for (final repo in repos) {
-      mergedApps.addAll(repo.apps);
+      for (final entry in repo.apps.entries) {
+        final packageName = entry.key;
+        final app = entry.value;
+        
+        if (mergedApps.containsKey(packageName)) {
+          // App already exists, add this repository to the available sources
+          final existing = mergedApps[packageName]!;
+          final repoSource = RepositorySource(
+            name: repo.name,
+            url: app.repositoryUrl,
+          );
+          
+          // Create a list of available repositories if it doesn't exist
+          final availableRepos = existing.availableRepositories != null
+              ? List<RepositorySource>.from(existing.availableRepositories!)
+              : [RepositorySource(name: 'Unknown', url: existing.repositoryUrl)];
+          
+          // Add the new repository if it's not already in the list
+          if (!availableRepos.contains(repoSource)) {
+            availableRepos.add(repoSource);
+          }
+          
+          // Keep the existing app but update available repositories
+          mergedApps[packageName] = existing.copyWith(
+            availableRepositories: availableRepos,
+          );
+        } else {
+          // First time seeing this app, add it with its repository as a source
+          mergedApps[packageName] = app.copyWith(
+            availableRepositories: [
+              RepositorySource(
+                name: repo.name,
+                url: app.repositoryUrl,
+              ),
+            ],
+          );
+        }
+      }
     }
 
     // Use the first repo's metadata

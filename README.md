@@ -150,9 +150,34 @@ The backend server can be deployed to any Node.js hosting platform:
 
 See the backend README for detailed deployment instructions.
 
+### Web Frontend (NEW)
+
+The Flutter Web frontend is now available! It provides a web interface for browsing F-Droid apps and remotely installing them on your paired mobile device.
+
+**Features:**
+- User authentication (login/registration)
+- Browse and search F-Droid apps
+- View app details
+- Pair devices with 6-digit pairing code
+- Select target device for installation
+- Send remote install commands with one click
+
+**Running the Web Frontend:**
+```bash
+flutter run -d chrome --web-renderer html --target lib/main_web.dart
+```
+
+**Building for Production:**
+```bash
+flutter build web --release --web-renderer html --target lib/main_web.dart
+```
+
+The built files will be in `build/web/` and can be deployed to any static hosting service (GitHub Pages, Netlify, Vercel, etc.).
+
+**Note:** Update the backend URL in `lib/services/web_auth_service.dart` and `lib/services/web_device_service.dart` to point to your deployed backend server.
+
 ### Future Enhancements
 
-- Flutter Web frontend (reusing mobile app code)
 - Multi-device support (install on multiple devices simultaneously)
 - Install history and analytics
 - Remote uninstall capability

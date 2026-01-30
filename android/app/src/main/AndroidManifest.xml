@@ -24,6 +24,11 @@
     
     <!-- Permission to vibrate for notification alerts -->
     <uses-permission android:name="android.permission.VIBRATE" />
+    
+    <!-- Permission for foreground service (WebSocket connection) -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
 
     <application
         android:label="Florid"

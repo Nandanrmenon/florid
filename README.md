@@ -28,6 +28,7 @@ Browse, search, and install open‑source Android apps from the F‑Droid reposi
 - Appearance: Material 3 design with light/dark and system themes
 - Localization: Choose repository content language (e.g., en‑US, de‑DE)
 - Offline cache: Fast local database with smart network/cache fallback
+- **Web Companion Store** (NEW): Pair your device with a web browser to remotely trigger app installations
 
 ## Screenshots
 
@@ -87,13 +88,76 @@ flutter build apk
 
 ```
 lib/
-├── models/          # Data models (FDroidApp, FDroidVersion, ...)
+├── models/          # Data models (FDroidApp, FDroidVersion, InstallCommand, PairedDevice)
 ├── providers/       # App, download, and settings providers
-├── screens/         # UI screens (Latest, Categories, Updates, Details, ...)
-├── services/        # API, database, notifications, utilities
+├── screens/         # UI screens (Latest, Categories, Updates, Details, Pairing, ...)
+├── services/        # API, database, notifications, web sync, device pairing
 ├── widgets/         # Reusable UI components
 └── main.dart        # App entry point
+backend/             # Node.js backend server for web companion store
 ```
+
+## Web Companion Store (Beta)
+
+Florid now supports a web companion store that allows you to browse F-Droid apps on your computer and remotely trigger installations on your paired mobile device. This feature works entirely without Google Play Services.
+
+### Features
+
+- **Device Pairing**: Scan a QR code or enter a pairing code to link your mobile device with the web companion
+- **Remote Install**: Browse apps on the web and send install commands to your paired device
+- **Real-time Sync**: WebSocket-based communication for instant delivery of install requests
+- **Notifications**: Receive notifications on your mobile device when remote install requests arrive
+- **Queue Management**: View and manage pending remote install requests on your device
+
+### How It Works
+
+1. **Mobile App**: Open Settings → Web Store Sync → Pair with Web Store
+2. **Display QR Code**: The app generates a QR code and pairing code
+3. **Web Browser**: Visit the web companion store (requires backend server)
+4. **Scan or Enter Code**: Use the QR code or enter the 6-digit pairing code
+5. **Paired**: Your device is now paired and will receive remote install requests
+6. **Browse & Install**: Browse apps on the web and click "Install on Device"
+7. **Receive Notification**: Your mobile device receives a notification
+8. **Download & Install**: Open the notification to view and start the installation
+
+### Backend Server
+
+The web companion store requires a backend server to facilitate communication between the web frontend and mobile devices. The server handles:
+
+- User authentication
+- Device pairing management
+- WebSocket connections for real-time messaging
+- Install command queuing
+
+See [`backend/README.md`](backend/README.md) for setup and deployment instructions.
+
+### Security
+
+- **JWT Authentication**: Secure token-based authentication for API requests
+- **Device IDs**: Unique UUIDs generated per device
+- **Pairing Codes**: Time-limited 6-digit codes for secure pairing
+- **WebSocket Auth**: All WebSocket connections are authenticated
+- **Rate Limiting**: API endpoints are rate-limited to prevent abuse
+
+### Deployment
+
+The backend server can be deployed to any Node.js hosting platform:
+
+- **Heroku**: Free tier available, easy deployment
+- **Railway.app**: Modern platform with free tier
+- **Render.com**: Free tier with automatic deploys
+- **Your Own Server**: Any server with Node.js support
+
+See the backend README for detailed deployment instructions.
+
+### Future Enhancements
+
+- Flutter Web frontend (reusing mobile app code)
+- Multi-device support (install on multiple devices simultaneously)
+- Install history and analytics
+- Remote uninstall capability
+- Batch install (multiple apps at once)
+- UnifiedPush integration for better battery efficiency
 
 ## Permissions
 

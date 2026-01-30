@@ -8,17 +8,38 @@ A complete web-to-mobile installation system architecture for Florid that demons
 3. Message passing architecture for install requests
 4. Download/install progress tracking on mobile
 
-**IMPORTANT:** This is a **proof-of-concept/demonstration** that shows the architecture and flow. The current implementation uses an in-memory message queue, which means:
+**IMPORTANT:** This implementation now includes **localStorage-based pairing for same-browser testing**! This means:
 
+- ✅ **NEW: Same-browser testing works!** Open web and mobile in different tabs of the same browser
 - ✅ Perfect for understanding the architecture
-- ✅ Demonstrates the complete flow
-- ✅ No external dependencies needed for testing
-- ⚠️ **Does NOT work across different devices without a server backend**
-- ⚠️ **For production use, you need to implement a server to relay messages**
+- ✅ Demonstrates the complete flow  
+- ✅ No server required for testing
+- ⚠️ **Cross-device pairing requires a server backend** (see implementation guide below)
 
-The code provides the complete architecture that can be connected to a real server backend for production deployment.
+**For Testing:** See [TESTING_PAIRING.md](TESTING_PAIRING.md) for detailed same-browser testing instructions.
 
-## How to Use
+**For Production:** Implement a server backend to enable cross-device pairing (guide below).
+
+## Quick Testing (Same Browser)
+
+1. **Build and run the web version:**
+   ```bash
+   flutter build web
+   # Serve the web directory (e.g., python3 -m http.server -d build/web 8080)
+   ```
+
+2. **Open two tabs in the same browser:**
+   - Tab 1: Web version (will show web store UI)
+   - Tab 2: Mobile version (will show mobile UI or use mobile device emulation)
+
+3. **Pair the tabs:**
+   - Tab 2 (Mobile): Settings → Pair with Web → Note the 6-digit code
+   - Tab 1 (Web): Enter the code → Click Pair
+   - ✅ Should pair instantly via localStorage!
+
+See [TESTING_PAIRING.md](TESTING_PAIRING.md) for detailed instructions and troubleshooting.
+
+## How to Use (Production Setup)
 
 ### Step 1: Pair Devices
 

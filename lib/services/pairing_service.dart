@@ -5,6 +5,11 @@ import 'dart:math';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
+// Conditional imports for web storage
+import 'pairing_storage_stub.dart'
+    if (dart.library.html) 'pairing_storage_web.dart'
+    if (dart.library.io) 'pairing_storage_mobile.dart';
+
 /// Message types for web-mobile communication
 enum MessageType {
   pairRequest,
@@ -334,24 +339,70 @@ class PairingService extends ChangeNotifier {
 
   // Local message queue methods (replace with actual server API in production)
   void _enqueueMessage(String code, PairingMessage message) {
+    // Use in-memory queue
     if (!_sharedMessageQueue.containsKey(code)) {
       _sharedMessageQueue[code] = [];
     }
     _sharedMessageQueue[code]!.add(message);
 
-    debugPrint(
-      '[PairingService] Enqueued message for code $code: ${message.type.name}',
-    );
-
-    // Clean up old messages
+    // Clean up old messages from memory
     _sharedMessageQueue[code] = _sharedMessageQueue[code]!
         .where(
           (m) => m.timestamp.isAfter(DateTime.now().subtract(_messageExpiry)),
         )
         .toList();
+
+    // On web, also save to localStorage for cross-tab communication
+    if (kIsWeb) {
+      try {
+        final messagesJson = jsonEncode(
+          _sharedMessageQueue[code]!.map((m) => m.toJson()).toList(),
+        );
+        PairingStorage.saveMessages(code, messagesJson);
+        debugPrint(
+          '[PairingService] Enqueued message for code $code: ${message.type.name} (saved to localStorage)',
+        );
+      } catch (e) {
+        debugPrint('[PairingService] Error saving to localStorage: $e');
+      }
+    } else {
+      debugPrint(
+        '[PairingService] Enqueued message for code $code: ${message.type.name} (in-memory only)',
+      );
+    }
   }
 
   List<PairingMessage> _getMessages(String code) {
+    // On web, try to load from localStorage first for cross-tab communication
+    if (kIsWeb) {
+      try {
+        final storedJson = PairingStorage.loadMessages(code);
+        if (storedJson != null) {
+          final messagesList = jsonDecode(storedJson) as List;
+          final messages = messagesList
+              .map((m) => PairingMessage.fromJson(m as Map<String, dynamic>))
+              .where(
+                (m) => m.timestamp.isAfter(
+                  DateTime.now().subtract(_messageExpiry),
+                ),
+              )
+              .toList();
+
+          // Update in-memory cache
+          _sharedMessageQueue[code] = messages;
+          
+          debugPrint(
+            '[PairingService] Loaded ${messages.length} messages from localStorage for code $code',
+          );
+          
+          return messages;
+        }
+      } catch (e) {
+        debugPrint('[PairingService] Error loading from localStorage: $e');
+      }
+    }
+
+    // Fallback to in-memory queue
     return _sharedMessageQueue[code] ?? [];
   }
 
@@ -388,6 +439,19 @@ class PairingService extends ChangeNotifier {
     debugPrint(
       '[PairingService] Timeout waiting for pairing response after 30 seconds',
     );
+    
+    if (kIsWeb) {
+      debugPrint(
+        '[PairingService] Web: Make sure the mobile app is running and has started pairing with the same code.',
+      );
+      debugPrint(
+        '[PairingService] Web: For same-browser testing, open the mobile app in another tab.',
+      );
+      debugPrint(
+        '[PairingService] Web: For cross-device pairing, implement a server backend (see documentation).',
+      );
+    }
+    
     return null;
   }
 

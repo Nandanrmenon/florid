@@ -30,6 +30,9 @@ Browse, search, and install open‑source Android apps from the F‑Droid reposi
 - Offline cache: Fast local database with smart network/cache fallback
 - **Web Store**: Browse F-Droid apps on the web and trigger installs on your paired mobile device
 - **Remote Install**: Pair your mobile device with the web version to install apps remotely
+- **Same-Browser Testing**: Test web-mobile pairing in the same browser using localStorage (no server required!)
+
+> **Note:** For testing, pairing works in the same browser via localStorage. For production cross-device pairing, implement a server backend. See [TESTING_PAIRING.md](TESTING_PAIRING.md) for details.
 
 ## Screenshots
 

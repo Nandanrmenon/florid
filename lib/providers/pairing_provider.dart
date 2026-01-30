@@ -55,7 +55,17 @@ class PairingProvider extends ChangeNotifier {
         _currentPairingCode = code;
         _errorMessage = null;
       } else {
-        _errorMessage = 'Failed to pair. Please check the code and try again.';
+        // Provide helpful error message based on platform
+        if (kIsWeb) {
+          _errorMessage = 
+              'Failed to pair. Make sure:\n'
+              '• The mobile app is running\n'
+              '• Mobile has started pairing with code: $code\n'
+              '• For same-browser testing: Open mobile in another tab\n'
+              '• For cross-device: A server backend is required (see docs)';
+        } else {
+          _errorMessage = 'Failed to pair. Please check the code and try again.';
+        }
       }
       notifyListeners();
       return success;

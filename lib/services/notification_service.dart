@@ -7,6 +7,10 @@ class NotificationService {
   static const String downloadChannelId = 'com.florid.download';
   static const String downloadChannelName = 'Download Progress';
   static const int downloadNotificationId = 1;
+  
+  static const String remoteInstallChannelId = 'com.florid.remote_install';
+  static const String remoteInstallChannelName = 'Remote Install';
+  static const int remoteInstallNotificationId = 2;
 
   late FlutterLocalNotificationsPlugin _flutterLocalNotificationsPlugin;
 
@@ -51,6 +55,9 @@ class NotificationService {
 
     // Create download notification channel
     await _createDownloadChannel();
+    
+    // Create remote install notification channel
+    await _createRemoteInstallChannel();
   }
 
   Future<void> requestPermission() async {
@@ -70,6 +77,24 @@ class NotificationService {
       enableVibration: false,
       playSound: false,
       showBadge: false,
+    );
+
+    await _flutterLocalNotificationsPlugin
+        .resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin
+        >()
+        ?.createNotificationChannel(channel);
+  }
+
+  Future<void> _createRemoteInstallChannel() async {
+    const AndroidNotificationChannel channel = AndroidNotificationChannel(
+      remoteInstallChannelId,
+      remoteInstallChannelName,
+      description: 'Remote install notifications from web store',
+      importance: Importance.high,
+      enableVibration: true,
+      playSound: true,
+      showBadge: true,
     );
 
     await _flutterLocalNotificationsPlugin
@@ -216,6 +241,65 @@ class NotificationService {
 
   Future<void> cancelDownloadNotification() async {
     await _flutterLocalNotificationsPlugin.cancel(downloadNotificationId);
+  }
+
+  /// Show notification for remote install request
+  Future<void> showRemoteInstallNotification({
+    required String appName,
+    required String packageName,
+    required String sourceDevice,
+  }) async {
+    final NotificationDetails platformChannelSpecifics = NotificationDetails(
+      android: AndroidNotificationDetails(
+        remoteInstallChannelId,
+        remoteInstallChannelName,
+        channelDescription: 'Remote install notifications from web store',
+        importance: Importance.high,
+        priority: Priority.high,
+        enableVibration: true,
+        playSound: true,
+        channelShowBadge: true,
+        tag: packageName,
+      ),
+    );
+
+    await _flutterLocalNotificationsPlugin.show(
+      remoteInstallNotificationId,
+      'Install Request',
+      'Install $appName from $sourceDevice',
+      platformChannelSpecifics,
+      payload: packageName,
+    );
+  }
+
+  /// Show notification for successful pairing
+  Future<void> showPairingSuccessNotification({
+    required String deviceName,
+  }) async {
+    final NotificationDetails platformChannelSpecifics = NotificationDetails(
+      android: AndroidNotificationDetails(
+        remoteInstallChannelId,
+        remoteInstallChannelName,
+        channelDescription: 'Device pairing notifications',
+        importance: Importance.defaultImportance,
+        priority: Priority.defaultPriority,
+        enableVibration: true,
+        playSound: true,
+        channelShowBadge: true,
+      ),
+    );
+
+    await _flutterLocalNotificationsPlugin.show(
+      remoteInstallNotificationId,
+      'Device Paired',
+      'Successfully paired with $deviceName',
+      platformChannelSpecifics,
+    );
+  }
+
+  /// Cancel remote install notification
+  Future<void> cancelRemoteInstallNotification() async {
+    await _flutterLocalNotificationsPlugin.cancel(remoteInstallNotificationId);
   }
 
   void _onNotificationTapped(NotificationResponse response) {

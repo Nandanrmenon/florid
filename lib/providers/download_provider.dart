@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 import '../models/fdroid_app.dart';
+import '../models/install_command.dart';
 import '../providers/settings_provider.dart';
 import '../services/fdroid_api_service.dart';
 import '../services/notification_service.dart';
@@ -77,6 +78,9 @@ class DownloadProvider extends ChangeNotifier {
   SettingsProvider _settingsProvider;
   final Map<String, DownloadInfo> _downloads = {};
   final NotificationService _notificationService = NotificationService();
+  
+  // Queue for remote install requests
+  final List<InstallCommand> _remoteInstallQueue = [];
 
   DownloadProvider(this._apiService, this._settingsProvider) {
     _initNotifications();
@@ -369,6 +373,47 @@ class DownloadProvider extends ChangeNotifier {
     return _downloads.values
         .where((info) => info.status == DownloadStatus.downloading)
         .length;
+  }
+
+  /// Queue a remote install command
+  Future<void> queueRemoteInstall(InstallCommand command) async {
+    // Check if already in queue
+    if (_remoteInstallQueue.any((c) => c.packageName == command.packageName)) {
+      debugPrint(
+        '[DownloadProvider] Remote install already queued: ${command.packageName}',
+      );
+      return;
+    }
+
+    _remoteInstallQueue.add(command);
+    notifyListeners();
+
+    // Show notification
+    await _notificationService.showRemoteInstallNotification(
+      appName: command.appName,
+      packageName: command.packageName,
+      sourceDevice: command.sourceDevice,
+    );
+
+    debugPrint(
+      '[DownloadProvider] Queued remote install: ${command.packageName}',
+    );
+  }
+
+  /// Get all pending remote install commands
+  List<InstallCommand> get pendingRemoteInstalls =>
+      List.unmodifiable(_remoteInstallQueue);
+
+  /// Remove a remote install command from queue
+  void removeRemoteInstall(InstallCommand command) {
+    _remoteInstallQueue.removeWhere((c) => c.id == command.id);
+    notifyListeners();
+  }
+
+  /// Clear all remote install commands
+  void clearRemoteInstalls() {
+    _remoteInstallQueue.clear();
+    notifyListeners();
   }
 
   /// Installs an APK file

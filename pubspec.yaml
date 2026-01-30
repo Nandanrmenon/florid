@@ -48,6 +48,9 @@ dependencies:
 
   # Package info for app version checking
   package_info_plus: ^9.0.0
+  
+  # Device info for getting device details
+  device_info_plus: ^11.0.0
 
   # Cached network image for app icons
   cached_network_image: ^3.3.1

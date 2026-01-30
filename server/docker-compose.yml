@@ -1,0 +1,17 @@
+version: '3.8'
+
+services:
+  florid-server:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+    restart: unless-stopped
+    networks:
+      - florid-network
+
+networks:
+  florid-network:
+    driver: bridge

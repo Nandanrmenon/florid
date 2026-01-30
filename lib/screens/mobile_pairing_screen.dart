@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:qr_code_scanner/qr_code_scanner.dart';
+import 'package:universal_platform/universal_platform.dart';
 
 import '../services/pairing_service.dart';
+
+// Conditional import for QR scanner (only works on mobile)
+// ignore: uri_does_not_exist
+import 'package:qr_code_scanner/qr_code_scanner.dart' if (dart.library.html) '';
 
 /// Mobile pairing screen to scan QR code or enter pairing code
 class MobilePairingScreen extends StatefulWidget {
@@ -14,19 +18,25 @@ class MobilePairingScreen extends StatefulWidget {
 
 class _MobilePairingScreenState extends State<MobilePairingScreen> {
   final GlobalKey qrKey = GlobalKey(debugLabel: 'QR');
-  QRViewController? controller;
+  dynamic controller; // Use dynamic for conditional compilation
   bool _isProcessing = false;
   String? _error;
   final _codeController = TextEditingController();
 
   @override
   void dispose() {
-    controller?.dispose();
+    if (controller != null && UniversalPlatform.isAndroid) {
+      controller?.dispose();
+    }
     _codeController.dispose();
     super.dispose();
   }
 
-  void _onQRViewCreated(QRViewController controller) {
+  void _onQRViewCreated(dynamic controller) {
+    if (!UniversalPlatform.isAndroid && !UniversalPlatform.isIOS) {
+      return; // QR scanner only works on mobile
+    }
+    
     this.controller = controller;
     controller.scannedDataStream.listen((scanData) {
       if (!_isProcessing && scanData.code != null) {
@@ -109,6 +119,38 @@ class _MobilePairingScreenState extends State<MobilePairingScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // On web or unsupported platforms, show manual entry only
+    if (!UniversalPlatform.isAndroid && !UniversalPlatform.isIOS) {
+      return Scaffold(
+        appBar: AppBar(
+          title: const Text('Pair with Web'),
+        ),
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(Icons.phonelink, size: 64),
+                const SizedBox(height: 24),
+                const Text(
+                  'QR scanner is only available on mobile devices',
+                  style: TextStyle(fontSize: 16),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 32),
+                ElevatedButton.icon(
+                  onPressed: _enterCodeManually,
+                  icon: const Icon(Icons.keyboard),
+                  label: const Text('Enter Pairing Code'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+    
     return Scaffold(
       appBar: AppBar(
         title: const Text('Pair with Web'),
@@ -124,17 +166,7 @@ class _MobilePairingScreenState extends State<MobilePairingScreen> {
         children: [
           Expanded(
             flex: 4,
-            child: QRView(
-              key: qrKey,
-              onQRViewCreated: _onQRViewCreated,
-              overlay: QrScannerOverlayShape(
-                borderColor: Theme.of(context).colorScheme.primary,
-                borderRadius: 10,
-                borderLength: 30,
-                borderWidth: 10,
-                cutOutSize: 300,
-              ),
-            ),
+            child: _buildQRScanner(context),
           ),
           Expanded(
             flex: 1,
@@ -182,5 +214,34 @@ class _MobilePairingScreenState extends State<MobilePairingScreen> {
         ],
       ),
     );
+  }
+  
+  Widget _buildQRScanner(BuildContext context) {
+    // This will only be called on Android/iOS
+    try {
+      return QRView(
+        key: qrKey,
+        onQRViewCreated: _onQRViewCreated,
+        overlay: QrScannerOverlayShape(
+          borderColor: Theme.of(context).colorScheme.primary,
+          borderRadius: 10,
+          borderLength: 30,
+          borderWidth: 10,
+          cutOutSize: 300,
+        ),
+      );
+    } catch (e) {
+      // Fallback if QRView fails
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.error, size: 64, color: Colors.red),
+            const SizedBox(height: 16),
+            Text('QR Scanner Error: $e'),
+          ],
+        ),
+      );
+    }
   }
 }

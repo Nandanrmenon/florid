@@ -28,6 +28,8 @@ Browse, search, and install open‑source Android apps from the F‑Droid reposi
 - Appearance: Material 3 design with light/dark and system themes
 - Localization: Choose repository content language (e.g., en‑US, de‑DE)
 - Offline cache: Fast local database with smart network/cache fallback
+- **Web Store**: Browse F-Droid apps on the web and trigger installs on your paired mobile device
+- **Remote Install**: Pair your mobile device with the web version to install apps remotely
 
 ## Screenshots
 
@@ -69,6 +71,36 @@ Build a release APK:
 flutter build apk
 ```
 
+Build for web:
+
+```bash
+flutter build web
+```
+
+## Web Store & Remote Install
+
+Florid now supports a web version that allows you to browse apps and trigger installations on your paired mobile device.
+
+### How it works
+
+1. **On Mobile**: 
+   - Open Florid app
+   - Go to Settings → Pair with Web
+   - Note the 6-digit pairing code displayed
+
+2. **On Web**: 
+   - Open the Florid web app in your browser
+   - Click "Enter Pairing Code"
+   - Enter the 6-digit code from your mobile device
+   - Once paired, browse apps and click "Install" to send the app to your mobile
+
+3. **Installation**:
+   - Your mobile device receives a notification
+   - Tap the notification to see download/install progress
+   - The app downloads and can be installed directly
+
+This feature works without any Google services or proprietary protocols - it uses a simple pairing mechanism built entirely in Flutter.
+
 ## Architecture
 
 - State management: Provider
@@ -76,6 +108,7 @@ flutter build apk
 - Serialization: `json_serializable` + `build_runner`
 - UI: Flutter Material 3 components and custom widgets
 - Notifications: `flutter_local_notifications` for download progress/completion
+- Pairing: `PairingService` for web-mobile communication using in-memory message queue (can be replaced with a server implementation)
 
 ### Repository & Caching
 
@@ -83,16 +116,27 @@ flutter build apk
 - Falls back to local DB or JSON cache when offline or on failures
 - Extracts screenshots from raw metadata when available
 
+### Web-Mobile Communication
+
+- Uses a pairing code system (6-digit code) for secure device pairing
+- Message queue for install requests and status updates
+- Currently uses in-memory queue (suitable for local testing)
+- Can be easily extended to use a server backend for production use
+
 ### Project Structure
 
 ```
 lib/
 ├── models/          # Data models (FDroidApp, FDroidVersion, ...)
-├── providers/       # App, download, and settings providers
-├── screens/         # UI screens (Latest, Categories, Updates, Details, ...)
-├── services/        # API, database, notifications, utilities
+├── providers/       # App, download, pairing, and settings providers
+├── screens/         # UI screens (Latest, Categories, Updates, Details, Pairing, RemoteInstall, WebStore, ...)
+├── services/        # API, database, notifications, pairing utilities
 ├── widgets/         # Reusable UI components
-└── main.dart        # App entry point
+└── main.dart        # App entry point with platform detection
+web/                 # Web platform files
+├── index.html       # Web entry point
+├── manifest.json    # PWA manifest
+└── icons/           # PWA icons
 ```
 
 ## Permissions

@@ -6,9 +6,15 @@ class NotificationService {
   static final NotificationService _instance = NotificationService._internal();
   static const String downloadChannelId = 'com.florid.download';
   static const String downloadChannelName = 'Download Progress';
+  static const String installRequestChannelId = 'com.florid.install_request';
+  static const String installRequestChannelName = 'Install Requests';
   static const int downloadNotificationId = 1;
+  static const int installRequestNotificationId = 2;
 
   late FlutterLocalNotificationsPlugin _flutterLocalNotificationsPlugin;
+  
+  // Callback for notification taps
+  Function(String)? onInstallRequestTapped;
 
   NotificationService._internal();
 
@@ -51,6 +57,9 @@ class NotificationService {
 
     // Create download notification channel
     await _createDownloadChannel();
+    
+    // Create install request notification channel
+    await _createInstallRequestChannel();
   }
 
   Future<void> requestPermission() async {
@@ -70,6 +79,24 @@ class NotificationService {
       enableVibration: false,
       playSound: false,
       showBadge: false,
+    );
+
+    await _flutterLocalNotificationsPlugin
+        .resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin
+        >()
+        ?.createNotificationChannel(channel);
+  }
+  
+  Future<void> _createInstallRequestChannel() async {
+    const AndroidNotificationChannel channel = AndroidNotificationChannel(
+      installRequestChannelId,
+      installRequestChannelName,
+      description: 'Install requests from web',
+      importance: Importance.high,
+      enableVibration: true,
+      playSound: true,
+      showBadge: true,
     );
 
     await _flutterLocalNotificationsPlugin
@@ -222,5 +249,59 @@ class NotificationService {
     debugPrint(
       '[NotificationService] Notification tapped: ${response.payload}',
     );
+    
+    // Handle install request notification taps
+    if (response.id == installRequestNotificationId && 
+        response.payload != null &&
+        onInstallRequestTapped != null) {
+      onInstallRequestTapped!(response.payload!);
+    }
+  }
+  
+  /// Show notification for install request from web
+  Future<void> showInstallRequest({
+    required String appName,
+    required String packageName,
+  }) async {
+    const AndroidNotificationDetails androidPlatformChannelSpecifics =
+        AndroidNotificationDetails(
+          installRequestChannelId,
+          installRequestChannelName,
+          channelDescription: 'Install requests from web',
+          importance: Importance.high,
+          priority: Priority.high,
+          showProgress: false,
+          enableVibration: true,
+          playSound: true,
+          channelShowBadge: true,
+        );
+
+    final NotificationDetails platformChannelSpecifics = NotificationDetails(
+      android: AndroidNotificationDetails(
+        installRequestChannelId,
+        installRequestChannelName,
+        channelDescription: 'Install requests from web',
+        importance: Importance.high,
+        priority: Priority.high,
+        showProgress: false,
+        enableVibration: true,
+        playSound: true,
+        channelShowBadge: true,
+        tag: packageName,
+      ),
+    );
+
+    await _flutterLocalNotificationsPlugin.show(
+      installRequestNotificationId,
+      'Install Request',
+      'Tap to install $appName from web',
+      platformChannelSpecifics,
+      payload: packageName,
+    );
+  }
+  
+  /// Cancel install request notification
+  Future<void> cancelInstallRequestNotification() async {
+    await _flutterLocalNotificationsPlugin.cancel(installRequestNotificationId);
   }
 }

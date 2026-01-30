@@ -3,11 +3,13 @@ import 'package:florid/providers/app_provider.dart';
 import 'package:florid/providers/repositories_provider.dart';
 import 'package:florid/screens/categories_screen.dart';
 import 'package:florid/screens/home_screen.dart';
+import 'package:florid/screens/mobile_pairing_screen.dart';
 import 'package:florid/utils/menu_actions.dart';
 import 'package:florid/widgets/f_tabbar.dart';
 import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/material_symbols_icons.dart';
 import 'package:provider/provider.dart';
+import 'package:universal_platform/universal_platform.dart';
 
 class LibraryScreen extends StatefulWidget {
   const LibraryScreen({super.key});
@@ -47,6 +49,9 @@ class _LibraryScreenState extends State<LibraryScreen>
                 case 'refresh':
                   _refreshData();
                   break;
+                case 'pair':
+                  _openPairingScreen();
+                  break;
                 case 'settings':
                   MenuActions.showSettings(context);
                   break;
@@ -64,6 +69,16 @@ class _LibraryScreenState extends State<LibraryScreen>
                   contentPadding: EdgeInsets.zero,
                 ),
               ),
+              // Show pairing option only on mobile platforms
+              if (UniversalPlatform.isAndroid || UniversalPlatform.isIOS)
+                const PopupMenuItem(
+                  value: 'pair',
+                  child: ListTile(
+                    leading: Icon(Symbols.qr_code_scanner),
+                    title: Text('Pair with Web'),
+                    contentPadding: EdgeInsets.zero,
+                  ),
+                ),
               PopupMenuItem(
                 value: 'settings',
                 child: ListTile(
@@ -142,5 +157,14 @@ class _LibraryScreenState extends State<LibraryScreen>
         ).showSnackBar(SnackBar(content: Text('Refresh failed: $e')));
       }
     });
+  }
+  
+  void _openPairingScreen() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const MobilePairingScreen(),
+      ),
+    );
   }
 }

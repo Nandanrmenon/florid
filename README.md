@@ -17,6 +17,7 @@ Browse, search, and install open‑source Android apps from the F‑Droid reposi
 
 ## Features
 
+### Mobile App
 - Latest and trending: Browse recently added and updated apps
 - Categories: Explore apps organized by topic
 - Powerful search: Instant filtering by name, summary, description, or package
@@ -28,6 +29,15 @@ Browse, search, and install open‑source Android apps from the F‑Droid reposi
 - Appearance: Material 3 design with light/dark and system themes
 - Localization: Choose repository content language (e.g., en‑US, de‑DE)
 - Offline cache: Fast local database with smart network/cache fallback
+
+### Web Store (NEW!)
+- Browse apps from web browser
+- Pair with mobile device via QR code
+- Remote install to mobile device
+- Real-time download and install progress
+- No Google services required
+
+See [WEB_STORE.md](WEB_STORE.md) for setup and usage instructions.
 
 ## Screenshots
 

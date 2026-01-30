@@ -3,25 +3,29 @@ import 'dart:convert';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:florid/providers/settings_provider.dart';
 import 'package:florid/screens/florid_app.dart';
+import 'package:florid/services/notification_service.dart';
+import 'package:florid/services/pairing_service.dart';
 import 'package:florid/themes/app_themes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import 'package:universal_platform/universal_platform.dart';
 
 import 'providers/app_provider.dart';
 import 'providers/download_provider.dart';
 import 'providers/repositories_provider.dart';
+import 'screens/install_progress_screen.dart';
 import 'screens/onboarding_screen.dart';
 import 'services/database_service.dart';
 import 'services/fdroid_api_service.dart';
 import 'services/izzy_stats_service.dart';
 
+// Global navigator key for handling notifications
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await EasyLocalization.ensureInitialized();
-
-  // Initialize notification service and request permission
-  // await NotificationService().init();
 
   runApp(
     EasyLocalization(
@@ -33,8 +37,50 @@ void main() async {
   );
 }
 
-class MainApp extends StatelessWidget {
+class MainApp extends StatefulWidget {
   const MainApp({super.key});
+
+  @override
+  State<MainApp> createState() => _MainAppState();
+}
+
+class _MainAppState extends State<MainApp> {
+  @override
+  void initState() {
+    super.initState();
+    _initializeServices();
+  }
+
+  Future<void> _initializeServices() async {
+    // Initialize notification service on mobile platforms
+    if (UniversalPlatform.isAndroid || UniversalPlatform.isIOS) {
+      try {
+        final notificationService = NotificationService();
+        await notificationService.init();
+        
+        // Set up notification tap handler for install requests
+        notificationService.onInstallRequestTapped = (payload) {
+          // payload is the package name and app name separated by '|'
+          final parts = payload.split('|');
+          if (parts.length >= 2) {
+            final packageName = parts[0];
+            final appName = parts[1];
+            
+            navigatorKey.currentState?.push(
+              MaterialPageRoute(
+                builder: (context) => InstallProgressScreen(
+                  packageName: packageName,
+                  appName: appName,
+                ),
+              ),
+            );
+          }
+        };
+      } catch (e) {
+        debugPrint('Failed to initialize notification service: $e');
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -47,6 +93,26 @@ class MainApp extends StatelessWidget {
           create: (_) => RepositoriesProvider(DatabaseService()),
         ),
         Provider<IzzyStatsService>(create: (_) => IzzyStatsService()),
+        ChangeNotifierProvider<PairingService>(
+          create: (_) {
+            final service = PairingService();
+            // Initialize with server configuration
+            // TODO: Make this configurable in settings
+            service.init(
+              serverUrl: 'http://localhost:3000',
+              wsUrl: 'ws://localhost:3000',
+            );
+            
+            // Listen for install requests on mobile
+            if (UniversalPlatform.isAndroid || UniversalPlatform.isIOS) {
+              service.installRequestStream.listen((request) {
+                _handleInstallRequest(request);
+              });
+            }
+            
+            return service;
+          },
+        ),
         ProxyProvider<SettingsProvider, FDroidApiService>(
           update: (context, settings, previous) {
             if (previous != null) {
@@ -96,6 +162,7 @@ class MainApp extends StatelessWidget {
         builder: (context, settings, _) {
           return MaterialApp(
             title: 'Florid - F-Droid Client',
+            navigatorKey: navigatorKey,
             debugShowCheckedModeBanner: false,
             localizationsDelegates: context.localizationDelegates,
             supportedLocales: context.supportedLocales,
@@ -118,6 +185,32 @@ class MainApp extends StatelessWidget {
         },
       ),
     );
+  }
+  
+  /// Handle install requests received from web
+  Future<void> _handleInstallRequest(InstallRequest request) async {
+    debugPrint('[MainApp] Received install request: ${request.packageName}');
+    
+    // Show notification
+    try {
+      final notificationService = NotificationService();
+      await notificationService.showInstallRequest(
+        appName: request.appName,
+        packageName: '${request.packageName}|${request.appName}',
+      );
+    } catch (e) {
+      debugPrint('[MainApp] Failed to show install request notification: $e');
+    }
+    
+    // Optionally navigate to install progress screen immediately
+    // navigatorKey.currentState?.push(
+    //   MaterialPageRoute(
+    //     builder: (context) => InstallProgressScreen(
+    //       packageName: request.packageName,
+    //       appName: request.appName,
+    //     ),
+    //   ),
+    // );
   }
 }
 

@@ -1,0 +1,22 @@
+{
+  "name": "florid-server",
+  "version": "1.0.0",
+  "description": "Backend server for Florid web-mobile pairing and communication",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js"
+  },
+  "keywords": ["florid", "fdroid", "websocket"],
+  "author": "",
+  "license": "GPL-3.0",
+  "dependencies": {
+    "express": "^4.18.2",
+    "ws": "^8.14.2",
+    "cors": "^2.8.5",
+    "uuid": "^9.0.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  }
+}

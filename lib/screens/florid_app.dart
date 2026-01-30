@@ -1,8 +1,10 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:florid/screens/library_screen.dart';
+import 'package:florid/screens/web_store_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:provider/provider.dart';
+import 'package:universal_platform/universal_platform.dart';
 
 import '../providers/app_provider.dart';
 import '../providers/repositories_provider.dart';
@@ -34,7 +36,10 @@ class _FloridAppState extends State<FloridApp> {
       final appProvider = context.read<AppProvider>();
       final repositoriesProvider = context.read<RepositoriesProvider>();
 
-      appProvider.fetchInstalledApps();
+      // Only fetch installed apps on mobile platforms
+      if (UniversalPlatform.isAndroid || UniversalPlatform.isIOS) {
+        appProvider.fetchInstalledApps();
+      }
       repositoriesProvider.loadRepositories();
     });
   }
@@ -47,6 +52,12 @@ class _FloridAppState extends State<FloridApp> {
 
   @override
   Widget build(BuildContext context) {
+    // Show web store for web platform
+    if (UniversalPlatform.isWeb) {
+      return const WebStoreScreen();
+    }
+    
+    // Show mobile UI for mobile platforms
     return Scaffold(
       body: IndexedStack(index: _currentIndex, children: _screens),
       bottomNavigationBar: Consumer<AppProvider>(

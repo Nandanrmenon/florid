@@ -10,6 +10,7 @@ class SettingsProvider extends ChangeNotifier {
   static const _autoDeleteKey = 'auto_delete_apk';
   static const _localeKey = 'locale';
   static const _onboardingCompleteKey = 'onboarding_complete';
+  static const _sniBypassKey = 'sni_bypass_enabled';
 
   ThemeMode _themeMode = ThemeMode.system;
   ThemeStyle _themeStyle = ThemeStyle.florid;
@@ -17,6 +18,7 @@ class SettingsProvider extends ChangeNotifier {
   bool _autoDeleteApk = true;
   String _locale = 'en-US';
   bool _onboardingComplete = false;
+  bool _sniBypassEnabled = true;
   bool _loaded = false;
 
   SettingsProvider() {
@@ -30,6 +32,7 @@ class SettingsProvider extends ChangeNotifier {
   bool get autoDeleteApk => _autoDeleteApk;
   String get locale => _locale;
   bool get onboardingComplete => _onboardingComplete;
+  bool get sniBypassEnabled => _sniBypassEnabled;
 
   /// Available locales for F-Droid repository data
   static const List<String> availableLocales = [
@@ -93,6 +96,7 @@ class SettingsProvider extends ChangeNotifier {
     _autoDeleteApk = prefs.getBool(_autoDeleteKey) ?? true;
     _locale = prefs.getString(_localeKey) ?? 'en-US';
     _onboardingComplete = prefs.getBool(_onboardingCompleteKey) ?? false;
+    _sniBypassEnabled = prefs.getBool(_sniBypassKey) ?? true;
     _loaded = true;
     notifyListeners();
   }
@@ -140,5 +144,12 @@ class SettingsProvider extends ChangeNotifier {
     notifyListeners();
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_onboardingCompleteKey, value);
+  }
+
+  Future<void> setSniBypassEnabled(bool value) async {
+    _sniBypassEnabled = value;
+    notifyListeners();
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_sniBypassKey, value);
   }
 }

@@ -3,18 +3,22 @@ import 'dart:convert';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:florid/providers/settings_provider.dart';
 import 'package:florid/screens/florid_app.dart';
+import 'package:florid/screens/web_store_screen.dart';
 import 'package:florid/themes/app_themes.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 import 'providers/app_provider.dart';
 import 'providers/download_provider.dart';
+import 'providers/pairing_provider.dart';
 import 'providers/repositories_provider.dart';
 import 'screens/onboarding_screen.dart';
 import 'services/database_service.dart';
 import 'services/fdroid_api_service.dart';
 import 'services/izzy_stats_service.dart';
+import 'services/pairing_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -91,6 +95,9 @@ class MainApp extends StatelessWidget {
             return previous;
           },
         ),
+        ChangeNotifierProvider<PairingProvider>(
+          create: (_) => PairingProvider(PairingService()),
+        ),
       ],
       child: Consumer<SettingsProvider>(
         builder: (context, settings, _) {
@@ -111,6 +118,8 @@ class MainApp extends StatelessWidget {
                 ? const Scaffold(
                     body: Center(child: CircularProgressIndicator()),
                   )
+                : kIsWeb
+                ? const WebStoreScreen()
                 : settings.onboardingComplete
                 ? const FloridApp()
                 : const OnboardingScreen(),

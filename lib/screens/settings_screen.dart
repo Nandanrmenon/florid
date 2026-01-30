@@ -1,4 +1,6 @@
+import 'package:florid/screens/pairing_screen.dart';
 import 'package:florid/widgets/m_list.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:material_symbols_icons/symbols.dart';
@@ -175,6 +177,22 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       MListHeader(title: 'General Settings'),
                       MListView(
                         items: [
+                          if (!kIsWeb) ...[
+                            MListItemData(
+                              leading: Icon(Symbols.devices),
+                              title: 'Pair with Web',
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => const PairingScreen(),
+                                  ),
+                                );
+                              },
+                              subtitle: 'Connect with web version for remote installs',
+                              suffix: Icon(Symbols.chevron_right),
+                            ),
+                          ],
                           MListItemData(
                             leading: Icon(Symbols.language),
                             title: 'App content language',

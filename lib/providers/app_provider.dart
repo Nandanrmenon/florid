@@ -518,4 +518,44 @@ class AppProvider extends ChangeNotifier {
       repositoryUrl: repositoryUrl,
     );
   }
+
+  /// Gets an app by package name from cached data
+  FDroidApp? getCachedApp(String packageName) {
+    // First check the repository
+    if (_repository != null && _repository!.apps.containsKey(packageName)) {
+      return _repository!.apps[packageName];
+    }
+
+    // Check in latest apps
+    for (final app in _latestApps) {
+      if (app.packageName == packageName) {
+        return app;
+      }
+    }
+
+    // Check in recently updated apps
+    for (final app in _recentlyUpdatedApps) {
+      if (app.packageName == packageName) {
+        return app;
+      }
+    }
+
+    // Check in search results
+    for (final app in _searchResults) {
+      if (app.packageName == packageName) {
+        return app;
+      }
+    }
+
+    // Check in category apps
+    for (final apps in _categoryApps.values) {
+      for (final app in apps) {
+        if (app.packageName == packageName) {
+          return app;
+        }
+      }
+    }
+
+    return null;
+  }
 }

@@ -9,6 +9,8 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../providers/download_provider.dart';
 import '../providers/settings_provider.dart';
+import '../screens/device_pairing_screen.dart';
+import '../screens/remote_install_screen.dart';
 import '../screens/repositories_screen.dart';
 import '../services/fdroid_api_service.dart';
 
@@ -199,6 +201,56 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             subtitle: 'Add or remove F-Droid repositories',
                             suffix: Icon(Symbols.chevron_right),
                           ),
+                        ],
+                      ),
+                    ],
+                  ),
+
+                  Column(
+                    spacing: 4,
+                    children: [
+                      MListHeader(title: 'Web Store Sync'),
+                      MListView(
+                        items: [
+                          MListItemData(
+                            leading: Icon(Symbols.devices),
+                            title: 'Pair with Web Store',
+                            subtitle: settings.webSyncEnabled
+                                ? 'Device paired'
+                                : 'Not paired',
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      const DevicePairingScreen(),
+                                ),
+                              );
+                            },
+                            suffix: settings.webSyncEnabled
+                                ? Icon(
+                                    Symbols.check_circle,
+                                    color: Colors.green,
+                                  )
+                                : Icon(Symbols.chevron_right),
+                          ),
+                          if (settings.webSyncEnabled)
+                            MListItemData(
+                              leading: Icon(Symbols.install_mobile),
+                              title: 'Remote Installs',
+                              subtitle:
+                                  'View and manage remote install requests',
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        const RemoteInstallScreen(),
+                                  ),
+                                );
+                              },
+                              suffix: Icon(Symbols.chevron_right),
+                            ),
                         ],
                       ),
                     ],

@@ -10,6 +10,13 @@ class SettingsProvider extends ChangeNotifier {
   static const _autoDeleteKey = 'auto_delete_apk';
   static const _localeKey = 'locale';
   static const _onboardingCompleteKey = 'onboarding_complete';
+  
+  // Web sync settings
+  static const _webSyncEnabledKey = 'web_sync_enabled';
+  static const _deviceIdKey = 'device_id';
+  static const _userIdKey = 'user_id';
+  static const _authTokenKey = 'auth_token';
+  static const _deviceNameKey = 'device_name';
 
   ThemeMode _themeMode = ThemeMode.system;
   ThemeStyle _themeStyle = ThemeStyle.florid;
@@ -18,6 +25,13 @@ class SettingsProvider extends ChangeNotifier {
   String _locale = 'en-US';
   bool _onboardingComplete = false;
   bool _loaded = false;
+  
+  // Web sync properties
+  bool _webSyncEnabled = false;
+  String? _deviceId;
+  String? _userId;
+  String? _authToken;
+  String? _deviceName;
 
   SettingsProvider() {
     _load();
@@ -30,6 +44,13 @@ class SettingsProvider extends ChangeNotifier {
   bool get autoDeleteApk => _autoDeleteApk;
   String get locale => _locale;
   bool get onboardingComplete => _onboardingComplete;
+  
+  // Web sync getters
+  bool get webSyncEnabled => _webSyncEnabled;
+  String? get deviceId => _deviceId;
+  String? get userId => _userId;
+  String? get authToken => _authToken;
+  String? get deviceName => _deviceName;
 
   /// Available locales for F-Droid repository data
   static const List<String> availableLocales = [
@@ -93,6 +114,14 @@ class SettingsProvider extends ChangeNotifier {
     _autoDeleteApk = prefs.getBool(_autoDeleteKey) ?? true;
     _locale = prefs.getString(_localeKey) ?? 'en-US';
     _onboardingComplete = prefs.getBool(_onboardingCompleteKey) ?? false;
+    
+    // Load web sync settings
+    _webSyncEnabled = prefs.getBool(_webSyncEnabledKey) ?? false;
+    _deviceId = prefs.getString(_deviceIdKey);
+    _userId = prefs.getString(_userIdKey);
+    _authToken = prefs.getString(_authTokenKey);
+    _deviceName = prefs.getString(_deviceNameKey);
+    
     _loaded = true;
     notifyListeners();
   }
@@ -140,5 +169,64 @@ class SettingsProvider extends ChangeNotifier {
     notifyListeners();
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_onboardingCompleteKey, value);
+  }
+
+  /// Enable or disable web sync
+  Future<void> setWebSyncEnabled(bool value) async {
+    _webSyncEnabled = value;
+    notifyListeners();
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_webSyncEnabledKey, value);
+  }
+
+  /// Save device pairing information
+  Future<void> saveDevicePairing({
+    required String deviceId,
+    required String userId,
+    required String authToken,
+    String? deviceName,
+  }) async {
+    _deviceId = deviceId;
+    _userId = userId;
+    _authToken = authToken;
+    _deviceName = deviceName;
+    _webSyncEnabled = true;
+    
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_deviceIdKey, deviceId);
+    await prefs.setString(_userIdKey, userId);
+    await prefs.setString(_authTokenKey, authToken);
+    if (deviceName != null) {
+      await prefs.setString(_deviceNameKey, deviceName);
+    }
+    await prefs.setBool(_webSyncEnabledKey, true);
+    
+    notifyListeners();
+  }
+
+  /// Clear device pairing information
+  Future<void> clearDevicePairing() async {
+    _deviceId = null;
+    _userId = null;
+    _authToken = null;
+    _deviceName = null;
+    _webSyncEnabled = false;
+    
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_deviceIdKey);
+    await prefs.remove(_userIdKey);
+    await prefs.remove(_authTokenKey);
+    await prefs.remove(_deviceNameKey);
+    await prefs.setBool(_webSyncEnabledKey, false);
+    
+    notifyListeners();
+  }
+
+  /// Update device name
+  Future<void> setDeviceName(String deviceName) async {
+    _deviceName = deviceName;
+    notifyListeners();
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_deviceNameKey, deviceName);
   }
 }

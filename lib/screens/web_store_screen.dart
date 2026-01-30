@@ -162,20 +162,19 @@ class _WebStoreScreenState extends State<WebStoreScreen> {
   Future<void> _handleInstall(FDroidApp app, PairingService pairingService) async {
     if (!pairingService.isPaired) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please pair with a mobile device first'),
+        SnackBar(
+          content: const Text('Please pair with a mobile device first'),
           action: SnackBarAction(
             label: 'Pair',
-            onPressed: null, // Will be handled by tap
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const WebPairingScreen(),
+                ),
+              );
+            },
           ),
-        ),
-      );
-      
-      // Navigate to pairing screen
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => const WebPairingScreen(),
         ),
       );
       return;

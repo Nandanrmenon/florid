@@ -262,20 +262,8 @@ class NotificationService {
   Future<void> showInstallRequest({
     required String appName,
     required String packageName,
+    String? payload,
   }) async {
-    const AndroidNotificationDetails androidPlatformChannelSpecifics =
-        AndroidNotificationDetails(
-          installRequestChannelId,
-          installRequestChannelName,
-          channelDescription: 'Install requests from web',
-          importance: Importance.high,
-          priority: Priority.high,
-          showProgress: false,
-          enableVibration: true,
-          playSound: true,
-          channelShowBadge: true,
-        );
-
     final NotificationDetails platformChannelSpecifics = NotificationDetails(
       android: AndroidNotificationDetails(
         installRequestChannelId,
@@ -296,7 +284,7 @@ class NotificationService {
       'Install Request',
       'Tap to install $appName from web',
       platformChannelSpecifics,
-      payload: packageName,
+      payload: payload ?? packageName,
     );
   }
   

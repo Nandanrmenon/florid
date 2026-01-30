@@ -15,3 +15,15 @@ Future<String> getAppVersion() async {
     return kAppversion;
   }
 }
+
+// Server configuration for web-mobile pairing
+// TODO: Make these configurable through settings or environment variables
+const String kDefaultServerUrl = String.fromEnvironment(
+  'SERVER_URL',
+  defaultValue: 'http://localhost:3000',
+);
+
+const String kDefaultWsUrl = String.fromEnvironment(
+  'WS_URL',
+  defaultValue: 'ws://localhost:3000',
+);

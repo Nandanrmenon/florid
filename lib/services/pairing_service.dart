@@ -142,14 +142,20 @@ class PairingService extends ChangeNotifier {
   }
   
   /// Check pairing status
+  bool _isPolling = false;
+  
   Future<void> _pollPairingStatus() async {
-    if (_sessionId == null) return;
+    if (_sessionId == null || _isPolling) return;
     
+    _isPolling = true;
     int attempts = 0;
     const maxAttempts = 60; // Poll for 5 minutes (every 5 seconds)
     
-    while (attempts < maxAttempts && !_isPaired) {
+    while (attempts < maxAttempts && !_isPaired && _isPolling) {
       await Future.delayed(const Duration(seconds: 5));
+      
+      // Stop polling if service is being disposed or session is cleared
+      if (!_isPolling || _sessionId == null) break;
       
       try {
         final response = await http.get(
@@ -172,6 +178,8 @@ class PairingService extends ChangeNotifier {
       
       attempts++;
     }
+    
+    _isPolling = false;
   }
   
   /// Connect to WebSocket server
@@ -183,6 +191,9 @@ class PairingService extends ChangeNotifier {
       await _closeWebSocket();
       
       _wsChannel = WebSocketChannel.connect(Uri.parse(_wsUrl));
+      
+      // Reset reconnection attempts on successful connection
+      _reconnectAttempts = 0;
       
       // Register device
       _wsChannel!.sink.add(jsonEncode({
@@ -213,8 +224,19 @@ class PairingService extends ChangeNotifier {
   }
   
   /// Reconnect WebSocket after a delay
+  int _reconnectAttempts = 0;
+  static const int _maxReconnectAttempts = 10;
+  
   Future<void> _reconnectWebSocket() async {
-    await Future.delayed(const Duration(seconds: 5));
+    if (_reconnectAttempts >= _maxReconnectAttempts) {
+      debugPrint('[PairingService] Max reconnection attempts reached');
+      return;
+    }
+    
+    _reconnectAttempts++;
+    final delay = Duration(seconds: 5 * _reconnectAttempts); // Exponential backoff
+    await Future.delayed(delay);
+    
     if (_sessionId != null) {
       await _connectWebSocket();
     }
@@ -363,6 +385,7 @@ class PairingService extends ChangeNotifier {
     _pairedDeviceName = null;
     _pairingCode = null;
     _sessionId = null;
+    _isPolling = false; // Stop polling
     
     await _closeWebSocket();
     
@@ -376,6 +399,7 @@ class PairingService extends ChangeNotifier {
   
   @override
   void dispose() {
+    _isPolling = false; // Stop polling
     _closeWebSocket();
     _installRequestController.close();
     _downloadProgressController.close();

@@ -1,6 +1,5 @@
-import 'dart:convert';
-
 import 'package:easy_localization/easy_localization.dart';
+import 'package:florid/constants.dart';
 import 'package:florid/providers/settings_provider.dart';
 import 'package:florid/screens/florid_app.dart';
 import 'package:florid/services/notification_service.dart';
@@ -96,11 +95,10 @@ class _MainAppState extends State<MainApp> {
         ChangeNotifierProvider<PairingService>(
           create: (_) {
             final service = PairingService();
-            // Initialize with server configuration
-            // TODO: Make this configurable in settings
+            // Initialize with server configuration from constants
             service.init(
-              serverUrl: 'http://localhost:3000',
-              wsUrl: 'ws://localhost:3000',
+              serverUrl: kDefaultServerUrl,
+              wsUrl: kDefaultWsUrl,
             );
             
             // Listen for install requests on mobile
@@ -194,9 +192,11 @@ class _MainAppState extends State<MainApp> {
     // Show notification
     try {
       final notificationService = NotificationService();
+      // Pass package name and app name separated by pipe for parsing in tap handler
       await notificationService.showInstallRequest(
         appName: request.appName,
-        packageName: '${request.packageName}|${request.appName}',
+        packageName: request.packageName,
+        payload: '${request.packageName}|${request.appName}',
       );
     } catch (e) {
       debugPrint('[MainApp] Failed to show install request notification: $e');

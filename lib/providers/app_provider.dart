@@ -163,13 +163,47 @@ class AppProvider extends ChangeNotifier {
     }
   }
 
-  /// Merges multiple repositories into one
+  /// Merges multiple repositories into one, tracking all available sources
   FDroidRepository _mergeRepositories(List<FDroidRepository> repos) {
     final mergedApps = <String, FDroidApp>{};
 
     // Merge all apps from all repositories
     for (final repo in repos) {
-      mergedApps.addAll(repo.apps);
+      for (final entry in repo.apps.entries) {
+        final packageName = entry.key;
+        final app = entry.value;
+        
+        if (mergedApps.containsKey(packageName)) {
+          // App already exists, add this repository to the available sources
+          final existing = mergedApps[packageName]!;
+          final repoSource = RepositorySource(
+            name: repo.name,
+            url: app.repositoryUrl,
+          );
+          
+          // Add the new repository if it's not already in the list
+          final availableRepos = existing.availableRepositories ?? [];
+          if (!availableRepos.contains(repoSource)) {
+            // Create new list with the additional repository
+            final updatedRepos = [...availableRepos, repoSource];
+            
+            // Keep the existing app but update available repositories
+            mergedApps[packageName] = existing.copyWith(
+              availableRepositories: updatedRepos,
+            );
+          }
+        } else {
+          // First time seeing this app, add it with its repository as a source
+          mergedApps[packageName] = app.copyWith(
+            availableRepositories: [
+              RepositorySource(
+                name: repo.name,
+                url: app.repositoryUrl,
+              ),
+            ],
+          );
+        }
+      }
     }
 
     // Use the first repo's metadata
@@ -182,6 +216,86 @@ class AppProvider extends ChangeNotifier {
       maxage: repos.first.maxage,
       apps: mergedApps,
     );
+  }
+
+  /// Enriches a single app with repository information from all enabled repositories
+  /// This is useful when displaying app details to show which repositories host the app
+  Future<FDroidApp> enrichAppWithRepositories(
+    FDroidApp app,
+    RepositoriesProvider? repositoriesProvider,
+  ) async {
+    if (repositoriesProvider == null) {
+      return app;
+    }
+
+    try {
+      // Ensure repositories are loaded
+      if (repositoriesProvider.repositories.isEmpty) {
+        if (!repositoriesProvider.isLoading) {
+          await repositoriesProvider.loadRepositories();
+        } else {
+          // Wait a bit for loading to complete
+          await Future.delayed(const Duration(milliseconds: 100));
+        }
+      }
+
+      final enabledRepos = repositoriesProvider.enabledRepositories;
+      if (enabledRepos.isEmpty) {
+        return app;
+      }
+
+      // Start with original repository source if not null
+      final availableReposList = <RepositorySource>[];
+      if (app.repositoryUrl.isNotEmpty) {
+        // Find the repo name for the original URL
+        final originalRepo = enabledRepos.where((r) => r.url == app.repositoryUrl).firstOrNull;
+        if (originalRepo != null) {
+          availableReposList.add(RepositorySource(
+            name: originalRepo.name,
+            url: app.repositoryUrl,
+          ));
+        }
+      }
+
+      // Query all repositories in parallel for better performance
+      final repoChecks = await Future.wait(
+        enabledRepos.map((repo) async {
+          try {
+            // Skip if already added as original
+            if (repo.url == app.repositoryUrl) {
+              return null;
+            }
+            
+            // Try to find the app in this repository via database
+            final results = await _apiService.searchAppsFromRepositoryUrl(
+              app.packageName, // Use exact package name for lookup
+              repo.url,
+            );
+            
+            // If found in this repository, return the source
+            if (results.any((a) => a.packageName == app.packageName)) {
+              return RepositorySource(name: repo.name, url: repo.url);
+            }
+          } catch (e) {
+            debugPrint('Error checking repo ${repo.name} for ${app.packageName}: $e');
+          }
+          return null;
+        }),
+      );
+
+      // Filter out nulls and add to available repos
+      availableReposList.addAll(repoChecks.whereType<RepositorySource>());
+
+      // If we found the app in repositories, update it
+      if (availableReposList.isNotEmpty) {
+        return app.copyWith(availableRepositories: availableReposList);
+      }
+
+      return app;
+    } catch (e) {
+      debugPrint('Error enriching app with repositories: $e');
+      return app;
+    }
   }
 
   /// Fetches latest apps from F-Droid and custom repositories

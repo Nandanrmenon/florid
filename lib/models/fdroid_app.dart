@@ -2,6 +2,28 @@ import 'package:json_annotation/json_annotation.dart';
 
 part 'fdroid_app.g.dart';
 
+/// Represents a repository source for an app
+class RepositorySource {
+  final String name;
+  final String url;
+
+  const RepositorySource({
+    required this.name,
+    required this.url,
+  });
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is RepositorySource &&
+          runtimeType == other.runtimeType &&
+          url == other.url &&
+          name == other.name;
+
+  @override
+  int get hashCode => Object.hash(url, name);
+}
+
 @JsonSerializable()
 class FDroidApp {
   final String packageName;
@@ -28,6 +50,8 @@ class FDroidApp {
   final DateTime? lastUpdated;
   @JsonKey(ignore: true)
   final String repositoryUrl;
+  @JsonKey(ignore: true)
+  final List<RepositorySource>? availableRepositories;
 
   const FDroidApp({
     required this.packageName,
@@ -53,6 +77,7 @@ class FDroidApp {
     this.added,
     this.lastUpdated,
     this.repositoryUrl = 'https://f-droid.org/repo',
+    this.availableRepositories,
   });
 
   factory FDroidApp.fromJson(Map<String, dynamic> json) =>
@@ -138,6 +163,7 @@ class FDroidApp {
       added: added,
       lastUpdated: lastUpdated,
       repositoryUrl: repositoryUrl,
+      availableRepositories: availableRepositories,
     );
   }
 
@@ -165,6 +191,7 @@ class FDroidApp {
     DateTime? added,
     DateTime? lastUpdated,
     String? repositoryUrl,
+    List<RepositorySource>? availableRepositories,
   }) {
     return FDroidApp(
       packageName: packageName ?? this.packageName,
@@ -190,6 +217,7 @@ class FDroidApp {
       added: added ?? this.added,
       lastUpdated: lastUpdated ?? this.lastUpdated,
       repositoryUrl: repositoryUrl ?? this.repositoryUrl,
+      availableRepositories: availableRepositories ?? this.availableRepositories,
     );
   }
 }

@@ -15,6 +15,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../models/fdroid_app.dart';
 import '../providers/app_provider.dart';
 import '../providers/download_provider.dart';
+import '../providers/repositories_provider.dart';
 import '../services/izzy_stats_service.dart';
 
 class AppDetailsScreen extends StatefulWidget {
@@ -29,6 +30,7 @@ class AppDetailsScreen extends StatefulWidget {
 class _AppDetailsScreenState extends State<AppDetailsScreen> {
   late Future<List<String>> _screenshotsFuture;
   late Future<IzzyStats> _statsFuture;
+  late Future<FDroidApp> _enrichedAppFuture;
 
   @override
   void initState() {
@@ -40,6 +42,326 @@ class _AppDetailsScreenState extends State<AppDetailsScreen> {
     );
     _statsFuture = context.read<IzzyStatsService>().fetchStatsForPackage(
       widget.app.packageName,
+    );
+    // Enrich app with repository information
+    _enrichedAppFuture = context.read<AppProvider>().enrichAppWithRepositories(
+      widget.app,
+      context.read<RepositoriesProvider>(),
+    );
+  }
+
+  Widget _buildInstallButton(
+    BuildContext context,
+    DownloadProvider downloadProvider,
+    AppProvider appProvider,
+    bool isDownloaded,
+    FDroidVersion version,
+    FDroidApp app,
+  ) {
+    final availableRepos = app.availableRepositories;
+    final hasMultipleRepos =
+        availableRepos != null && availableRepos.length > 1;
+
+    return AnimatedSwitcher(
+      duration: const Duration(milliseconds: 300),
+      transitionBuilder: (child, animation) {
+        return ScaleTransition(
+          scale: animation,
+          child: FadeTransition(opacity: animation, child: child),
+        );
+      },
+      child: hasMultipleRepos
+          ? Row(
+              key: const ValueKey('split-button'),
+              spacing: 2,
+              children: [
+                Expanded(
+                  child: SizedBox(
+                    height: 48,
+                    child: FilledButton.icon(
+                      onPressed: () => _handleInstall(
+                        context,
+                        downloadProvider,
+                        appProvider,
+                        isDownloaded,
+                        version,
+                        app.repositoryUrl,
+                      ),
+                      icon: Icon(
+                        isDownloaded
+                            ? Symbols.install_mobile
+                            : Symbols.download,
+                      ),
+                      label: Text(isDownloaded ? 'Install' : 'Download'),
+                      style: FilledButton.styleFrom(),
+                    ),
+                  ),
+                ),
+                SizedBox(
+                  height: 48,
+                  child: IconButton.filledTonal(
+                    onPressed: () => _showRepositorySelection(
+                      context,
+                      downloadProvider,
+                      appProvider,
+                      isDownloaded,
+                      version,
+                      app,
+                    ),
+                    icon: Icon(Symbols.keyboard_arrow_down),
+                  ),
+                ),
+              ],
+            )
+          : SizedBox(
+              key: const ValueKey('simple-button'),
+              height: 48,
+              width: double.infinity,
+              child: FilledButton.icon(
+                onPressed: () => _handleInstall(
+                  context,
+                  downloadProvider,
+                  appProvider,
+                  isDownloaded,
+                  version,
+                  app.repositoryUrl,
+                ),
+                icon: Icon(
+                  isDownloaded ? Symbols.install_mobile : Symbols.download,
+                ),
+                label: Text(isDownloaded ? 'Install' : 'Download'),
+              ),
+            ),
+    );
+  }
+
+  Future<void> _handleInstall(
+    BuildContext context,
+    DownloadProvider downloadProvider,
+    AppProvider appProvider,
+    bool isDownloaded,
+    FDroidVersion version,
+    String repositoryUrl,
+  ) async {
+    if (isDownloaded) {
+      try {
+        final downloadInfo = downloadProvider.getDownloadInfo(
+          widget.app.packageName,
+          version.versionName,
+        );
+        if (downloadInfo?.filePath != null) {
+          final hasPermission = await downloadProvider
+              .requestInstallPermission();
+          if (!hasPermission) {
+            if (context.mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text(
+                    'Install permission is required to install APK files',
+                  ),
+                ),
+              );
+            }
+            return;
+          }
+
+          await downloadProvider.installApk(downloadInfo!.filePath!);
+          await Future.delayed(const Duration(milliseconds: 100));
+          await appProvider.fetchInstalledApps();
+          if (context.mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('${widget.app.name} installation started!'),
+              ),
+            );
+          }
+        }
+      } catch (e) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Installation failed: ${e.toString()}')),
+          );
+        }
+      }
+    } else {
+      final hasPermission = await downloadProvider.requestPermissions();
+
+      if (!hasPermission) {
+        if (context.mounted) {
+          await showDialog(
+            context: context,
+            builder: (context) => AlertDialog(
+              icon: const Icon(Symbols.warning, size: 48),
+              title: const Text('Storage Permission Required'),
+              content: const Text(
+                'Florid needs storage permission to download APK files.\n\n'
+                'To enable:\n'
+                '1. Go to Settings (button below)\n'
+                '2. Find "Permissions"\n'
+                '3. Enable "Files and media" or "Storage"\n\n'
+                'Then try downloading again.',
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: const Text('Cancel'),
+                ),
+                FilledButton(
+                  onPressed: () async {
+                    Navigator.of(context).pop();
+                    await openAppSettings();
+                  },
+                  child: const Text('Open Settings'),
+                ),
+              ],
+            ),
+          );
+        }
+        return;
+      }
+
+      try {
+        // Create a copy of the app with the selected repository URL
+        final appWithRepo = widget.app.copyWith(repositoryUrl: repositoryUrl);
+        await downloadProvider.downloadApk(appWithRepo);
+
+        if (context.mounted) {
+          for (int i = 0; i < 15; i++) {
+            await Future.delayed(const Duration(milliseconds: 800));
+            await appProvider.fetchInstalledApps();
+            if (appProvider.isAppInstalled(widget.app.packageName)) {
+              final downloadInfo = downloadProvider.getDownloadInfo(
+                widget.app.packageName,
+                widget.app.latestVersion!.versionName,
+              );
+              if (downloadInfo?.filePath != null) {
+                await downloadProvider.deleteDownloadedFile(
+                  downloadInfo!.filePath!,
+                );
+              }
+              break;
+            }
+          }
+        }
+      } catch (e) {
+        final errorMsg = e.toString();
+        if (!errorMsg.contains('cancelled') &&
+            !errorMsg.contains('Cancelled')) {
+          if (context.mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Download failed: $errorMsg')),
+            );
+          }
+        }
+      }
+    }
+  }
+
+  Future<void> _showRepositorySelection(
+    BuildContext context,
+    DownloadProvider downloadProvider,
+    AppProvider appProvider,
+    bool isDownloaded,
+    FDroidVersion version,
+    FDroidApp app,
+  ) async {
+    final availableRepos = app.availableRepositories;
+    if (availableRepos == null || availableRepos.isEmpty) return;
+
+    // Capture the mounted context before showing dialog
+    final scaffoldMessenger = ScaffoldMessenger.of(context);
+
+    await showModalBottomSheet(
+      context: context,
+      builder: (dialogContext) => Padding(
+        padding: const EdgeInsets.symmetric(vertical: 24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          spacing: 8.0,
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        isDownloaded
+                            ? 'Install from Repository'
+                            : 'Download from Repository',
+                        style: Theme.of(dialogContext).textTheme.titleLarge,
+                      ),
+                      Text(
+                        'You can choose which repository to use to '
+                        '${isDownloaded ? 'install' : 'download'} this app.',
+                        style: Theme.of(dialogContext).textTheme.labelMedium,
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            MListViewBuilder(
+              itemCount: availableRepos.length,
+              itemBuilder: (index) {
+                final isPrimary =
+                    availableRepos[index].url == app.repositoryUrl;
+                return MListItemData(
+                  selected: isPrimary,
+                  leading: isPrimary ? Icon(Symbols.check) : null,
+                  title: availableRepos[index].name,
+                  onTap: () {
+                    Navigator.of(dialogContext).pop();
+                    _handleInstall(
+                      context,
+                      downloadProvider,
+                      appProvider,
+                      isDownloaded,
+                      version,
+                      availableRepos[index].url,
+                    );
+                  },
+                  suffix: Visibility(
+                    visible: isPrimary,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 2,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Theme.of(
+                          dialogContext,
+                        ).colorScheme.primaryContainer,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        'Default',
+                        style: Theme.of(dialogContext).textTheme.labelSmall
+                            ?.copyWith(
+                              color: Theme.of(
+                                dialogContext,
+                              ).colorScheme.onPrimaryContainer,
+                            ),
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: FilledButton.tonal(
+                child: const Text('Cancel'),
+                onPressed: () => Navigator.of(dialogContext).pop(),
+              ),
+            ),
+            SizedBox(height: 24),
+          ],
+        ),
+      ),
     );
   }
 
@@ -165,7 +487,7 @@ class _AppDetailsScreenState extends State<AppDetailsScreen> {
                 // What's New preview from version.whatsNew
                 Padding(
                   padding: const EdgeInsets.symmetric(
-                    vertical: 16,
+                    vertical: 4,
                     horizontal: 16,
                   ),
                   child: Consumer<AppProvider>(
@@ -563,181 +885,38 @@ class _AppDetailsScreenState extends State<AppDetailsScreen> {
                                 );
                               }
 
-                              return SizedBox(
-                                width: double.infinity,
-                                height: 48,
-                                child: FilledButton.icon(
-                                  onPressed: () async {
-                                    if (isDownloaded) {
-                                      try {
-                                        final downloadInfo = downloadProvider
-                                            .getDownloadInfo(
-                                              widget.app.packageName,
-                                              version.versionName,
-                                            );
-                                        if (downloadInfo?.filePath != null) {
-                                          final hasPermission =
-                                              await downloadProvider
-                                                  .requestInstallPermission();
-                                          if (!hasPermission) {
-                                            if (context.mounted) {
-                                              ScaffoldMessenger.of(
-                                                context,
-                                              ).showSnackBar(
-                                                const SnackBar(
-                                                  content: Text(
-                                                    'Install permission is required to install APK files',
-                                                  ),
-                                                ),
-                                              );
-                                            }
-                                            return;
-                                          }
+                              // return SizedBox(
+                              //   width: double.infinity,
+                              return FutureBuilder<FDroidApp>(
+                                future: _enrichedAppFuture,
+                                builder: (context, snapshot) {
+                                  // Use enriched app if available and loaded, otherwise fall back to widget.app
+                                  final enrichedApp =
+                                      snapshot.connectionState ==
+                                              ConnectionState.done &&
+                                          snapshot.hasData
+                                      ? snapshot.data!
+                                      : widget.app;
 
-                                          await downloadProvider.installApk(
-                                            downloadInfo!.filePath!,
-                                          );
-                                          await Future.delayed(
-                                            const Duration(milliseconds: 100),
-                                          );
-                                          await appProvider
-                                              .fetchInstalledApps();
-                                          if (context.mounted) {
-                                            ScaffoldMessenger.of(
-                                              context,
-                                            ).showSnackBar(
-                                              SnackBar(
-                                                content: Text(
-                                                  '${widget.app.name} installation started!',
-                                                ),
-                                              ),
-                                            );
-                                          }
-                                        }
-                                      } catch (e) {
-                                        if (context.mounted) {
-                                          ScaffoldMessenger.of(
-                                            context,
-                                          ).showSnackBar(
-                                            SnackBar(
-                                              content: Text(
-                                                'Installation failed: ${e.toString()}',
-                                              ),
-                                            ),
-                                          );
-                                        }
-                                      }
-                                    } else {
-                                      final hasPermission =
-                                          await downloadProvider
-                                              .requestPermissions();
+                                  // Log error if enrichment failed
+                                  if (snapshot.hasError) {
+                                    debugPrint(
+                                      'Error enriching app: ${snapshot.error}',
+                                    );
+                                  }
 
-                                      if (!hasPermission) {
-                                        if (context.mounted) {
-                                          await showDialog(
-                                            context: context,
-                                            builder: (context) => AlertDialog(
-                                              icon: const Icon(
-                                                Symbols.warning,
-                                                size: 48,
-                                              ),
-                                              title: const Text(
-                                                'Storage Permission Required',
-                                              ),
-                                              content: const Text(
-                                                'Florid needs storage permission to download APK files.\n\n'
-                                                'To enable:\n'
-                                                '1. Go to Settings (button below)\n'
-                                                '2. Find "Permissions"\n'
-                                                '3. Enable "Files and media" or "Storage"\n\n'
-                                                'Then try downloading again.',
-                                              ),
-                                              actions: [
-                                                TextButton(
-                                                  onPressed: () => Navigator.of(
-                                                    context,
-                                                  ).pop(),
-                                                  child: const Text('Cancel'),
-                                                ),
-                                                FilledButton(
-                                                  onPressed: () async {
-                                                    Navigator.of(context).pop();
-                                                    await openAppSettings();
-                                                  },
-                                                  child: const Text(
-                                                    'Open Settings',
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          );
-                                        }
-                                        return;
-                                      }
-
-                                      try {
-                                        await downloadProvider.downloadApk(
-                                          widget.app,
-                                        );
-
-                                        if (context.mounted) {
-                                          for (int i = 0; i < 15; i++) {
-                                            await Future.delayed(
-                                              const Duration(milliseconds: 800),
-                                            );
-                                            await appProvider
-                                                .fetchInstalledApps();
-                                            if (appProvider.isAppInstalled(
-                                              widget.app.packageName,
-                                            )) {
-                                              final downloadInfo =
-                                                  downloadProvider
-                                                      .getDownloadInfo(
-                                                        widget.app.packageName,
-                                                        widget
-                                                            .app
-                                                            .latestVersion!
-                                                            .versionName,
-                                                      );
-                                              if (downloadInfo?.filePath !=
-                                                  null) {
-                                                await downloadProvider
-                                                    .deleteDownloadedFile(
-                                                      downloadInfo!.filePath!,
-                                                    );
-                                              }
-                                              break;
-                                            }
-                                          }
-                                        }
-                                      } catch (e) {
-                                        final errorMsg = e.toString();
-                                        if (!errorMsg.contains('cancelled') &&
-                                            !errorMsg.contains('Cancelled')) {
-                                          if (context.mounted) {
-                                            ScaffoldMessenger.of(
-                                              context,
-                                            ).showSnackBar(
-                                              SnackBar(
-                                                content: Text(
-                                                  'Download failed: $errorMsg',
-                                                ),
-                                              ),
-                                            );
-                                          }
-                                        }
-                                      }
-                                    }
-                                  },
-                                  icon: Icon(
-                                    isDownloaded
-                                        ? Symbols.install_mobile
-                                        : Symbols.download,
-                                  ),
-                                  label: Text(
-                                    isDownloaded ? 'Install' : 'Download',
-                                  ),
-                                ),
+                                  return SizedBox(
+                                    width: double.infinity,
+                                    child: _buildInstallButton(
+                                      context,
+                                      downloadProvider,
+                                      appProvider,
+                                      isDownloaded,
+                                      version,
+                                      enrichedApp,
+                                    ),
+                                  );
+                                },
                               );
                             },
                           ).animate().fadeIn(

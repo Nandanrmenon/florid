@@ -317,7 +317,8 @@ class _WebStoreScreenState extends State<WebStoreScreen> {
                     ? null
                     : () async {
                         final code = _pairingCodeController.text.trim();
-                        if (code.length == 6) {
+                        // Validate: must be 6 digits
+                        if (code.length == 6 && int.tryParse(code) != null) {
                           final success = await pairingProvider.pairWithCode(code);
                           if (success && context.mounted) {
                             Navigator.pop(context);
@@ -328,6 +329,13 @@ class _WebStoreScreenState extends State<WebStoreScreen> {
                               ),
                             );
                           }
+                        } else if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Please enter a valid 6-digit code'),
+                              backgroundColor: Colors.red,
+                            ),
+                          );
                         }
                       },
                 child: pairingProvider.isLoading

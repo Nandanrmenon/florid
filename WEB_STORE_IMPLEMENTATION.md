@@ -4,6 +4,8 @@
 
 This implementation adds a web version of the Florid F-Droid client that allows users to browse apps on the web and remotely trigger installations on their paired mobile devices. The solution is built entirely in Flutter with no external dependencies or proprietary services.
 
+**IMPORTANT NOTE:** The current implementation uses an in-memory message queue for demonstration purposes. This means it works best for local testing and development. For production use across different networks, you'll need to implement a server backend to facilitate message passing between web and mobile devices. See the "Limitations and Future Improvements" section below for details.
+
 ## Key Features
 
 1. **Web Platform Support**: Full web version of the app with responsive UI
@@ -123,10 +125,17 @@ Detection is done using `kIsWeb` from `package:flutter/foundation.dart`.
 
 ### Current Limitations
 
-1. **In-Memory Queue**: Messages stored locally, doesn't work across sessions
-2. **Same Network**: Devices must be on same local network (with server backend)
+1. **In-Memory Queue - CRITICAL**: 
+   - Messages are stored in memory only, not shared between web and mobile instances
+   - **This means web and mobile apps running on different devices/browsers CANNOT communicate**
+   - Works only for demonstration/testing in same app instance
+   - **For actual cross-device communication, you MUST implement a server backend**
+   - Without a server, the feature serves as a proof-of-concept/architecture demo
+
+2. **Same Process**: Devices must share the same Flutter app instance
 3. **No Real-time**: Polling-based (5-second interval)
 4. **Single Session**: Pairing doesn't persist across app restarts
+5. **No Storage**: Pairing data not saved to disk
 
 ### Potential Improvements
 

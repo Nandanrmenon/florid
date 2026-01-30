@@ -2,13 +2,21 @@
 
 ## What Was Implemented
 
-A complete web-to-mobile installation system for Florid that allows users to:
+A complete web-to-mobile installation system architecture for Florid that demonstrates:
 1. Browse F-Droid apps in a web browser
-2. Pair their web browser with their mobile device
-3. Trigger app installations on mobile from the web
-4. See download/install progress on mobile
+2. Pair web browser with mobile device (pairing mechanism)
+3. Message passing architecture for install requests
+4. Download/install progress tracking on mobile
 
-**Key Point:** This works WITHOUT any Google services or external servers!
+**IMPORTANT:** This is a **proof-of-concept/demonstration** that shows the architecture and flow. The current implementation uses an in-memory message queue, which means:
+
+- ✅ Perfect for understanding the architecture
+- ✅ Demonstrates the complete flow
+- ✅ No external dependencies needed for testing
+- ⚠️ **Does NOT work across different devices without a server backend**
+- ⚠️ **For production use, you need to implement a server to relay messages**
+
+The code provides the complete architecture that can be connected to a real server backend for production deployment.
 
 ## How to Use
 
@@ -163,6 +171,65 @@ flutter test
 - `installRequest` - Web wants to install app
 - `installStatus` - Mobile sends progress
 - `heartbeat` - Keep connection alive
+
+## Implementing a Server Backend (For Production)
+
+To make this work across different devices and networks, you need to implement a server backend. Here's what you need to do:
+
+### 1. Create a Simple REST API Server
+
+**Required endpoints:**
+- `POST /pairing/start` - Create a new pairing session
+- `POST /pairing/confirm` - Confirm pairing with code
+- `POST /messages` - Post a message to the queue
+- `GET /messages/:code` - Get messages for a pairing code
+- `DELETE /messages/:id` - Mark message as consumed
+
+### 2. Replace In-Memory Queue
+
+In `lib/services/pairing_service.dart`, replace these methods:
+- `_enqueueMessage()` - POST to server API
+- `_getMessages()` - GET from server API
+- `_waitForPairingResponse()` - Poll server API
+
+### 3. Add Server Configuration
+
+Add a settings option for server URL:
+```dart
+static const String serverUrl = 'https://your-server.com/api';
+```
+
+### 4. Example Server Implementation (Node.js/Express)
+
+```javascript
+const express = require('express');
+const app = express();
+
+// In-memory store (use Redis/DB in production)
+const messages = new Map();
+
+app.post('/messages', (req, res) => {
+  const { code, message } = req.body;
+  if (!messages.has(code)) messages.set(code, []);
+  messages.get(code).push(message);
+  res.json({ success: true });
+});
+
+app.get('/messages/:code', (req, res) => {
+  const msgs = messages.get(req.params.code) || [];
+  res.json({ messages: msgs });
+});
+```
+
+### 5. Security Considerations
+
+When implementing a server:
+- Use HTTPS/TLS for all communication
+- Implement rate limiting on pairing attempts
+- Add message authentication (HMAC)
+- Implement message expiry cleanup
+- Add user authentication (optional)
+- Log suspicious activity
 
 ## Troubleshooting
 

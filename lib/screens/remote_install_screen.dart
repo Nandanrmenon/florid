@@ -55,7 +55,9 @@ class _RemoteInstallScreenState extends State<RemoteInstallScreen> {
 
       // Start download
       await _startDownload();
-    } catch (e) {
+    } catch (e, stackTrace) {
+      debugPrint('[RemoteInstallScreen] Failed to load app: $e');
+      debugPrint('[RemoteInstallScreen] Stack trace: $stackTrace');
       setState(() {
         _errorMessage = 'Failed to load app: $e';
         _isLoading = false;

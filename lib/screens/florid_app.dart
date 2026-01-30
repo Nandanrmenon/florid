@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:easy_localization/easy_localization.dart';
 import 'package:florid/screens/library_screen.dart';
@@ -62,13 +63,16 @@ class _FloridAppState extends State<FloridApp> {
   }
   
   void _startPollingForInstallRequests() {
+    _pollTimer?.cancel();
     _pollTimer = Timer.periodic(const Duration(seconds: 5), (_) async {
+      if (!mounted) return; // Check if widget is still mounted
+      
       final pairingProvider = context.read<PairingProvider>();
       
       if (pairingProvider.isPaired) {
         final installRequest = await pairingProvider.checkForInstallRequest();
         
-        if (installRequest != null && installRequest.data != null) {
+        if (installRequest != null && installRequest.data != null && mounted) {
           final packageName = installRequest.data!['packageName'] as String;
           final appName = installRequest.data!['appName'] as String;
           final versionName = installRequest.data!['versionName'] as String?;
@@ -98,13 +102,17 @@ class _FloridAppState extends State<FloridApp> {
       
       const NotificationDetails details = NotificationDetails(android: androidDetails);
       
-      final flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
-      await flutterLocalNotificationsPlugin.show(
+      // Use the initialized notification service
+      await _notificationService._flutterLocalNotificationsPlugin.show(
         packageName.hashCode,
         'Install Request',
         'Install $appName from web?',
         details,
-        payload: '$packageName|$appName|${versionName ?? ''}',
+        payload: jsonEncode({
+          'packageName': packageName,
+          'appName': appName,
+          'versionName': versionName ?? '',
+        }),
       );
       
       // Navigate to remote install screen

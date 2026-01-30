@@ -228,6 +228,11 @@ class PairingService extends ChangeNotifier {
           .where((m) => m.deviceId == _pairedDeviceId)
           .firstOrNull;
 
+      // Mark message as consumed by removing it from queue
+      if (installRequest != null && _messageQueue.containsKey(_pairingCode!)) {
+        _messageQueue[_pairingCode!]!.remove(installRequest);
+      }
+
       return installRequest;
     } catch (e) {
       debugPrint('[PairingService] Error checking for install request: $e');
@@ -329,7 +334,7 @@ class PairingService extends ChangeNotifier {
       final response = messages
           .where((m) => m.type == MessageType.pairResponse)
           .where((m) => m.timestamp.isAfter(
-                DateTime.now().subtract(const Duration(seconds: 35)),
+                DateTime.now().subtract(const Duration(seconds: 30)),
               ))
           .firstOrNull;
       
@@ -352,16 +357,5 @@ class PairingService extends ChangeNotifier {
   void dispose() {
     stopPolling();
     super.dispose();
-  }
-}
-
-// Extension for firstOrNull
-extension FirstWhereOrNull<E> on Iterable<E> {
-  E? get firstOrNull {
-    final iterator = this.iterator;
-    if (iterator.moveNext()) {
-      return iterator.current;
-    }
-    return null;
   }
 }

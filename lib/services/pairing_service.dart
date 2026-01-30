@@ -31,12 +31,12 @@ class PairingMessage {
   }) : timestamp = timestamp ?? DateTime.now();
 
   Map<String, dynamic> toJson() => {
-        'type': type.name,
-        'deviceId': deviceId,
-        'pairingCode': pairingCode,
-        'data': data,
-        'timestamp': timestamp.toIso8601String(),
-      };
+    'type': type.name,
+    'deviceId': deviceId,
+    'pairingCode': pairingCode,
+    'data': data,
+    'timestamp': timestamp.toIso8601String(),
+  };
 
   factory PairingMessage.fromJson(Map<String, dynamic> json) {
     return PairingMessage(
@@ -59,14 +59,15 @@ class PairingService extends ChangeNotifier {
   static const Duration _pollInterval = Duration(seconds: 3);
   static const Duration _messageExpiry = Duration(minutes: 5);
 
+  // Shared static message queue (for local testing across web and mobile)
+  // For production, replace with actual server backend
+  static final Map<String, List<PairingMessage>> _sharedMessageQueue = {};
+
   String? _deviceId;
   String? _pairingCode;
   bool _isPaired = false;
   String? _pairedDeviceId;
   Timer? _pollTimer;
-  
-  // In-memory message queue (for local testing, replace with actual server in production)
-  final Map<String, List<PairingMessage>> _messageQueue = {};
 
   String? get deviceId => _deviceId;
   String? get pairingCode => _pairingCode;
@@ -104,12 +105,12 @@ class PairingService extends ChangeNotifier {
     _pairingCode = _generatePairingCode();
     _isPaired = false;
     _pairedDeviceId = null;
-    
+
     debugPrint('[PairingService] Started pairing with code: $_pairingCode');
-    
+
     // Start polling for pairing requests
     _startPolling();
-    
+
     notifyListeners();
     return _pairingCode!;
   }
@@ -117,6 +118,8 @@ class PairingService extends ChangeNotifier {
   /// Pair with a device using pairing code (web side)
   Future<bool> pairWithCode(String code) async {
     try {
+      debugPrint('[PairingService] Web: Attempting to pair with code: $code');
+
       final message = PairingMessage(
         type: MessageType.pairRequest,
         deviceId: _deviceId,
@@ -136,8 +139,14 @@ class PairingService extends ChangeNotifier {
         await _savePairingData();
         _startPolling();
         notifyListeners();
+        debugPrint(
+          '[PairingService] Web: Successfully paired with device: ${response.deviceId}',
+        );
         return true;
       }
+      debugPrint(
+        '[PairingService] Web: Pairing failed - no response from device',
+      );
       return false;
     } catch (e) {
       debugPrint('[PairingService] Error pairing: $e');
@@ -183,14 +192,30 @@ class PairingService extends ChangeNotifier {
 
     try {
       final messages = _getMessages(_pairingCode!);
+
+      if (messages.isNotEmpty) {
+        debugPrint(
+          '[PairingService] Mobile: Found ${messages.length} messages for code $_pairingCode',
+        );
+        for (var msg in messages) {
+          debugPrint(
+            '[PairingService] Mobile: Message type: ${msg.type.name}, from device: ${msg.deviceId}',
+          );
+        }
+      }
+
       final pairRequest = messages
           .where((m) => m.type == MessageType.pairRequest)
-          .where((m) => m.timestamp.isAfter(
-                DateTime.now().subtract(_messageExpiry),
-              ))
+          .where(
+            (m) => m.timestamp.isAfter(DateTime.now().subtract(_messageExpiry)),
+          )
           .firstOrNull;
 
       if (pairRequest != null) {
+        debugPrint(
+          '[PairingService] Mobile: Received pairing request from web device: ${pairRequest.deviceId}',
+        );
+
         // Send response
         final response = PairingMessage(
           type: MessageType.pairResponse,
@@ -222,15 +247,15 @@ class PairingService extends ChangeNotifier {
       final messages = _getMessages(_pairingCode!);
       final installRequest = messages
           .where((m) => m.type == MessageType.installRequest)
-          .where((m) => m.timestamp.isAfter(
-                DateTime.now().subtract(_messageExpiry),
-              ))
+          .where(
+            (m) => m.timestamp.isAfter(DateTime.now().subtract(_messageExpiry)),
+          )
           .where((m) => m.deviceId == _pairedDeviceId)
           .firstOrNull;
 
       // Mark message as consumed by removing it from queue
-      if (installRequest != null && _messageQueue.containsKey(_pairingCode!)) {
-        _messageQueue[_pairingCode!]!.remove(installRequest);
+      if (installRequest != null && _sharedMessageQueue.containsKey(_pairingCode!)) {
+        _sharedMessageQueue[_pairingCode!]!.remove(installRequest);
       }
 
       return installRequest;
@@ -309,42 +334,60 @@ class PairingService extends ChangeNotifier {
 
   // Local message queue methods (replace with actual server API in production)
   void _enqueueMessage(String code, PairingMessage message) {
-    if (!_messageQueue.containsKey(code)) {
-      _messageQueue[code] = [];
+    if (!_sharedMessageQueue.containsKey(code)) {
+      _sharedMessageQueue[code] = [];
     }
-    _messageQueue[code]!.add(message);
-    
+    _sharedMessageQueue[code]!.add(message);
+
+    debugPrint(
+      '[PairingService] Enqueued message for code $code: ${message.type.name}',
+    );
+
     // Clean up old messages
-    _messageQueue[code] = _messageQueue[code]!
-        .where((m) => m.timestamp.isAfter(
-              DateTime.now().subtract(_messageExpiry),
-            ))
+    _sharedMessageQueue[code] = _sharedMessageQueue[code]!
+        .where(
+          (m) => m.timestamp.isAfter(DateTime.now().subtract(_messageExpiry)),
+        )
         .toList();
   }
 
   List<PairingMessage> _getMessages(String code) {
-    return _messageQueue[code] ?? [];
+    return _sharedMessageQueue[code] ?? [];
   }
 
   Future<PairingMessage?> _waitForPairingResponse(String code) async {
     final timeout = DateTime.now().add(const Duration(seconds: 30));
-    
+    int attemptCount = 0;
+
     while (DateTime.now().isBefore(timeout)) {
       final messages = _getMessages(code);
+
+      debugPrint(
+        '[PairingService] Waiting for pairing response (attempt ${++attemptCount}), found ${messages.length} messages',
+      );
+
       final response = messages
           .where((m) => m.type == MessageType.pairResponse)
-          .where((m) => m.timestamp.isAfter(
-                DateTime.now().subtract(const Duration(seconds: 30)),
-              ))
+          .where(
+            (m) => m.timestamp.isAfter(
+              DateTime.now().subtract(const Duration(seconds: 30)),
+            ),
+          )
           .firstOrNull;
-      
+
       if (response != null) {
+        debugPrint(
+          '[PairingService] Received pairing response from device: ${response.deviceId}',
+        );
         return response;
       }
-      
-      await Future.delayed(const Duration(seconds: 1));
+
+      await Future.delayed(const Duration(milliseconds: 500));
     }
-    
+
+    debugPrint(
+      '[PairingService] Timeout waiting for pairing response after 30 seconds',
+    );
     return null;
   }
 

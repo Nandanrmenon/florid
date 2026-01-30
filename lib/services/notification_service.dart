@@ -218,6 +218,22 @@ class NotificationService {
     await _flutterLocalNotificationsPlugin.cancel(downloadNotificationId);
   }
 
+  Future<void> showNotification({
+    required int id,
+    required String title,
+    required String body,
+    required NotificationDetails details,
+    String? payload,
+  }) async {
+    await _flutterLocalNotificationsPlugin.show(
+      id,
+      title,
+      body,
+      details,
+      payload: payload,
+    );
+  }
+
   void _onNotificationTapped(NotificationResponse response) {
     debugPrint(
       '[NotificationService] Notification tapped: ${response.payload}',

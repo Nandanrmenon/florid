@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
 import '../models/fdroid_app.dart';
-import '../providers/download_provider.dart';
 import '../providers/app_provider.dart';
+import '../providers/download_provider.dart';
 
 class RemoteInstallScreen extends StatefulWidget {
   final String packageName;
@@ -41,8 +42,8 @@ class _RemoteInstallScreenState extends State<RemoteInstallScreen> {
     try {
       // Load app details
       final appProvider = context.read<AppProvider>();
-      await appProvider.ensureAppsLoaded();
-      
+      await appProvider.loadApps();
+
       final app = appProvider.apps.firstWhere(
         (a) => a.packageName == widget.packageName,
         orElse: () => throw Exception('App not found'),
@@ -76,7 +77,7 @@ class _RemoteInstallScreenState extends State<RemoteInstallScreen> {
     try {
       final downloadProvider = context.read<DownloadProvider>();
       await downloadProvider.downloadApk(_app!);
-      
+
       if (mounted) {
         setState(() {
           _isDownloading = false;
@@ -95,9 +96,7 @@ class _RemoteInstallScreenState extends State<RemoteInstallScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Remote Install'),
-      ),
+      appBar: AppBar(title: const Text('Remote Install')),
       body: _buildBody(),
     );
   }
@@ -123,11 +122,7 @@ class _RemoteInstallScreenState extends State<RemoteInstallScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(
-                Icons.error,
-                size: 64,
-                color: Colors.red,
-              ),
+              const Icon(Icons.error, size: 64, color: Colors.red),
               const SizedBox(height: 16),
               Text(
                 _errorMessage!,
@@ -146,9 +141,7 @@ class _RemoteInstallScreenState extends State<RemoteInstallScreen> {
     }
 
     if (_app == null) {
-      return const Center(
-        child: Text('App not found'),
-      );
+      return const Center(child: Text('App not found'));
     }
 
     return Consumer<DownloadProvider>(
@@ -163,11 +156,7 @@ class _RemoteInstallScreenState extends State<RemoteInstallScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const Icon(
-                Icons.download,
-                size: 80,
-                color: Colors.blue,
-              ),
+              const Icon(Icons.download, size: 80, color: Colors.blue),
               const SizedBox(height: 24),
               Text(
                 widget.appName,
@@ -181,18 +170,13 @@ class _RemoteInstallScreenState extends State<RemoteInstallScreen> {
               Text(
                 widget.packageName,
                 textAlign: TextAlign.center,
-                style: const TextStyle(
-                  fontSize: 14,
-                  color: Colors.grey,
-                ),
+                style: const TextStyle(fontSize: 14, color: Colors.grey),
               ),
               const SizedBox(height: 32),
               if (downloadInfo != null) ...[
                 _buildDownloadStatus(downloadInfo),
               ] else ...[
-                const Center(
-                  child: CircularProgressIndicator(),
-                ),
+                const Center(child: CircularProgressIndicator()),
               ],
             ],
           ),
@@ -208,16 +192,10 @@ class _RemoteInstallScreenState extends State<RemoteInstallScreen> {
           children: [
             const Text(
               'Downloading...',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w500,
-              ),
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
             ),
             const SizedBox(height: 16),
-            LinearProgressIndicator(
-              value: downloadInfo.progress,
-              minHeight: 8,
-            ),
+            LinearProgressIndicator(value: downloadInfo.progress, minHeight: 8),
             const SizedBox(height: 8),
             Text(
               '${(downloadInfo.progress * 100).toStringAsFixed(0)}%',
@@ -247,11 +225,7 @@ class _RemoteInstallScreenState extends State<RemoteInstallScreen> {
       case DownloadStatus.completed:
         return Column(
           children: [
-            const Icon(
-              Icons.check_circle,
-              size: 64,
-              color: Colors.green,
-            ),
+            const Icon(Icons.check_circle, size: 64, color: Colors.green),
             const SizedBox(height: 16),
             const Text(
               'Download Complete!',
@@ -265,9 +239,9 @@ class _RemoteInstallScreenState extends State<RemoteInstallScreen> {
             ElevatedButton.icon(
               onPressed: () async {
                 try {
-                  await context
-                      .read<DownloadProvider>()
-                      .installApk(downloadInfo.filePath!);
+                  await context.read<DownloadProvider>().installApk(
+                    downloadInfo.filePath!,
+                  );
                 } catch (e) {
                   if (mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
@@ -296,11 +270,7 @@ class _RemoteInstallScreenState extends State<RemoteInstallScreen> {
       case DownloadStatus.error:
         return Column(
           children: [
-            const Icon(
-              Icons.error,
-              size: 64,
-              color: Colors.red,
-            ),
+            const Icon(Icons.error, size: 64, color: Colors.red),
             const SizedBox(height: 16),
             const Text(
               'Download Failed',
@@ -332,11 +302,7 @@ class _RemoteInstallScreenState extends State<RemoteInstallScreen> {
       case DownloadStatus.cancelled:
         return Column(
           children: [
-            const Icon(
-              Icons.cancel,
-              size: 64,
-              color: Colors.orange,
-            ),
+            const Icon(Icons.cancel, size: 64, color: Colors.orange),
             const SizedBox(height: 16),
             const Text(
               'Download Cancelled',

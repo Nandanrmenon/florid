@@ -45,15 +45,15 @@ class _FloridAppState extends State<FloridApp> {
 
       appProvider.fetchInstalledApps();
       repositoriesProvider.loadRepositories();
-      
+
       // Initialize notification service
       _initNotifications();
-      
+
       // Start polling for install requests from web
       _startPollingForInstallRequests();
     });
   }
-  
+
   Future<void> _initNotifications() async {
     try {
       await _notificationService.init();
@@ -61,60 +61,64 @@ class _FloridAppState extends State<FloridApp> {
       debugPrint('[FloridApp] Failed to initialize notifications: $e');
     }
   }
-  
+
   void _startPollingForInstallRequests() {
     _pollTimer?.cancel();
     _pollTimer = Timer.periodic(const Duration(seconds: 5), (_) async {
       if (!mounted) return; // Check if widget is still mounted
-      
+
       final pairingProvider = context.read<PairingProvider>();
-      
+
       if (pairingProvider.isPaired) {
         final installRequest = await pairingProvider.checkForInstallRequest();
-        
+
         if (installRequest != null && installRequest.data != null && mounted) {
           final packageName = installRequest.data!['packageName'] as String;
           final appName = installRequest.data!['appName'] as String;
           final versionName = installRequest.data!['versionName'] as String?;
-          
+
           // Show notification
           await _showInstallNotification(packageName, appName, versionName);
         }
       }
     });
   }
-  
+
   Future<void> _showInstallNotification(
     String packageName,
     String appName,
     String? versionName,
   ) async {
     try {
-      const AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
-        'remote_install_channel',
-        'Remote Install Requests',
-        channelDescription: 'Notifications for remote install requests from web',
-        importance: Importance.high,
-        priority: Priority.high,
-        enableVibration: true,
-        playSound: true,
+      const AndroidNotificationDetails androidDetails =
+          AndroidNotificationDetails(
+            'remote_install_channel',
+            'Remote Install Requests',
+            channelDescription:
+                'Notifications for remote install requests from web',
+            importance: Importance.high,
+            priority: Priority.high,
+            enableVibration: true,
+            playSound: true,
+          );
+
+      const NotificationDetails details = NotificationDetails(
+        android: androidDetails,
       );
-      
-      const NotificationDetails details = NotificationDetails(android: androidDetails);
-      
+
       // Use the initialized notification service
-      await _notificationService._flutterLocalNotificationsPlugin.show(
-        packageName.hashCode,
-        'Install Request',
-        'Install $appName from web?',
-        details,
+      await _notificationService.showNotification(
+        id: packageName.hashCode,
+        title: 'Install Request',
+        body: 'Install $appName from web?',
+        details: details,
         payload: jsonEncode({
           'packageName': packageName,
           'appName': appName,
           'versionName': versionName ?? '',
         }),
       );
-      
+
       // Navigate to remote install screen
       if (mounted) {
         Navigator.push(

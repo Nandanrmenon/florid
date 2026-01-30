@@ -1,10 +1,9 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../providers/pairing_provider.dart';
-import '../providers/app_provider.dart';
+
 import '../models/fdroid_app.dart';
-import '../widgets/app_list_item.dart';
+import '../providers/app_provider.dart';
+import '../providers/pairing_provider.dart';
 
 class WebStoreScreen extends StatefulWidget {
   const WebStoreScreen({super.key});
@@ -71,18 +70,11 @@ class _WebStoreScreenState extends State<WebStoreScreen> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(
-                  Icons.phonelink_off,
-                  size: 80,
-                  color: Colors.grey,
-                ),
+                const Icon(Icons.phonelink_off, size: 80, color: Colors.grey),
                 const SizedBox(height: 24),
                 const Text(
                   'Pair with Mobile Device',
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 16),
                 const Text(
@@ -93,10 +85,7 @@ class _WebStoreScreenState extends State<WebStoreScreen> {
                 const SizedBox(height: 32),
                 const Text(
                   'Steps:',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w500,
-                  ),
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
                 ),
                 const SizedBox(height: 16),
                 const Column(
@@ -124,7 +113,7 @@ class _WebStoreScreenState extends State<WebStoreScreen> {
                         const Icon(Icons.error, color: Colors.red),
                         const SizedBox(width: 8),
                         Expanded(
-                          child: Text(
+                          child: SelectableText(
                             pairingProvider.errorMessage!,
                             style: const TextStyle(color: Colors.red),
                           ),
@@ -175,9 +164,7 @@ class _WebStoreScreenState extends State<WebStoreScreen> {
           child: Consumer<AppProvider>(
             builder: (context, appProvider, child) {
               if (appProvider.isLoading && appProvider.apps.isEmpty) {
-                return const Center(
-                  child: CircularProgressIndicator(),
-                );
+                return const Center(child: CircularProgressIndicator());
               }
 
               if (appProvider.error != null && appProvider.apps.isEmpty) {
@@ -190,7 +177,8 @@ class _WebStoreScreenState extends State<WebStoreScreen> {
                       Text(appProvider.error!),
                       const SizedBox(height: 16),
                       ElevatedButton(
-                        onPressed: () => appProvider.loadApps(forceRefresh: true),
+                        onPressed: () =>
+                            appProvider.loadApps(forceRefresh: true),
                         child: const Text('Retry'),
                       ),
                     ],
@@ -202,14 +190,16 @@ class _WebStoreScreenState extends State<WebStoreScreen> {
                   ? appProvider.apps
                   : appProvider.apps.where((app) {
                       return app.name.toLowerCase().contains(_searchQuery) ||
-                          app.packageName.toLowerCase().contains(_searchQuery) ||
-                          (app.summary ?? '').toLowerCase().contains(_searchQuery);
+                          app.packageName.toLowerCase().contains(
+                            _searchQuery,
+                          ) ||
+                          (app.summary ?? '').toLowerCase().contains(
+                            _searchQuery,
+                          );
                     }).toList();
 
               if (filteredApps.isEmpty) {
-                return const Center(
-                  child: Text('No apps found'),
-                );
+                return const Center(child: Text('No apps found'));
               }
 
               return ListView.builder(
@@ -243,10 +233,7 @@ class _WebStoreScreenState extends State<WebStoreScreen> {
             : const Icon(Icons.android, size: 48),
         title: Text(
           app.name,
-          style: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w500,
-          ),
+          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
         ),
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -260,10 +247,7 @@ class _WebStoreScreenState extends State<WebStoreScreen> {
             const SizedBox(height: 4),
             Text(
               app.packageName,
-              style: const TextStyle(
-                fontSize: 12,
-                color: Colors.grey,
-              ),
+              style: const TextStyle(fontSize: 12, color: Colors.grey),
             ),
           ],
         ),
@@ -281,7 +265,7 @@ class _WebStoreScreenState extends State<WebStoreScreen> {
 
   Future<void> _showPairingDialog(BuildContext context) async {
     _pairingCodeController.clear();
-    
+
     await showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -289,9 +273,7 @@ class _WebStoreScreenState extends State<WebStoreScreen> {
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text(
-              'Enter the 6-digit code from your mobile device:',
-            ),
+            const Text('Enter the 6-digit code from your mobile device:'),
             const SizedBox(height: 16),
             TextField(
               controller: _pairingCodeController,
@@ -319,7 +301,9 @@ class _WebStoreScreenState extends State<WebStoreScreen> {
                         final code = _pairingCodeController.text.trim();
                         // Validate: must be 6 digits
                         if (code.length == 6 && int.tryParse(code) != null) {
-                          final success = await pairingProvider.pairWithCode(code);
+                          final success = await pairingProvider.pairWithCode(
+                            code,
+                          );
                           if (success && context.mounted) {
                             Navigator.pop(context);
                             ScaffoldMessenger.of(context).showSnackBar(
@@ -332,7 +316,9 @@ class _WebStoreScreenState extends State<WebStoreScreen> {
                         } else if (context.mounted) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
-                              content: Text('Please enter a valid 6-digit code'),
+                              content: Text(
+                                'Please enter a valid 6-digit code',
+                              ),
                               backgroundColor: Colors.red,
                             ),
                           );
@@ -355,7 +341,7 @@ class _WebStoreScreenState extends State<WebStoreScreen> {
 
   void _showPairingInfo(BuildContext context) {
     final pairingProvider = context.read<PairingProvider>();
-    
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -368,7 +354,9 @@ class _WebStoreScreenState extends State<WebStoreScreen> {
             const SizedBox(height: 16),
             Text('Device ID: ${pairingProvider.deviceId ?? 'Unknown'}'),
             const SizedBox(height: 8),
-            Text('Pairing Code: ${pairingProvider.currentPairingCode ?? 'N/A'}'),
+            Text(
+              'Pairing Code: ${pairingProvider.currentPairingCode ?? 'N/A'}',
+            ),
           ],
         ),
         actions: [
@@ -391,7 +379,7 @@ class _WebStoreScreenState extends State<WebStoreScreen> {
 
   Future<void> _sendInstallRequest(BuildContext context, FDroidApp app) async {
     final pairingProvider = context.read<PairingProvider>();
-    
+
     final success = await pairingProvider.sendInstallRequest(
       packageName: app.packageName,
       appName: app.name,
@@ -408,7 +396,9 @@ class _WebStoreScreenState extends State<WebStoreScreen> {
     } else if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Failed to send install request: ${pairingProvider.errorMessage}'),
+          content: Text(
+            'Failed to send install request: ${pairingProvider.errorMessage}',
+          ),
           backgroundColor: Colors.red,
         ),
       );

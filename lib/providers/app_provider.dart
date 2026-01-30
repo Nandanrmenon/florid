@@ -92,6 +92,20 @@ class AppProvider extends ChangeNotifier {
   LoadingState get repositoryState => _repositoryState;
   String? get repositoryError => _repositoryError;
 
+  // Convenience getters for web store screen
+  List<FDroidApp> get apps => _latestApps;
+  bool get isLoading => _latestAppsState == LoadingState.loading;
+  String? get error => _latestAppsError;
+
+  /// Load apps method for web store screen
+  Future<void> loadApps({bool forceRefresh = false}) async {
+    if (forceRefresh) {
+      _latestAppsState = LoadingState.idle;
+      _latestAppsError = null;
+    }
+    await fetchLatestApps();
+  }
+
   /// Fetches the complete repository (cached for performance)
   Future<void> fetchRepository() async {
     if (_repository != null) return; // Use cached version
@@ -172,7 +186,7 @@ class AppProvider extends ChangeNotifier {
       for (final entry in repo.apps.entries) {
         final packageName = entry.key;
         final app = entry.value;
-        
+
         if (mergedApps.containsKey(packageName)) {
           // App already exists, add this repository to the available sources
           final existing = mergedApps[packageName]!;
@@ -180,13 +194,13 @@ class AppProvider extends ChangeNotifier {
             name: repo.name,
             url: app.repositoryUrl,
           );
-          
+
           // Add the new repository if it's not already in the list
           final availableRepos = existing.availableRepositories ?? [];
           if (!availableRepos.contains(repoSource)) {
             // Create new list with the additional repository
             final updatedRepos = [...availableRepos, repoSource];
-            
+
             // Keep the existing app but update available repositories
             mergedApps[packageName] = existing.copyWith(
               availableRepositories: updatedRepos,
@@ -196,10 +210,7 @@ class AppProvider extends ChangeNotifier {
           // First time seeing this app, add it with its repository as a source
           mergedApps[packageName] = app.copyWith(
             availableRepositories: [
-              RepositorySource(
-                name: repo.name,
-                url: app.repositoryUrl,
-              ),
+              RepositorySource(name: repo.name, url: app.repositoryUrl),
             ],
           );
         }
@@ -248,12 +259,13 @@ class AppProvider extends ChangeNotifier {
       final availableReposList = <RepositorySource>[];
       if (app.repositoryUrl.isNotEmpty) {
         // Find the repo name for the original URL
-        final originalRepo = enabledRepos.where((r) => r.url == app.repositoryUrl).firstOrNull;
+        final originalRepo = enabledRepos
+            .where((r) => r.url == app.repositoryUrl)
+            .firstOrNull;
         if (originalRepo != null) {
-          availableReposList.add(RepositorySource(
-            name: originalRepo.name,
-            url: app.repositoryUrl,
-          ));
+          availableReposList.add(
+            RepositorySource(name: originalRepo.name, url: app.repositoryUrl),
+          );
         }
       }
 
@@ -265,19 +277,21 @@ class AppProvider extends ChangeNotifier {
             if (repo.url == app.repositoryUrl) {
               return null;
             }
-            
+
             // Try to find the app in this repository via database
             final results = await _apiService.searchAppsFromRepositoryUrl(
               app.packageName, // Use exact package name for lookup
               repo.url,
             );
-            
+
             // If found in this repository, return the source
             if (results.any((a) => a.packageName == app.packageName)) {
               return RepositorySource(name: repo.name, url: repo.url);
             }
           } catch (e) {
-            debugPrint('Error checking repo ${repo.name} for ${app.packageName}: $e');
+            debugPrint(
+              'Error checking repo ${repo.name} for ${app.packageName}: $e',
+            );
           }
           return null;
         }),

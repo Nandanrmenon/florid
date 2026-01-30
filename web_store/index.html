@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Florid Web Store</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>🌸 Florid Web Store</h1>
+            <p class="subtitle">Browse and install F-Droid apps remotely on your phone</p>
+        </div>
+    </header>
+
+    <main class="container">
+        <!-- Pairing Section -->
+        <section id="pairing-section" class="card">
+            <h2>📱 Pair Your Device</h2>
+            <p>Enter the pairing code from your Florid mobile app to connect.</p>
+            
+            <div class="pairing-form">
+                <input 
+                    type="text" 
+                    id="pairing-code" 
+                    placeholder="Enter 6-digit pairing code"
+                    maxlength="6"
+                    pattern="[0-9]*"
+                >
+                <input 
+                    type="text" 
+                    id="device-id" 
+                    placeholder="Device ID (from QR code)"
+                    style="display: none;"
+                >
+                <button id="pair-button" onclick="pairDevice()">Pair Device</button>
+            </div>
+            
+            <div id="pairing-status"></div>
+            
+            <div class="qr-scan-option">
+                <p>Or scan QR code from mobile app:</p>
+                <button id="scan-qr-button" onclick="showQRScanner()">Scan QR Code</button>
+                <div id="qr-reader" style="display: none;"></div>
+            </div>
+        </section>
+
+        <!-- App Browser Section (hidden until paired) -->
+        <section id="app-browser-section" style="display: none;">
+            <div class="card">
+                <h2>🔍 Browse Apps</h2>
+                
+                <div class="search-bar">
+                    <input 
+                        type="text" 
+                        id="search-input" 
+                        placeholder="Search apps..."
+                        onkeyup="searchApps()"
+                    >
+                </div>
+                
+                <div id="app-list" class="app-grid">
+                    <!-- Apps will be loaded here -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Device Info (shown when paired) -->
+        <section id="device-info-section" style="display: none;" class="card device-info">
+            <h3>Connected Device</h3>
+            <p id="device-info-text"></p>
+            <button onclick="unpairDevice()" class="secondary-button">Disconnect</button>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>Florid Web Store - Unofficial web interface for Florid F-Droid Client</p>
+            <p>Not affiliated with F-Droid. <a href="https://github.com/Nandanrmenon/florid" target="_blank">View on GitHub</a></p>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>

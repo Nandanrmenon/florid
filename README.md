@@ -25,6 +25,7 @@ Browse, search, and install open‑source Android apps from the F‑Droid reposi
 - Downloads: Reliable APK downloads with progress and notifications
 - Install/uninstall: One‑tap install of downloaded APKs, uninstall via intent
 - Updates: Detect newer versions for apps installed on your device
+- **Web Store Pairing**: Install apps remotely from a web browser on your computer
 - Appearance: Material 3 design with light/dark and system themes
 - Localization: Choose repository content language (e.g., en‑US, de‑DE)
 - Offline cache: Fast local database with smart network/cache fallback
@@ -60,6 +61,21 @@ flutter run
 ```
 
 First launch performs an initial repository sync and caches data locally for faster subsequent loads and limited offline use.
+
+### Web Store
+
+Florid includes a web store feature that allows you to browse and install apps remotely from a web browser on your computer.
+
+**Setup:**
+
+1. Enable web pairing in the Florid app: Settings → Web Store Pairing → Enable Web Pairing
+2. Note the 6-digit pairing code displayed
+3. Set up a backend server (see `web_store/README.md` for instructions)
+4. Open the web store in your browser and enter the pairing code
+5. Browse apps and click "Install on Phone"
+6. Your phone will receive a notification to download and install the app
+
+The web store requires a self-hosted backend server and **does not use any Google services**. See the [Web Store README](web_store/README.md) for detailed setup instructions.
 
 ### Build
 

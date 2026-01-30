@@ -81,6 +81,13 @@ dependencies:
   # HTML rendering
   flutter_html: ^3.0.0-beta.2
 
+  # QR code generation and scanning for web pairing
+  qr_flutter: ^4.1.0
+  mobile_scanner: ^6.0.3
+  
+  # WebSocket for real-time communication
+  web_socket_channel: ^3.0.1
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

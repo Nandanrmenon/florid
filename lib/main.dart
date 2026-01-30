@@ -3,6 +3,8 @@ import 'dart:convert';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:florid/providers/settings_provider.dart';
 import 'package:florid/screens/florid_app.dart';
+import 'package:florid/services/notification_service.dart';
+import 'package:florid/services/web_pairing_service.dart';
 import 'package:florid/themes/app_themes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -12,16 +14,66 @@ import 'providers/app_provider.dart';
 import 'providers/download_provider.dart';
 import 'providers/repositories_provider.dart';
 import 'screens/onboarding_screen.dart';
+import 'screens/remote_install_progress_screen.dart';
 import 'services/database_service.dart';
 import 'services/fdroid_api_service.dart';
 import 'services/izzy_stats_service.dart';
+
+// Global navigator key for handling notifications
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await EasyLocalization.ensureInitialized();
 
-  // Initialize notification service and request permission
-  // await NotificationService().init();
+  // Initialize notification service
+  final notificationService = NotificationService();
+  try {
+    await notificationService.init();
+    
+    // Set up notification tap handler
+    notificationService.onNotificationTap = (payload) {
+      if (payload != null && payload.contains('|')) {
+        final parts = payload.split('|');
+        if (parts.length == 2) {
+          final packageName = parts[0];
+          final versionName = parts[1];
+          
+          // Navigate to remote install progress screen
+          navigatorKey.currentState?.push(
+            MaterialPageRoute(
+              builder: (_) => RemoteInstallProgressScreen(
+                packageName: packageName,
+                versionName: versionName,
+              ),
+            ),
+          );
+        }
+      }
+    };
+  } catch (e) {
+    debugPrint('Notification service initialization error: $e');
+  }
+
+  // Initialize web pairing service
+  final webPairingService = WebPairingService();
+  try {
+    await webPairingService.initialize();
+    
+    // Set up remote install request handler
+    webPairingService.onRemoteInstallRequest = (packageName, versionName) {
+      debugPrint('Remote install request: $packageName v$versionName');
+      
+      // Show notification
+      notificationService.showRemoteInstallNotification(
+        appName: packageName,
+        packageName: packageName,
+        versionName: versionName,
+      );
+    };
+  } catch (e) {
+    debugPrint('Web pairing service initialization error: $e');
+  }
 
   runApp(
     EasyLocalization(
@@ -95,6 +147,7 @@ class MainApp extends StatelessWidget {
       child: Consumer<SettingsProvider>(
         builder: (context, settings, _) {
           return MaterialApp(
+            navigatorKey: navigatorKey,
             title: 'Florid - F-Droid Client',
             debugShowCheckedModeBanner: false,
             localizationsDelegates: context.localizationDelegates,

@@ -10,6 +10,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../providers/download_provider.dart';
 import '../providers/settings_provider.dart';
 import '../screens/repositories_screen.dart';
+import '../screens/web_pairing_screen.dart';
 import '../services/fdroid_api_service.dart';
 
 class SettingsScreen extends StatefulWidget {
@@ -271,6 +272,31 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               _clearRepoCache(context);
                             },
                             subtitle: 'Remove cached icons and screenshots',
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                  
+                  Column(
+                    spacing: 4,
+                    children: [
+                      MListHeader(title: 'Web Store'),
+                      MListView(
+                        items: [
+                          MListItemData(
+                            leading: Icon(Symbols.web),
+                            title: 'Web Store Pairing',
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => const WebPairingScreen(),
+                                ),
+                              );
+                            },
+                            subtitle: 'Install apps remotely from web browser',
+                            suffix: Icon(Symbols.chevron_right),
                           ),
                         ],
                       ),

@@ -10,17 +10,16 @@ Browse, search, and install open‑source Android apps from the F‑Droid reposi
 <div align="center">
 
 [![Crowdin](https://badges.crowdin.net/florid/localized.svg)](https://crowdin.com/project/florid) [![CI](https://github.com/Nandanrmenon/florid/actions/workflows/ci.yml/badge.svg)](https://github.com/Nandanrmenon/florid/actions/workflows/ci.yml)
+<a href="https://github.com/Nandanrmenon/florid/releases/latest">
+<img src="https://img.shields.io/github/v/release/Nandanrmenon/florid?label=Latest%20release&logo=github" alt="Latest release" />
+</a>
 
 </div>
 
 ## Download
 
-**Get latest build from**
-
-<a href="https://github.com/Nandanrmenon/florid/releases/latest">
-	<img src="https://img.shields.io/github/v/release/Nandanrmenon/florid?label=Latest%20release&logo=github&style=for-the-badge" alt="Latest release" />
-</a> *or* <a href="https://apt.izzysoft.de/packages/com.nahnah.florid">
-	<img src="https://img.shields.io/endpoint?url=https://apt.izzysoft.de/fdroid/api/v1/shield/<packageName>&label=IzzyOnDroid&style=for-the-badge" alt="Get it at IzzyOnDroid"/> 
+<a href="https://apt.izzysoft.de/packages/com.nahnah.florid">
+	<img src="https://gitlab.com/IzzyOnDroid/repo/-/raw/master/assets/IzzyOnDroidButtonGreyBorder_nofont.png" alt="Get it at IzzyOnDroid" height="80"> 
 </a>
 
 ## Features
@@ -85,10 +84,10 @@ Issues and PRs are welcome! Check out [CONTRIBUTING.md](https://github.com/Nanda
 
 Help translate Florid into other languages at [Crowdin](https://crowdin.com/project/florid).
 
-| Language        | Code | Contributors								 |
-| --------------- | ---- | ------------------------------------------|
-| English         |  en  | @Nandanrmenon 							 |
-| German          |  de  | [@JasmineLowen](https://github.com/JasmineLowen), [@mondlicht-und-sterne](https://github.com/mondlicht-und-sterne)      |
+| Language | Code | Contributors                                                                                                       |
+| -------- | ---- | ------------------------------------------------------------------------------------------------------------------ |
+| English  | en   | @Nandanrmenon                                                                                                      |
+| German   | de   | [@JasmineLowen](https://github.com/JasmineLowen), [@mondlicht-und-sterne](https://github.com/mondlicht-und-sterne) |
 
 ## License
 

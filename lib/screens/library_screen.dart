@@ -1,4 +1,5 @@
 import 'package:easy_localization/easy_localization.dart';
+import 'package:florid/l10n/app_localizations.dart';
 import 'package:florid/providers/app_provider.dart';
 import 'package:florid/providers/repositories_provider.dart';
 import 'package:florid/screens/categories_screen.dart';
@@ -37,7 +38,7 @@ class _LibraryScreenState extends State<LibraryScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('app_name'.tr()),
+        title: Text(AppLocalizations.of(context)!.app_name),
         backgroundColor: Theme.of(context).colorScheme.surfaceContainerLow,
         surfaceTintColor: Theme.of(context).colorScheme.surfaceContainerLow,
         actions: [
@@ -60,7 +61,7 @@ class _LibraryScreenState extends State<LibraryScreen>
                 value: 'refresh',
                 child: ListTile(
                   leading: const Icon(Symbols.refresh),
-                  title: Text('refresh'.tr()),
+                  title: Text(AppLocalizations.of(context)!.refresh),
                   contentPadding: EdgeInsets.zero,
                 ),
               ),
@@ -68,15 +69,15 @@ class _LibraryScreenState extends State<LibraryScreen>
                 value: 'settings',
                 child: ListTile(
                   leading: const Icon(Symbols.settings),
-                  title: Text('settings'.tr()),
+                  title: Text(AppLocalizations.of(context)!.settings),
                   contentPadding: EdgeInsets.zero,
                 ),
               ),
-              const PopupMenuItem(
+              PopupMenuItem(
                 value: 'about',
                 child: ListTile(
                   leading: Icon(Symbols.info),
-                  title: Text('About'),
+                  title: Text(AppLocalizations.of(context)!.about),
                   contentPadding: EdgeInsets.zero,
                 ),
               ),
@@ -89,8 +90,8 @@ class _LibraryScreenState extends State<LibraryScreen>
             _tabController.animateTo(index);
           },
           items: [
-            FloridTabBarItem(icon: Symbols.home, label: 'home'.tr()),
-            FloridTabBarItem(icon: Symbols.category, label: 'categories'.tr()),
+            FloridTabBarItem(icon: Symbols.home, label: AppLocalizations.of(context)!.home),
+            FloridTabBarItem(icon: Symbols.category, label: AppLocalizations.of(context)!.categories),
           ],
         ),
       ),

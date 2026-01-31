@@ -1,12 +1,14 @@
 import 'dart:convert';
 
-import 'package:easy_localization/easy_localization.dart';
-import 'package:florid/constants.dart';
+import 'package:florid/l10n/app_localizations.dart';
+import 'package:florid/l10n/crowdin_localizations.dart';
 import 'package:florid/providers/settings_provider.dart';
 import 'package:florid/screens/florid_app.dart';
 import 'package:florid/themes/app_themes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+// import 'package:easy_localization/easy_localization.dart';
+// import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
 
 import 'providers/app_provider.dart';
@@ -19,19 +21,7 @@ import 'services/izzy_stats_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await EasyLocalization.ensureInitialized();
-
-  // Initialize notification service and request permission
-  // await NotificationService().init();
-
-  runApp(
-    EasyLocalization(
-      supportedLocales: kSpportedLocales,
-      path: 'assets/translations',
-      fallbackLocale: const Locale('en'),
-      child: const MainApp(),
-    ),
-  );
+  runApp(MainApp());
 }
 
 class MainApp extends StatelessWidget {
@@ -98,9 +88,8 @@ class MainApp extends StatelessWidget {
           return MaterialApp(
             title: 'Florid - F-Droid Client',
             debugShowCheckedModeBanner: false,
-            localizationsDelegates: context.localizationDelegates,
-            supportedLocales: context.supportedLocales,
-            locale: context.locale,
+            localizationsDelegates: CrowdinLocalization.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
             theme: settings.themeStyle == ThemeStyle.florid
                 ? AppThemes.floridLightTheme()
                 : AppThemes.materialLightTheme(),

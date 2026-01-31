@@ -1,4 +1,4 @@
-import 'package:easy_localization/easy_localization.dart';
+import 'package:florid/l10n/app_localizations.dart';
 import 'package:florid/screens/library_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/symbols.dart';
@@ -62,12 +62,12 @@ class _FloridAppState extends State<FloridApp> {
                 fill: 1,
                 weight: 600,
               ),
-              label: 'home'.tr(),
+              label: AppLocalizations.of(context)!.home,
             ),
             NavigationDestination(
               icon: const Icon(Symbols.search),
               selectedIcon: const Icon(Symbols.search, fill: 1, weight: 600),
-              label: 'search'.tr(),
+              label: AppLocalizations.of(context)!.search,
             ),
             NavigationDestination(
               icon: updatableAppsCount > 0
@@ -86,7 +86,7 @@ class _FloridAppState extends State<FloridApp> {
                       ),
                     )
                   : const Icon(Symbols.mobile_3_rounded, fill: 1, weight: 600),
-              label: 'device'.tr(),
+              label: AppLocalizations.of(context)!.device,
             ),
           ];
 

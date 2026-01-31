@@ -1,4 +1,4 @@
-import 'package:easy_localization/easy_localization.dart';
+import 'package:florid/l10n/app_localizations.dart';
 import 'package:florid/providers/settings_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/symbols.dart';
@@ -82,7 +82,7 @@ class _CategoryAppsScreenState extends State<CategoryAppsScreen> {
                 children: [
                   CircularProgressIndicator(year2023: false),
                   SizedBox(height: 16),
-                  Text('loading_apps'.tr()),
+                  Text(AppLocalizations.of(context)!.loading_apps),
                 ],
               ),
             );
@@ -115,7 +115,7 @@ class _CategoryAppsScreenState extends State<CategoryAppsScreen> {
                   ElevatedButton.icon(
                     onPressed: _loadData,
                     icon: const Icon(Symbols.refresh),
-                    label: Text('retry'.tr()),
+                    label: Text(AppLocalizations.of(context)!.retry),
                   ),
                 ],
               ),
@@ -129,7 +129,12 @@ class _CategoryAppsScreenState extends State<CategoryAppsScreen> {
                 children: [
                   const Icon(Symbols.apps, size: 64, color: Colors.grey),
                   const SizedBox(height: 16),
-                  Text('no_apps_in_category'.tr(args: [widget.category])),
+                  // Text('no_apps_in_category'.tr(args: [widget.category])),
+                  Text(
+                    AppLocalizations.of(
+                      context,
+                    )!.no_apps_in_category(widget.category),
+                  ),
                 ],
               ),
             );

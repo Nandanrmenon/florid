@@ -1,19 +1,27 @@
 <div align="center">
+<img src="assets/Github-Cover.png" alt="Florid"/>
 
-# <img src="assets/Florid.png" alt="Florid logo" width="120" height="120" style="border-radius:99px; vertical-align:middle; margin-right:12px;" /> Florid — A Modern F‑Droid Client for Android
+# Florid — A Modern F‑Droid Client for Android
 
 Browse, search, and install open‑source Android apps from the F‑Droid repository with a clean Material 3 UI. Built with Flutter.
 
 </div>
 
 <div align="center">
-	<a href="https://github.com/Nandanrmenon/florid/releases/latest">
-		<img src="https://img.shields.io/github/v/release/Nandanrmenon/florid?label=Latest%20release&logo=github&style=for-the-badge" alt="Latest release" />
-	</a>
-	<a href="https://apt.izzysoft.de/packages/com.nahnah.florid">
-		<img src="https://gitlab.com/IzzyOnDroid/repo/-/raw/master/assets/IzzyOnDroidButtonGreyBorder_nofont.png" alt="Get it at IzzyOnDroid" height="50"/>
-	</a>
+
+[![Crowdin](https://badges.crowdin.net/florid/localized.svg)](https://crowdin.com/project/florid) [![CI](https://github.com/Nandanrmenon/florid/actions/workflows/ci.yml/badge.svg)](https://github.com/Nandanrmenon/florid/actions/workflows/ci.yml)
+
 </div>
+
+## Download
+
+**Get latest build from**
+
+<a href="https://github.com/Nandanrmenon/florid/releases/latest">
+	<img src="https://img.shields.io/github/v/release/Nandanrmenon/florid?label=Latest%20release&logo=github&style=for-the-badge" alt="Latest release" />
+</a> *or* <a href="https://apt.izzysoft.de/packages/com.nahnah.florid">
+	<img src="https://img.shields.io/endpoint?url=https://apt.izzysoft.de/fdroid/api/v1/shield/<packageName>&label=IzzyOnDroid&style=for-the-badge" alt="Get it at IzzyOnDroid"/> 
+</a>
 
 ## Features
 
@@ -66,80 +74,20 @@ First launch performs an initial repository sync and caches data locally for fas
 Build a release APK:
 
 ```bash
-flutter build apk
+flutter build apk --split-per-abi
 ```
-
-## Architecture
-
-- State management: Provider
-- Data layer: `FDroidApiService` (network + download) and `DatabaseService` (SQLite via `sqflite`) with cache‑first fallback
-- Serialization: `json_serializable` + `build_runner`
-- UI: Flutter Material 3 components and custom widgets
-- Notifications: `flutter_local_notifications` for download progress/completion
-
-### Repository & Caching
-
-- Fetches `index-v2.json` from F‑Droid, parses into models, persists to SQLite
-- Falls back to local DB or JSON cache when offline or on failures
-- Extracts screenshots from raw metadata when available
-
-### Project Structure
-
-```
-lib/
-├── models/          # Data models (FDroidApp, FDroidVersion, ...)
-├── providers/       # App, download, and settings providers
-├── screens/         # UI screens (Latest, Categories, Updates, Details, ...)
-├── services/        # API, database, notifications, utilities
-├── widgets/         # Reusable UI components
-└── main.dart        # App entry point
-```
-
-## Permissions
-
-Florid uses the following Android permissions for core functionality:
-
-- INTERNET: Access the F‑Droid repository and app metadata
-- REQUEST_INSTALL_PACKAGES: Install downloaded APKs
-- POST_NOTIFICATIONS (Android 13+): Show download notifications
-- QUERY_ALL_PACKAGES: Detect installed apps to surface available updates
-- Storage access: APK files are stored in the app’s external Downloads dir; on Android 13+ this typically works without the legacy storage permission
-
-Actual permissions are declared in the Android manifest and requested at runtime where required.
-
-## Development
-
-- Regenerate splash screen (configured in `splash_screen.yaml`):
-
-```bash
-flutter pub run flutter_native_splash:create
-```
-
-- Regenerate app icons (configured in `icon_launcher.yaml`):
-
-```bash
-flutter pub run icons_launcher:create
-```
-
-## Dependencies (selected)
-
-- provider, http, dio, cached_network_image, flutter_cache_manager
-- sqflite, path_provider, shared_preferences
-- permission_handler, package_info_plus, installed_apps, android_intent_plus
-- flutter_local_notifications, url_launcher, share_plus
-- json_annotation, json_serializable, build_runner
 
 ## Contributing
 
-Issues and PRs are welcome! Please:
+Issues and PRs are welcome! Check out [CONTRIBUTING.md](https://github.com/Nandanrmenon/florid/blob/main/CONTRIBUTING.md) for guidelines.
 
-- Open an issue for bugs or feature requests
-- Keep PRs focused and include concise descriptions
-- Follow the existing code style and Provider architecture
+## Translations
+
+Help translate Florid into other languages at [Crowdin](https://crowdin.com/project/florid).
 
 ## License
 
-GPL‑3.0 — see LICENSE for full text.
+GPL‑3.0 - see LICENSE for full text.
 
 ## Disclaimer
 

@@ -1,4 +1,5 @@
 import 'package:easy_localization/easy_localization.dart';
+import 'package:florid/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:material_symbols_icons/symbols.dart';
@@ -66,7 +67,7 @@ class _LatestScreenState extends State<LatestScreen>
           children: [
             CircularProgressIndicator(year2023: false),
             SizedBox(height: 16),
-            Text('loading_latest_apps'.tr()),
+            Text(AppLocalizations.of(context)!.loading_latest_apps),
           ],
         ),
       );
@@ -99,7 +100,7 @@ class _LatestScreenState extends State<LatestScreen>
             ElevatedButton.icon(
               onPressed: _loadData,
               icon: const Icon(Symbols.refresh),
-              label: Text('retry'.tr()),
+              label: Text(AppLocalizations.of(context)!.retry),
             ),
           ],
         ),
@@ -113,7 +114,7 @@ class _LatestScreenState extends State<LatestScreen>
           children: [
             const Icon(Symbols.apps, size: 64, color: Colors.grey),
             const SizedBox(height: 16),
-            Text('no_apps_found'.tr()),
+            Text(AppLocalizations.of(context)!.no_apps_found),
           ],
         ),
       );
@@ -121,7 +122,7 @@ class _LatestScreenState extends State<LatestScreen>
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('latest_apps'.tr()),
+        title: Text(AppLocalizations.of(context)!.latest_apps),
         backgroundColor: Theme.of(context).colorScheme.surfaceContainerLow,
         surfaceTintColor: Theme.of(context).colorScheme.surfaceContainerLow,
       ),

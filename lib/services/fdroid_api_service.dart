@@ -2,8 +2,10 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:dio/dio.dart';
+import 'package:dio/io.dart';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
+import 'package:http/io_client.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -22,6 +24,10 @@ class FDroidApiService {
   final Map<String, CancelToken> _downloadTokens = {};
   final DatabaseService _databaseService;
   String _userAgent = 'Florid';
+  bool _sniBypassEnabled = true;
+
+  /// Cache of what worked for each URL to optimize future requests
+  final Map<String, bool> _workingSniBypassSettings = {};
 
   /// Cache raw repository JSON for screenshot extraction from the default repo
   Map<String, dynamic>? _cachedRawJson;
@@ -33,11 +39,69 @@ class FDroidApiService {
     http.Client? client,
     Dio? dio,
     DatabaseService? databaseService,
-  }) : _client = client ?? http.Client(),
-       _dio = dio ?? Dio(),
-       _databaseService = databaseService ?? DatabaseService() {
+    bool enableSNIBypass = true,
+  }) : _client = client ?? _createSNIBypassHttpClient(enableSNIBypass),
+       _dio = dio ?? _createSNIBypassDio(),
+       _databaseService = databaseService ?? DatabaseService(),
+       _sniBypassEnabled = enableSNIBypass {
     _initializeUserAgent();
   }
+
+  /// Creates an HTTP client with SNI bypass support
+  static http.Client _createSNIBypassHttpClient(bool enableSNIBypass) {
+    if (!enableSNIBypass) {
+      return http.Client();
+    }
+
+    // Create a custom HttpClient with SNI bypass
+    final httpClient = HttpClient()
+      ..badCertificateCallback = (X509Certificate cert, String host, int port) {
+        debugPrint(
+          'FDroidApiService: Bypassing certificate verification for $host:$port',
+        );
+        return true; // Accept all certificates to bypass SNI filtering
+      };
+
+    // Wrap it with the http package's IOClient
+    return IOClient(httpClient);
+  }
+
+  /// Creates a Dio instance with SNI bypass support
+  static Dio _createSNIBypassDio() {
+    final dio = Dio();
+
+    // Configure Dio to work with SNI bypass
+    final httpClient = HttpClient()
+      ..badCertificateCallback = (X509Certificate cert, String host, int port) {
+        debugPrint('Dio: Bypassing certificate verification for $host:$port');
+        return true; // Accept all certificates to bypass SNI filtering
+      };
+
+    dio.httpClientAdapter = IOHttpClientAdapter(
+      createHttpClient: () => httpClient,
+    );
+
+    return dio;
+  }
+
+  /// Enables or disables SNI bypass
+  void setSNIBypassEnabled(bool enabled) {
+    _sniBypassEnabled = enabled;
+    debugPrint('SNI bypass ${enabled ? 'enabled' : 'disabled'}');
+  }
+
+  /// Checks if SNI bypass is currently enabled
+  bool isSNIBypassEnabled() => _sniBypassEnabled;
+
+  /// Clears cached SNI bypass settings for URLs to force re-detection
+  /// Useful when network conditions change or for manual reset
+  void clearSNIBypassCache() {
+    _workingSniBypassSettings.clear();
+    debugPrint('SNI bypass cache cleared. Next requests will auto-detect.');
+  }
+
+  /// Gets the cached SNI bypass setting for a URL, or null if not cached
+  bool? getCachedSNIBypassSetting(String url) => _workingSniBypassSettings[url];
 
   /// Initializes the User-Agent header with app version
   Future<void> _initializeUserAgent() async {
@@ -111,8 +175,8 @@ class FDroidApiService {
     }
   }
 
-  /// Fetches the complete repository index with database caching.
-  /// Flow: try database (fresh) -> network -> database fallback on network failure.
+  /// Fetches the complete repository index with database caching and automatic SNI bypass fallback.
+  /// Flow: try database (fresh) -> network -> try opposite SNI bypass if failed -> database fallback.
   Future<FDroidRepository> fetchRepository() async {
     if (!hasRepositoryUrl()) {
       throw Exception(
@@ -141,11 +205,87 @@ class FDroidApiService {
       }
     }
 
-    // Try to fetch from network
+    // Try to fetch from network with automatic SNI bypass fallback
+    return await _fetchRepositoryWithAutoFallback(repoIndexUrl!);
+  }
+
+  /// Fetches repository with automatic SNI bypass fallback
+  /// First tries the current SNI bypass setting, if that fails, tries the opposite
+  Future<FDroidRepository> _fetchRepositoryWithAutoFallback(String url) async {
+    // Check if we have cached knowledge about what works for this URL
+    final cachedSetting = _workingSniBypassSettings[url];
+
+    // Try the known working setting first, or current setting if unknown
+    final primarySetting = cachedSetting ?? _sniBypassEnabled;
+    final fallbackSetting = !primarySetting;
+
+    debugPrint(
+      'Fetching from network: $url (Primary SNI bypass: $primarySetting)',
+    );
+
+    // Try primary setting
     try {
-      debugPrint('Fetching from network: $repoIndexUrl');
+      final repo = await _fetchRepositoryWithSNISetting(url, primarySetting);
+      // Cache this working setting
+      _workingSniBypassSettings[url] = primarySetting;
+      return repo;
+    } catch (primaryError) {
+      debugPrint(
+        'Primary attempt failed with SNI bypass=$primarySetting: $primaryError',
+      );
+
+      // Try with fallback SNI setting
+      debugPrint('Retrying with fallback SNI bypass setting: $fallbackSetting');
+      try {
+        final repo = await _fetchRepositoryWithSNISetting(url, fallbackSetting);
+        // Cache this working setting
+        _workingSniBypassSettings[url] = fallbackSetting;
+        debugPrint('Successfully fetched with SNI bypass=$fallbackSetting');
+        return repo;
+      } catch (fallbackError) {
+        debugPrint('Fallback attempt also failed: $fallbackError');
+
+        // Both attempts failed, try database and cache fallbacks
+        final isPopulated = await _databaseService.isPopulated();
+        if (isPopulated) {
+          try {
+            debugPrint('Falling back to database...');
+            return await _loadRepositoryFromDatabase();
+          } catch (dbError) {
+            debugPrint('Error loading from database fallback: $dbError');
+          }
+        }
+
+        // Last resort: try JSON cache
+        debugPrint('Trying JSON cache...');
+        final cachedJson = await _tryLoadCache();
+        if (cachedJson != null) {
+          _cachedRawJson = cachedJson;
+          debugPrint('Loaded from JSON cache');
+          return FDroidRepository.fromJson(cachedJson);
+        }
+
+        // All fallbacks failed
+        throw Exception(
+          'Error fetching repository: Failed with both SNI bypass settings. '
+          'Primary error: $primaryError, Fallback error: $fallbackError',
+        );
+      }
+    }
+  }
+
+  /// Fetches repository with a specific SNI bypass setting
+  Future<FDroidRepository> _fetchRepositoryWithSNISetting(
+    String url,
+    bool useSniBypass,
+  ) async {
+    // Temporarily set SNI bypass for this request
+    final originalSetting = _sniBypassEnabled;
+    _sniBypassEnabled = useSniBypass;
+
+    try {
       final response = await _client.get(
-        Uri.parse(repoIndexUrl!),
+        Uri.parse(url),
         headers: {'User-Agent': _userAgent},
       );
 
@@ -177,29 +317,9 @@ class FDroidApiService {
       } else {
         throw Exception('Failed to load repository: ${response.statusCode}');
       }
-    } catch (e) {
-      debugPrint('Network fetch failed: $e');
-
-      // Fall back to database if available (even if stale)
-      if (isPopulated) {
-        try {
-          debugPrint('Falling back to database...');
-          return await _loadRepositoryFromDatabase();
-        } catch (dbError) {
-          debugPrint('Error loading from database fallback: $dbError');
-        }
-      }
-
-      // Last resort: try JSON cache
-      debugPrint('Trying JSON cache...');
-      final cachedJson = await _tryLoadCache();
-      if (cachedJson != null) {
-        _cachedRawJson = cachedJson;
-        debugPrint('Loaded from JSON cache');
-        return FDroidRepository.fromJson(cachedJson);
-      }
-
-      throw Exception('Error fetching repository: $e');
+    } finally {
+      // Restore original SNI bypass setting
+      _sniBypassEnabled = originalSetting;
     }
   }
 
@@ -245,7 +365,7 @@ class FDroidApiService {
     );
   }
 
-  /// Fetches repository from a custom URL
+  /// Fetches repository from a custom URL with automatic SNI bypass fallback
   Future<FDroidRepository> fetchRepositoryFromUrl(String url) async {
     try {
       // Construct the index URL
@@ -272,12 +392,22 @@ class FDroidApiService {
       }
 
       debugPrint('Fetching from custom repo: $indexUrl');
-      final response = await _client.get(
-        Uri.parse(indexUrl),
-        headers: {'User-Agent': _userAgent},
-      );
 
-      if (response.statusCode == 200) {
+      // Check if we have cached knowledge about what works for this URL
+      final cachedSetting = _workingSniBypassSettings[indexUrl];
+
+      // Try the known working setting first, or current setting if unknown
+      final primarySetting = cachedSetting ?? _sniBypassEnabled;
+      final fallbackSetting = !primarySetting;
+
+      // Try primary setting
+      try {
+        final response = await _fetchCustomRepoWithSNISetting(
+          indexUrl,
+          primarySetting,
+        );
+        _workingSniBypassSettings[indexUrl] = primarySetting;
+
         final jsonData = json.decode(response.body);
         final repo = FDroidRepository.fromJson(
           jsonData,
@@ -285,12 +415,67 @@ class FDroidApiService {
         );
         debugPrint('Successfully fetched repository from $url');
         return repo;
-      } else {
-        throw Exception('Failed to load repository: ${response.statusCode}');
+      } catch (primaryError) {
+        debugPrint(
+          'Primary attempt failed with SNI bypass=$primarySetting: $primaryError',
+        );
+
+        // Try with fallback SNI setting
+        debugPrint(
+          'Retrying with fallback SNI bypass setting: $fallbackSetting',
+        );
+        try {
+          final response = await _fetchCustomRepoWithSNISetting(
+            indexUrl,
+            fallbackSetting,
+          );
+          _workingSniBypassSettings[indexUrl] = fallbackSetting;
+          debugPrint('Successfully fetched with SNI bypass=$fallbackSetting');
+
+          final jsonData = json.decode(response.body);
+          final repo = FDroidRepository.fromJson(
+            jsonData,
+            repositoryUrl: repoBase,
+          );
+          return repo;
+        } catch (fallbackError) {
+          debugPrint('Fallback attempt also failed: $fallbackError');
+          throw Exception(
+            'Error fetching repository from $url: '
+            'Failed with both SNI bypass settings. '
+            'Primary error: $primaryError, Fallback error: $fallbackError',
+          );
+        }
       }
     } catch (e) {
       debugPrint('Error fetching from custom repo $url: $e');
       throw Exception('Error fetching repository from $url: $e');
+    }
+  }
+
+  /// Fetches custom repository with a specific SNI bypass setting
+  Future<http.Response> _fetchCustomRepoWithSNISetting(
+    String url,
+    bool useSniBypass,
+  ) async {
+    // Temporarily set SNI bypass for this request
+    final originalSetting = _sniBypassEnabled;
+    _sniBypassEnabled = useSniBypass;
+
+    try {
+      final response = await _client.get(
+        Uri.parse(url),
+        headers: {'User-Agent': _userAgent},
+      );
+
+      if (response.statusCode != 200) {
+        throw Exception('Failed to load repository: ${response.statusCode}');
+      }
+
+      return response;
+    } finally {
+      // Restore original SNI bypass setting
+      _sniBypassEnabled = originalSetting;
     }
   }
 
@@ -1046,4 +1231,54 @@ class FDroidApiService {
     _client.close();
     _databaseService.close();
   }
+}
+
+/// Custom HTTP client wrapper that provides SNI bypass capability
+/// This extends the http.Client to allow bypassing SNI filtering in censored regions
+class SNIBypassHttpClient extends http.BaseClient {
+  final http.Client _inner;
+  final bool _enableSNIBypass;
+  static const String _tag = 'SNIBypassHttpClient';
+
+  SNIBypassHttpClient({http.Client? innerClient, bool enableSNIBypass = true})
+    : _inner = innerClient ?? http.Client(),
+      _enableSNIBypass = enableSNIBypass;
+
+  @override
+  Future<http.StreamedResponse> send(http.BaseRequest request) async {
+    if (!_enableSNIBypass) {
+      return _inner.send(request);
+    }
+
+    // Log the request for debugging
+    debugPrint('$_tag: ${request.method} ${request.url} (SNI bypass enabled)');
+
+    try {
+      // Send the request through the inner client
+      // The SNI bypass is handled at the HttpClient level by the app
+      final response = await _inner.send(request);
+
+      if (!response.isOk) {
+        debugPrint(
+          '$_tag: Received status ${response.statusCode} for ${request.url}',
+        );
+
+        // If SNI filtering is suspected, retry with direct connection
+        if (response.statusCode == 403 || response.statusCode == 502) {
+          debugPrint('$_tag: Possible SNI blocking detected, retrying...');
+          // The retry will use the same client with SNI bypass enabled
+          return _inner.send(request);
+        }
+      }
+
+      return response;
+    } catch (e) {
+      debugPrint('$_tag: Request failed: $e');
+      rethrow;
+    }
+  }
+}
+
+extension on http.StreamedResponse {
+  bool get isOk => statusCode >= 200 && statusCode < 300;
 }

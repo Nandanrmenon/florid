@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:easy_localization/easy_localization.dart';
+import 'package:florid/constants.dart';
 import 'package:florid/providers/settings_provider.dart';
 import 'package:florid/screens/florid_app.dart';
 import 'package:florid/themes/app_themes.dart';
@@ -25,7 +26,7 @@ void main() async {
 
   runApp(
     EasyLocalization(
-      supportedLocales: const [Locale('en')],
+      supportedLocales: kSpportedLocales,
       path: 'assets/translations',
       fallbackLocale: const Locale('en'),
       child: const MainApp(),

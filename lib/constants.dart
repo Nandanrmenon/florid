@@ -15,3 +15,5 @@ Future<String> getAppVersion() async {
     return kAppversion;
   }
 }
+
+var kSpportedLocales = const [Locale('en'), Locale('de')];

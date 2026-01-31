@@ -85,6 +85,11 @@ Issues and PRs are welcome! Check out [CONTRIBUTING.md](https://github.com/Nanda
 
 Help translate Florid into other languages at [Crowdin](https://crowdin.com/project/florid).
 
+| Language        | Code | Contributors								 |
+| --------------- | ---- | ------------------------------------------|
+| English         |  en  | @Nandanrmenon 							 |
+| German          |  de  | @JasmineLowen, @mondlicht-und-sterne      |
+
 ## License
 
 GPL‑3.0 - see LICENSE for full text.

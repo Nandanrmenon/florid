@@ -88,7 +88,7 @@ Help translate Florid into other languages at [Crowdin](https://crowdin.com/proj
 | Language        | Code | Contributors								 |
 | --------------- | ---- | ------------------------------------------|
 | English         |  en  | @Nandanrmenon 							 |
-| German          |  de  | @JasmineLowen, @mondlicht-und-sterne      |
+| German          |  de  | [@JasmineLowen](https://github.com/JasmineLowen), [@mondlicht-und-sterne](https://github.com/mondlicht-und-sterne)      |
 
 ## License
 

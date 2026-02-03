@@ -121,26 +121,30 @@ class _RepositoriesScreenState extends State<RepositoriesScreen> {
                               onChanged: (newValue) async {
                                 if (newValue) {
                                   // Add the preset
-                                  await _runRepositoryActionWithDialog(
-                                    context,
-                                    () async {
-                                      final repoProvider = context
-                                          .read<RepositoriesProvider>();
-                                      final apiService = context
-                                          .read<FDroidApiService>();
-                                      final appProvider = context
-                                          .read<AppProvider>();
-
-                                      await repoProvider.addRepository(
-                                        preset['name']!,
-                                        preset['url']!,
-                                      );
-                                      await apiService.clearRepositoryCache();
-                                      await appProvider.refreshAll(
-                                        repositoriesProvider: repoProvider,
-                                      );
-                                    },
+                                  final repoProvider = context
+                                      .read<RepositoriesProvider>();
+                                  await repoProvider.addRepository(
+                                    preset['name']!,
+                                    preset['url']!,
                                   );
+                                  // Only proceed with modal and refresh if addition succeeded (no error)
+                                  if (repoProvider.error == null &&
+                                      context.mounted) {
+                                    await _runRepositoryActionWithDialog(
+                                      context,
+                                      () async {
+                                        final apiService = context
+                                            .read<FDroidApiService>();
+                                        final appProvider = context
+                                            .read<AppProvider>();
+
+                                        await apiService.clearRepositoryCache();
+                                        await appProvider.refreshAll(
+                                          repositoriesProvider: repoProvider,
+                                        );
+                                      },
+                                    );
+                                  }
                                 } else {
                                   // Remove the preset
                                   Repository? addedRepo;
@@ -153,25 +157,28 @@ class _RepositoriesScreenState extends State<RepositoriesScreen> {
                                     addedRepo = null;
                                   }
                                   if (addedRepo != null) {
-                                    await _runRepositoryActionWithDialog(
-                                      context,
-                                      () async {
-                                        final repoProvider = context
-                                            .read<RepositoriesProvider>();
-                                        final apiService = context
-                                            .read<FDroidApiService>();
-                                        final appProvider = context
-                                            .read<AppProvider>();
+                                    final repoProvider = context
+                                        .read<RepositoriesProvider>();
+                                    repoProvider.deleteRepository(addedRepo.id);
+                                    // Only proceed with modal and refresh if deletion succeeded (no error)
+                                    if (repoProvider.error == null &&
+                                        context.mounted) {
+                                      await _runRepositoryActionWithDialog(
+                                        context,
+                                        () async {
+                                          final apiService = context
+                                              .read<FDroidApiService>();
+                                          final appProvider = context
+                                              .read<AppProvider>();
 
-                                        repoProvider.deleteRepository(
-                                          addedRepo!.id,
-                                        );
-                                        await apiService.clearRepositoryCache();
-                                        await appProvider.refreshAll(
-                                          repositoriesProvider: repoProvider,
-                                        );
-                                      },
-                                    );
+                                          await apiService
+                                              .clearRepositoryCache();
+                                          await appProvider.refreshAll(
+                                            repositoriesProvider: repoProvider,
+                                          );
+                                        },
+                                      );
+                                    }
                                   }
                                 }
                               },
@@ -338,26 +345,32 @@ class _RepositoriesScreenState extends State<RepositoriesScreen> {
         onAdd: (name, url) async {
           // Close the add dialog, then run the add flow with a blocking progress dialog.
           Navigator.pop(context);
-          await _runRepositoryActionWithDialog(context, () async {
-            final repoProvider = context.read<RepositoriesProvider>();
-            final apiService = context.read<FDroidApiService>();
-            final appProvider = context.read<AppProvider>();
+          final repoProvider = context.read<RepositoriesProvider>();
+          await repoProvider.addRepository(name, url);
+          // Only proceed with modal and refresh if addition succeeded (no error)
+          if (repoProvider.error == null && context.mounted) {
+            await _runRepositoryActionWithDialog(context, () async {
+              final apiService = context.read<FDroidApiService>();
+              final appProvider = context.read<AppProvider>();
 
-            await repoProvider.addRepository(name, url);
-            await apiService.clearRepositoryCache();
-            await appProvider.refreshAll(repositoriesProvider: repoProvider);
-          });
+              await apiService.clearRepositoryCache();
+              await appProvider.refreshAll(repositoriesProvider: repoProvider);
+            });
+          }
         },
         onAddPreset: (name, url) async {
-          await _runRepositoryActionWithDialog(context, () async {
-            final repoProvider = context.read<RepositoriesProvider>();
-            final apiService = context.read<FDroidApiService>();
-            final appProvider = context.read<AppProvider>();
+          final repoProvider = context.read<RepositoriesProvider>();
+          await repoProvider.addRepository(name, url);
+          // Only proceed with modal and refresh if addition succeeded (no error)
+          if (repoProvider.error == null && context.mounted) {
+            await _runRepositoryActionWithDialog(context, () async {
+              final apiService = context.read<FDroidApiService>();
+              final appProvider = context.read<AppProvider>();
 
-            await repoProvider.addRepository(name, url);
-            await apiService.clearRepositoryCache();
-            await appProvider.refreshAll(repositoriesProvider: repoProvider);
-          });
+              await apiService.clearRepositoryCache();
+              await appProvider.refreshAll(repositoriesProvider: repoProvider);
+            });
+          }
         },
       ),
     );

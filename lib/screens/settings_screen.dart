@@ -200,22 +200,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             subtitle: 'Add or remove F-Droid repositories',
                             suffix: Icon(Symbols.chevron_right),
                           ),
-                          MListItemData(
-                            title: 'Include unstable versions',
-                            onTap: () {
-                              settings.setIncludeUnstableVersions(
-                                !settings.includeUnstableVersions,
-                              );
-                            },
-                            subtitle:
-                                'Show beta, alpha, and other pre-release versions',
-                            suffix: Switch(
-                              value: settings.includeUnstableVersions,
-                              onChanged: (value) {
-                                settings.setIncludeUnstableVersions(value);
-                              },
-                            ),
-                          ),
                         ],
                       ),
                     ],

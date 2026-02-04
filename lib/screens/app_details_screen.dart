@@ -1005,6 +1005,67 @@ class _AppDetailsScreenState extends State<AppDetailsScreen> {
                               delay: Duration(milliseconds: 300),
                               duration: Duration(milliseconds: 300),
                             ),
+                          if (isInstalled)
+                            FutureBuilder<bool>(
+                              future: appProvider.getIncludeUnstable(widget.app.packageName),
+                              builder: (context, snapshot) {
+                                final includeUnstable = snapshot.data ?? false;
+                                return Card.outlined(
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 16.0,
+                                      vertical: 12.0,
+                                    ),
+                                    child: Row(
+                                      children: [
+                                        Icon(
+                                          Symbols.science,
+                                          size: 20,
+                                          color: Theme.of(context).colorScheme.primary,
+                                        ),
+                                        const SizedBox(width: 12),
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              Text(
+                                                'Include unstable versions',
+                                                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                                  fontWeight: FontWeight.w500,
+                                                ),
+                                              ),
+                                              Text(
+                                                'Show beta, alpha, and pre-release versions for this app',
+                                                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        Switch(
+                                          value: includeUnstable,
+                                          onChanged: (value) async {
+                                            await appProvider.setIncludeUnstable(
+                                              widget.app.packageName,
+                                              value,
+                                            );
+                                            // Rebuild the widget to reflect the change
+                                            if (mounted) {
+                                              setState(() {});
+                                            }
+                                          },
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ).animate().fadeIn(
+                                  delay: Duration(milliseconds: 300),
+                                  duration: Duration(milliseconds: 300),
+                                );
+                              },
+                            ),
 
                           FutureBuilder<IzzyStats>(
                             future: _statsFuture,
@@ -2030,58 +2091,71 @@ class _AllVersionsSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final versions = app.packages?.values.toList() ?? [];
-    if (versions.isEmpty) return const SizedBox.shrink();
+    return Consumer<AppProvider>(
+      builder: (context, appProvider, _) {
+        return FutureBuilder<bool>(
+          future: appProvider.getIncludeUnstable(app.packageName),
+          builder: (context, snapshot) {
+            final includeUnstable = snapshot.data ?? false;
+            
+            var versions = app.packages?.values.toList() ?? [];
+            if (versions.isEmpty) return const SizedBox.shrink();
 
-    // Sort versions by version code descending
-    versions.sort((a, b) => b.versionCode.compareTo(a.versionCode));
+            // Filter out unstable versions if not enabled
+            if (!includeUnstable) {
+              versions = versions.where((v) => !v.isUnstable).toList();
+              if (versions.isEmpty) return const SizedBox.shrink();
+            }
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      spacing: 8.0,
-      children: [
-        MListHeader(title: 'All Versions'),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0),
-          child: Column(
-            children: [
-              ...versions.map((version) {
-                final isLatest = version == versions.first;
+            // Sort versions by version code descending
+            versions.sort((a, b) => b.versionCode.compareTo(a.versionCode));
 
-                return Container(
-                  padding: const EdgeInsets.all(12),
-                  margin: const EdgeInsets.only(bottom: 4),
-                  decoration: BoxDecoration(
-                    color: isLatest
-                        ? Theme.of(context).colorScheme.primaryContainer
-                        : Theme.of(context).colorScheme.surfaceContainer,
-                    borderRadius: BorderRadius.circular(16),
-                    border: isLatest
-                        ? Border.all(
-                            color: Theme.of(context).colorScheme.primary,
-                            width: 1,
-                          )
-                        : null,
-                  ),
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              spacing: 8.0,
+              children: [
+                MListHeader(title: 'All Versions'),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  version.versionName,
-                                  style: Theme.of(context).textTheme.bodyMedium
-                                      ?.copyWith(fontWeight: FontWeight.w600),
-                                ),
-                                Text(
-                                  'Code: ${version.versionCode}',
-                                  style: Theme.of(context).textTheme.bodySmall
-                                      ?.copyWith(
+                      ...versions.map((version) {
+                        final isLatest = version == versions.first;
+
+                        return Container(
+                          padding: const EdgeInsets.all(12),
+                          margin: const EdgeInsets.only(bottom: 4),
+                          decoration: BoxDecoration(
+                            color: isLatest
+                                ? Theme.of(context).colorScheme.primaryContainer
+                                : Theme.of(context).colorScheme.surfaceContainer,
+                            borderRadius: BorderRadius.circular(16),
+                            border: isLatest
+                                ? Border.all(
+                                    color: Theme.of(context).colorScheme.primary,
+                                    width: 1,
+                                  )
+                                : null,
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          version.versionName,
+                                          style: Theme.of(context).textTheme.bodyMedium
+                                              ?.copyWith(fontWeight: FontWeight.w600),
+                                        ),
+                                        Text(
+                                          'Code: ${version.versionCode}',
+                                          style: Theme.of(context).textTheme.bodySmall
+                                              ?.copyWith(
                                         color: Theme.of(
                                           context,
                                         ).colorScheme.onSurfaceVariant,
@@ -2136,6 +2210,10 @@ class _AllVersionsSection extends StatelessWidget {
           ),
         ),
       ],
+    );
+          },
+        );
+      },
     );
   }
 

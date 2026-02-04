@@ -12,7 +12,6 @@ class SettingsProvider extends ChangeNotifier {
   static const _localeKey = 'locale';
   static const _onboardingCompleteKey = 'onboarding_complete';
   static const _sniBypassKey = 'sni_bypass_enabled';
-  static const _includeUnstableKey = 'include_unstable_versions';
 
   ThemeMode _themeMode = ThemeMode.system;
   ThemeStyle _themeStyle = ThemeStyle.florid;
@@ -21,7 +20,6 @@ class SettingsProvider extends ChangeNotifier {
   String _locale = 'en-US';
   bool _onboardingComplete = false;
   bool _sniBypassEnabled = true;
-  bool _includeUnstableVersions = false;
   bool _loaded = false;
 
   SettingsProvider() {
@@ -36,7 +34,6 @@ class SettingsProvider extends ChangeNotifier {
   String get locale => _locale;
   bool get onboardingComplete => _onboardingComplete;
   bool get sniBypassEnabled => _sniBypassEnabled;
-  bool get includeUnstableVersions => _includeUnstableVersions;
 
   /// Available locales for F-Droid repository data
   static const List<String> availableLocales = [
@@ -101,7 +98,6 @@ class SettingsProvider extends ChangeNotifier {
     _locale = prefs.getString(_localeKey) ?? 'en-US';
     _onboardingComplete = prefs.getBool(_onboardingCompleteKey) ?? false;
     _sniBypassEnabled = prefs.getBool(_sniBypassKey) ?? true;
-    _includeUnstableVersions = prefs.getBool(_includeUnstableKey) ?? false;
     _loaded = true;
     notifyListeners();
   }
@@ -169,12 +165,5 @@ class SettingsProvider extends ChangeNotifier {
     notifyListeners();
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_sniBypassKey, value);
-  }
-
-  Future<void> setIncludeUnstableVersions(bool value) async {
-    _includeUnstableVersions = value;
-    notifyListeners();
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool(_includeUnstableKey, value);
   }
 }

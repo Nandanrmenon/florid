@@ -131,8 +131,23 @@ class FDroidApp {
   String get categoryString => categories?.join(', ') ?? 'Unknown';
 
   FDroidVersion? get latestVersion {
+    return getLatestVersion();
+  }
+
+  /// Gets the latest version, optionally filtering out unstable versions
+  FDroidVersion? getLatestVersion({bool includeUnstable = true}) {
     if (packages == null || packages!.isEmpty) return null;
-    final versions = packages!.values.toList();
+    
+    var versions = packages!.values.toList();
+    
+    // Filter out unstable versions if requested
+    if (!includeUnstable) {
+      versions = versions.where((v) => !v.isUnstable).toList();
+      
+      // If no stable versions exist, return null
+      if (versions.isEmpty) return null;
+    }
+    
     versions.sort((a, b) => b.versionCode.compareTo(a.versionCode));
     return versions.first;
   }
@@ -270,6 +285,22 @@ class FDroidVersion {
     if (size < 1024) return '${size}B';
     if (size < 1024 * 1024) return '${(size / 1024).toStringAsFixed(1)}KB';
     return '${(size / (1024 * 1024)).toStringAsFixed(1)}MB';
+  }
+
+  /// Checks if this version is considered unstable (beta, alpha, RC, etc.)
+  bool get isUnstable {
+    final lowerVersionName = versionName.toLowerCase();
+    // Check for common unstable version indicators
+    return lowerVersionName.contains('alpha') ||
+        lowerVersionName.contains('beta') ||
+        lowerVersionName.contains('rc') ||
+        lowerVersionName.contains('dev') ||
+        lowerVersionName.contains('pre') ||
+        lowerVersionName.contains('snapshot') ||
+        lowerVersionName.contains('nightly') ||
+        lowerVersionName.contains('canary') ||
+        lowerVersionName.contains('preview') ||
+        lowerVersionName.contains('test');
   }
 }
 

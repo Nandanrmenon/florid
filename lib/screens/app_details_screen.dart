@@ -16,6 +16,7 @@ import '../models/fdroid_app.dart';
 import '../providers/app_provider.dart';
 import '../providers/download_provider.dart';
 import '../providers/repositories_provider.dart';
+import '../providers/settings_provider.dart';
 import '../services/izzy_stats_service.dart';
 
 class AppDetailsScreen extends StatefulWidget {
@@ -230,14 +231,17 @@ class _AppDetailsScreenState extends State<AppDetailsScreen> {
             await Future.delayed(const Duration(milliseconds: 800));
             await appProvider.fetchInstalledApps();
             if (appProvider.isAppInstalled(widget.app.packageName)) {
-              final downloadInfo = downloadProvider.getDownloadInfo(
-                widget.app.packageName,
-                widget.app.latestVersion!.versionName,
-              );
-              if (downloadInfo?.filePath != null) {
-                await downloadProvider.deleteDownloadedFile(
-                  downloadInfo!.filePath!,
+              final latestVersion = appProvider.getLatestVersion(widget.app);
+              if (latestVersion != null) {
+                final downloadInfo = downloadProvider.getDownloadInfo(
+                  widget.app.packageName,
+                  latestVersion.versionName,
                 );
+                if (downloadInfo?.filePath != null) {
+                  await downloadProvider.deleteDownloadedFile(
+                    downloadInfo!.filePath!,
+                  );
+                }
               }
               break;
             }
@@ -506,7 +510,11 @@ class _AppDetailsScreenState extends State<AppDetailsScreen> {
                         children: [
                           Consumer2<DownloadProvider, AppProvider>(
                             builder: (context, downloadProvider, appProvider, child) {
-                              final version = widget.app.latestVersion!;
+                              final version = appProvider.getLatestVersion(widget.app);
+                              if (version == null) {
+                                return const SizedBox.shrink();
+                              }
+                              
                               final isInstalled = appProvider.isAppInstalled(
                                 widget.app.packageName,
                               );
@@ -591,7 +599,7 @@ class _AppDetailsScreenState extends State<AppDetailsScreen> {
                                 // Check if update is available
                                 final hasUpdate =
                                     installedApp.versionCode != null &&
-                                    widget.app.latestVersion!.versionCode >
+                                    version.versionCode >
                                         installedApp.versionCode!;
 
                                 if (hasUpdate) {
@@ -923,14 +931,21 @@ class _AppDetailsScreenState extends State<AppDetailsScreen> {
                             delay: Duration(milliseconds: 300),
                             duration: Duration(milliseconds: 300),
                           ),
-                          if (widget.app.latestVersion?.whatsNew != null &&
-                              widget.app.latestVersion!.whatsNew!.isNotEmpty)
-                            ChangelogPreview(
-                              text: widget.app.latestVersion!.whatsNew,
-                            ).animate().fadeIn(
-                              delay: Duration(milliseconds: 300),
-                              duration: Duration(milliseconds: 300),
-                            ),
+                          Builder(
+                            builder: (context) {
+                              final latestVersion = appProvider.getLatestVersion(widget.app);
+                              if (latestVersion?.whatsNew != null &&
+                                  latestVersion!.whatsNew!.isNotEmpty) {
+                                return ChangelogPreview(
+                                  text: latestVersion.whatsNew,
+                                ).animate().fadeIn(
+                                  delay: Duration(milliseconds: 300),
+                                  duration: Duration(milliseconds: 300),
+                                );
+                              }
+                              return const SizedBox.shrink();
+                            },
+                          ),
                           if (isInstalled)
                             Chip(
                               visualDensity: VisualDensity.compact,
@@ -1045,18 +1060,24 @@ class _AppDetailsScreenState extends State<AppDetailsScreen> {
                 ),
 
                 // Version info
-                if (widget.app.latestVersion != null)
-                  _VersionInfoSection(
-                    version: widget.app.latestVersion!,
-                  ).animate().fadeIn(
-                    delay: Duration(milliseconds: 300),
-                    duration: Duration(milliseconds: 300),
-                  )
-                else
-                  const _NoVersionInfoSection().animate().fadeIn(
-                    delay: Duration(milliseconds: 300),
-                    duration: Duration(milliseconds: 300),
-                  ),
+                Builder(
+                  builder: (context) {
+                    final latestVersion = appProvider.getLatestVersion(widget.app);
+                    if (latestVersion != null) {
+                      return _VersionInfoSection(
+                        version: latestVersion,
+                      ).animate().fadeIn(
+                        delay: Duration(milliseconds: 300),
+                        duration: Duration(milliseconds: 300),
+                      );
+                    } else {
+                      return const _NoVersionInfoSection().animate().fadeIn(
+                        delay: Duration(milliseconds: 300),
+                        duration: Duration(milliseconds: 300),
+                      );
+                    }
+                  },
+                ),
                 // All versions history
                 if (widget.app.packages != null &&
                     widget.app.packages!.isNotEmpty)
@@ -1090,49 +1111,53 @@ class _DownloadSection extends StatefulWidget {
 class _DownloadSectionState extends State<_DownloadSection> {
   @override
   Widget build(BuildContext context) {
-    if (widget.app.latestVersion == null) {
-      return Container(
-        width: double.infinity,
-        margin: const EdgeInsets.symmetric(horizontal: 16),
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.errorContainer,
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
+    return Consumer<AppProvider>(
+      builder: (context, appProvider, _) {
+        final latestVersion = appProvider.getLatestVersion(widget.app);
+        
+        if (latestVersion == null) {
+          return Container(
+            width: double.infinity,
+            margin: const EdgeInsets.symmetric(horizontal: 16),
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.errorContainer,
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Icon(
-                  Symbols.warning,
-                  color: Theme.of(context).colorScheme.onErrorContainer,
+                Row(
+                  children: [
+                    Icon(
+                      Symbols.warning,
+                      color: Theme.of(context).colorScheme.onErrorContainer,
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      'No Version Available',
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        color: Theme.of(context).colorScheme.onErrorContainer,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(width: 8),
+                const SizedBox(height: 8),
                 Text(
-                  'No Version Available',
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  'This app doesn\'t have any downloadable versions available.',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     color: Theme.of(context).colorScheme.onErrorContainer,
-                    fontWeight: FontWeight.w600,
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 8),
-            Text(
-              'This app doesn\'t have any downloadable versions available.',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Theme.of(context).colorScheme.onErrorContainer,
-              ),
-            ),
-          ],
-        ),
-      );
-    }
+          );
+        }
 
     return Consumer2<DownloadProvider, AppProvider>(
       builder: (context, downloadProvider, appProvider, child) {
-        final version = widget.app.latestVersion!;
+        final version = latestVersion;
 
         // Check if ANY version of this app is downloading
         DownloadInfo? activeDownloadInfo;
@@ -1373,6 +1398,8 @@ class _DownloadSectionState extends State<_DownloadSection> {
         );
       },
     );
+      },
+    );
   }
 }
 
@@ -1562,21 +1589,25 @@ class _AppInfoSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        MListHeader(title: 'App Information'),
-        MListView(
-          items: [
-            MListItemData(
-              leading: Icon(
-                Symbols.package_rounded,
-                color: Theme.of(context).colorScheme.primary,
-              ),
-              title: 'Package Name',
-              subtitle: app.packageName,
-              onTap: () {},
-            ),
+    return Consumer<AppProvider>(
+      builder: (context, appProvider, _) {
+        final latestVersion = appProvider.getLatestVersion(app);
+        
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            MListHeader(title: 'App Information'),
+            MListView(
+              items: [
+                MListItemData(
+                  leading: Icon(
+                    Symbols.package_rounded,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                  title: 'Package Name',
+                  subtitle: app.packageName,
+                  onTap: () {},
+                ),
             MListItemData(
               leading: Icon(
                 Symbols.license_rounded,
@@ -1606,21 +1637,21 @@ class _AppInfoSection extends StatelessWidget {
                 subtitle: _formatDate(app.lastUpdated!),
                 onTap: () {},
               ),
-            if (app.latestVersion?.permissions?.isNotEmpty == true)
+            if (latestVersion?.permissions?.isNotEmpty == true)
               MListItemData(
                 leading: Icon(
                   Symbols.security,
                   color: Theme.of(context).colorScheme.primary,
                 ),
                 title: 'Permissions ',
-                subtitle: '(${app.latestVersion!.permissions!.length})',
+                subtitle: '(${latestVersion!.permissions!.length})',
                 suffix: Icon(Symbols.arrow_forward),
                 onTap: () {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
                       builder: (context) => PermissionsScreen(
-                        permissions: app.latestVersion!.permissions!,
+                        permissions: latestVersion.permissions!,
                         appName: app.name,
                       ),
                     ),
@@ -1630,6 +1661,8 @@ class _AppInfoSection extends StatelessWidget {
           ],
         ),
       ],
+    );
+      },
     );
   }
 

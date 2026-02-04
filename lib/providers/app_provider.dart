@@ -5,6 +5,7 @@ import 'package:installed_apps/installed_apps.dart';
 import '../models/fdroid_app.dart';
 import '../services/fdroid_api_service.dart';
 import 'repositories_provider.dart';
+import 'settings_provider.dart';
 
 enum LoadingState { idle, loading, success, error }
 
@@ -25,8 +26,14 @@ class AppInfo {
 
 class AppProvider extends ChangeNotifier {
   final FDroidApiService _apiService;
+  SettingsProvider? _settingsProvider;
 
-  AppProvider(this._apiService);
+  AppProvider(this._apiService, [this._settingsProvider]);
+
+  void updateSettings(SettingsProvider settings) {
+    _settingsProvider = settings;
+    notifyListeners();
+  }
 
   // Latest apps state
   List<FDroidApp> _latestApps = [];
@@ -555,21 +562,26 @@ class AppProvider extends ChangeNotifier {
     }
 
     final updatableApps = <FDroidApp>[];
+    final includeUnstable = _settingsProvider?.includeUnstableVersions ?? false;
 
     for (final installedApp in _installedApps) {
       // Check if the app exists in F-Droid repository
       final fdroidApp = _repository!.apps[installedApp.packageName];
       if (fdroidApp == null) continue;
 
+      // Get the latest version based on user's unstable preference
+      final latestVersion = fdroidApp.getLatestVersion(includeUnstable: includeUnstable);
+      
       // Check if F-Droid app has a latest version
-      if (fdroidApp.latestVersion == null) continue;
+      if (latestVersion == null) continue;
 
       // Check if installed app has version info
       if (installedApp.versionCode == null) continue;
 
       // Compare version codes - if F-Droid has a newer version, it's updatable
-      if (fdroidApp.latestVersion!.versionCode > installedApp.versionCode!) {
+      if (latestVersion.versionCode > installedApp.versionCode!) {
         updatableApps.add(fdroidApp);
+      }
       }
     }
 
@@ -591,6 +603,12 @@ class AppProvider extends ChangeNotifier {
     } catch (_) {
       return null;
     }
+  }
+
+  /// Gets the latest version for an app based on user's unstable preference
+  FDroidVersion? getLatestVersion(FDroidApp app) {
+    final includeUnstable = _settingsProvider?.includeUnstableVersions ?? false;
+    return app.getLatestVersion(includeUnstable: includeUnstable);
   }
 
   /// Attempts to launch an installed app by package name

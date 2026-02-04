@@ -8,6 +8,7 @@ import 'package:permission_handler/permission_handler.dart';
 import '../models/fdroid_app.dart';
 import '../providers/settings_provider.dart';
 import '../services/fdroid_api_service.dart';
+import '../services/installation_tracking_service.dart';
 import '../services/notification_service.dart';
 
 enum DownloadStatus { idle, downloading, completed, error, cancelled }
@@ -77,6 +78,7 @@ class DownloadProvider extends ChangeNotifier {
   SettingsProvider _settingsProvider;
   final Map<String, DownloadInfo> _downloads = {};
   final NotificationService _notificationService = NotificationService();
+  final InstallationTrackingService _trackingService = InstallationTrackingService();
 
   DownloadProvider(this._apiService, this._settingsProvider) {
     _initNotifications();
@@ -273,6 +275,9 @@ class DownloadProvider extends ChangeNotifier {
       );
       notifyListeners();
 
+      // Track which repository this app was downloaded from
+      await _trackingService.setAppSource(app.packageName, app.repositoryUrl);
+
       // Show completion notification
       await _notificationService.showDownloadComplete(
         title: app.name,
@@ -424,8 +429,18 @@ class DownloadProvider extends ChangeNotifier {
         data: 'package:$packageName',
       );
       await intent.launch();
+      
+      // Remove tracking data when app is uninstalled
+      // Note: This is best-effort. The actual uninstall is handled by Android
+      // and we can't know for sure if it succeeded immediately
+      await _trackingService.removeAppSource(packageName);
     } catch (e) {
       throw Exception('Failed to uninstall app: $e');
     }
+  }
+
+  /// Gets the repository URL that an app was downloaded from
+  Future<String?> getAppSource(String packageName) async {
+    return await _trackingService.getAppSource(packageName);
   }
 }

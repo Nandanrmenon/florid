@@ -229,9 +229,11 @@ class _AppDetailsScreenState extends State<AppDetailsScreen> {
       }
 
       try {
-        // Create a copy of the app with the selected repository URL
-        final appWithRepo = widget.app.copyWith(repositoryUrl: repositoryUrl);
-        await downloadProvider.downloadApk(appWithRepo);
+        // Create a copy of the app with the selected repository URL and the specific version
+        final appWithVersion = widget.app.copyWithVersion(version).copyWith(
+          repositoryUrl: repositoryUrl,
+        );
+        await downloadProvider.downloadApk(appWithVersion);
 
         if (context.mounted) {
           for (int i = 0; i < 15; i++) {

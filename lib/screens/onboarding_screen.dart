@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:easy_localization/easy_localization.dart';
 import 'package:florid/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -229,10 +230,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('${AppLocalizations.of(context)!.setup_failed}: $e'),
-          action: SnackBarAction(
-            label: AppLocalizations.of(context)!.retry,
-            onPressed: _performSetup,
-          ),
+          action: SnackBarAction(label: AppLocalizations.of(context)!.retry, onPressed: _performSetup),
         ),
       );
     }
@@ -594,7 +592,7 @@ class _PermissionCard extends StatelessWidget {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: isGranted
-            ? colorScheme.primaryContainer.withValues(alpha: 0.5)
+            ? colorScheme.primaryContainer.withOpacity(0.5)
             : colorScheme.surfaceContainer,
         border: Border.all(
           color: isGranted ? colorScheme.primary : colorScheme.outlineVariant,
@@ -609,7 +607,7 @@ class _PermissionCard extends StatelessWidget {
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
               color: isGranted
-                  ? colorScheme.primary.withValues(alpha: 0.2)
+                  ? colorScheme.primary.withOpacity(0.2)
                   : colorScheme.surfaceContainerHighest,
               borderRadius: BorderRadius.circular(8),
             ),
@@ -697,6 +695,7 @@ class _ProgressStep extends StatelessWidget {
             child: LinearProgressIndicator(
               value: progress,
               minHeight: 8,
+              year2023: false,
               borderRadius: BorderRadius.circular(4),
             ),
           ),

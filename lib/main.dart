@@ -55,12 +55,18 @@ class MainApp extends StatelessWidget {
             return service;
           },
         ),
-        ChangeNotifierProxyProvider<FDroidApiService, AppProvider>(
+        ChangeNotifierProxyProvider2<FDroidApiService, SettingsProvider, AppProvider>(
           create: (context) => AppProvider(
             Provider.of<FDroidApiService>(context, listen: false),
+            Provider.of<SettingsProvider>(context, listen: false),
           ),
-          update: (context, apiService, previous) =>
-              previous ?? AppProvider(apiService),
+          update: (context, apiService, settings, previous) {
+            if (previous == null) {
+              return AppProvider(apiService, settings);
+            }
+            previous.updateSettings(settings);
+            return previous;
+          },
         ),
         ChangeNotifierProxyProvider2<
           FDroidApiService,

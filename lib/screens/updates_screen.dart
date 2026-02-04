@@ -98,108 +98,113 @@ class _UpdatesScreenState extends State<UpdatesScreen>
           );
         }
 
-        final updatableApps = repositoryLoaded
-            ? appProvider.getUpdatableApps()
-            : <FDroidApp>[];
+        return FutureBuilder<List<FDroidApp>>(
+          future: repositoryLoaded
+              ? appProvider.getUpdatableApps()
+              : Future.value(<FDroidApp>[]),
+          builder: (context, snapshot) {
+            final updatableApps = snapshot.data ?? <FDroidApp>[];
 
-        // Get all F-Droid apps installed on device
-        final allFDroidApps = installedApps
-            .where(
-              (installedApp) =>
-                  appProvider.repository?.apps[installedApp.packageName] !=
-                  null,
-            )
-            .map(
-              (installedApp) =>
-                  appProvider.repository!.apps[installedApp.packageName]!,
-            )
-            .toList();
+            // Get all F-Droid apps installed on device
+            final allFDroidApps = installedApps
+                .where(
+                  (installedApp) =>
+                      appProvider.repository?.apps[installedApp.packageName] !=
+                      null,
+                )
+                .map(
+                  (installedApp) =>
+                      appProvider.repository!.apps[installedApp.packageName]!,
+                )
+                .toList();
 
-        return Scaffold(
-          appBar: AppBar(
-            backgroundColor: Theme.of(context).colorScheme.surfaceContainerLow,
-            surfaceTintColor: Theme.of(context).colorScheme.surfaceContainerLow,
-            title: const Text('Apps'),
-            actions: [
-              IconButton(
-                onPressed: () {
-                  _onRefresh();
-                },
-                icon: Icon(Symbols.refresh),
-              ),
-              PopupMenuButton<String>(
-                onSelected: (value) {
-                  switch (value) {
-                    case 'settings':
-                      MenuActions.showSettings(context);
-                      break;
-                    case 'about':
-                      MenuActions.showAbout(context);
-                      break;
-                  }
-                },
-                itemBuilder: (context) => [
-                  const PopupMenuItem(
-                    value: 'settings',
-                    child: ListTile(
-                      leading: Icon(Symbols.settings),
-                      title: Text('Settings'),
-                      contentPadding: EdgeInsets.zero,
-                    ),
+            return Scaffold(
+              appBar: AppBar(
+                backgroundColor: Theme.of(context).colorScheme.surfaceContainerLow,
+                surfaceTintColor: Theme.of(context).colorScheme.surfaceContainerLow,
+                title: const Text('Apps'),
+                actions: [
+                  IconButton(
+                    onPressed: () {
+                      _onRefresh();
+                    },
+                    icon: Icon(Symbols.refresh),
                   ),
-                  const PopupMenuItem(
-                    value: 'about',
-                    child: ListTile(
-                      leading: Icon(Symbols.info),
-                      title: Text('About'),
-                      contentPadding: EdgeInsets.zero,
-                    ),
+                  PopupMenuButton<String>(
+                    onSelected: (value) {
+                      switch (value) {
+                        case 'settings':
+                          MenuActions.showSettings(context);
+                          break;
+                        case 'about':
+                          MenuActions.showAbout(context);
+                          break;
+                      }
+                    },
+                    itemBuilder: (context) => [
+                      const PopupMenuItem(
+                        value: 'settings',
+                        child: ListTile(
+                          leading: Icon(Symbols.settings),
+                          title: Text('Settings'),
+                          contentPadding: EdgeInsets.zero,
+                        ),
+                      ),
+                      const PopupMenuItem(
+                        value: 'about',
+                        child: ListTile(
+                          leading: Icon(Symbols.info),
+                          title: Text('About'),
+                          contentPadding: EdgeInsets.zero,
+                        ),
+                      ),
+                    ],
                   ),
                 ],
+                bottom: FTabBar(
+                  controller: _tabController,
+                  items: [
+                    FloridTabBarItem(
+                      icon: Symbols.system_update,
+                      label: repositoryLoaded && updatableApps.isNotEmpty
+                          ? 'Updates (${updatableApps.length})'
+                          : 'Updates',
+                    ),
+                    FloridTabBarItem(icon: Symbols.devices, label: 'On Device'),
+                    // Tab(
+                    //   text: repositoryLoaded && updatableApps.isNotEmpty
+                    //       ? 'Updates (${updatableApps.length})'
+                    //       : 'Updates',
+                    // ),
+                    // Tab(text: 'On Device'),
+                  ],
+                  onTabChanged: (index) {
+                    _tabController.animateTo(index);
+                  },
+                ),
               ),
-            ],
-            bottom: FTabBar(
-              controller: _tabController,
-              items: [
-                FloridTabBarItem(
-                  icon: Symbols.system_update,
-                  label: repositoryLoaded && updatableApps.isNotEmpty
-                      ? 'Updates (${updatableApps.length})'
-                      : 'Updates',
-                ),
-                FloridTabBarItem(icon: Symbols.devices, label: 'On Device'),
-                // Tab(
-                //   text: repositoryLoaded && updatableApps.isNotEmpty
-                //       ? 'Updates (${updatableApps.length})'
-                //       : 'Updates',
-                // ),
-                // Tab(text: 'On Device'),
-              ],
-              onTabChanged: (index) {
-                _tabController.animateTo(index);
-              },
-            ),
-          ),
-          body: RefreshIndicator(
-            onRefresh: _onRefresh,
-            child: TabBarView(
-              controller: _tabController,
-              children: [
-                // Tab 1: Updates Only
-                _buildUpdatesTab(
-                  context,
-                  appProvider,
-                  updatableApps,
-                  repositoryLoaded,
-                  repositoryState,
-                  repositoryError,
-                ),
+              body: RefreshIndicator(
+                onRefresh: _onRefresh,
+                child: TabBarView(
+                  controller: _tabController,
+                  children: [
+                    // Tab 1: Updates Only
+                    _buildUpdatesTab(
+                      context,
+                      appProvider,
+                      updatableApps,
+                      repositoryLoaded,
+                      repositoryState,
+                      repositoryError,
+                    ),
 
-                // Tab 2: All Installed F-Droid Apps
-                _buildInstalledAppsTab(context, appProvider, allFDroidApps),
-              ],
-            ),
-          ),
+                    // Tab 2: All Installed F-Droid Apps
+                    _buildInstalledAppsTab(context, appProvider, allFDroidApps, updatableApps),
+                  ],
+                ),
+              ),
+            );
+          },
         );
       },
     );
@@ -219,7 +224,7 @@ class _UpdatesScreenState extends State<UpdatesScreen>
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: const [
-            CircularProgressIndicator(),
+            CircularProgressIndicator(year2023: false),
             SizedBox(height: 12),
             Text('Loading repository…'),
           ],
@@ -430,6 +435,7 @@ class _UpdatesScreenState extends State<UpdatesScreen>
     BuildContext context,
     AppProvider appProvider,
     List<FDroidApp> allFDroidApps,
+    List<FDroidApp> updatableApps,
   ) {
     if (allFDroidApps.isEmpty) {
       return SingleChildScrollView(
@@ -465,7 +471,7 @@ class _UpdatesScreenState extends State<UpdatesScreen>
       itemCount: allFDroidApps.length,
       itemBuilder: (context, index) {
         final app = allFDroidApps[index];
-        final updatableApps = appProvider.getUpdatableApps();
+        final installedApp = appProvider.getInstalledApp(app.packageName);
         final hasUpdate = updatableApps.any(
           (updateApp) => updateApp.packageName == app.packageName,
         );

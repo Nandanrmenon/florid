@@ -89,7 +89,7 @@ class SettingsProvider extends ChangeNotifier {
       _themeMode = ThemeMode.values[themeIndex];
     }
     final themeStyleIndex =
-        prefs.getInt(_themeStyleKey) ?? 0; // Default to Florid
+        prefs.getInt(_themeStyleKey) ?? 1; // Default to Florid
     if (themeStyleIndex >= 0 && themeStyleIndex < ThemeStyle.values.length) {
       _themeStyle = ThemeStyle.values[themeStyleIndex];
     }

@@ -3,8 +3,10 @@ import 'package:installed_apps/app_info.dart' as installed;
 import 'package:installed_apps/installed_apps.dart';
 
 import '../models/fdroid_app.dart';
+import '../services/app_preferences_service.dart';
 import '../services/fdroid_api_service.dart';
 import 'repositories_provider.dart';
+import 'settings_provider.dart';
 
 enum LoadingState { idle, loading, success, error }
 
@@ -25,8 +27,15 @@ class AppInfo {
 
 class AppProvider extends ChangeNotifier {
   final FDroidApiService _apiService;
+  SettingsProvider? _settingsProvider;
+  final AppPreferencesService _preferencesService = AppPreferencesService();
 
-  AppProvider(this._apiService);
+  AppProvider(this._apiService, [this._settingsProvider]);
+
+  void updateSettings(SettingsProvider settings) {
+    _settingsProvider = settings;
+    notifyListeners();
+  }
 
   // Latest apps state
   List<FDroidApp> _latestApps = [];
@@ -172,7 +181,7 @@ class AppProvider extends ChangeNotifier {
       for (final entry in repo.apps.entries) {
         final packageName = entry.key;
         final app = entry.value;
-        
+
         if (mergedApps.containsKey(packageName)) {
           // App already exists, add this repository to the available sources
           final existing = mergedApps[packageName]!;
@@ -180,13 +189,13 @@ class AppProvider extends ChangeNotifier {
             name: repo.name,
             url: app.repositoryUrl,
           );
-          
+
           // Add the new repository if it's not already in the list
           final availableRepos = existing.availableRepositories ?? [];
           if (!availableRepos.contains(repoSource)) {
             // Create new list with the additional repository
             final updatedRepos = [...availableRepos, repoSource];
-            
+
             // Keep the existing app but update available repositories
             mergedApps[packageName] = existing.copyWith(
               availableRepositories: updatedRepos,
@@ -196,10 +205,7 @@ class AppProvider extends ChangeNotifier {
           // First time seeing this app, add it with its repository as a source
           mergedApps[packageName] = app.copyWith(
             availableRepositories: [
-              RepositorySource(
-                name: repo.name,
-                url: app.repositoryUrl,
-              ),
+              RepositorySource(name: repo.name, url: app.repositoryUrl),
             ],
           );
         }
@@ -248,12 +254,13 @@ class AppProvider extends ChangeNotifier {
       final availableReposList = <RepositorySource>[];
       if (app.repositoryUrl.isNotEmpty) {
         // Find the repo name for the original URL
-        final originalRepo = enabledRepos.where((r) => r.url == app.repositoryUrl).firstOrNull;
+        final originalRepo = enabledRepos
+            .where((r) => r.url == app.repositoryUrl)
+            .firstOrNull;
         if (originalRepo != null) {
-          availableReposList.add(RepositorySource(
-            name: originalRepo.name,
-            url: app.repositoryUrl,
-          ));
+          availableReposList.add(
+            RepositorySource(name: originalRepo.name, url: app.repositoryUrl),
+          );
         }
       }
 
@@ -265,19 +272,21 @@ class AppProvider extends ChangeNotifier {
             if (repo.url == app.repositoryUrl) {
               return null;
             }
-            
+
             // Try to find the app in this repository via database
             final results = await _apiService.searchAppsFromRepositoryUrl(
               app.packageName, // Use exact package name for lookup
               repo.url,
             );
-            
+
             // If found in this repository, return the source
             if (results.any((a) => a.packageName == app.packageName)) {
               return RepositorySource(name: repo.name, url: repo.url);
             }
           } catch (e) {
-            debugPrint('Error checking repo ${repo.name} for ${app.packageName}: $e');
+            debugPrint(
+              'Error checking repo ${repo.name} for ${app.packageName}: $e',
+            );
           }
           return null;
         }),
@@ -540,6 +549,10 @@ class AppProvider extends ChangeNotifier {
           )
           .toList();
 
+      // Clean up preferences for uninstalled apps
+      final installedPackages = _installedApps.map((app) => app.packageName).toSet();
+      await _preferencesService.cleanupUninstalledApps(installedPackages);
+
       _installedAppsState = LoadingState.success;
     } catch (e) {
       debugPrint('Error fetching installed apps: $e');
@@ -549,7 +562,7 @@ class AppProvider extends ChangeNotifier {
   }
 
   /// Gets apps that have updates available
-  List<FDroidApp> getUpdatableApps() {
+  Future<List<FDroidApp>> getUpdatableApps() async {
     if (_repository == null || _installedApps.isEmpty) {
       return [];
     }
@@ -561,14 +574,22 @@ class AppProvider extends ChangeNotifier {
       final fdroidApp = _repository!.apps[installedApp.packageName];
       if (fdroidApp == null) continue;
 
+      // Get the latest version based on per-app unstable preference
+      final includeUnstable = await _preferencesService.getIncludeUnstable(
+        installedApp.packageName,
+      );
+      final latestVersion = fdroidApp.getLatestVersion(
+        includeUnstable: includeUnstable,
+      );
+
       // Check if F-Droid app has a latest version
-      if (fdroidApp.latestVersion == null) continue;
+      if (latestVersion == null) continue;
 
       // Check if installed app has version info
       if (installedApp.versionCode == null) continue;
 
       // Compare version codes - if F-Droid has a newer version, it's updatable
-      if (fdroidApp.latestVersion!.versionCode > installedApp.versionCode!) {
+      if (latestVersion.versionCode > installedApp.versionCode!) {
         updatableApps.add(fdroidApp);
       }
     }
@@ -591,6 +612,24 @@ class AppProvider extends ChangeNotifier {
     } catch (_) {
       return null;
     }
+  }
+
+  /// Gets the latest version for an app based on per-app unstable preference
+  Future<FDroidVersion?> getLatestVersion(FDroidApp app) async {
+    final includeUnstable = await _preferencesService.getIncludeUnstable(app.packageName);
+    return app.getLatestVersion(includeUnstable: includeUnstable);
+  }
+
+  /// Gets whether unstable versions should be included for a specific app
+  Future<bool> getIncludeUnstable(String packageName) async {
+    return await _preferencesService.getIncludeUnstable(packageName);
+  }
+
+  /// Sets whether unstable versions should be included for a specific app
+  /// This should only be called for installed apps
+  Future<void> setIncludeUnstable(String packageName, bool include) async {
+    await _preferencesService.setIncludeUnstable(packageName, include);
+    notifyListeners();
   }
 
   /// Attempts to launch an installed app by package name

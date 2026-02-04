@@ -80,7 +80,7 @@ class _CategoryAppsScreenState extends State<CategoryAppsScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  CircularProgressIndicator(),
+                  CircularProgressIndicator(year2023: false),
                   SizedBox(height: 16),
                   Text(AppLocalizations.of(context)!.loading_apps),
                 ],

@@ -229,7 +229,8 @@ class _AppDetailsScreenState extends State<AppDetailsScreen> {
       }
 
       try {
-        // Create a copy of the app with the selected repository URL and the specific version
+        // Create a copy of the app with the selected repository URL and only the filtered version
+        // This ensures we download the correct version respecting the per-app unstable preference
         final appWithVersion = widget.app.copyWithVersion(version).copyWith(
           repositoryUrl: repositoryUrl,
         );
@@ -1038,7 +1039,7 @@ class _AppDetailsScreenState extends State<AppDetailsScreen> {
                                                 ),
                                               ),
                                               Text(
-                                                'Show beta, alpha, and pre-release versions for this app',
+                                                'Show beta, alpha, and prerelease versions for this app',
                                                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
                                                   color: Theme.of(context).colorScheme.onSurfaceVariant,
                                                 ),

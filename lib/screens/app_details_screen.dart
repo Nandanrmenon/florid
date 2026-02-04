@@ -231,9 +231,9 @@ class _AppDetailsScreenState extends State<AppDetailsScreen> {
       try {
         // Create a copy of the app with the selected repository URL and only the filtered version
         // This ensures we download the correct version respecting the per-app unstable preference
-        final appWithVersion = widget.app.copyWithVersion(version).copyWith(
-          repositoryUrl: repositoryUrl,
-        );
+        final appWithVersion = widget.app
+            .copyWithVersion(version)
+            .copyWith(repositoryUrl: repositoryUrl);
         await downloadProvider.downloadApk(appWithVersion);
 
         if (context.mounted) {
@@ -241,7 +241,9 @@ class _AppDetailsScreenState extends State<AppDetailsScreen> {
             await Future.delayed(const Duration(milliseconds: 800));
             await appProvider.fetchInstalledApps();
             if (appProvider.isAppInstalled(widget.app.packageName)) {
-              final latestVersion = await appProvider.getLatestVersion(widget.app);
+              final latestVersion = await appProvider.getLatestVersion(
+                widget.app,
+              );
               if (latestVersion != null) {
                 final downloadInfo = downloadProvider.getDownloadInfo(
                   widget.app.packageName,
@@ -556,206 +558,364 @@ class _AppDetailsScreenState extends State<AppDetailsScreen> {
                           Consumer2<DownloadProvider, AppProvider>(
                             builder: (context, downloadProvider, appProvider, child) {
                               return FutureBuilder<FDroidVersion?>(
-                                future: appProvider.getLatestVersion(widget.app),
+                                future: appProvider.getLatestVersion(
+                                  widget.app,
+                                ),
                                 builder: (context, snapshot) {
                                   final version = snapshot.data;
                                   if (version == null) {
                                     return const SizedBox.shrink();
                                   }
 
-                                  final isInstalled = appProvider.isAppInstalled(
-                                    widget.app.packageName,
-                                  );
-                                  final installedApp = appProvider.getInstalledApp(
-                                    widget.app.packageName,
-                                  );
+                                  final isInstalled = appProvider
+                                      .isAppInstalled(widget.app.packageName);
+                                  final installedApp = appProvider
+                                      .getInstalledApp(widget.app.packageName);
 
-                              // Check if ANY version of this app is downloading
-                              DownloadInfo? activeDownloadInfo;
-                              bool isDownloading = false;
+                                  // Check if ANY version of this app is downloading
+                                  DownloadInfo? activeDownloadInfo;
+                                  bool isDownloading = false;
 
-                              if (widget.app.packages != null) {
-                                for (var pkg in widget.app.packages!.values) {
-                                  final info = downloadProvider.getDownloadInfo(
-                                    widget.app.packageName,
-                                    pkg.versionName,
-                                  );
-                                  if (info?.status ==
-                                      DownloadStatus.downloading) {
-                                    activeDownloadInfo = info;
-                                    isDownloading = true;
-                                    break;
-                                  }
-                                }
-                              }
-
-                              // If no version is downloading, check the latest version for install/download buttons
-                              final downloadInfo =
-                                  activeDownloadInfo ??
-                                  downloadProvider.getDownloadInfo(
-                                    widget.app.packageName,
-                                    version.versionName,
-                                  );
-                              final isCancelled =
-                                  downloadInfo?.status ==
-                                  DownloadStatus.cancelled;
-                              final fileExists = downloadInfo?.filePath != null
-                                  ? File(downloadInfo!.filePath!).existsSync()
-                                  : false;
-                              final isDownloaded =
-                                  downloadInfo?.status ==
-                                      DownloadStatus.completed &&
-                                  downloadInfo?.filePath != null &&
-                                  !isCancelled &&
-                                  fileExists;
-
-                              if (isDownloading && activeDownloadInfo != null) {
-                                // Find the version name that's downloading
-                                String downloadingVersionName =
-                                    version.versionName;
-                                if (widget.app.packages != null) {
-                                  for (var pkg in widget.app.packages!.values) {
-                                    final info = downloadProvider
-                                        .getDownloadInfo(
-                                          widget.app.packageName,
-                                          pkg.versionName,
-                                        );
-                                    if (info?.status ==
-                                        DownloadStatus.downloading) {
-                                      downloadingVersionName = pkg.versionName;
-                                      break;
+                                  if (widget.app.packages != null) {
+                                    for (var pkg
+                                        in widget.app.packages!.values) {
+                                      final info = downloadProvider
+                                          .getDownloadInfo(
+                                            widget.app.packageName,
+                                            pkg.versionName,
+                                          );
+                                      if (info?.status ==
+                                          DownloadStatus.downloading) {
+                                        activeDownloadInfo = info;
+                                        isDownloading = true;
+                                        break;
+                                      }
                                     }
                                   }
-                                }
 
-                                return SizedBox(
-                                  width: double.infinity,
-                                  height: 48,
-                                  child: FilledButton.tonal(
-                                    onPressed: () {
-                                      downloadProvider.cancelDownload(
+                                  // If no version is downloading, check the latest version for install/download buttons
+                                  final downloadInfo =
+                                      activeDownloadInfo ??
+                                      downloadProvider.getDownloadInfo(
                                         widget.app.packageName,
-                                        downloadingVersionName,
+                                        version.versionName,
                                       );
-                                    },
-                                    child: const Text('Cancel Download'),
-                                  ),
-                                );
-                              }
+                                  final isCancelled =
+                                      downloadInfo?.status ==
+                                      DownloadStatus.cancelled;
+                                  final fileExists =
+                                      downloadInfo?.filePath != null
+                                      ? File(
+                                          downloadInfo!.filePath!,
+                                        ).existsSync()
+                                      : false;
+                                  final isDownloaded =
+                                      downloadInfo?.status ==
+                                          DownloadStatus.completed &&
+                                      downloadInfo?.filePath != null &&
+                                      !isCancelled &&
+                                      fileExists;
 
-                              if (isInstalled && installedApp != null) {
-                                // Check if update is available
-                                final hasUpdate =
-                                    installedApp.versionCode != null &&
-                                    version.versionCode >
-                                        installedApp.versionCode!;
+                                  if (isDownloading &&
+                                      activeDownloadInfo != null) {
+                                    // Find the version name that's downloading
+                                    String downloadingVersionName =
+                                        version.versionName;
+                                    if (widget.app.packages != null) {
+                                      for (var pkg
+                                          in widget.app.packages!.values) {
+                                        final info = downloadProvider
+                                            .getDownloadInfo(
+                                              widget.app.packageName,
+                                              pkg.versionName,
+                                            );
+                                        if (info?.status ==
+                                            DownloadStatus.downloading) {
+                                          downloadingVersionName =
+                                              pkg.versionName;
+                                          break;
+                                        }
+                                      }
+                                    }
 
-                                if (hasUpdate) {
-                                  // Show Update button
-                                  return Column(
-                                    spacing: 8,
-                                    children: [
-                                      Row(
+                                    return SizedBox(
+                                      width: double.infinity,
+                                      height: 48,
+                                      child: FilledButton.tonal(
+                                        onPressed: () {
+                                          downloadProvider.cancelDownload(
+                                            widget.app.packageName,
+                                            downloadingVersionName,
+                                          );
+                                        },
+                                        child: const Text('Cancel Download'),
+                                      ),
+                                    );
+                                  }
+
+                                  if (isInstalled && installedApp != null) {
+                                    // Check if update is available
+                                    final hasUpdate =
+                                        installedApp.versionCode != null &&
+                                        version.versionCode >
+                                            installedApp.versionCode!;
+
+                                    if (hasUpdate) {
+                                      // Show Update button
+                                      return Column(
                                         spacing: 8,
                                         children: [
-                                          Expanded(
-                                            child: SizedBox(
-                                              height: 48,
-                                              child: FilledButton.icon(
-                                                onPressed: () async {
-                                                  final hasPermission =
-                                                      await downloadProvider
-                                                          .requestPermissions();
+                                          Row(
+                                            spacing: 8,
+                                            children: [
+                                              Expanded(
+                                                child: SizedBox(
+                                                  height: 48,
+                                                  child: FilledButton.icon(
+                                                    onPressed: () async {
+                                                      final hasPermission =
+                                                          await downloadProvider
+                                                              .requestPermissions();
 
-                                                  if (!hasPermission) {
-                                                    if (context.mounted) {
-                                                      await showDialog(
-                                                        context: context,
-                                                        builder: (context) => AlertDialog(
-                                                          icon: const Icon(
-                                                            Symbols.warning,
-                                                            size: 48,
-                                                          ),
-                                                          title: const Text(
-                                                            'Storage Permission Required',
-                                                          ),
-                                                          content: const Text(
-                                                            'Florid needs storage permission to download APK files.\n\n'
-                                                            'To enable:\n'
-                                                            '1. Go to Settings (button below)\n'
-                                                            '2. Find "Permissions"\n'
-                                                            '3. Enable "Files and media" or "Storage"\n\n'
-                                                            'Then try downloading again.',
-                                                          ),
-                                                          actions: [
-                                                            TextButton(
-                                                              onPressed: () =>
-                                                                  Navigator.of(
-                                                                    context,
-                                                                  ).pop(),
-                                                              child: const Text(
-                                                                'Cancel',
+                                                      if (!hasPermission) {
+                                                        if (context.mounted) {
+                                                          await showDialog(
+                                                            context: context,
+                                                            builder: (context) => AlertDialog(
+                                                              icon: const Icon(
+                                                                Symbols.warning,
+                                                                size: 48,
+                                                              ),
+                                                              title: const Text(
+                                                                'Storage Permission Required',
+                                                              ),
+                                                              content: const Text(
+                                                                'Florid needs storage permission to download APK files.\n\n'
+                                                                'To enable:\n'
+                                                                '1. Go to Settings (button below)\n'
+                                                                '2. Find "Permissions"\n'
+                                                                '3. Enable "Files and media" or "Storage"\n\n'
+                                                                'Then try downloading again.',
+                                                              ),
+                                                              actions: [
+                                                                TextButton(
+                                                                  onPressed: () =>
+                                                                      Navigator.of(
+                                                                        context,
+                                                                      ).pop(),
+                                                                  child:
+                                                                      const Text(
+                                                                        'Cancel',
+                                                                      ),
+                                                                ),
+                                                                FilledButton(
+                                                                  onPressed: () async {
+                                                                    Navigator.of(
+                                                                      context,
+                                                                    ).pop();
+                                                                    await openAppSettings();
+                                                                  },
+                                                                  child: const Text(
+                                                                    'Open Settings',
+                                                                  ),
+                                                                ),
+                                                              ],
+                                                            ),
+                                                          );
+                                                        }
+                                                        return;
+                                                      }
+
+                                                      try {
+                                                        await downloadProvider
+                                                            .downloadApk(
+                                                              widget.app,
+                                                            );
+
+                                                        if (context.mounted) {
+                                                          ScaffoldMessenger.of(
+                                                            context,
+                                                          ).showSnackBar(
+                                                            SnackBar(
+                                                              content: Text(
+                                                                'Downloading ${widget.app.name} update...',
                                                               ),
                                                             ),
-                                                            FilledButton(
-                                                              onPressed: () async {
-                                                                Navigator.of(
-                                                                  context,
-                                                                ).pop();
-                                                                await openAppSettings();
-                                                              },
-                                                              child: const Text(
-                                                                'Open Settings',
+                                                          );
+                                                        }
+                                                      } catch (e) {
+                                                        if (context.mounted) {
+                                                          ScaffoldMessenger.of(
+                                                            context,
+                                                          ).showSnackBar(
+                                                            SnackBar(
+                                                              content: Text(
+                                                                'Update failed: $e',
                                                               ),
                                                             ),
-                                                          ],
-                                                        ),
-                                                      );
-                                                    }
-                                                    return;
-                                                  }
-
-                                                  try {
-                                                    await downloadProvider
-                                                        .downloadApk(
-                                                          widget.app,
-                                                        );
-
-                                                    if (context.mounted) {
-                                                      ScaffoldMessenger.of(
-                                                        context,
-                                                      ).showSnackBar(
-                                                        SnackBar(
-                                                          content: Text(
-                                                            'Downloading ${widget.app.name} update...',
-                                                          ),
-                                                        ),
-                                                      );
-                                                    }
-                                                  } catch (e) {
-                                                    if (context.mounted) {
-                                                      ScaffoldMessenger.of(
-                                                        context,
-                                                      ).showSnackBar(
-                                                        SnackBar(
-                                                          content: Text(
-                                                            'Update failed: $e',
-                                                          ),
-                                                        ),
-                                                      );
-                                                    }
-                                                  }
-                                                },
-                                                icon: const Icon(
-                                                  Symbols.upgrade,
+                                                          );
+                                                        }
+                                                      }
+                                                    },
+                                                    icon: const Icon(
+                                                      Symbols.upgrade,
+                                                    ),
+                                                    label: const Text('Update'),
+                                                  ),
                                                 ),
-                                                label: const Text('Update'),
+                                              ),
+                                              SizedBox(
+                                                height: 48,
+                                                child: FilledButton.tonalIcon(
+                                                  onPressed: () async {
+                                                    try {
+                                                      final opened =
+                                                          await appProvider
+                                                              .openInstalledApp(
+                                                                widget
+                                                                    .app
+                                                                    .packageName,
+                                                              );
+                                                      if (!opened &&
+                                                          context.mounted) {
+                                                        ScaffoldMessenger.of(
+                                                          context,
+                                                        ).showSnackBar(
+                                                          SnackBar(
+                                                            content: Text(
+                                                              'Unable to open ${widget.app.name}.',
+                                                            ),
+                                                          ),
+                                                        );
+                                                      }
+                                                    } catch (e) {
+                                                      if (context.mounted) {
+                                                        ScaffoldMessenger.of(
+                                                          context,
+                                                        ).showSnackBar(
+                                                          SnackBar(
+                                                            content: Text(
+                                                              'Open failed: ${e.toString()}',
+                                                            ),
+                                                          ),
+                                                        );
+                                                      }
+                                                    }
+                                                  },
+                                                  icon: const Icon(
+                                                    Symbols.open_in_new_rounded,
+                                                  ),
+                                                  label: const Text('Open'),
+                                                ),
+                                              ),
+                                              SizedBox(
+                                                height: 48,
+                                                child: FilledButton.tonal(
+                                                  onPressed: () async {
+                                                    try {
+                                                      await downloadProvider
+                                                          .uninstallApp(
+                                                            widget
+                                                                .app
+                                                                .packageName,
+                                                          );
+                                                      await Future.delayed(
+                                                        const Duration(
+                                                          seconds: 1,
+                                                        ),
+                                                      );
+                                                      await appProvider
+                                                          .fetchInstalledApps();
+                                                    } catch (e) {
+                                                      if (context.mounted) {
+                                                        ScaffoldMessenger.of(
+                                                          context,
+                                                        ).showSnackBar(
+                                                          SnackBar(
+                                                            content: Text(
+                                                              'Uninstall failed: ${e.toString()}',
+                                                            ),
+                                                          ),
+                                                        );
+                                                      }
+                                                    }
+                                                  },
+                                                  // label: const Text('Uninstall'),
+                                                  style: FilledButton.styleFrom(
+                                                    foregroundColor:
+                                                        Theme.of(context)
+                                                            .colorScheme
+                                                            .onErrorContainer,
+                                                    backgroundColor:
+                                                        Theme.of(context)
+                                                            .colorScheme
+                                                            .errorContainer,
+                                                  ),
+                                                  child: const Icon(
+                                                    Symbols.delete_rounded,
+                                                    fill: 1,
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ],
+                                      );
+                                    }
+
+                                    // No update available, show normal buttons
+                                    return Row(
+                                      spacing: 8,
+                                      children: [
+                                        Expanded(
+                                          child: SizedBox(
+                                            height: 48,
+                                            child: FilledButton.tonalIcon(
+                                              onPressed: () async {
+                                                try {
+                                                  await downloadProvider
+                                                      .uninstallApp(
+                                                        widget.app.packageName,
+                                                      );
+                                                  await Future.delayed(
+                                                    const Duration(seconds: 1),
+                                                  );
+                                                  await appProvider
+                                                      .fetchInstalledApps();
+                                                } catch (e) {
+                                                  if (context.mounted) {
+                                                    ScaffoldMessenger.of(
+                                                      context,
+                                                    ).showSnackBar(
+                                                      SnackBar(
+                                                        content: Text(
+                                                          'Uninstall failed: ${e.toString()}',
+                                                        ),
+                                                      ),
+                                                    );
+                                                  }
+                                                }
+                                              },
+                                              icon: const Icon(
+                                                Symbols.delete_rounded,
+                                                fill: 1,
+                                              ),
+                                              label: const Text('Uninstall'),
+                                              style: FilledButton.styleFrom(
+                                                foregroundColor: Theme.of(
+                                                  context,
+                                                ).colorScheme.onErrorContainer,
+                                                backgroundColor: Theme.of(
+                                                  context,
+                                                ).colorScheme.errorContainer,
                                               ),
                                             ),
                                           ),
-                                          SizedBox(
+                                        ),
+                                        Expanded(
+                                          child: SizedBox(
                                             height: 48,
-                                            child: FilledButton.tonalIcon(
+                                            child: FilledButton.icon(
                                               onPressed: () async {
                                                 try {
                                                   final opened =
@@ -797,183 +957,44 @@ class _AppDetailsScreenState extends State<AppDetailsScreen> {
                                               label: const Text('Open'),
                                             ),
                                           ),
-                                          SizedBox(
-                                            height: 48,
-                                            child: FilledButton.tonal(
-                                              onPressed: () async {
-                                                try {
-                                                  await downloadProvider
-                                                      .uninstallApp(
-                                                        widget.app.packageName,
-                                                      );
-                                                  await Future.delayed(
-                                                    const Duration(seconds: 1),
-                                                  );
-                                                  await appProvider
-                                                      .fetchInstalledApps();
-                                                } catch (e) {
-                                                  if (context.mounted) {
-                                                    ScaffoldMessenger.of(
-                                                      context,
-                                                    ).showSnackBar(
-                                                      SnackBar(
-                                                        content: Text(
-                                                          'Uninstall failed: ${e.toString()}',
-                                                        ),
-                                                      ),
-                                                    );
-                                                  }
-                                                }
-                                              },
-                                              // label: const Text('Uninstall'),
-                                              style: FilledButton.styleFrom(
-                                                foregroundColor: Theme.of(
-                                                  context,
-                                                ).colorScheme.onErrorContainer,
-                                                backgroundColor: Theme.of(
-                                                  context,
-                                                ).colorScheme.errorContainer,
-                                              ),
-                                              child: const Icon(
-                                                Symbols.delete_rounded,
-                                                fill: 1,
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ],
-                                  );
-                                }
-
-                                // No update available, show normal buttons
-                                return Row(
-                                  spacing: 8,
-                                  children: [
-                                    Expanded(
-                                      child: SizedBox(
-                                        height: 48,
-                                        child: FilledButton.tonalIcon(
-                                          onPressed: () async {
-                                            try {
-                                              await downloadProvider
-                                                  .uninstallApp(
-                                                    widget.app.packageName,
-                                                  );
-                                              await Future.delayed(
-                                                const Duration(seconds: 1),
-                                              );
-                                              await appProvider
-                                                  .fetchInstalledApps();
-                                            } catch (e) {
-                                              if (context.mounted) {
-                                                ScaffoldMessenger.of(
-                                                  context,
-                                                ).showSnackBar(
-                                                  SnackBar(
-                                                    content: Text(
-                                                      'Uninstall failed: ${e.toString()}',
-                                                    ),
-                                                  ),
-                                                );
-                                              }
-                                            }
-                                          },
-                                          icon: const Icon(
-                                            Symbols.delete_rounded,
-                                            fill: 1,
-                                          ),
-                                          label: const Text('Uninstall'),
-                                          style: FilledButton.styleFrom(
-                                            foregroundColor: Theme.of(
-                                              context,
-                                            ).colorScheme.onErrorContainer,
-                                            backgroundColor: Theme.of(
-                                              context,
-                                            ).colorScheme.errorContainer,
-                                          ),
                                         ),
-                                      ),
-                                    ),
-                                    Expanded(
-                                      child: SizedBox(
-                                        height: 48,
-                                        child: FilledButton.icon(
-                                          onPressed: () async {
-                                            try {
-                                              final opened = await appProvider
-                                                  .openInstalledApp(
-                                                    widget.app.packageName,
-                                                  );
-                                              if (!opened && context.mounted) {
-                                                ScaffoldMessenger.of(
-                                                  context,
-                                                ).showSnackBar(
-                                                  SnackBar(
-                                                    content: Text(
-                                                      'Unable to open ${widget.app.name}.',
-                                                    ),
-                                                  ),
-                                                );
-                                              }
-                                            } catch (e) {
-                                              if (context.mounted) {
-                                                ScaffoldMessenger.of(
-                                                  context,
-                                                ).showSnackBar(
-                                                  SnackBar(
-                                                    content: Text(
-                                                      'Open failed: ${e.toString()}',
-                                                    ),
-                                                  ),
-                                                );
-                                              }
-                                            }
-                                          },
-                                          icon: const Icon(
-                                            Symbols.open_in_new_rounded,
-                                          ),
-                                          label: const Text('Open'),
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                );
-                              }
-
-                              // return SizedBox(
-                              //   width: double.infinity,
-                              return FutureBuilder<FDroidApp>(
-                                future: _enrichedAppFuture,
-                                builder: (context, snapshot) {
-                                  // Use enriched app if available and loaded, otherwise fall back to widget.app
-                                  final enrichedApp =
-                                      snapshot.connectionState ==
-                                              ConnectionState.done &&
-                                          snapshot.hasData
-                                      ? snapshot.data!
-                                      : widget.app;
-
-                                  // Log error if enrichment failed
-                                  if (snapshot.hasError) {
-                                    debugPrint(
-                                      'Error enriching app: ${snapshot.error}',
+                                      ],
                                     );
                                   }
 
-                                  return SizedBox(
-                                    width: double.infinity,
-                                    child: _buildInstallButton(
-                                      context,
-                                      downloadProvider,
-                                      appProvider,
-                                      isDownloaded,
-                                      version,
-                                      enrichedApp,
-                                    ),
+                                  // return SizedBox(
+                                  //   width: double.infinity,
+                                  return FutureBuilder<FDroidApp>(
+                                    future: _enrichedAppFuture,
+                                    builder: (context, snapshot) {
+                                      // Use enriched app if available and loaded, otherwise fall back to widget.app
+                                      final enrichedApp =
+                                          snapshot.connectionState ==
+                                                  ConnectionState.done &&
+                                              snapshot.hasData
+                                          ? snapshot.data!
+                                          : widget.app;
+
+                                      // Log error if enrichment failed
+                                      if (snapshot.hasError) {
+                                        debugPrint(
+                                          'Error enriching app: ${snapshot.error}',
+                                        );
+                                      }
+
+                                      return SizedBox(
+                                        width: double.infinity,
+                                        child: _buildInstallButton(
+                                          context,
+                                          downloadProvider,
+                                          appProvider,
+                                          isDownloaded,
+                                          version,
+                                          enrichedApp,
+                                        ),
+                                      );
+                                    },
                                   );
-                                },
-                              );
                                 },
                               );
                             },
@@ -1007,67 +1028,6 @@ class _AppDetailsScreenState extends State<AppDetailsScreen> {
                             ).animate().fadeIn(
                               delay: Duration(milliseconds: 300),
                               duration: Duration(milliseconds: 300),
-                            ),
-                          if (isInstalled)
-                            FutureBuilder<bool>(
-                              future: appProvider.getIncludeUnstable(widget.app.packageName),
-                              builder: (context, snapshot) {
-                                final includeUnstable = snapshot.data ?? false;
-                                return Card.outlined(
-                                  child: Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 16.0,
-                                      vertical: 12.0,
-                                    ),
-                                    child: Row(
-                                      children: [
-                                        Icon(
-                                          Symbols.science,
-                                          size: 20,
-                                          color: Theme.of(context).colorScheme.primary,
-                                        ),
-                                        const SizedBox(width: 12),
-                                        Expanded(
-                                          child: Column(
-                                            crossAxisAlignment: CrossAxisAlignment.start,
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: [
-                                              Text(
-                                                'Include unstable versions',
-                                                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                                  fontWeight: FontWeight.w500,
-                                                ),
-                                              ),
-                                              Text(
-                                                'Show beta, alpha, and prerelease versions for this app',
-                                                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                        Switch(
-                                          value: includeUnstable,
-                                          onChanged: (value) async {
-                                            await appProvider.setIncludeUnstable(
-                                              widget.app.packageName,
-                                              value,
-                                            );
-                                            // Rebuild the widget to reflect the change
-                                            if (mounted) {
-                                              setState(() {});
-                                            }
-                                          },
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ).animate().fadeIn(
-                                  delay: Duration(milliseconds: 300),
-                                  duration: Duration(milliseconds: 300),
-                                );
-                              },
                             ),
 
                           FutureBuilder<IzzyStats>(
@@ -1137,6 +1097,12 @@ class _AppDetailsScreenState extends State<AppDetailsScreen> {
                   duration: Duration(milliseconds: 300),
                 ),
 
+                // Include unstable versions toggle (only show if unstable versions exist)
+                IncludeUnstableSection(app: widget.app).animate().fadeIn(
+                  delay: Duration(milliseconds: 300),
+                  duration: Duration(milliseconds: 300),
+                ),
+
                 // App details
                 _AppInfoSection(app: widget.app).animate().fadeIn(
                   delay: Duration(milliseconds: 300),
@@ -1173,7 +1139,9 @@ class _AppDetailsScreenState extends State<AppDetailsScreen> {
 
                 // Version info
                 FutureBuilder<FDroidVersion?>(
-                  future: context.read<AppProvider>().getLatestVersion(widget.app),
+                  future: context.read<AppProvider>().getLatestVersion(
+                    widget.app,
+                  ),
                   builder: (context, snapshot) {
                     final latestVersion = snapshot.data;
                     if (latestVersion != null) {
@@ -1239,287 +1207,309 @@ class _DownloadSectionState extends State<_DownloadSection> {
                 decoration: BoxDecoration(
                   color: Theme.of(context).colorScheme.errorContainer,
                   borderRadius: BorderRadius.circular(16),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Icon(
-                      Symbols.warning,
-                      color: Theme.of(context).colorScheme.onErrorContainer,
+                    Row(
+                      children: [
+                        Icon(
+                          Symbols.warning,
+                          color: Theme.of(context).colorScheme.onErrorContainer,
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          'No Version Available',
+                          style: Theme.of(context).textTheme.titleMedium
+                              ?.copyWith(
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onErrorContainer,
+                                fontWeight: FontWeight.w600,
+                              ),
+                        ),
+                      ],
                     ),
-                    const SizedBox(width: 8),
+                    const SizedBox(height: 8),
                     Text(
-                      'No Version Available',
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      'This app doesn\'t have any downloadable versions available.',
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                         color: Theme.of(context).colorScheme.onErrorContainer,
-                        fontWeight: FontWeight.w600,
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 8),
-                Text(
-                  'This app doesn\'t have any downloadable versions available.',
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Theme.of(context).colorScheme.onErrorContainer,
-                  ),
-                ),
-              ],
-            ),
-          );
-        }
-
-        return Consumer2<DownloadProvider, AppProvider>(
-          builder: (context, downloadProvider, appProvider, child) {
-            final version = latestVersion;
-
-            // Check if ANY version of this app is downloading
-            DownloadInfo? activeDownloadInfo;
-            bool isDownloading = false;
-            String downloadingVersionName = version.versionName;
-
-            if (widget.app.packages != null) {
-              for (var pkg in widget.app.packages!.values) {
-                final info = downloadProvider.getDownloadInfo(
-                  widget.app.packageName,
-                  pkg.versionName,
-                );
-                if (info?.status == DownloadStatus.downloading) {
-                  activeDownloadInfo = info;
-                  isDownloading = true;
-                  downloadingVersionName = pkg.versionName;
-                  break;
-                }
-              }
+              );
             }
 
-            final progress = isDownloading
-                ? downloadProvider.getProgress(
-                    widget.app.packageName,
-                    downloadingVersionName,
-                  )
-                : 0.0;
+            return Consumer2<DownloadProvider, AppProvider>(
+              builder: (context, downloadProvider, appProvider, child) {
+                final version = latestVersion;
 
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              spacing: 16.0,
-              children: [
-                if (isDownloading && activeDownloadInfo != null) ...[
-                  Column(
-                    spacing: 4.0,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                // Check if ANY version of this app is downloading
+                DownloadInfo? activeDownloadInfo;
+                bool isDownloading = false;
+                String downloadingVersionName = version.versionName;
+
+                if (widget.app.packages != null) {
+                  for (var pkg in widget.app.packages!.values) {
+                    final info = downloadProvider.getDownloadInfo(
+                      widget.app.packageName,
+                      pkg.versionName,
+                    );
+                    if (info?.status == DownloadStatus.downloading) {
+                      activeDownloadInfo = info;
+                      isDownloading = true;
+                      downloadingVersionName = pkg.versionName;
+                      break;
+                    }
+                  }
+                }
+
+                final progress = isDownloading
+                    ? downloadProvider.getProgress(
+                        widget.app.packageName,
+                        downloadingVersionName,
+                      )
+                    : 0.0;
+
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  spacing: 16.0,
+                  children: [
+                    if (isDownloading && activeDownloadInfo != null) ...[
+                      Column(
+                        spacing: 4.0,
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            'Downloading... ${(progress * 100).toInt()}%',
-                            style: Theme.of(context).textTheme.bodySmall
-                                ?.copyWith(
-                                  color: Theme.of(
-                                    context,
-                                  ).colorScheme.onSurfaceVariant,
-                                ),
-                          ).animate().fadeIn(
-                            duration: Duration(milliseconds: 300),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                'Downloading... ${(progress * 100).toInt()}%',
+                                style: Theme.of(context).textTheme.bodySmall
+                                    ?.copyWith(
+                                      color: Theme.of(
+                                        context,
+                                      ).colorScheme.onSurfaceVariant,
+                                    ),
+                              ).animate().fadeIn(
+                                duration: Duration(milliseconds: 300),
+                              ),
+                              if (activeDownloadInfo.totalBytes > 0)
+                                Text(
+                                      '${activeDownloadInfo.formattedBytesDownloaded} / ${activeDownloadInfo.formattedTotalBytes}',
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodySmall
+                                          ?.copyWith(
+                                            color: Theme.of(
+                                              context,
+                                            ).colorScheme.onSurfaceVariant,
+                                          ),
+                                    )
+                                    .animate()
+                                    .fadeIn(
+                                      duration: Duration(milliseconds: 300),
+                                    )
+                                    .slideY(
+                                      begin: 0.5,
+                                      end: 0,
+                                      duration: Duration(milliseconds: 300),
+                                    ),
+                            ],
                           ),
-                          if (activeDownloadInfo.totalBytes > 0)
-                            Text(
-                                  '${activeDownloadInfo.formattedBytesDownloaded} / ${activeDownloadInfo.formattedTotalBytes}',
-                                  style: Theme.of(context).textTheme.bodySmall
-                                      ?.copyWith(
-                                        color: Theme.of(
-                                          context,
-                                        ).colorScheme.onSurfaceVariant,
-                                      ),
-                                )
-                                .animate()
-                                .fadeIn(duration: Duration(milliseconds: 300))
-                                .slideY(
-                                  begin: 0.5,
-                                  end: 0,
-                                  duration: Duration(milliseconds: 300),
-                                ),
+                          const SizedBox(height: 4),
+                          Text(
+                                activeDownloadInfo.formattedSpeed,
+                                style: Theme.of(context).textTheme.bodySmall
+                                    ?.copyWith(
+                                      color: Theme.of(
+                                        context,
+                                      ).colorScheme.primary,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                              )
+                              .animate()
+                              .fadeIn(duration: Duration(milliseconds: 300))
+                              .slideY(
+                                begin: 0.5,
+                                end: 0,
+                                duration: Duration(milliseconds: 300),
+                              ),
+                          const SizedBox(height: 8),
+                          LinearProgressIndicator(
+                                value: progress,
+                                year2023: false,
+                              )
+                              .animate()
+                              .fadeIn(duration: Duration(milliseconds: 300))
+                              .slideY(
+                                begin: 0.5,
+                                end: 0,
+                                duration: Duration(milliseconds: 300),
+                              ),
                         ],
                       ),
-                      const SizedBox(height: 4),
-                      Text(
-                            activeDownloadInfo.formattedSpeed,
-                            style: Theme.of(context).textTheme.bodySmall
-                                ?.copyWith(
-                                  color: Theme.of(context).colorScheme.primary,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                          )
-                          .animate()
-                          .fadeIn(duration: Duration(milliseconds: 300))
-                          .slideY(
-                            begin: 0.5,
-                            end: 0,
-                            duration: Duration(milliseconds: 300),
-                          ),
-                      const SizedBox(height: 8),
-                      LinearProgressIndicator(value: progress, year2023: false)
-                          .animate()
-                          .fadeIn(duration: Duration(milliseconds: 300))
-                          .slideY(
-                            begin: 0.5,
-                            end: 0,
-                            duration: Duration(milliseconds: 300),
-                          ),
                     ],
-                  ),
-                ],
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  spacing: 8,
-                  children: [
-                    Expanded(
-                      child: Card.outlined(
-                        margin: EdgeInsets.zero,
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 8),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            spacing: 8,
-                            children: [
-                              SizedBox(
-                                height: 32,
-                                child: Icon(
-                                  Symbols.download,
-                                  size: 32,
-                                  color: Theme.of(
-                                    context,
-                                  ).colorScheme.onSurfaceVariant,
-                                ),
-                              ),
-                              Text(
-                                version.sizeString,
-                                style: Theme.of(context).textTheme.bodySmall
-                                    ?.copyWith(
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      spacing: 8,
+                      children: [
+                        Expanded(
+                          child: Card.outlined(
+                            margin: EdgeInsets.zero,
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 8),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                spacing: 8,
+                                children: [
+                                  SizedBox(
+                                    height: 32,
+                                    child: Icon(
+                                      Symbols.download,
+                                      size: 32,
                                       color: Theme.of(
                                         context,
                                       ).colorScheme.onSurfaceVariant,
                                     ),
+                                  ),
+                                  Text(
+                                    version.sizeString,
+                                    style: Theme.of(context).textTheme.bodySmall
+                                        ?.copyWith(
+                                          color: Theme.of(
+                                            context,
+                                          ).colorScheme.onSurfaceVariant,
+                                        ),
+                                  ),
+                                ],
                               ),
-                            ],
+                            ),
                           ),
                         ),
-                      ),
-                    ),
-                    Expanded(
-                      child: Card.outlined(
-                        margin: EdgeInsets.zero,
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 8),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            spacing: 8,
-                            children: [
-                              SizedBox(
-                                height: 32,
-                                child: Icon(
-                                  Symbols.code_rounded,
-                                  size: 32,
-                                  color: Theme.of(
-                                    context,
-                                  ).colorScheme.onSurfaceVariant,
-                                ),
-                              ),
-                              Text(
-                                version.versionName,
-                                style: Theme.of(context).textTheme.bodySmall
-                                    ?.copyWith(
+                        Expanded(
+                          child: Card.outlined(
+                            margin: EdgeInsets.zero,
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 8),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                spacing: 8,
+                                children: [
+                                  SizedBox(
+                                    height: 32,
+                                    child: Icon(
+                                      Symbols.code_rounded,
+                                      size: 32,
                                       color: Theme.of(
                                         context,
                                       ).colorScheme.onSurfaceVariant,
                                     ),
+                                  ),
+                                  Text(
+                                    version.versionName,
+                                    style: Theme.of(context).textTheme.bodySmall
+                                        ?.copyWith(
+                                          color: Theme.of(
+                                            context,
+                                          ).colorScheme.onSurfaceVariant,
+                                        ),
+                                  ),
+                                ],
                               ),
-                            ],
+                            ),
                           ),
                         ),
-                      ),
+                        if (widget.stats?.hasAny != true)
+                          Expanded(
+                            child: Card.outlined(
+                              margin: EdgeInsets.zero,
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 8,
+                                ),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  spacing: 8,
+                                  children: [
+                                    SizedBox(
+                                      height: 32,
+                                      child: Icon(
+                                        Symbols.license_rounded,
+                                        size: 32,
+                                        color: Theme.of(
+                                          context,
+                                        ).colorScheme.onSurfaceVariant,
+                                      ),
+                                    ),
+                                    Text(
+                                      widget.app.license,
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodySmall
+                                          ?.copyWith(
+                                            color: Theme.of(
+                                              context,
+                                            ).colorScheme.onSurfaceVariant,
+                                          ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        if (widget.stats?.hasAny == true)
+                          Expanded(
+                            child: Card.outlined(
+                              margin: EdgeInsets.zero,
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 8,
+                                ),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  spacing: 8,
+                                  children: [
+                                    SizedBox(
+                                      height: 32,
+                                      child: Icon(
+                                        Symbols.chart_data,
+                                        size: 32,
+                                        color: Theme.of(
+                                          context,
+                                        ).colorScheme.onSurfaceVariant,
+                                      ),
+                                    ),
+                                    Text(
+                                      widget.stats!.last365Days != null
+                                          ? _formatCount(
+                                              widget.stats!.last365Days!,
+                                            )
+                                          : 'N/A',
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodySmall
+                                          ?.copyWith(
+                                            color: Theme.of(
+                                              context,
+                                            ).colorScheme.onSurfaceVariant,
+                                          ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                      ],
                     ),
-                    if (widget.stats?.hasAny != true)
-                      Expanded(
-                        child: Card.outlined(
-                          margin: EdgeInsets.zero,
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 8),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              spacing: 8,
-                              children: [
-                                SizedBox(
-                                  height: 32,
-                                  child: Icon(
-                                    Symbols.license_rounded,
-                                    size: 32,
-                                    color: Theme.of(
-                                      context,
-                                    ).colorScheme.onSurfaceVariant,
-                                  ),
-                                ),
-                                Text(
-                                  widget.app.license,
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: Theme.of(context).textTheme.bodySmall
-                                      ?.copyWith(
-                                        color: Theme.of(
-                                          context,
-                                        ).colorScheme.onSurfaceVariant,
-                                      ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                    if (widget.stats?.hasAny == true)
-                      Expanded(
-                        child: Card.outlined(
-                          margin: EdgeInsets.zero,
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 8),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              spacing: 8,
-                              children: [
-                                SizedBox(
-                                  height: 32,
-                                  child: Icon(
-                                    Symbols.chart_data,
-                                    size: 32,
-                                    color: Theme.of(
-                                      context,
-                                    ).colorScheme.onSurfaceVariant,
-                                  ),
-                                ),
-                                Text(
-                                  widget.stats!.last365Days != null
-                                      ? _formatCount(widget.stats!.last365Days!)
-                                      : 'N/A',
-                                  style: Theme.of(context).textTheme.bodySmall
-                                      ?.copyWith(
-                                        color: Theme.of(
-                                          context,
-                                        ).colorScheme.onSurfaceVariant,
-                                      ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
                   ],
-                ),
-              ],
+                );
+              },
             );
-          },
-        );
           },
         );
       },
@@ -1740,55 +1730,55 @@ class _AppInfoSection extends StatelessWidget {
                         Symbols.license_rounded,
                         color: Theme.of(context).colorScheme.primary,
                       ),
-                  title: 'License',
-                  subtitle: app.license,
-                  onTap: () {},
-                ),
-                if (app.added != null)
-                  MListItemData(
-                    leading: Icon(
-                      Symbols.add,
-                      color: Theme.of(context).colorScheme.primary,
+                      title: 'License',
+                      subtitle: app.license,
+                      onTap: () {},
                     ),
-                    title: 'Added',
-                    subtitle: _formatDate(app.added!),
-                    onTap: () {},
-                  ),
-                if (app.added != null)
-                  MListItemData(
-                    leading: Icon(
-                      Symbols.update,
-                      color: Theme.of(context).colorScheme.primary,
-                    ),
-                    title: 'Last Updated',
-                    subtitle: _formatDate(app.lastUpdated!),
-                    onTap: () {},
-                  ),
-                if (latestVersion?.permissions?.isNotEmpty == true)
-                  MListItemData(
-                    leading: Icon(
-                      Symbols.security,
-                      color: Theme.of(context).colorScheme.primary,
-                    ),
-                    title: 'Permissions ',
-                    subtitle: '(${latestVersion!.permissions!.length})',
-                    suffix: Icon(Symbols.arrow_forward),
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => PermissionsScreen(
-                            permissions: latestVersion.permissions!,
-                            appName: app.name,
-                          ),
+                    if (app.added != null)
+                      MListItemData(
+                        leading: Icon(
+                          Symbols.add,
+                          color: Theme.of(context).colorScheme.primary,
                         ),
-                      );
-                    },
-                  ),
+                        title: 'Added',
+                        subtitle: _formatDate(app.added!),
+                        onTap: () {},
+                      ),
+                    if (app.added != null)
+                      MListItemData(
+                        leading: Icon(
+                          Symbols.update,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                        title: 'Last Updated',
+                        subtitle: _formatDate(app.lastUpdated!),
+                        onTap: () {},
+                      ),
+                    if (latestVersion?.permissions?.isNotEmpty == true)
+                      MListItemData(
+                        leading: Icon(
+                          Symbols.security,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                        title: 'Permissions ',
+                        subtitle: '(${latestVersion!.permissions!.length})',
+                        suffix: Icon(Symbols.arrow_forward),
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => PermissionsScreen(
+                                permissions: latestVersion.permissions!,
+                                appName: app.name,
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                  ],
+                ),
               ],
-            ),
-          ],
-        );
+            );
           },
         );
       },
@@ -1891,6 +1881,94 @@ class _DescriptionSectionState extends State<_DescriptionSection>
         ],
       ),
     );
+  }
+}
+
+class IncludeUnstableSection extends StatefulWidget {
+  final FDroidApp app;
+  const IncludeUnstableSection({super.key, required this.app});
+
+  @override
+  State<IncludeUnstableSection> createState() => _IncludeUnstableSectionState();
+}
+
+class _IncludeUnstableSectionState extends State<IncludeUnstableSection> {
+  @override
+  Widget build(BuildContext context) {
+    if (widget.app.packages != null &&
+        widget.app.packages!.values.any((v) => v.isUnstable)) {
+      return FutureBuilder<bool>(
+        future: context.read<AppProvider>().getIncludeUnstable(
+          widget.app.packageName,
+        ),
+        builder: (context, snapshot) {
+          final includeUnstable = snapshot.data ?? false;
+          return Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12.0),
+            child:
+                Card.outlined(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16.0,
+                      vertical: 12.0,
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(
+                          Symbols.science,
+                          size: 20,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                'Include unstable versions',
+                                style: Theme.of(context).textTheme.bodyMedium
+                                    ?.copyWith(fontWeight: FontWeight.w500),
+                              ),
+                              Text(
+                                'Show beta, alpha, and prerelease versions for this app',
+                                style: Theme.of(context).textTheme.bodySmall
+                                    ?.copyWith(
+                                      color: Theme.of(
+                                        context,
+                                      ).colorScheme.onSurfaceVariant,
+                                    ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Switch(
+                          value: includeUnstable,
+                          onChanged: (value) async {
+                            await context
+                                .read<AppProvider>()
+                                .setIncludeUnstable(
+                                  widget.app.packageName,
+                                  value,
+                                );
+                            // Rebuild the widget to reflect the change
+                            if (mounted) {
+                              setState(() {});
+                            }
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                ).animate().fadeIn(
+                  delay: Duration(milliseconds: 300),
+                  duration: Duration(milliseconds: 300),
+                ),
+          );
+        },
+      );
+    }
+    return const SizedBox.shrink();
   }
 }
 
@@ -2100,7 +2178,7 @@ class _AllVersionsSection extends StatelessWidget {
           future: appProvider.getIncludeUnstable(app.packageName),
           builder: (context, snapshot) {
             final includeUnstable = snapshot.data ?? false;
-            
+
             var versions = app.packages?.values.toList() ?? [];
             if (versions.isEmpty) return const SizedBox.shrink();
 
@@ -2131,11 +2209,15 @@ class _AllVersionsSection extends StatelessWidget {
                           decoration: BoxDecoration(
                             color: isLatest
                                 ? Theme.of(context).colorScheme.primaryContainer
-                                : Theme.of(context).colorScheme.surfaceContainer,
+                                : Theme.of(
+                                    context,
+                                  ).colorScheme.surfaceContainer,
                             borderRadius: BorderRadius.circular(16),
                             border: isLatest
                                 ? Border.all(
-                                    color: Theme.of(context).colorScheme.primary,
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.primary,
                                     width: 1,
                                   )
                                 : null,
@@ -2144,76 +2226,95 @@ class _AllVersionsSection extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
                                   Expanded(
                                     child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       children: [
                                         Text(
                                           version.versionName,
-                                          style: Theme.of(context).textTheme.bodyMedium
-                                              ?.copyWith(fontWeight: FontWeight.w600),
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .bodyMedium
+                                              ?.copyWith(
+                                                fontWeight: FontWeight.w600,
+                                              ),
                                         ),
                                         Text(
                                           'Code: ${version.versionCode}',
-                                          style: Theme.of(context).textTheme.bodySmall
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .bodySmall
                                               ?.copyWith(
+                                                color: Theme.of(
+                                                  context,
+                                                ).colorScheme.onSurfaceVariant,
+                                              ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  if (isLatest)
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 8,
+                                        vertical: 4,
+                                      ),
+                                      decoration: BoxDecoration(
                                         color: Theme.of(
                                           context,
-                                        ).colorScheme.onSurfaceVariant,
+                                        ).colorScheme.primary,
+                                        borderRadius: BorderRadius.circular(4),
                                       ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          if (isLatest)
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 8,
-                                vertical: 4,
-                              ),
-                              decoration: BoxDecoration(
-                                color: Theme.of(context).colorScheme.primary,
-                                borderRadius: BorderRadius.circular(4),
-                              ),
-                              child: Text(
-                                'Latest',
-                                style: Theme.of(context).textTheme.labelSmall
-                                    ?.copyWith(
-                                      color: Theme.of(
-                                        context,
-                                      ).colorScheme.onPrimary,
+                                      child: Text(
+                                        'Latest',
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .labelSmall
+                                            ?.copyWith(
+                                              color: Theme.of(
+                                                context,
+                                              ).colorScheme.onPrimary,
+                                            ),
+                                      ),
                                     ),
+                                ],
                               ),
-                            ),
-                        ],
-                      ),
-                      const SizedBox(height: 8),
-                      Row(
-                        children: [
-                          Text(
-                            'Size: ${version.sizeString}',
-                            style: Theme.of(context).textTheme.bodySmall,
+                              const SizedBox(height: 8),
+                              Row(
+                                children: [
+                                  Text(
+                                    'Size: ${version.sizeString}',
+                                    style: Theme.of(
+                                      context,
+                                    ).textTheme.bodySmall,
+                                  ),
+                                  const SizedBox(width: 16),
+                                  Text(
+                                    'Released: ${_formatDate(version.added)}',
+                                    style: Theme.of(
+                                      context,
+                                    ).textTheme.bodySmall,
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 12),
+                              _VersionDownloadButton(
+                                app: app,
+                                version: version,
+                              ),
+                            ],
                           ),
-                          const SizedBox(width: 16),
-                          Text(
-                            'Released: ${_formatDate(version.added)}',
-                            style: Theme.of(context).textTheme.bodySmall,
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 12),
-                      _VersionDownloadButton(app: app, version: version),
+                        );
+                      }),
                     ],
                   ),
-                );
-              }),
-            ],
-          ),
-        ),
-      ],
-    );
+                ),
+              ],
+            );
           },
         );
       },

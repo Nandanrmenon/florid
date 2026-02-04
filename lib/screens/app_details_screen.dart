@@ -269,7 +269,7 @@ class _AppDetailsScreenState extends State<AppDetailsScreen> {
     if (availableRepos == null || availableRepos.isEmpty) return;
 
     // Capture the mounted context before showing dialog
-    final scaffoldMessenger = ScaffoldMessenger.of(context);
+    // final scaffoldMessenger = ScaffoldMessenger.of(context);
 
     await showModalBottomSheet(
       context: context,
@@ -370,7 +370,7 @@ class _AppDetailsScreenState extends State<AppDetailsScreen> {
     return Scaffold(
       body: CustomScrollView(
         slivers: [
-          SliverAppBar.large(
+          SliverAppBar(
             pinned: true,
             centerTitle: false,
             title: Row(
@@ -428,6 +428,7 @@ class _AppDetailsScreenState extends State<AppDetailsScreen> {
                 },
               ),
               PopupMenuButton<String>(
+                icon: const Icon(Symbols.more_vert),
                 onSelected: (value) async {
                   switch (value) {
                     case 'website':

@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:florid/l10n/app_localizations.dart';
 import 'package:florid/widgets/m_list.dart';
 import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/symbols.dart';
@@ -56,279 +57,308 @@ class _RepositoriesScreenState extends State<RepositoriesScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Manage Repositories')),
-      body: Consumer<RepositoriesProvider>(
-        builder: (context, provider, _) {
-          if (provider.isLoading) {
-            return const Center(child: CircularProgressIndicator());
-          }
+      body: CustomScrollView(
+        slivers: [
+          SliverAppBar.medium(
+            leading: BackButton(
+              style: ButtonStyle(
+                backgroundColor: WidgetStateColor.resolveWith(
+                  (states) => Theme.of(context).colorScheme.surfaceContainer,
+                ),
+              ),
+            ),
+            title: Text(AppLocalizations.of(context)!.manage_repositories),
+          ),
+          SliverToBoxAdapter(
+            child: Consumer<RepositoriesProvider>(
+              builder: (context, provider, _) {
+                if (provider.isLoading) {
+                  return const Center(child: CircularProgressIndicator());
+                }
 
-          return Padding(
-            padding: const EdgeInsets.symmetric(vertical: 24.0),
-            child: Column(
-              spacing: 16,
-              children: [
-                // Error message if any
-                if (provider.error != null)
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Material(
-                      color: Colors.red.shade100,
-                      borderRadius: BorderRadius.circular(8),
-                      child: Padding(
-                        padding: const EdgeInsets.all(12.0),
-                        child: Row(
-                          children: [
-                            Icon(Symbols.error, color: Colors.red.shade700),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Text(
-                                provider.error ?? 'Unknown error',
-                                style: TextStyle(color: Colors.red.shade700),
+                return Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 24.0),
+                  child: Column(
+                    spacing: 16,
+                    children: [
+                      // Error message if any
+                      if (provider.error != null)
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Material(
+                            color: Colors.red.shade100,
+                            borderRadius: BorderRadius.circular(8),
+                            child: Padding(
+                              padding: const EdgeInsets.all(12.0),
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    Symbols.error,
+                                    color: Colors.red.shade700,
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: Text(
+                                      provider.error ?? 'Unknown error',
+                                      style: TextStyle(
+                                        color: Colors.red.shade700,
+                                      ),
+                                    ),
+                                  ),
+                                  IconButton(
+                                    icon: const Icon(Symbols.close),
+                                    onPressed: provider.clearError,
+                                    color: Colors.red.shade700,
+                                  ),
+                                ],
                               ),
                             ),
-                            IconButton(
-                              icon: const Icon(Symbols.close),
-                              onPressed: provider.clearError,
-                              color: Colors.red.shade700,
+                          ),
+                        ),
+                      // Presets section
+                      if (_presets.isNotEmpty)
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          spacing: 4.0,
+                          children: [
+                            MListHeader(title: 'Preset'),
+                            MListViewBuilder(
+                              itemCount: _presets.length,
+                              itemBuilder: (index) {
+                                final preset = _presets[index];
+                                final isAdded = provider.repositories.any(
+                                  (repo) => repo.url == preset['url'],
+                                );
+
+                                return MListItemData(
+                                  title: preset['name']!,
+                                  subtitle: preset['description']!,
+                                  onTap: () {},
+                                  suffix: Switch(
+                                    value: isAdded,
+                                    onChanged: (newValue) async {
+                                      if (newValue) {
+                                        // Add the preset
+                                        final repoProvider = context
+                                            .read<RepositoriesProvider>();
+                                        await repoProvider.addRepository(
+                                          preset['name']!,
+                                          preset['url']!,
+                                        );
+                                        // Only proceed with modal and refresh if addition succeeded (no error)
+                                        if (repoProvider.error == null &&
+                                            context.mounted) {
+                                          await _runRepositoryActionWithDialog(
+                                            context,
+                                            () async {
+                                              final apiService = context
+                                                  .read<FDroidApiService>();
+                                              final appProvider = context
+                                                  .read<AppProvider>();
+
+                                              await apiService
+                                                  .clearRepositoryCache();
+                                              await appProvider.refreshAll(
+                                                repositoriesProvider:
+                                                    repoProvider,
+                                              );
+                                            },
+                                          );
+                                        }
+                                      } else {
+                                        // Remove the preset
+                                        Repository? addedRepo;
+                                        try {
+                                          addedRepo = provider.repositories
+                                              .firstWhere(
+                                                (repo) =>
+                                                    repo.url == preset['url'],
+                                              );
+                                        } catch (e) {
+                                          addedRepo = null;
+                                        }
+                                        if (addedRepo != null) {
+                                          final repoProvider = context
+                                              .read<RepositoriesProvider>();
+                                          repoProvider.deleteRepository(
+                                            addedRepo.id,
+                                          );
+                                          // Only proceed with modal and refresh if deletion succeeded (no error)
+                                          if (repoProvider.error == null &&
+                                              context.mounted) {
+                                            await _runRepositoryActionWithDialog(
+                                              context,
+                                              () async {
+                                                final apiService = context
+                                                    .read<FDroidApiService>();
+                                                final appProvider = context
+                                                    .read<AppProvider>();
+
+                                                await apiService
+                                                    .clearRepositoryCache();
+                                                await appProvider.refreshAll(
+                                                  repositoriesProvider:
+                                                      repoProvider,
+                                                );
+                                              },
+                                            );
+                                          }
+                                        }
+                                      }
+                                    },
+                                  ),
+                                );
+                              },
                             ),
                           ],
                         ),
-                      ),
-                    ),
-                  ),
-                // Presets section
-                if (_presets.isNotEmpty)
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    spacing: 4.0,
-                    children: [
-                      MListHeader(title: 'Preset'),
-                      MListViewBuilder(
-                        itemCount: _presets.length,
-                        itemBuilder: (index) {
-                          final preset = _presets[index];
-                          final isAdded = provider.repositories.any(
-                            (repo) => repo.url == preset['url'],
-                          );
-
-                          return MListItemData(
-                            title: preset['name']!,
-                            subtitle: preset['description']!,
-                            onTap: () {},
-                            suffix: Switch(
-                              value: isAdded,
-                              onChanged: (newValue) async {
-                                if (newValue) {
-                                  // Add the preset
-                                  final repoProvider = context
-                                      .read<RepositoriesProvider>();
-                                  await repoProvider.addRepository(
-                                    preset['name']!,
-                                    preset['url']!,
-                                  );
-                                  // Only proceed with modal and refresh if addition succeeded (no error)
-                                  if (repoProvider.error == null &&
-                                      context.mounted) {
-                                    await _runRepositoryActionWithDialog(
-                                      context,
-                                      () async {
-                                        final apiService = context
-                                            .read<FDroidApiService>();
-                                        final appProvider = context
-                                            .read<AppProvider>();
-
-                                        await apiService.clearRepositoryCache();
-                                        await appProvider.refreshAll(
-                                          repositoriesProvider: repoProvider,
-                                        );
-                                      },
-                                    );
-                                  }
-                                } else {
-                                  // Remove the preset
-                                  Repository? addedRepo;
-                                  try {
-                                    addedRepo = provider.repositories
-                                        .firstWhere(
-                                          (repo) => repo.url == preset['url'],
-                                        );
-                                  } catch (e) {
-                                    addedRepo = null;
-                                  }
-                                  if (addedRepo != null) {
-                                    final repoProvider = context
-                                        .read<RepositoriesProvider>();
-                                    repoProvider.deleteRepository(addedRepo.id);
-                                    // Only proceed with modal and refresh if deletion succeeded (no error)
-                                    if (repoProvider.error == null &&
-                                        context.mounted) {
-                                      await _runRepositoryActionWithDialog(
-                                        context,
-                                        () async {
-                                          final apiService = context
-                                              .read<FDroidApiService>();
-                                          final appProvider = context
-                                              .read<AppProvider>();
-
-                                          await apiService
-                                              .clearRepositoryCache();
-                                          await appProvider.refreshAll(
-                                            repositoriesProvider: repoProvider,
-                                          );
-                                        },
-                                      );
-                                    }
-                                  }
-                                }
-                              },
-                            ),
-                          );
-                        },
-                      ),
-                    ],
-                  ),
-                // Custom Repositories list
-                Column(
-                  spacing: 4.0,
-                  children: [
-                    MListHeader(title: 'Your Repositories'),
-                    provider.repositories
-                            .where(
-                              (repo) => !_presets.any(
-                                (preset) => preset['url'] == repo.url,
-                              ),
-                            )
-                            .toList()
-                            .isEmpty
-                        ? Center(
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(
-                                  Symbols.inbox,
-                                  size: 64,
-                                  color: Colors.grey.shade400,
-                                ),
-                                const SizedBox(height: 16),
-                                Text(
-                                  'No custom repositories added',
-                                  style: Theme.of(
-                                    context,
-                                  ).textTheme.titleMedium,
-                                ),
-                                const SizedBox(height: 8),
-                                Text(
-                                  'Add a custom F-Droid repository to get started',
-                                  style: Theme.of(context).textTheme.bodySmall,
-                                  textAlign: TextAlign.center,
-                                ),
-                              ],
-                            ),
-                          )
-                        : MListViewBuilder(
-                            itemCount: provider.repositories
-                                .where(
-                                  (repo) => !_presets.any(
-                                    (preset) => preset['url'] == repo.url,
-                                  ),
-                                )
-                                .length,
-                            itemBuilder: (index) {
-                              final customRepos = provider.repositories
+                      // Custom Repositories list
+                      Column(
+                        spacing: 4.0,
+                        children: [
+                          MListHeader(title: 'Your Repositories'),
+                          provider.repositories
                                   .where(
                                     (repo) => !_presets.any(
                                       (preset) => preset['url'] == repo.url,
                                     ),
                                   )
-                                  .toList();
-                              final repo = customRepos[index];
-                              return MListItemData(
-                                title: repo.name,
-                                subtitle: repo.url,
-                                suffix: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Switch(
-                                      value: repo.isEnabled,
-                                      onChanged: (_) async {
-                                        await _toggleRepositoryWithDialog(
+                                  .toList()
+                                  .isEmpty
+                              ? Center(
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Icon(
+                                        Symbols.inbox,
+                                        size: 64,
+                                        color: Colors.grey.shade400,
+                                      ),
+                                      const SizedBox(height: 16),
+                                      Text(
+                                        'No custom repositories added',
+                                        style: Theme.of(
                                           context,
-                                          provider,
-                                          repo.id,
-                                        );
-                                      },
-                                    ),
-                                    PopupMenuButton<String>(
-                                      onSelected: (value) async {
-                                        switch (value) {
-                                          case 'edit':
-                                            _RepositoryListItem(
-                                              repository: repo,
-                                            )._showEditRepositoryDialog(
-                                              context,
-                                              repo,
-                                            );
-                                            break;
-                                          case 'delete':
-                                            _RepositoryListItem(
-                                              repository: repo,
-                                            )._showDeleteConfirmation(
-                                              context,
-                                              repo,
-                                              provider,
-                                            );
-                                            break;
-                                        }
-                                      },
-                                      itemBuilder: (context) => [
-                                        PopupMenuItem(
-                                          value: 'edit',
-                                          child: Row(
-                                            spacing: 16.0,
-                                            children: [
-                                              Icon(Symbols.edit_rounded),
-                                              Text('Edit'),
-                                            ],
-                                          ),
+                                        ).textTheme.titleMedium,
+                                      ),
+                                      const SizedBox(height: 8),
+                                      Text(
+                                        'Add a custom F-Droid repository to get started',
+                                        style: Theme.of(
+                                          context,
+                                        ).textTheme.bodySmall,
+                                        textAlign: TextAlign.center,
+                                      ),
+                                    ],
+                                  ),
+                                )
+                              : MListViewBuilder(
+                                  itemCount: provider.repositories
+                                      .where(
+                                        (repo) => !_presets.any(
+                                          (preset) => preset['url'] == repo.url,
                                         ),
-                                        PopupMenuItem(
-                                          value: 'delete',
-                                          child: Row(
-                                            spacing: 16.0,
-                                            children: [
-                                              Icon(
-                                                Symbols.delete_rounded,
-                                                fill: 1,
-                                                color: Theme.of(
-                                                  context,
-                                                ).colorScheme.error,
-                                              ),
-                                              Text(
-                                                'Delete',
-                                                style: TextStyle(
-                                                  color: Theme.of(
+                                      )
+                                      .length,
+                                  itemBuilder: (index) {
+                                    final customRepos = provider.repositories
+                                        .where(
+                                          (repo) => !_presets.any(
+                                            (preset) =>
+                                                preset['url'] == repo.url,
+                                          ),
+                                        )
+                                        .toList();
+                                    final repo = customRepos[index];
+                                    return MListItemData(
+                                      title: repo.name,
+                                      subtitle: repo.url,
+                                      suffix: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Switch(
+                                            value: repo.isEnabled,
+                                            onChanged: (_) async {
+                                              await _toggleRepositoryWithDialog(
+                                                context,
+                                                provider,
+                                                repo.id,
+                                              );
+                                            },
+                                          ),
+                                          PopupMenuButton<String>(
+                                            onSelected: (value) async {
+                                              switch (value) {
+                                                case 'edit':
+                                                  _RepositoryListItem(
+                                                    repository: repo,
+                                                  )._showEditRepositoryDialog(
                                                     context,
-                                                  ).colorScheme.error,
+                                                    repo,
+                                                  );
+                                                  break;
+                                                case 'delete':
+                                                  _RepositoryListItem(
+                                                    repository: repo,
+                                                  )._showDeleteConfirmation(
+                                                    context,
+                                                    repo,
+                                                    provider,
+                                                  );
+                                                  break;
+                                              }
+                                            },
+                                            itemBuilder: (context) => [
+                                              PopupMenuItem(
+                                                value: 'edit',
+                                                child: Row(
+                                                  spacing: 16.0,
+                                                  children: [
+                                                    Icon(Symbols.edit_rounded),
+                                                    Text('Edit'),
+                                                  ],
+                                                ),
+                                              ),
+                                              PopupMenuItem(
+                                                value: 'delete',
+                                                child: Row(
+                                                  spacing: 16.0,
+                                                  children: [
+                                                    Icon(
+                                                      Symbols.delete_rounded,
+                                                      fill: 1,
+                                                      color: Theme.of(
+                                                        context,
+                                                      ).colorScheme.error,
+                                                    ),
+                                                    Text(
+                                                      'Delete',
+                                                      style: TextStyle(
+                                                        color: Theme.of(
+                                                          context,
+                                                        ).colorScheme.error,
+                                                      ),
+                                                    ),
+                                                  ],
                                                 ),
                                               ),
                                             ],
                                           ),
-                                        ),
-                                      ],
-                                    ),
-                                  ],
+                                        ],
+                                      ),
+                                      onTap: () {},
+                                    );
+                                  },
                                 ),
-                                onTap: () {},
-                              );
-                            },
-                          ),
-                  ],
-                ),
-              ],
+                        ],
+                      ),
+                    ],
+                  ),
+                );
+              },
             ),
-          );
-        },
+          ),
+        ],
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => _showAddRepositoryDialog(context),

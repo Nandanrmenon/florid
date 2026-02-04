@@ -1,4 +1,3 @@
-import 'package:easy_localization/easy_localization.dart';
 import 'package:florid/l10n/app_localizations.dart';
 import 'package:florid/providers/app_provider.dart';
 import 'package:florid/providers/repositories_provider.dart';
@@ -7,7 +6,7 @@ import 'package:florid/screens/home_screen.dart';
 import 'package:florid/utils/menu_actions.dart';
 import 'package:florid/widgets/f_tabbar.dart';
 import 'package:flutter/material.dart';
-import 'package:material_symbols_icons/material_symbols_icons.dart';
+import 'package:material_symbols_icons/symbols.dart';
 import 'package:provider/provider.dart';
 
 class LibraryScreen extends StatefulWidget {
@@ -37,67 +36,73 @@ class _LibraryScreenState extends State<LibraryScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(AppLocalizations.of(context)!.app_name),
-        backgroundColor: Theme.of(context).colorScheme.surfaceContainerLow,
-        surfaceTintColor: Theme.of(context).colorScheme.surfaceContainerLow,
-        actions: [
-          PopupMenuButton<String>(
-            onSelected: (value) {
-              switch (value) {
-                case 'refresh':
-                  _refreshData();
-                  break;
-                case 'settings':
-                  MenuActions.showSettings(context);
-                  break;
-                case 'about':
-                  MenuActions.showAbout(context);
-                  break;
-              }
-            },
-            itemBuilder: (context) => [
-              PopupMenuItem(
-                value: 'refresh',
-                child: ListTile(
-                  leading: const Icon(Symbols.refresh),
-                  title: Text(AppLocalizations.of(context)!.refresh),
-                  contentPadding: EdgeInsets.zero,
-                ),
-              ),
-              PopupMenuItem(
-                value: 'settings',
-                child: ListTile(
-                  leading: const Icon(Symbols.settings),
-                  title: Text(AppLocalizations.of(context)!.settings),
-                  contentPadding: EdgeInsets.zero,
-                ),
-              ),
-              PopupMenuItem(
-                value: 'about',
-                child: ListTile(
-                  leading: Icon(Symbols.info),
-                  title: Text(AppLocalizations.of(context)!.about),
-                  contentPadding: EdgeInsets.zero,
-                ),
+      body: CustomScrollView(
+        slivers: [
+          SliverAppBar(
+            title: Text(AppLocalizations.of(context)!.app_name),
+            backgroundColor: Theme.of(context).colorScheme.surfaceContainerLow,
+            surfaceTintColor: Theme.of(context).colorScheme.surfaceContainerLow,
+            actions: [
+              PopupMenuButton<String>(
+                onSelected: (value) {
+                  switch (value) {
+                    case 'refresh':
+                      _refreshData();
+                      break;
+                    case 'settings':
+                      MenuActions.showSettings(context);
+                      break;
+                    case 'about':
+                      MenuActions.showAbout(context);
+                      break;
+                  }
+                },
+                itemBuilder: (context) => [
+                  PopupMenuItem(
+                    value: 'refresh',
+                    child: ListTile(
+                      leading: const Icon(Symbols.refresh),
+                      title: Text(AppLocalizations.of(context)!.refresh),
+                      contentPadding: EdgeInsets.zero,
+                    ),
+                  ),
+                  PopupMenuItem(
+                    value: 'settings',
+                    child: ListTile(
+                      leading: const Icon(Symbols.settings),
+                      title: Text(AppLocalizations.of(context)!.settings),
+                      contentPadding: EdgeInsets.zero,
+                    ),
+                  ),
+                  PopupMenuItem(
+                    value: 'about',
+                    child: ListTile(
+                      leading: Icon(Symbols.info),
+                      title: Text(AppLocalizations.of(context)!.about),
+                      contentPadding: EdgeInsets.zero,
+                    ),
+                  ),
+                ],
               ),
             ],
+            bottom: FTabBar(
+              controller: _tabController,
+              onTabChanged: (index) {
+                _tabController.animateTo(index);
+              },
+              items: [
+                FloridTabBarItem(
+                  icon: Symbols.home,
+                  label: AppLocalizations.of(context)!.home,
+                ),
+                FloridTabBarItem(
+                  icon: Symbols.category,
+                  label: AppLocalizations.of(context)!.categories,
+                ),
+              ],
+            ),
           ),
-        ],
-        bottom: FTabBar(
-          controller: _tabController,
-          onTabChanged: (index) {
-            _tabController.animateTo(index);
-          },
-          items: [
-            FloridTabBarItem(icon: Symbols.home, label: AppLocalizations.of(context)!.home),
-            FloridTabBarItem(icon: Symbols.category, label: AppLocalizations.of(context)!.categories),
-          ],
-        ),
-      ),
-      body: Column(
-        children: [
-          Expanded(
+          SliverFillRemaining(
             child: TabBarView(controller: _tabController, children: tabs),
           ),
         ],

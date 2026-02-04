@@ -1,4 +1,3 @@
-import 'package:easy_localization/easy_localization.dart';
 import 'package:florid/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -110,7 +109,9 @@ class _HomeScreenState extends State<HomeScreen>
                               onPressed: _openRecentlyUpdatedScreen,
                               iconAlignment: IconAlignment.end,
                               icon: Icon(Symbols.arrow_forward),
-                              label: Text(AppLocalizations.of(context)!.show_more),
+                              label: Text(
+                                AppLocalizations.of(context)!.show_more,
+                              ),
                             ),
                           ],
                         ),
@@ -118,9 +119,7 @@ class _HomeScreenState extends State<HomeScreen>
                       if (isLoading && recentlyUpdatedApps.isEmpty)
                         const Padding(
                           padding: EdgeInsets.symmetric(vertical: 32.0),
-                          child: Center(
-                            child: CircularProgressIndicator(year2023: false),
-                          ),
+                          child: Center(child: CircularProgressIndicator()),
                         )
                       else if (recentlyUpdatedApps.isEmpty)
                         Padding(
@@ -188,7 +187,9 @@ class _HomeScreenState extends State<HomeScreen>
                             onPressed: _openLatestScreen,
                             iconAlignment: IconAlignment.end,
                             icon: Icon(Symbols.arrow_forward),
-                            label: Text(AppLocalizations.of(context)!.show_more),
+                            label: Text(
+                              AppLocalizations.of(context)!.show_more,
+                            ),
                           ),
                         ],
                       ),
@@ -196,9 +197,7 @@ class _HomeScreenState extends State<HomeScreen>
                     if (isLoading && latestApps.isEmpty)
                       const Padding(
                         padding: EdgeInsets.symmetric(horizontal: 32.0),
-                        child: Center(
-                          child: CircularProgressIndicator(year2023: false),
-                        ),
+                        child: Center(child: CircularProgressIndicator()),
                       )
                     else if (latestApps.isEmpty)
                       Padding(

@@ -65,7 +65,7 @@ class _RecentlyUpdatedScreenState extends State<RecentlyUpdatedScreen>
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            CircularProgressIndicator(year2023: false),
+            CircularProgressIndicator(),
             SizedBox(height: 16),
             Text('Loading recently updated apps...'),
           ],

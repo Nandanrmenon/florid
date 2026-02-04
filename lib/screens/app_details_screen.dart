@@ -16,7 +16,6 @@ import '../models/fdroid_app.dart';
 import '../providers/app_provider.dart';
 import '../providers/download_provider.dart';
 import '../providers/repositories_provider.dart';
-import '../providers/settings_provider.dart';
 import '../services/izzy_stats_service.dart';
 
 class AppDetailsScreen extends StatefulWidget {
@@ -68,7 +67,7 @@ class _AppDetailsScreenState extends State<AppDetailsScreen> {
       builder: (context, snapshot) {
         // Use tracked repository if available, otherwise use app's default repository
         final defaultRepoUrl = snapshot.data ?? app.repositoryUrl;
-        
+
         return AnimatedSwitcher(
           duration: const Duration(milliseconds: 300),
           transitionBuilder: (child, animation) {
@@ -319,18 +318,24 @@ class _AppDetailsScreenState extends State<AppDetailsScreen> {
                           padding: const EdgeInsets.only(top: 4.0),
                           child: Builder(
                             builder: (context) {
-                              final trackedRepoSource = availableRepos.firstWhere(
-                                (r) => r.url == trackedRepo,
-                                orElse: () => RepositorySource(
-                                  name: 'Unknown',
-                                  url: trackedRepo,
-                                ),
-                              );
+                              final trackedRepoSource = availableRepos
+                                  .firstWhere(
+                                    (r) => r.url == trackedRepo,
+                                    orElse: () => RepositorySource(
+                                      name: 'Unknown',
+                                      url: trackedRepo,
+                                    ),
+                                  );
                               return Text(
                                 'Previously installed from: ${trackedRepoSource.name}',
-                                style: Theme.of(dialogContext).textTheme.bodySmall?.copyWith(
-                                  color: Theme.of(dialogContext).colorScheme.primary,
-                                ),
+                                style: Theme.of(dialogContext)
+                                    .textTheme
+                                    .bodySmall
+                                    ?.copyWith(
+                                      color: Theme.of(
+                                        dialogContext,
+                                      ).colorScheme.primary,
+                                    ),
                               );
                             },
                           ),
@@ -345,10 +350,13 @@ class _AppDetailsScreenState extends State<AppDetailsScreen> {
               itemBuilder: (index) {
                 final repo = availableRepos[index];
                 final isPrimary = repo.url == app.repositoryUrl;
-                final isTracked = trackedRepo != null && repo.url == trackedRepo;
+                final isTracked =
+                    trackedRepo != null && repo.url == trackedRepo;
                 return MListItemData(
                   selected: isPrimary || isTracked,
-                  leading: (isPrimary || isTracked) ? Icon(Symbols.check) : null,
+                  leading: (isPrimary || isTracked)
+                      ? Icon(Symbols.check)
+                      : null,
                   title: repo.name,
                   subtitle: isTracked ? 'Previously installed from here' : null,
                   onTap: () {
@@ -544,11 +552,13 @@ class _AppDetailsScreenState extends State<AppDetailsScreen> {
                         children: [
                           Consumer2<DownloadProvider, AppProvider>(
                             builder: (context, downloadProvider, appProvider, child) {
-                              final version = appProvider.getLatestVersion(widget.app);
+                              final version = appProvider.getLatestVersion(
+                                widget.app,
+                              );
                               if (version == null) {
                                 return const SizedBox.shrink();
                               }
-                              
+
                               final isInstalled = appProvider.isAppInstalled(
                                 widget.app.packageName,
                               );
@@ -967,7 +977,8 @@ class _AppDetailsScreenState extends State<AppDetailsScreen> {
                           ),
                           Builder(
                             builder: (context) {
-                              final latestVersion = appProvider.getLatestVersion(widget.app);
+                              final latestVersion = appProvider
+                                  .getLatestVersion(widget.app);
                               if (latestVersion?.whatsNew != null &&
                                   latestVersion!.whatsNew!.isNotEmpty) {
                                 return ChangelogPreview(
@@ -1096,7 +1107,9 @@ class _AppDetailsScreenState extends State<AppDetailsScreen> {
                 // Version info
                 Builder(
                   builder: (context) {
-                    final latestVersion = appProvider.getLatestVersion(widget.app);
+                    final latestVersion = context
+                        .read<AppProvider>()
+                        .getLatestVersion(widget.app);
                     if (latestVersion != null) {
                       return _VersionInfoSection(
                         version: latestVersion,
@@ -1148,7 +1161,7 @@ class _DownloadSectionState extends State<_DownloadSection> {
     return Consumer<AppProvider>(
       builder: (context, appProvider, _) {
         final latestVersion = appProvider.getLatestVersion(widget.app);
-        
+
         if (latestVersion == null) {
           return Container(
             width: double.infinity,
@@ -1189,249 +1202,255 @@ class _DownloadSectionState extends State<_DownloadSection> {
           );
         }
 
-    return Consumer2<DownloadProvider, AppProvider>(
-      builder: (context, downloadProvider, appProvider, child) {
-        final version = latestVersion;
+        return Consumer2<DownloadProvider, AppProvider>(
+          builder: (context, downloadProvider, appProvider, child) {
+            final version = latestVersion;
 
-        // Check if ANY version of this app is downloading
-        DownloadInfo? activeDownloadInfo;
-        bool isDownloading = false;
-        String downloadingVersionName = version.versionName;
+            // Check if ANY version of this app is downloading
+            DownloadInfo? activeDownloadInfo;
+            bool isDownloading = false;
+            String downloadingVersionName = version.versionName;
 
-        if (widget.app.packages != null) {
-          for (var pkg in widget.app.packages!.values) {
-            final info = downloadProvider.getDownloadInfo(
-              widget.app.packageName,
-              pkg.versionName,
-            );
-            if (info?.status == DownloadStatus.downloading) {
-              activeDownloadInfo = info;
-              isDownloading = true;
-              downloadingVersionName = pkg.versionName;
-              break;
+            if (widget.app.packages != null) {
+              for (var pkg in widget.app.packages!.values) {
+                final info = downloadProvider.getDownloadInfo(
+                  widget.app.packageName,
+                  pkg.versionName,
+                );
+                if (info?.status == DownloadStatus.downloading) {
+                  activeDownloadInfo = info;
+                  isDownloading = true;
+                  downloadingVersionName = pkg.versionName;
+                  break;
+                }
+              }
             }
-          }
-        }
 
-        final progress = isDownloading
-            ? downloadProvider.getProgress(
-                widget.app.packageName,
-                downloadingVersionName,
-              )
-            : 0.0;
+            final progress = isDownloading
+                ? downloadProvider.getProgress(
+                    widget.app.packageName,
+                    downloadingVersionName,
+                  )
+                : 0.0;
 
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          spacing: 16.0,
-          children: [
-            if (isDownloading && activeDownloadInfo != null) ...[
-              Column(
-                spacing: 4.0,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              spacing: 16.0,
+              children: [
+                if (isDownloading && activeDownloadInfo != null) ...[
+                  Column(
+                    spacing: 4.0,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'Downloading... ${(progress * 100).toInt()}%',
+                            style: Theme.of(context).textTheme.bodySmall
+                                ?.copyWith(
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.onSurfaceVariant,
+                                ),
+                          ).animate().fadeIn(
+                            duration: Duration(milliseconds: 300),
+                          ),
+                          if (activeDownloadInfo.totalBytes > 0)
+                            Text(
+                                  '${activeDownloadInfo.formattedBytesDownloaded} / ${activeDownloadInfo.formattedTotalBytes}',
+                                  style: Theme.of(context).textTheme.bodySmall
+                                      ?.copyWith(
+                                        color: Theme.of(
+                                          context,
+                                        ).colorScheme.onSurfaceVariant,
+                                      ),
+                                )
+                                .animate()
+                                .fadeIn(duration: Duration(milliseconds: 300))
+                                .slideY(
+                                  begin: 0.5,
+                                  end: 0,
+                                  duration: Duration(milliseconds: 300),
+                                ),
+                        ],
+                      ),
+                      const SizedBox(height: 4),
                       Text(
-                        'Downloading... ${(progress * 100).toInt()}%',
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        ),
-                      ).animate().fadeIn(duration: Duration(milliseconds: 300)),
-                      if (activeDownloadInfo.totalBytes > 0)
-                        Text(
-                              '${activeDownloadInfo.formattedBytesDownloaded} / ${activeDownloadInfo.formattedTotalBytes}',
-                              style: Theme.of(context).textTheme.bodySmall
-                                  ?.copyWith(
-                                    color: Theme.of(
-                                      context,
-                                    ).colorScheme.onSurfaceVariant,
-                                  ),
-                            )
-                            .animate()
-                            .fadeIn(duration: Duration(milliseconds: 300))
-                            .slideY(
-                              begin: 0.5,
-                              end: 0,
-                              duration: Duration(milliseconds: 300),
-                            ),
+                            activeDownloadInfo.formattedSpeed,
+                            style: Theme.of(context).textTheme.bodySmall
+                                ?.copyWith(
+                                  color: Theme.of(context).colorScheme.primary,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                          )
+                          .animate()
+                          .fadeIn(duration: Duration(milliseconds: 300))
+                          .slideY(
+                            begin: 0.5,
+                            end: 0,
+                            duration: Duration(milliseconds: 300),
+                          ),
+                      const SizedBox(height: 8),
+                      LinearProgressIndicator(value: progress, year2023: false)
+                          .animate()
+                          .fadeIn(duration: Duration(milliseconds: 300))
+                          .slideY(
+                            begin: 0.5,
+                            end: 0,
+                            duration: Duration(milliseconds: 300),
+                          ),
                     ],
                   ),
-                  const SizedBox(height: 4),
-                  Text(
-                        activeDownloadInfo.formattedSpeed,
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Theme.of(context).colorScheme.primary,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      )
-                      .animate()
-                      .fadeIn(duration: Duration(milliseconds: 300))
-                      .slideY(
-                        begin: 0.5,
-                        end: 0,
-                        duration: Duration(milliseconds: 300),
-                      ),
-                  const SizedBox(height: 8),
-                  LinearProgressIndicator(value: progress, year2023: false)
-                      .animate()
-                      .fadeIn(duration: Duration(milliseconds: 300))
-                      .slideY(
-                        begin: 0.5,
-                        end: 0,
-                        duration: Duration(milliseconds: 300),
-                      ),
                 ],
-              ),
-            ],
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              spacing: 8,
-              children: [
-                Expanded(
-                  child: Card.outlined(
-                    margin: EdgeInsets.zero,
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 8),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        spacing: 8,
-                        children: [
-                          SizedBox(
-                            height: 32,
-                            child: Icon(
-                              Symbols.download,
-                              size: 32,
-                              color: Theme.of(
-                                context,
-                              ).colorScheme.onSurfaceVariant,
-                            ),
-                          ),
-                          Text(
-                            version.sizeString,
-                            style: Theme.of(context).textTheme.bodySmall
-                                ?.copyWith(
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  spacing: 8,
+                  children: [
+                    Expanded(
+                      child: Card.outlined(
+                        margin: EdgeInsets.zero,
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 8),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            spacing: 8,
+                            children: [
+                              SizedBox(
+                                height: 32,
+                                child: Icon(
+                                  Symbols.download,
+                                  size: 32,
                                   color: Theme.of(
                                     context,
                                   ).colorScheme.onSurfaceVariant,
                                 ),
+                              ),
+                              Text(
+                                version.sizeString,
+                                style: Theme.of(context).textTheme.bodySmall
+                                    ?.copyWith(
+                                      color: Theme.of(
+                                        context,
+                                      ).colorScheme.onSurfaceVariant,
+                                    ),
+                              ),
+                            ],
                           ),
-                        ],
+                        ),
                       ),
                     ),
-                  ),
-                ),
-                Expanded(
-                  child: Card.outlined(
-                    margin: EdgeInsets.zero,
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 8),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        spacing: 8,
-                        children: [
-                          SizedBox(
-                            height: 32,
-                            child: Icon(
-                              Symbols.code_rounded,
-                              size: 32,
-                              color: Theme.of(
-                                context,
-                              ).colorScheme.onSurfaceVariant,
-                            ),
-                          ),
-                          Text(
-                            version.versionName,
-                            style: Theme.of(context).textTheme.bodySmall
-                                ?.copyWith(
+                    Expanded(
+                      child: Card.outlined(
+                        margin: EdgeInsets.zero,
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 8),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            spacing: 8,
+                            children: [
+                              SizedBox(
+                                height: 32,
+                                child: Icon(
+                                  Symbols.code_rounded,
+                                  size: 32,
                                   color: Theme.of(
                                     context,
                                   ).colorScheme.onSurfaceVariant,
                                 ),
+                              ),
+                              Text(
+                                version.versionName,
+                                style: Theme.of(context).textTheme.bodySmall
+                                    ?.copyWith(
+                                      color: Theme.of(
+                                        context,
+                                      ).colorScheme.onSurfaceVariant,
+                                    ),
+                              ),
+                            ],
                           ),
-                        ],
+                        ),
                       ),
                     ),
-                  ),
+                    if (widget.stats?.hasAny != true)
+                      Expanded(
+                        child: Card.outlined(
+                          margin: EdgeInsets.zero,
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 8),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              spacing: 8,
+                              children: [
+                                SizedBox(
+                                  height: 32,
+                                  child: Icon(
+                                    Symbols.license_rounded,
+                                    size: 32,
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.onSurfaceVariant,
+                                  ),
+                                ),
+                                Text(
+                                  widget.app.license,
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: Theme.of(context).textTheme.bodySmall
+                                      ?.copyWith(
+                                        color: Theme.of(
+                                          context,
+                                        ).colorScheme.onSurfaceVariant,
+                                      ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    if (widget.stats?.hasAny == true)
+                      Expanded(
+                        child: Card.outlined(
+                          margin: EdgeInsets.zero,
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 8),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              spacing: 8,
+                              children: [
+                                SizedBox(
+                                  height: 32,
+                                  child: Icon(
+                                    Symbols.chart_data,
+                                    size: 32,
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.onSurfaceVariant,
+                                  ),
+                                ),
+                                Text(
+                                  widget.stats!.last365Days != null
+                                      ? _formatCount(widget.stats!.last365Days!)
+                                      : 'N/A',
+                                  style: Theme.of(context).textTheme.bodySmall
+                                      ?.copyWith(
+                                        color: Theme.of(
+                                          context,
+                                        ).colorScheme.onSurfaceVariant,
+                                      ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                  ],
                 ),
-                if (widget.stats?.hasAny != true)
-                  Expanded(
-                    child: Card.outlined(
-                      margin: EdgeInsets.zero,
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 8),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          spacing: 8,
-                          children: [
-                            SizedBox(
-                              height: 32,
-                              child: Icon(
-                                Symbols.license_rounded,
-                                size: 32,
-                                color: Theme.of(
-                                  context,
-                                ).colorScheme.onSurfaceVariant,
-                              ),
-                            ),
-                            Text(
-                              widget.app.license,
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                              style: Theme.of(context).textTheme.bodySmall
-                                  ?.copyWith(
-                                    color: Theme.of(
-                                      context,
-                                    ).colorScheme.onSurfaceVariant,
-                                  ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                if (widget.stats?.hasAny == true)
-                  Expanded(
-                    child: Card.outlined(
-                      margin: EdgeInsets.zero,
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 8),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          spacing: 8,
-                          children: [
-                            SizedBox(
-                              height: 32,
-                              child: Icon(
-                                Symbols.chart_data,
-                                size: 32,
-                                color: Theme.of(
-                                  context,
-                                ).colorScheme.onSurfaceVariant,
-                              ),
-                            ),
-                            Text(
-                              widget.stats!.last365Days != null
-                                  ? _formatCount(widget.stats!.last365Days!)
-                                  : 'N/A',
-                              style: Theme.of(context).textTheme.bodySmall
-                                  ?.copyWith(
-                                    color: Theme.of(
-                                      context,
-                                    ).colorScheme.onSurfaceVariant,
-                                  ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
               ],
-            ),
-          ],
+            );
+          },
         );
-      },
-    );
       },
     );
   }
@@ -1626,7 +1645,7 @@ class _AppInfoSection extends StatelessWidget {
     return Consumer<AppProvider>(
       builder: (context, appProvider, _) {
         final latestVersion = appProvider.getLatestVersion(app);
-        
+
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -1642,60 +1661,60 @@ class _AppInfoSection extends StatelessWidget {
                   subtitle: app.packageName,
                   onTap: () {},
                 ),
-            MListItemData(
-              leading: Icon(
-                Symbols.license_rounded,
-                color: Theme.of(context).colorScheme.primary,
-              ),
-              title: 'License',
-              subtitle: app.license,
-              onTap: () {},
-            ),
-            if (app.added != null)
-              MListItemData(
-                leading: Icon(
-                  Symbols.add,
-                  color: Theme.of(context).colorScheme.primary,
+                MListItemData(
+                  leading: Icon(
+                    Symbols.license_rounded,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                  title: 'License',
+                  subtitle: app.license,
+                  onTap: () {},
                 ),
-                title: 'Added',
-                subtitle: _formatDate(app.added!),
-                onTap: () {},
-              ),
-            if (app.added != null)
-              MListItemData(
-                leading: Icon(
-                  Symbols.update,
-                  color: Theme.of(context).colorScheme.primary,
-                ),
-                title: 'Last Updated',
-                subtitle: _formatDate(app.lastUpdated!),
-                onTap: () {},
-              ),
-            if (latestVersion?.permissions?.isNotEmpty == true)
-              MListItemData(
-                leading: Icon(
-                  Symbols.security,
-                  color: Theme.of(context).colorScheme.primary,
-                ),
-                title: 'Permissions ',
-                subtitle: '(${latestVersion!.permissions!.length})',
-                suffix: Icon(Symbols.arrow_forward),
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => PermissionsScreen(
-                        permissions: latestVersion.permissions!,
-                        appName: app.name,
-                      ),
+                if (app.added != null)
+                  MListItemData(
+                    leading: Icon(
+                      Symbols.add,
+                      color: Theme.of(context).colorScheme.primary,
                     ),
-                  );
-                },
-              ),
+                    title: 'Added',
+                    subtitle: _formatDate(app.added!),
+                    onTap: () {},
+                  ),
+                if (app.added != null)
+                  MListItemData(
+                    leading: Icon(
+                      Symbols.update,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                    title: 'Last Updated',
+                    subtitle: _formatDate(app.lastUpdated!),
+                    onTap: () {},
+                  ),
+                if (latestVersion?.permissions?.isNotEmpty == true)
+                  MListItemData(
+                    leading: Icon(
+                      Symbols.security,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                    title: 'Permissions ',
+                    subtitle: '(${latestVersion!.permissions!.length})',
+                    suffix: Icon(Symbols.arrow_forward),
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => PermissionsScreen(
+                            permissions: latestVersion.permissions!,
+                            appName: app.name,
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+              ],
+            ),
           ],
-        ),
-      ],
-    );
+        );
       },
     );
   }

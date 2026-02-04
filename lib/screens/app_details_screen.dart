@@ -63,76 +63,84 @@ class _AppDetailsScreenState extends State<AppDetailsScreen> {
     final hasMultipleRepos =
         availableRepos != null && availableRepos.length > 1;
 
-    return AnimatedSwitcher(
-      duration: const Duration(milliseconds: 300),
-      transitionBuilder: (child, animation) {
-        return ScaleTransition(
-          scale: animation,
-          child: FadeTransition(opacity: animation, child: child),
-        );
-      },
-      child: hasMultipleRepos
-          ? Row(
-              key: const ValueKey('split-button'),
-              spacing: 2,
-              children: [
-                Expanded(
-                  child: SizedBox(
-                    height: 48,
-                    child: FilledButton.icon(
-                      onPressed: () => _handleInstall(
-                        context,
-                        downloadProvider,
-                        appProvider,
-                        isDownloaded,
-                        version,
-                        app.repositoryUrl,
+    return FutureBuilder<String?>(
+      future: downloadProvider.getAppSource(app.packageName),
+      builder: (context, snapshot) {
+        // Use tracked repository if available, otherwise use app's default repository
+        final defaultRepoUrl = snapshot.data ?? app.repositoryUrl;
+        
+        return AnimatedSwitcher(
+          duration: const Duration(milliseconds: 300),
+          transitionBuilder: (child, animation) {
+            return ScaleTransition(
+              scale: animation,
+              child: FadeTransition(opacity: animation, child: child),
+            );
+          },
+          child: hasMultipleRepos
+              ? Row(
+                  key: const ValueKey('split-button'),
+                  spacing: 2,
+                  children: [
+                    Expanded(
+                      child: SizedBox(
+                        height: 48,
+                        child: FilledButton.icon(
+                          onPressed: () => _handleInstall(
+                            context,
+                            downloadProvider,
+                            appProvider,
+                            isDownloaded,
+                            version,
+                            defaultRepoUrl,
+                          ),
+                          icon: Icon(
+                            isDownloaded
+                                ? Symbols.install_mobile
+                                : Symbols.download,
+                          ),
+                          label: Text(isDownloaded ? 'Install' : 'Download'),
+                          style: FilledButton.styleFrom(),
+                        ),
                       ),
-                      icon: Icon(
-                        isDownloaded
-                            ? Symbols.install_mobile
-                            : Symbols.download,
-                      ),
-                      label: Text(isDownloaded ? 'Install' : 'Download'),
-                      style: FilledButton.styleFrom(),
                     ),
-                  ),
-                ),
-                SizedBox(
+                    SizedBox(
+                      height: 48,
+                      child: IconButton.filledTonal(
+                        onPressed: () => _showRepositorySelection(
+                          context,
+                          downloadProvider,
+                          appProvider,
+                          isDownloaded,
+                          version,
+                          app,
+                        ),
+                        icon: Icon(Symbols.keyboard_arrow_down),
+                      ),
+                    ),
+                  ],
+                )
+              : SizedBox(
+                  key: const ValueKey('simple-button'),
                   height: 48,
-                  child: IconButton.filledTonal(
-                    onPressed: () => _showRepositorySelection(
+                  width: double.infinity,
+                  child: FilledButton.icon(
+                    onPressed: () => _handleInstall(
                       context,
                       downloadProvider,
                       appProvider,
                       isDownloaded,
                       version,
-                      app,
+                      defaultRepoUrl,
                     ),
-                    icon: Icon(Symbols.keyboard_arrow_down),
+                    icon: Icon(
+                      isDownloaded ? Symbols.install_mobile : Symbols.download,
+                    ),
+                    label: Text(isDownloaded ? 'Install' : 'Download'),
                   ),
                 ),
-              ],
-            )
-          : SizedBox(
-              key: const ValueKey('simple-button'),
-              height: 48,
-              width: double.infinity,
-              child: FilledButton.icon(
-                onPressed: () => _handleInstall(
-                  context,
-                  downloadProvider,
-                  appProvider,
-                  isDownloaded,
-                  version,
-                  app.repositoryUrl,
-                ),
-                icon: Icon(
-                  isDownloaded ? Symbols.install_mobile : Symbols.download,
-                ),
-                label: Text(isDownloaded ? 'Install' : 'Download'),
-              ),
-            ),
+        );
+      },
     );
   }
 
@@ -272,6 +280,9 @@ class _AppDetailsScreenState extends State<AppDetailsScreen> {
     final availableRepos = app.availableRepositories;
     if (availableRepos == null || availableRepos.isEmpty) return;
 
+    // Get the tracked repository for this app (if any)
+    final trackedRepo = await downloadProvider.getAppSource(app.packageName);
+
     // Capture the mounted context before showing dialog
     final scaffoldMessenger = ScaffoldMessenger.of(context);
 
@@ -303,6 +314,16 @@ class _AppDetailsScreenState extends State<AppDetailsScreen> {
                         '${isDownloaded ? 'install' : 'download'} this app.',
                         style: Theme.of(dialogContext).textTheme.labelMedium,
                       ),
+                      if (trackedRepo != null)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 4.0),
+                          child: Text(
+                            'Previously installed from: ${availableRepos.firstWhere((r) => r.url == trackedRepo, orElse: () => RepositorySource(name: 'Unknown', url: trackedRepo)).name}',
+                            style: Theme.of(dialogContext).textTheme.bodySmall?.copyWith(
+                              color: Theme.of(dialogContext).colorScheme.primary,
+                            ),
+                          ),
+                        ),
                     ],
                   ),
                 ],
@@ -311,12 +332,14 @@ class _AppDetailsScreenState extends State<AppDetailsScreen> {
             MListViewBuilder(
               itemCount: availableRepos.length,
               itemBuilder: (index) {
-                final isPrimary =
-                    availableRepos[index].url == app.repositoryUrl;
+                final repo = availableRepos[index];
+                final isPrimary = repo.url == app.repositoryUrl;
+                final isTracked = trackedRepo != null && repo.url == trackedRepo;
                 return MListItemData(
-                  selected: isPrimary,
-                  leading: isPrimary ? Icon(Symbols.check) : null,
-                  title: availableRepos[index].name,
+                  selected: isPrimary || isTracked,
+                  leading: (isPrimary || isTracked) ? Icon(Symbols.check) : null,
+                  title: repo.name,
+                  subtitle: isTracked ? 'Previously installed from here' : null,
                   onTap: () {
                     Navigator.of(dialogContext).pop();
                     _handleInstall(
@@ -325,7 +348,7 @@ class _AppDetailsScreenState extends State<AppDetailsScreen> {
                       appProvider,
                       isDownloaded,
                       version,
-                      availableRepos[index].url,
+                      repo.url,
                     );
                   },
                   suffix: Visibility(

@@ -317,11 +317,22 @@ class _AppDetailsScreenState extends State<AppDetailsScreen> {
                       if (trackedRepo != null)
                         Padding(
                           padding: const EdgeInsets.only(top: 4.0),
-                          child: Text(
-                            'Previously installed from: ${availableRepos.firstWhere((r) => r.url == trackedRepo, orElse: () => RepositorySource(name: 'Unknown', url: trackedRepo)).name}',
-                            style: Theme.of(dialogContext).textTheme.bodySmall?.copyWith(
-                              color: Theme.of(dialogContext).colorScheme.primary,
-                            ),
+                          child: Builder(
+                            builder: (context) {
+                              final trackedRepoSource = availableRepos.firstWhere(
+                                (r) => r.url == trackedRepo,
+                                orElse: () => RepositorySource(
+                                  name: 'Unknown',
+                                  url: trackedRepo,
+                                ),
+                              );
+                              return Text(
+                                'Previously installed from: ${trackedRepoSource.name}',
+                                style: Theme.of(dialogContext).textTheme.bodySmall?.copyWith(
+                                  color: Theme.of(dialogContext).colorScheme.primary,
+                                ),
+                              );
+                            },
                           ),
                         ),
                     ],

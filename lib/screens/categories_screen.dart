@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:florid/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -61,7 +62,7 @@ class _CategoriesScreenState extends State<CategoriesScreen>
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const CircularProgressIndicator(),
+            const CircularProgressIndicator(year2023: false),
             const SizedBox(height: 16),
             Text(AppLocalizations.of(context)!.loading_categories),
           ],

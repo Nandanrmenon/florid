@@ -33,6 +33,8 @@ class AppThemes {
         ),
         filled: true,
       ),
+      // ignore: deprecated_member_use
+      progressIndicatorTheme: ProgressIndicatorThemeData(year2023: false),
     );
   }
 
@@ -65,6 +67,8 @@ class AppThemes {
         ),
         filled: true,
       ),
+      // ignore: deprecated_member_use
+      progressIndicatorTheme: ProgressIndicatorThemeData(year2023: false),
     );
   }
 
@@ -301,6 +305,8 @@ class AppThemes {
         ).surfaceContainer,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
       ),
+      // ignore: deprecated_member_use
+      progressIndicatorTheme: ProgressIndicatorThemeData(year2023: false),
     );
   }
 
@@ -527,6 +533,8 @@ class AppThemes {
         ).surfaceContainer,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
       ),
+      // ignore: deprecated_member_use
+      progressIndicatorTheme: ProgressIndicatorThemeData(year2023: false),
     );
   }
 }

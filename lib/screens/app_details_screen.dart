@@ -284,12 +284,6 @@ class _AppDetailsScreenState extends State<AppDetailsScreen> {
     final availableRepos = app.availableRepositories;
     if (availableRepos == null || availableRepos.isEmpty) return;
 
-    // Get the tracked repository for this app (if any)
-    final trackedRepo = await downloadProvider.getAppSource(app.packageName);
-
-    // Capture the mounted context before showing dialog
-    final scaffoldMessenger = ScaffoldMessenger.of(context);
-
     await showModalBottomSheet(
       context: context,
       builder: (dialogContext) => Padding(
@@ -421,7 +415,7 @@ class _AppDetailsScreenState extends State<AppDetailsScreen> {
     return Scaffold(
       body: CustomScrollView(
         slivers: [
-          SliverAppBar.large(
+          SliverAppBar(
             pinned: true,
             centerTitle: false,
             title: Row(
@@ -479,6 +473,7 @@ class _AppDetailsScreenState extends State<AppDetailsScreen> {
                 },
               ),
               PopupMenuButton<String>(
+                icon: const Icon(Symbols.more_vert),
                 onSelected: (value) async {
                   switch (value) {
                     case 'website':
@@ -1228,13 +1223,59 @@ class _DownloadSectionState extends State<_DownloadSection> {
                                 fontWeight: FontWeight.w600,
                               ),
                         ),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'This app doesn\'t have any downloadable versions available.',
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: Theme.of(context).colorScheme.onErrorContainer,
+                      )
+                      .animate()
+                      .fadeIn(duration: Duration(milliseconds: 300))
+                      .slideY(
+                        begin: 0.5,
+                        end: 0,
+                        duration: Duration(milliseconds: 300),
+                      ),
+                  const SizedBox(height: 8),
+                  LinearProgressIndicator(value: progress)
+                      .animate()
+                      .fadeIn(duration: Duration(milliseconds: 300))
+                      .slideY(
+                        begin: 0.5,
+                        end: 0,
+                        duration: Duration(milliseconds: 300),
+                      ),
+                ],
+              ),
+            ],
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              spacing: 8,
+              children: [
+                Expanded(
+                  child: Card.outlined(
+                    margin: EdgeInsets.zero,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        spacing: 8,
+                        children: [
+                          SizedBox(
+                            height: 32,
+                            child: Icon(
+                              Symbols.download,
+                              size: 32,
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.onSurfaceVariant,
+                            ),
+                          ),
+                          Text(
+                            version.sizeString,
+                            style: Theme.of(context).textTheme.bodySmall
+                                ?.copyWith(
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.onSurfaceVariant,
+                                ),
+                          ),
+                        ],
                       ),
                     ),
                   ],
@@ -1648,7 +1689,7 @@ class _IzzyStatsLoadingCard extends StatelessWidget {
           child: Row(
             spacing: 12,
             children: [
-              CircularProgressIndicator(year2023: false),
+              CircularProgressIndicator(),
               Expanded(
                 child: Text(
                   'Loading IzzyOnDroid download stats...',
@@ -2117,14 +2158,14 @@ class _AppDetailsIconState extends State<_AppDetailsIcon> {
   Widget build(BuildContext context) {
     if (_showFallback) {
       return Container(
-        color: Colors.white.withOpacity(0.2),
+        color: Colors.white.withValues(alpha: 0.2),
         child: const Icon(Symbols.android, color: Colors.white, size: 40),
       );
     }
 
     if (_index >= _candidates.length) {
       return Container(
-        color: Colors.white.withOpacity(0.2),
+        color: Colors.white.withValues(alpha: 0.2),
         child: const Icon(Symbols.apps, color: Colors.white, size: 40),
       );
     }
@@ -2137,7 +2178,7 @@ class _AppDetailsIconState extends State<_AppDetailsIcon> {
         // Move to next candidate or fallback
         _next();
         return Container(
-          color: Colors.white.withOpacity(0.2),
+          color: Colors.white.withValues(alpha: 0.2),
           child: const Icon(
             Symbols.broken_image,
             color: Colors.white,
@@ -2148,14 +2189,13 @@ class _AppDetailsIconState extends State<_AppDetailsIcon> {
       loadingBuilder: (context, child, loadingProgress) {
         if (loadingProgress == null) return child;
         return Container(
-          color: Colors.white.withOpacity(0.2),
+          color: Colors.white.withValues(alpha: 0.2),
           alignment: Alignment.center,
           child: const SizedBox(
             width: 20,
             height: 20,
             child: CircularProgressIndicator(
               strokeWidth: 2,
-              year2023: false,
               valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
             ),
           ),
@@ -2439,7 +2479,7 @@ class _VersionDownloadButton extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 8),
-              LinearProgressIndicator(value: progress, year2023: false),
+              LinearProgressIndicator(value: progress),
             ],
           );
         }
@@ -2629,7 +2669,7 @@ class _ScreenshotsSectionState extends State<_ScreenshotsSection> {
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              const CircularProgressIndicator(year2023: false),
+                              const CircularProgressIndicator(),
                               const SizedBox(height: 12),
                               Padding(
                                 padding: const EdgeInsets.symmetric(
@@ -2754,7 +2794,6 @@ class _FullScreenScreenshotsState extends State<_FullScreenScreenshots> {
                       if (loadingProgress == null) return child;
                       return Center(
                         child: CircularProgressIndicator(
-                          year2023: false,
                           value: loadingProgress.expectedTotalBytes != null
                               ? loadingProgress.cumulativeBytesLoaded /
                                     loadingProgress.expectedTotalBytes!

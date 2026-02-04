@@ -224,7 +224,7 @@ class _UpdatesScreenState extends State<UpdatesScreen>
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: const [
-            CircularProgressIndicator(year2023: false),
+            CircularProgressIndicator(),
             SizedBox(height: 12),
             Text('Loading repository…'),
           ],
@@ -471,7 +471,7 @@ class _UpdatesScreenState extends State<UpdatesScreen>
       itemCount: allFDroidApps.length,
       itemBuilder: (context, index) {
         final app = allFDroidApps[index];
-        final installedApp = appProvider.getInstalledApp(app.packageName);
+        final updatableApps = appProvider.getUpdatableApps();
         final hasUpdate = updatableApps.any(
           (updateApp) => updateApp.packageName == app.packageName,
         );

@@ -75,267 +75,271 @@ class _SettingsScreenState extends State<SettingsScreen> {
     return Consumer<SettingsProvider>(
       builder: (context, settings, _) {
         return Scaffold(
-          appBar: AppBar(title: Text(AppLocalizations.of(context)!.settings)),
-          body: SingleChildScrollView(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                spacing: 16,
-                children: [
-                  Column(
-                    spacing: 4,
-                    children: [
-                      MListHeader(title: 'Theme Mode'),
-                      MRadioListView(
-                        items: [
-                          MRadioListItemData<ThemeMode>(
-                            title: 'Follow system theme',
-                            subtitle: '',
-                            value: ThemeMode.system,
-                          ),
-                          MRadioListItemData<ThemeMode>(
-                            title: 'Light theme',
-                            subtitle: '',
-                            value: ThemeMode.light,
-                          ),
-                          MRadioListItemData<ThemeMode>(
-                            title: 'Dark theme',
-                            subtitle: '',
-                            value: ThemeMode.dark,
-                          ),
-                        ],
-                        groupValue: settings.themeMode,
-                        onChanged: (mode) {
-                          settings.setThemeMode(mode);
-                        },
-                      ),
-                      MListHeader(title: 'Theme Style'),
-                      MRadioListView(
-                        items: [
-                          MRadioListItemData<ThemeStyle>(
-                            title: 'Material style',
-                            subtitle: '',
-                            value: ThemeStyle.material,
-                          ),
-                          MRadioListItemData<ThemeStyle>(
-                            title: 'Florid style',
-                            subtitle: '',
-                            suffix: Container(
-                              margin: const EdgeInsets.only(right: 8.0),
-                              child: Material(
-                                color: Theme.of(context).colorScheme.secondary,
-                                borderRadius: BorderRadius.circular(99.0),
-                                child: Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 12.0,
-                                    vertical: 2.0,
-                                  ),
-                                  child: Text(
-                                    'Beta',
-                                    style: TextStyle(
-                                      color: Theme.of(
-                                        context,
-                                      ).colorScheme.onSecondary,
-                                    ),
+          body: CustomScrollView(
+            slivers: [
+              SliverAppBar.medium(
+                title: Text(AppLocalizations.of(context)!.settings),
+              ),
+              SliverToBoxAdapter(
+                child: Column(
+                  spacing: 4,
+                  children: [
+                    MListHeader(title: 'Theme Mode'),
+                    MRadioListView(
+                      items: [
+                        MRadioListItemData<ThemeMode>(
+                          title: 'Follow system theme',
+                          subtitle: '',
+                          value: ThemeMode.system,
+                        ),
+                        MRadioListItemData<ThemeMode>(
+                          title: 'Light theme',
+                          subtitle: '',
+                          value: ThemeMode.light,
+                        ),
+                        MRadioListItemData<ThemeMode>(
+                          title: 'Dark theme',
+                          subtitle: '',
+                          value: ThemeMode.dark,
+                        ),
+                      ],
+                      groupValue: settings.themeMode,
+                      onChanged: (mode) {
+                        settings.setThemeMode(mode);
+                      },
+                    ),
+                    MListHeader(title: 'Theme Style'),
+                    MRadioListView(
+                      items: [
+                        MRadioListItemData<ThemeStyle>(
+                          title: 'Material style',
+                          subtitle: '',
+                          value: ThemeStyle.material,
+                        ),
+                        MRadioListItemData<ThemeStyle>(
+                          title: 'Florid style',
+                          subtitle: '',
+                          suffix: Container(
+                            margin: const EdgeInsets.only(right: 8.0),
+                            child: Material(
+                              color: Theme.of(context).colorScheme.secondary,
+                              borderRadius: BorderRadius.circular(99.0),
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 12.0,
+                                  vertical: 2.0,
+                                ),
+                                child: Text(
+                                  'Beta',
+                                  style: TextStyle(
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.onSecondary,
                                   ),
                                 ),
                               ),
                             ),
-                            value: ThemeStyle.florid,
                           ),
-                        ],
-                        groupValue: settings.themeStyle,
-                        onChanged: (style) {
-                          settings.setThemeStyle(style);
-                        },
-                      ),
-                      MListView(
-                        items: [
-                          MListItemData(
-                            leading: Icon(Symbols.feedback),
-                            title: 'Fedback on Florid theme',
-                            subtitle:
-                                'Help improve the Florid theme by providing feedback',
-                            onTap: () {
-                              launchUrl(
-                                Uri.parse(
-                                  'https://github.com/Nandanrmenon/florid/discussions/5',
-                                ),
-                              );
-                            },
-                            suffix: Icon(Symbols.open_in_new),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                  Column(
-                    spacing: 4,
-                    children: [
-                      MListHeader(title: 'General Settings'),
-                      MListView(
-                        items: [
-                          MListItemData(
-                            leading: Icon(Symbols.language),
-                            title: 'App content language',
-                            onTap: () => _showLanguageDialog(context, settings),
-                            subtitle: SettingsProvider.getLocaleDisplayName(
-                              settings.locale,
-                            ),
-                            suffix: Icon(Symbols.chevron_right),
-                          ),
-                          MListItemData(
-                            leading: Icon(Symbols.cloud),
-                            title: 'Manage repositories',
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) =>
-                                      const RepositoriesScreen(),
-                                ),
-                              );
-                            },
-                            subtitle: 'Add or remove F-Droid repositories',
-                            suffix: Icon(Symbols.chevron_right),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-
-                  Column(
-                    spacing: 4,
-                    children: [
-                      MListHeader(title: 'Downloads & Storage'),
-                      MListView(
-                        items: [
-                          MListItemData(
-                            title: 'Auto-install after download',
-                            onTap: () {
-                              settings.setAutoInstallApk(
-                                !settings.autoInstallApk,
-                              );
-                            },
-                            subtitle:
-                                'Install APKs automatically once download finishes',
-                            suffix: Switch(
-                              value: settings.autoInstallApk,
-                              onChanged: (value) {
-                                settings.setAutoInstallApk(value);
-                              },
-                            ),
-                          ),
-                          MListItemData(
-                            title: 'Delete APK after install',
-                            onTap: () {
-                              settings.setAutoInstallApk(
-                                !settings.autoInstallApk,
-                              );
-                            },
-                            subtitle:
-                                'Remove installer files after successful installation',
-                            suffix: Switch(
-                              value: settings.autoDeleteApk,
-                              onChanged: (value) {
-                                settings.setAutoDeleteApk(value);
-                              },
-                            ),
-                          ),
-                        ],
-                      ),
-                      MListView(
-                        items: [
-                          MListItemData(
-                            leading: Icon(Symbols.cleaning_services),
-                            title: 'Clear repository cache',
-                            onTap: () {
-                              _clearRepoCache(context);
-                            },
-                            subtitle:
-                                'Refresh app list and metadata on next load',
-                          ),
-                          MListItemData(
-                            leading: Icon(Symbols.delete_sweep),
-                            title: 'Clear APK downloads',
-                            onTap: () {
-                              _clearRepoCache(context);
-                            },
-                            subtitle:
-                                'Remove downloaded installer files from storage',
-                          ),
-                          MListItemData(
-                            leading: Icon(Symbols.image_not_supported),
-                            title: 'Clear image cache',
-                            onTap: () {
-                              _clearRepoCache(context);
-                            },
-                            subtitle: 'Remove cached icons and screenshots',
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-
-                  Column(
-                    spacing: 4,
-                    children: [
-                      MListHeader(title: 'About'),
-                      MListView(
-                        items: [
-                          MListItemData(
-                            leading: Icon(Symbols.info),
-                            title: 'Version',
-                            subtitle: _appVersion.isEmpty
-                                ? 'Loading…'
-                                : _appVersion,
-                            onTap: () {},
-                          ),
-                          MListItemData(
-                            leading: Icon(Symbols.code_rounded),
-                            title: 'Source code',
-                            onTap: () async {
-                              final url = Uri.parse(
-                                'https://github.com/Nandanrmenon/florid',
-                              );
-                              if (await canLaunchUrl(url)) {
-                                await launchUrl(url);
-                              }
-                            },
-                          ),
-                          MListItemData(
-                            leading: Icon(Symbols.bug_report_rounded),
-                            title: 'Report an issue',
-                            onTap: () async {
-                              final url = Uri.parse(
-                                'https://github.com/Nandanrmenon/florid/issues/new?template=bug_report.md',
-                              );
-                              if (await canLaunchUrl(url)) {
-                                await launchUrl(url);
-                              }
-                            },
-                          ),
-                          MListItemData(
-                            leading: Icon(Symbols.share),
-                            title: 'Share Florid',
-                            onTap: () {
-                              SharePlus.instance.share(
-                                ShareParams(
-                                  title: 'Check out Florid!',
-                                  text:
-                                      'A modern F-Droid client! https://github.com/Nandanrmenon/florid',
-                                ),
-                              );
-                            },
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ],
+                          value: ThemeStyle.florid,
+                        ),
+                      ],
+                      groupValue: settings.themeStyle,
+                      onChanged: (style) {
+                        settings.setThemeStyle(style);
+                      },
+                    ),
+                    MListView(
+                      items: [
+                        MListItemData(
+                          leading: Icon(Symbols.feedback),
+                          title: 'Fedback on Florid theme',
+                          subtitle:
+                              'Help improve the Florid theme by providing feedback',
+                          onTap: () {
+                            launchUrl(
+                              Uri.parse(
+                                'https://github.com/Nandanrmenon/florid/discussions/5',
+                              ),
+                            );
+                          },
+                          suffix: Icon(Symbols.open_in_new),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
-            ),
+              SliverToBoxAdapter(
+                child: Column(
+                  spacing: 4,
+                  children: [
+                    MListHeader(title: 'General Settings'),
+                    MListView(
+                      items: [
+                        MListItemData(
+                          leading: Icon(Symbols.language),
+                          title: 'App content language',
+                          onTap: () => _showLanguageDialog(context, settings),
+                          subtitle: SettingsProvider.getLocaleDisplayName(
+                            settings.locale,
+                          ),
+                          suffix: Icon(Symbols.chevron_right),
+                        ),
+                        MListItemData(
+                          leading: Icon(Symbols.cloud),
+                          title: 'Manage repositories',
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    const RepositoriesScreen(),
+                              ),
+                            );
+                          },
+                          subtitle: 'Add or remove F-Droid repositories',
+                          suffix: Icon(Symbols.chevron_right),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+
+              SliverToBoxAdapter(
+                child: Column(
+                  spacing: 4,
+                  children: [
+                    MListHeader(title: 'Downloads & Storage'),
+                    MListView(
+                      items: [
+                        MListItemData(
+                          title: 'Auto-install after download',
+                          onTap: () {
+                            settings.setAutoInstallApk(
+                              !settings.autoInstallApk,
+                            );
+                          },
+                          subtitle:
+                              'Install APKs automatically once download finishes',
+                          suffix: Switch(
+                            value: settings.autoInstallApk,
+                            onChanged: (value) {
+                              settings.setAutoInstallApk(value);
+                            },
+                          ),
+                        ),
+                        MListItemData(
+                          title: 'Delete APK after install',
+                          onTap: () {
+                            settings.setAutoInstallApk(
+                              !settings.autoInstallApk,
+                            );
+                          },
+                          subtitle:
+                              'Remove installer files after successful installation',
+                          suffix: Switch(
+                            value: settings.autoDeleteApk,
+                            onChanged: (value) {
+                              settings.setAutoDeleteApk(value);
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                    MListView(
+                      items: [
+                        MListItemData(
+                          leading: Icon(Symbols.cleaning_services),
+                          title: 'Clear repository cache',
+                          onTap: () {
+                            _clearRepoCache(context);
+                          },
+                          subtitle:
+                              'Refresh app list and metadata on next load',
+                        ),
+                        MListItemData(
+                          leading: Icon(Symbols.delete_sweep),
+                          title: 'Clear APK downloads',
+                          onTap: () {
+                            _clearApkDownloads(context);
+                          },
+                          subtitle:
+                              'Remove downloaded installer files from storage',
+                        ),
+                        MListItemData(
+                          leading: Icon(Symbols.image_not_supported),
+                          title: 'Clear image cache',
+                          onTap: () {
+                            _clearImageCache(context);
+                          },
+                          subtitle: 'Remove cached icons and screenshots',
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+
+              SliverToBoxAdapter(
+                child: Column(
+                  spacing: 4,
+                  children: [
+                    MListHeader(title: 'About'),
+                    MListView(
+                      items: [
+                        MListItemData(
+                          leading: Icon(Symbols.info),
+                          title: 'Version',
+                          subtitle: _appVersion.isEmpty
+                              ? 'Loading…'
+                              : _appVersion,
+                          onTap: () {},
+                        ),
+                        MListItemData(
+                          leading: Icon(Symbols.code_rounded),
+                          title: 'Source code',
+                          onTap: () async {
+                            final url = Uri.parse(
+                              'https://github.com/Nandanrmenon/florid',
+                            );
+                            if (await canLaunchUrl(url)) {
+                              await launchUrl(url);
+                            }
+                          },
+                        ),
+                        MListItemData(
+                          leading: Icon(Symbols.bug_report_rounded),
+                          title: 'Report an issue',
+                          onTap: () async {
+                            final url = Uri.parse(
+                              'https://github.com/Nandanrmenon/florid/issues/new?template=bug_report.md',
+                            );
+                            if (await canLaunchUrl(url)) {
+                              await launchUrl(url);
+                            }
+                          },
+                        ),
+                        MListItemData(
+                          leading: Icon(Symbols.share),
+                          title: 'Share Florid',
+                          onTap: () {
+                            SharePlus.instance.share(
+                              ShareParams(
+                                title: 'Check out Florid!',
+                                text:
+                                    'A modern F-Droid client! https://github.com/Nandanrmenon/florid',
+                              ),
+                            );
+                          },
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              SliverToBoxAdapter(child: const SizedBox(height: 32)),
+            ],
           ),
         );
       },
@@ -395,24 +399,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
             child: const Text('Close'),
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _SectionHeader extends StatelessWidget {
-  final String label;
-  const _SectionHeader({required this.label});
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
-      child: Text(
-        label,
-        style: Theme.of(
-          context,
-        ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
       ),
     );
   }

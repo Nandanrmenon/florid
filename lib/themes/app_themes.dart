@@ -1,5 +1,6 @@
 import 'package:florid/constants.dart';
 import 'package:flutter/material.dart';
+import 'package:material_symbols_icons/symbols.dart';
 
 class AppThemes {
   // Material Theme (Original)
@@ -32,6 +33,8 @@ class AppThemes {
         ),
         filled: true,
       ),
+      // ignore: deprecated_member_use
+      progressIndicatorTheme: ProgressIndicatorThemeData(year2023: false),
     );
   }
 
@@ -64,6 +67,8 @@ class AppThemes {
         ),
         filled: true,
       ),
+      // ignore: deprecated_member_use
+      progressIndicatorTheme: ProgressIndicatorThemeData(year2023: false),
     );
   }
 
@@ -91,6 +96,15 @@ class AppThemes {
             brightness: Brightness.light,
           ).onSurface,
         ),
+        backgroundColor: ColorScheme.fromSeed(
+          seedColor: kAppColor,
+          brightness: Brightness.light,
+        ).surface,
+        surfaceTintColor: ColorScheme.fromSeed(
+          seedColor: kAppColor,
+          brightness: Brightness.light,
+        ).surfaceContainerHigh,
+        elevation: 0,
       ),
       floatingActionButtonTheme: FloatingActionButtonThemeData(
         elevation: 0,
@@ -140,7 +154,29 @@ class AppThemes {
           ),
         ),
       ),
+      iconButtonTheme: IconButtonThemeData(
+        style: IconButton.styleFrom(
+          backgroundColor: ColorScheme.fromSeed(
+            seedColor: kAppColor,
+            brightness: Brightness.light,
+          ).surfaceContainerLow,
+        ),
+      ),
       switchTheme: SwitchThemeData(
+        thumbIcon: WidgetStateProperty.resolveWith<Icon?>((
+          Set<WidgetState> states,
+        ) {
+          if (states.contains(WidgetState.selected)) {
+            return Icon(
+              Symbols.check,
+              color: ColorScheme.fromSeed(
+                seedColor: kAppColor,
+                brightness: Brightness.light,
+              ).onPrimary,
+            );
+          }
+          return const Icon(Symbols.close);
+        }),
         thumbColor: WidgetStateProperty.resolveWith<Color?>((
           Set<WidgetState> states,
         ) {
@@ -148,7 +184,7 @@ class AppThemes {
             return ColorScheme.fromSeed(
               seedColor: kAppColor,
               brightness: Brightness.light,
-            ).primaryContainer;
+            ).primary;
           }
           return null; // Use the default thumb color
         }),
@@ -159,14 +195,26 @@ class AppThemes {
             return ColorScheme.fromSeed(
               seedColor: kAppColor,
               brightness: Brightness.light,
-            ).secondary;
+            ).surface;
           }
-          return null; // Use the default track color
+          // Change the default track color to a custom color
+          return ColorScheme.fromSeed(
+            seedColor: kAppColor,
+            brightness: Brightness.light,
+          ).surfaceContainerLowest;
         }),
         trackOutlineWidth: WidgetStateProperty.resolveWith<double?>((
           Set<WidgetState> states,
         ) {
-          return 1;
+          return 2;
+        }),
+        trackOutlineColor: WidgetStateProperty.resolveWith<Color?>((
+          Set<WidgetState> states,
+        ) {
+          return ColorScheme.fromSeed(
+            seedColor: kAppColor,
+            brightness: Brightness.light,
+          ).surfaceContainerHighest;
         }),
       ),
       navigationBarTheme: NavigationBarThemeData(
@@ -257,6 +305,8 @@ class AppThemes {
         ).surfaceContainer,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
       ),
+      // ignore: deprecated_member_use
+      progressIndicatorTheme: ProgressIndicatorThemeData(year2023: false),
     );
   }
 
@@ -283,6 +333,14 @@ class AppThemes {
             brightness: Brightness.dark,
           ).onSurface,
         ),
+        backgroundColor: ColorScheme.fromSeed(
+          seedColor: kAppColor,
+          brightness: Brightness.dark,
+        ).surface,
+        surfaceTintColor: ColorScheme.fromSeed(
+          seedColor: kAppColor,
+          brightness: Brightness.dark,
+        ).surfaceContainerHigh,
       ),
       floatingActionButtonTheme: FloatingActionButtonThemeData(
         elevation: 0,
@@ -336,6 +394,14 @@ class AppThemes {
         ),
       ),
       switchTheme: SwitchThemeData(
+        thumbIcon: WidgetStateProperty.resolveWith<Icon?>((
+          Set<WidgetState> states,
+        ) {
+          if (states.contains(WidgetState.selected)) {
+            return const Icon(Symbols.check);
+          }
+          return const Icon(Symbols.close);
+        }),
         thumbColor: WidgetStateProperty.resolveWith<Color?>((
           Set<WidgetState> states,
         ) {
@@ -354,14 +420,25 @@ class AppThemes {
             return ColorScheme.fromSeed(
               seedColor: kAppColor,
               brightness: Brightness.dark,
-            ).secondary;
+            ).surface;
           }
-          return null; // Use the default track color
+          return ColorScheme.fromSeed(
+            seedColor: kAppColor,
+            brightness: Brightness.dark,
+          ).surfaceContainerLowest;
         }),
         trackOutlineWidth: WidgetStateProperty.resolveWith<double?>((
           Set<WidgetState> states,
         ) {
-          return 1;
+          return 2;
+        }),
+        trackOutlineColor: WidgetStateProperty.resolveWith<Color?>((
+          Set<WidgetState> states,
+        ) {
+          return ColorScheme.fromSeed(
+            seedColor: kAppColor,
+            brightness: Brightness.dark,
+          ).surfaceContainerHighest;
         }),
       ),
       navigationBarTheme: NavigationBarThemeData(
@@ -456,6 +533,8 @@ class AppThemes {
         ).surfaceContainer,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
       ),
+      // ignore: deprecated_member_use
+      progressIndicatorTheme: ProgressIndicatorThemeData(year2023: false),
     );
   }
 }

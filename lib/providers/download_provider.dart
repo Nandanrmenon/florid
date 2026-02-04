@@ -7,6 +7,7 @@ import 'package:permission_handler/permission_handler.dart';
 
 import '../models/fdroid_app.dart';
 import '../providers/settings_provider.dart';
+import '../services/app_preferences_service.dart';
 import '../services/fdroid_api_service.dart';
 import '../services/installation_tracking_service.dart';
 import '../services/notification_service.dart';
@@ -79,6 +80,7 @@ class DownloadProvider extends ChangeNotifier {
   final Map<String, DownloadInfo> _downloads = {};
   final NotificationService _notificationService = NotificationService();
   final InstallationTrackingService _trackingService = InstallationTrackingService();
+  final AppPreferencesService _preferencesService = AppPreferencesService();
 
   DownloadProvider(this._apiService, this._settingsProvider) {
     _initNotifications();
@@ -434,6 +436,7 @@ class DownloadProvider extends ChangeNotifier {
       // Note: This is best-effort. The actual uninstall is handled by Android
       // and we can't know for sure if it succeeded immediately
       await _trackingService.removeAppSource(packageName);
+      await _preferencesService.removeIncludeUnstable(packageName);
     } catch (e) {
       throw Exception('Failed to uninstall app: $e');
     }

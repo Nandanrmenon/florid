@@ -238,7 +238,7 @@ class _AppDetailsScreenState extends State<AppDetailsScreen> {
             await Future.delayed(const Duration(milliseconds: 800));
             await appProvider.fetchInstalledApps();
             if (appProvider.isAppInstalled(widget.app.packageName)) {
-              final latestVersion = appProvider.getLatestVersion(widget.app);
+              final latestVersion = await appProvider.getLatestVersion(widget.app);
               if (latestVersion != null) {
                 final downloadInfo = downloadProvider.getDownloadInfo(
                   widget.app.packageName,
@@ -552,19 +552,20 @@ class _AppDetailsScreenState extends State<AppDetailsScreen> {
                         children: [
                           Consumer2<DownloadProvider, AppProvider>(
                             builder: (context, downloadProvider, appProvider, child) {
-                              final version = appProvider.getLatestVersion(
-                                widget.app,
-                              );
-                              if (version == null) {
-                                return const SizedBox.shrink();
-                              }
+                              return FutureBuilder<FDroidVersion?>(
+                                future: appProvider.getLatestVersion(widget.app),
+                                builder: (context, snapshot) {
+                                  final version = snapshot.data;
+                                  if (version == null) {
+                                    return const SizedBox.shrink();
+                                  }
 
-                              final isInstalled = appProvider.isAppInstalled(
-                                widget.app.packageName,
-                              );
-                              final installedApp = appProvider.getInstalledApp(
-                                widget.app.packageName,
-                              );
+                                  final isInstalled = appProvider.isAppInstalled(
+                                    widget.app.packageName,
+                                  );
+                                  final installedApp = appProvider.getInstalledApp(
+                                    widget.app.packageName,
+                                  );
 
                               // Check if ANY version of this app is downloading
                               DownloadInfo? activeDownloadInfo;
@@ -970,15 +971,17 @@ class _AppDetailsScreenState extends State<AppDetailsScreen> {
                                   );
                                 },
                               );
+                                },
+                              );
                             },
                           ).animate().fadeIn(
                             delay: Duration(milliseconds: 300),
                             duration: Duration(milliseconds: 300),
                           ),
-                          Builder(
-                            builder: (context) {
-                              final latestVersion = appProvider
-                                  .getLatestVersion(widget.app);
+                          FutureBuilder<FDroidVersion?>(
+                            future: appProvider.getLatestVersion(widget.app),
+                            builder: (context, snapshot) {
+                              final latestVersion = snapshot.data;
                               if (latestVersion?.whatsNew != null &&
                                   latestVersion!.whatsNew!.isNotEmpty) {
                                 return ChangelogPreview(
@@ -1105,11 +1108,10 @@ class _AppDetailsScreenState extends State<AppDetailsScreen> {
                 ),
 
                 // Version info
-                Builder(
-                  builder: (context) {
-                    final latestVersion = context
-                        .read<AppProvider>()
-                        .getLatestVersion(widget.app);
+                FutureBuilder<FDroidVersion?>(
+                  future: context.read<AppProvider>().getLatestVersion(widget.app),
+                  builder: (context, snapshot) {
+                    final latestVersion = snapshot.data;
                     if (latestVersion != null) {
                       return _VersionInfoSection(
                         version: latestVersion,
@@ -1160,16 +1162,19 @@ class _DownloadSectionState extends State<_DownloadSection> {
   Widget build(BuildContext context) {
     return Consumer<AppProvider>(
       builder: (context, appProvider, _) {
-        final latestVersion = appProvider.getLatestVersion(widget.app);
+        return FutureBuilder<FDroidVersion?>(
+          future: appProvider.getLatestVersion(widget.app),
+          builder: (context, snapshot) {
+            final latestVersion = snapshot.data;
 
-        if (latestVersion == null) {
-          return Container(
-            width: double.infinity,
-            margin: const EdgeInsets.symmetric(horizontal: 16),
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.errorContainer,
-              borderRadius: BorderRadius.circular(16),
+            if (latestVersion == null) {
+              return Container(
+                width: double.infinity,
+                margin: const EdgeInsets.symmetric(horizontal: 16),
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.errorContainer,
+                  borderRadius: BorderRadius.circular(16),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -1451,6 +1456,8 @@ class _DownloadSectionState extends State<_DownloadSection> {
             );
           },
         );
+          },
+        );
       },
     );
   }
@@ -1644,28 +1651,31 @@ class _AppInfoSection extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<AppProvider>(
       builder: (context, appProvider, _) {
-        final latestVersion = appProvider.getLatestVersion(app);
+        return FutureBuilder<FDroidVersion?>(
+          future: appProvider.getLatestVersion(app),
+          builder: (context, snapshot) {
+            final latestVersion = snapshot.data;
 
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            MListHeader(title: 'App Information'),
-            MListView(
-              items: [
-                MListItemData(
-                  leading: Icon(
-                    Symbols.package_rounded,
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
-                  title: 'Package Name',
-                  subtitle: app.packageName,
-                  onTap: () {},
-                ),
-                MListItemData(
-                  leading: Icon(
-                    Symbols.license_rounded,
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                MListHeader(title: 'App Information'),
+                MListView(
+                  items: [
+                    MListItemData(
+                      leading: Icon(
+                        Symbols.package_rounded,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                      title: 'Package Name',
+                      subtitle: app.packageName,
+                      onTap: () {},
+                    ),
+                    MListItemData(
+                      leading: Icon(
+                        Symbols.license_rounded,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
                   title: 'License',
                   subtitle: app.license,
                   onTap: () {},
@@ -1714,6 +1724,8 @@ class _AppInfoSection extends StatelessWidget {
               ],
             ),
           ],
+        );
+          },
         );
       },
     );

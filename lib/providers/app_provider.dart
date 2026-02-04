@@ -3,6 +3,7 @@ import 'package:installed_apps/app_info.dart' as installed;
 import 'package:installed_apps/installed_apps.dart';
 
 import '../models/fdroid_app.dart';
+import '../services/app_preferences_service.dart';
 import '../services/fdroid_api_service.dart';
 import 'repositories_provider.dart';
 import 'settings_provider.dart';
@@ -27,6 +28,7 @@ class AppInfo {
 class AppProvider extends ChangeNotifier {
   final FDroidApiService _apiService;
   SettingsProvider? _settingsProvider;
+  final AppPreferencesService _preferencesService = AppPreferencesService();
 
   AppProvider(this._apiService, [this._settingsProvider]);
 
@@ -547,6 +549,10 @@ class AppProvider extends ChangeNotifier {
           )
           .toList();
 
+      // Clean up preferences for uninstalled apps
+      final installedPackages = _installedApps.map((app) => app.packageName).toSet();
+      await _preferencesService.cleanupUninstalledApps(installedPackages);
+
       _installedAppsState = LoadingState.success;
     } catch (e) {
       debugPrint('Error fetching installed apps: $e');
@@ -556,20 +562,22 @@ class AppProvider extends ChangeNotifier {
   }
 
   /// Gets apps that have updates available
-  List<FDroidApp> getUpdatableApps() {
+  Future<List<FDroidApp>> getUpdatableApps() async {
     if (_repository == null || _installedApps.isEmpty) {
       return [];
     }
 
     final updatableApps = <FDroidApp>[];
-    final includeUnstable = _settingsProvider?.includeUnstableVersions ?? false;
 
     for (final installedApp in _installedApps) {
       // Check if the app exists in F-Droid repository
       final fdroidApp = _repository!.apps[installedApp.packageName];
       if (fdroidApp == null) continue;
 
-      // Get the latest version based on user's unstable preference
+      // Get the latest version based on per-app unstable preference
+      final includeUnstable = await _preferencesService.getIncludeUnstable(
+        installedApp.packageName,
+      );
       final latestVersion = fdroidApp.getLatestVersion(
         includeUnstable: includeUnstable,
       );
@@ -606,10 +614,22 @@ class AppProvider extends ChangeNotifier {
     }
   }
 
-  /// Gets the latest version for an app based on user's unstable preference
-  FDroidVersion? getLatestVersion(FDroidApp app) {
-    final includeUnstable = _settingsProvider?.includeUnstableVersions ?? false;
+  /// Gets the latest version for an app based on per-app unstable preference
+  Future<FDroidVersion?> getLatestVersion(FDroidApp app) async {
+    final includeUnstable = await _preferencesService.getIncludeUnstable(app.packageName);
     return app.getLatestVersion(includeUnstable: includeUnstable);
+  }
+
+  /// Gets whether unstable versions should be included for a specific app
+  Future<bool> getIncludeUnstable(String packageName) async {
+    return await _preferencesService.getIncludeUnstable(packageName);
+  }
+
+  /// Sets whether unstable versions should be included for a specific app
+  /// This should only be called for installed apps
+  Future<void> setIncludeUnstable(String packageName, bool include) async {
+    await _preferencesService.setIncludeUnstable(packageName, include);
+    notifyListeners();
   }
 
   /// Attempts to launch an installed app by package name

@@ -627,10 +627,7 @@ Future<void> _toggleRepositoryWithDialog(
                   style: Theme.of(dialogContext).textTheme.bodyMedium,
                 ),
                 SizedBox(height: 16),
-                LinearProgressIndicator(
-                  value: value == 0.0 ? null : value,
-                  year2023: false,
-                ),
+                LinearProgressIndicator(value: value == 0.0 ? null : value),
                 const SizedBox(height: 8),
                 Text('$pct%', textAlign: TextAlign.right),
                 const SizedBox(height: 32),
@@ -701,10 +698,7 @@ Future<void> _runRepositoryActionWithDialog(
                   style: Theme.of(dialogContext).textTheme.bodyMedium,
                 ),
                 SizedBox(height: 16),
-                LinearProgressIndicator(
-                  value: value == 0.0 ? null : value,
-                  year2023: false,
-                ),
+                LinearProgressIndicator(value: value == 0.0 ? null : value),
                 const SizedBox(height: 8),
                 Text('$pct%', textAlign: TextAlign.right),
                 const SizedBox(height: 32),
@@ -730,38 +724,12 @@ class _AddRepositoryDialog extends StatefulWidget {
 class _AddRepositoryDialogState extends State<_AddRepositoryDialog> {
   late TextEditingController _nameController;
   late TextEditingController _urlController;
-  List<Map<String, String>> _presets = [];
-  final bool _showPresets = true;
 
   @override
   void initState() {
     super.initState();
     _nameController = TextEditingController();
     _urlController = TextEditingController();
-    _loadPresets();
-  }
-
-  Future<void> _loadPresets() async {
-    try {
-      final jsonString = await DefaultAssetBundle.of(
-        context,
-      ).loadString('assets/repositories.json');
-      final jsonData = jsonDecode(jsonString);
-      final repos = (jsonData['repositories'] as List)
-          .map(
-            (e) => {
-              'name': e['name'] as String,
-              'url': e['url'] as String,
-              'description': e['description'] as String? ?? '',
-            },
-          )
-          .toList();
-      setState(() {
-        _presets = repos;
-      });
-    } catch (e) {
-      debugPrint('Error loading presets: $e');
-    }
   }
 
   @override

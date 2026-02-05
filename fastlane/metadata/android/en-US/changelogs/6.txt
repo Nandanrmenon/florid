@@ -1,0 +1,12 @@
+New Features
+- You can download the same from any repository (that you have enabled). It maybe buggy but it works.
+- Guess what? You can now enable download beta/alpha/dev verion of an app (if any)
+- Added support for German(de) Langauge
+
+Improvements
+- Florid theme is getting better!? I hope so
+- Avoid duplicate repo entries
+- Improvements to onboarding screen
+- No more annoying keyboard popping up when app opens.
+- More Animations!
+- Performance Bug Fixes

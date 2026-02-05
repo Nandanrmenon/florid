@@ -42,6 +42,8 @@ class _SearchScreenState extends State<SearchScreen> {
     final current = widget.tabIndexListenable?.value;
     if (current == widget.tabIndex) {
       _requestFocus();
+    } else {
+      _searchFocus.unfocus();
     }
   }
 
@@ -49,8 +51,6 @@ class _SearchScreenState extends State<SearchScreen> {
   void initState() {
     super.initState();
     widget.tabIndexListenable?.addListener(_handleTabChange);
-    // Focus once on first build even if opened directly.
-    _requestFocus();
   }
 
   @override
@@ -92,7 +92,6 @@ class _SearchScreenState extends State<SearchScreen> {
           title: TextField(
             controller: _searchController,
             focusNode: _searchFocus,
-            autofocus: true,
             decoration: InputDecoration(
               hintText: 'Search F-Droid apps...',
               prefixIcon: const Icon(Symbols.search),

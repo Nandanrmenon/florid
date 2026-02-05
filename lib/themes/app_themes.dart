@@ -257,6 +257,38 @@ class AppThemes {
         ).surfaceContainer,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
       ),
+      checkboxTheme: CheckboxThemeData(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+        checkColor: WidgetStateProperty.resolveWith<Color?>((
+          Set<WidgetState> states,
+        ) {
+          if (states.contains(WidgetState.selected)) {
+            return ColorScheme.fromSeed(
+              seedColor: kAppColor,
+              brightness: Brightness.light,
+            ).onPrimary;
+          }
+          return null; // Use the default check color
+        }),
+        fillColor: WidgetStateProperty.resolveWith<Color?>((
+          Set<WidgetState> states,
+        ) {
+          if (states.contains(WidgetState.selected)) {
+            return ColorScheme.fromSeed(
+              seedColor: kAppColor,
+              brightness: Brightness.light,
+            ).primary;
+          }
+          return null; // Use the default fill color
+        }),
+        side: BorderSide(
+          color: ColorScheme.fromSeed(
+            seedColor: kAppColor,
+            brightness: Brightness.light,
+          ).onSurfaceVariant,
+          width: 1.5,
+        ),
+      ),
     );
   }
 
@@ -455,6 +487,38 @@ class AppThemes {
           brightness: Brightness.dark,
         ).surfaceContainer,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+      ),
+      checkboxTheme: CheckboxThemeData(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+        checkColor: WidgetStateProperty.resolveWith<Color?>((
+          Set<WidgetState> states,
+        ) {
+          if (states.contains(WidgetState.selected)) {
+            return ColorScheme.fromSeed(
+              seedColor: kAppColor,
+              brightness: Brightness.dark,
+            ).onPrimaryContainer;
+          }
+          return null; // Use the default check color
+        }),
+        fillColor: WidgetStateProperty.resolveWith<Color?>((
+          Set<WidgetState> states,
+        ) {
+          if (states.contains(WidgetState.selected)) {
+            return ColorScheme.fromSeed(
+              seedColor: kAppColor,
+              brightness: Brightness.dark,
+            ).primaryContainer;
+          }
+          return null; // Use the default fill color
+        }),
+        side: BorderSide(
+          color: ColorScheme.fromSeed(
+            seedColor: kAppColor,
+            brightness: Brightness.dark,
+          ).onSurfaceVariant,
+          width: 1.5,
+        ),
       ),
     );
   }

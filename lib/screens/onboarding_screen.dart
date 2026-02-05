@@ -1,7 +1,7 @@
 import 'dart:convert';
 
-import 'package:easy_localization/easy_localization.dart';
 import 'package:florid/l10n/app_localizations.dart';
+import 'package:florid/widgets/onboarding_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:material_symbols_icons/symbols.dart';
@@ -230,7 +230,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('${AppLocalizations.of(context)!.setup_failed}: $e'),
-          action: SnackBarAction(label: AppLocalizations.of(context)!.retry, onPressed: _performSetup),
+          action: SnackBarAction(
+            label: AppLocalizations.of(context)!.retry,
+            onPressed: _performSetup,
+          ),
         ),
       );
     }
@@ -241,8 +244,24 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
+      appBar: AppBar(
+        leading: _currentPage > 0
+            ? IconButton(
+                onPressed: _isFinishing || _currentPage == 0
+                    ? null
+                    : () {
+                        _pageController.previousPage(
+                          duration: const Duration(milliseconds: 250),
+                          curve: Curves.easeOut,
+                        );
+                      },
+                icon: Icon(Symbols.arrow_back),
+              ).animate().fadeIn(duration: 500.ms)
+            : null,
+      ),
       body: SafeArea(
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Expanded(
               child: PageView(
@@ -274,61 +293,27 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 ],
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-              child: Row(
-                spacing: 16,
-                children: [
-                  if (_currentPage > 0)
-                    Expanded(
-                      child: SizedBox(
-                        height: 48,
-                        child: FilledButton.tonal(
-                          onPressed: _isFinishing || _currentPage == 0
-                              ? null
-                              : () {
-                                  _pageController.previousPage(
-                                    duration: const Duration(milliseconds: 250),
-                                    curve: Curves.easeOut,
-                                  );
-                                },
-                          child: const Text('Back'),
-                        ),
-                      ),
+            if (_currentPage < 3)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+                child: SizedBox(
+                  height: 48,
+                  child: OnboardingPrimaryButton(
+                    currentPage: _currentPage,
+                    isFinishing: _isFinishing,
+                    canProceedFromRepos: _selectedRepos.values.any(
+                      (selected) => selected,
                     ),
-
-                  if (_currentPage < 3)
-                    Expanded(
-                      child: SizedBox(
-                        height: 48,
-                        child: FilledButton(
-                          onPressed:
-                              _currentPage == 2 &&
-                                  !_selectedRepos.values.any(
-                                    (selected) => selected,
-                                  )
-                              ? null
-                              : () {
-                                  if (_currentPage == 0 || _currentPage == 1) {
-                                    _pageController.nextPage(
-                                      duration: const Duration(
-                                        milliseconds: 250,
-                                      ),
-                                      curve: Curves.easeOut,
-                                    );
-                                  } else if (_currentPage == 2) {
-                                    _startSetup();
-                                  }
-                                },
-                          child: Text(
-                            _currentPage == 2 ? 'Start Setup' : 'Continue',
-                          ),
-                        ),
-                      ),
-                    ),
-                ],
+                    onNext: () {
+                      _pageController.nextPage(
+                        duration: const Duration(milliseconds: 250),
+                        curve: Curves.easeOut,
+                      );
+                    },
+                    onStartSetup: _startSetup,
+                  ),
+                ).animate().fadeIn(duration: 500.ms),
               ),
-            ),
           ],
         ),
       ),
@@ -357,9 +342,28 @@ class _IntroStep extends StatelessWidget {
           ).animate().fadeIn(duration: 500.ms),
           const SizedBox(height: 16),
           Text(
-            'Welcome to Florid',
-            style: Theme.of(context).textTheme.headlineMedium,
+            'Welcome to',
+            style: TextStyle(
+              fontSize: 24,
+              fontVariations: [
+                FontVariation('wght', 400),
+                FontVariation('ROND', 100),
+              ],
+              color: colorScheme.onSurfaceVariant,
+            ),
           ).animate().fadeIn(duration: 500.ms, delay: 100.ms),
+          Text(
+            'Florid',
+            style: TextStyle(
+              fontSize: 42,
+              fontVariations: [
+                FontVariation('wght', 700),
+                FontVariation('ROND', 100),
+                FontVariation('wdth', 125),
+              ],
+              color: colorScheme.primary,
+            ),
+          ).animate().fadeIn(duration: 500.ms, delay: 200.ms),
           const SizedBox(height: 12),
           Text(
             'A modern F-Droid client to browse, search, and download open-source Android apps with ease.',

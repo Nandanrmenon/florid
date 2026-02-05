@@ -260,7 +260,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             leading: Icon(Symbols.delete_sweep),
                             title: 'Clear APK downloads',
                             onTap: () {
-                              _clearRepoCache(context);
+                              _clearApkDownloads(context);
                             },
                             subtitle:
                                 'Remove downloaded installer files from storage',
@@ -269,7 +269,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             leading: Icon(Symbols.image_not_supported),
                             title: 'Clear image cache',
                             onTap: () {
-                              _clearRepoCache(context);
+                              _clearImageCache(context);
                             },
                             subtitle: 'Remove cached icons and screenshots',
                           ),
@@ -395,24 +395,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
             child: const Text('Close'),
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _SectionHeader extends StatelessWidget {
-  final String label;
-  const _SectionHeader({required this.label});
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
-      child: Text(
-        label,
-        style: Theme.of(
-          context,
-        ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
       ),
     );
   }

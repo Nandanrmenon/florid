@@ -1,5 +1,5 @@
-import 'package:easy_localization/easy_localization.dart';
 import 'package:florid/l10n/app_localizations.dart';
+import 'package:florid/providers/settings_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:material_symbols_icons/symbols.dart';
@@ -72,8 +72,8 @@ class _HomeScreenState extends State<HomeScreen>
   Widget build(BuildContext context) {
     super.build(context);
 
-    return Consumer<AppProvider>(
-      builder: (context, appProvider, child) {
+    return Consumer2<AppProvider, SettingsProvider>(
+      builder: (context, appProvider, settingsProvider, child) {
         final latestApps = appProvider.latestApps.take(_previewLimit).toList();
         final recentlyUpdatedApps = appProvider.recentlyUpdatedApps
             .take(_previewLimit)
@@ -81,6 +81,7 @@ class _HomeScreenState extends State<HomeScreen>
         final isLoading =
             appProvider.latestAppsState == LoadingState.loading ||
             appProvider.recentlyUpdatedAppsState == LoadingState.loading;
+        final isFlorid = settingsProvider.themeStyle == ThemeStyle.florid;
 
         return RefreshIndicator(
           onRefresh: _onRefresh,
@@ -110,7 +111,9 @@ class _HomeScreenState extends State<HomeScreen>
                               onPressed: _openRecentlyUpdatedScreen,
                               iconAlignment: IconAlignment.end,
                               icon: Icon(Symbols.arrow_forward),
-                              label: Text(AppLocalizations.of(context)!.show_more),
+                              label: Text(
+                                AppLocalizations.of(context)!.show_more,
+                              ),
                             ),
                           ],
                         ),
@@ -188,7 +191,9 @@ class _HomeScreenState extends State<HomeScreen>
                             onPressed: _openLatestScreen,
                             iconAlignment: IconAlignment.end,
                             icon: Icon(Symbols.arrow_forward),
-                            label: Text(AppLocalizations.of(context)!.show_more),
+                            label: Text(
+                              AppLocalizations.of(context)!.show_more,
+                            ),
                           ),
                         ],
                       ),
@@ -247,6 +252,7 @@ class _HomeScreenState extends State<HomeScreen>
                       ),
                   ],
                 ),
+                if (isFlorid) const SizedBox(height: 86),
               ],
             ),
           ),

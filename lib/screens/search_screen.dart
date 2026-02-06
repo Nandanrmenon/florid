@@ -1,4 +1,5 @@
 import 'package:florid/l10n/app_localizations.dart';
+import 'package:florid/providers/settings_provider.dart';
 import 'package:florid/utils/menu_actions.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -162,6 +163,10 @@ class _SearchScreenState extends State<SearchScreen> {
             final results = appProvider.searchResults;
             final error = appProvider.searchError;
             final query = appProvider.searchQuery;
+            final settingsProvider = context.read<SettingsProvider>();
+
+            final bottomPadding =
+                settingsProvider.themeStyle == ThemeStyle.florid ? 96.0 : 16.0;
 
             // Show initial state
             if (query.isEmpty) {
@@ -298,10 +303,7 @@ class _SearchScreenState extends State<SearchScreen> {
                 // Results list
                 Expanded(
                   child: ListView.builder(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 8,
-                    ),
+                    padding: EdgeInsets.fromLTRB(8, 8, 8, bottomPadding),
                     itemCount: results.length,
                     itemBuilder: (context, index) {
                       final app = results[index];

@@ -1,5 +1,5 @@
-import 'package:easy_localization/easy_localization.dart';
 import 'package:florid/l10n/app_localizations.dart';
+import 'package:florid/providers/settings_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:material_symbols_icons/symbols.dart';
@@ -42,12 +42,13 @@ class _CategoriesScreenState extends State<CategoriesScreen>
   Widget build(BuildContext context) {
     super.build(context);
 
-    return Consumer<AppProvider>(
-      builder: (context, appProvider, child) {
+    return Consumer2<AppProvider, SettingsProvider>(
+      builder: (context, appProvider, settingsProvider, child) {
         final state = appProvider.categoriesState;
         final categories = appProvider.categories;
         final error = appProvider.categoriesError;
-        return _buildBody(state, categories, error);
+        final isFlorid = settingsProvider.themeStyle == ThemeStyle.florid;
+        return _buildBody(state, categories, error, isFlorid);
       },
     );
   }
@@ -56,6 +57,7 @@ class _CategoriesScreenState extends State<CategoriesScreen>
     LoadingState state,
     List<String> categories,
     String? error,
+    bool isFlorid,
   ) {
     if (state == LoadingState.loading && categories.isEmpty) {
       return Center(
@@ -119,28 +121,39 @@ class _CategoriesScreenState extends State<CategoriesScreen>
 
     return RefreshIndicator(
       onRefresh: _onRefresh,
-      child: GridView.builder(
-        padding: const EdgeInsets.all(16),
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2,
-          crossAxisSpacing: 8,
-          mainAxisSpacing: 8,
-          childAspectRatio: 2.5,
+      child: SingleChildScrollView(
+        child: Column(
+          children: [
+            GridView.builder(
+              padding: const EdgeInsets.all(16),
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                crossAxisSpacing: 8,
+                mainAxisSpacing: 8,
+                childAspectRatio: 2.5,
+              ),
+              itemCount: categories.length,
+              itemBuilder: (context, index) {
+                final category = categories[index];
+
+                return _CategoryCard(
+                  category: category,
+                  onTap: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            CategoryAppsScreen(category: category),
+                      ),
+                    );
+                  },
+                ).animate().fadeIn(duration: 300.ms, delay: (10 * index).ms);
+              },
+            ),
+            if (isFlorid) SizedBox(height: 96),
+          ],
         ),
-        itemCount: categories.length,
-        itemBuilder: (context, index) {
-          final category = categories[index];
-          return _CategoryCard(
-            category: category,
-            onTap: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (context) => CategoryAppsScreen(category: category),
-                ),
-              );
-            },
-          ).animate().fadeIn(duration: 300.ms, delay: (10 * index).ms);
-        },
       ),
     );
   }

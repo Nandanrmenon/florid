@@ -1,3 +1,4 @@
+import 'package:florid/providers/settings_provider.dart';
 import 'package:florid/utils/menu_actions.dart';
 import 'package:florid/widgets/changelog_preview.dart';
 import 'package:florid/widgets/f_tabbar.dart';
@@ -120,8 +121,12 @@ class _UpdatesScreenState extends State<UpdatesScreen>
 
             return Scaffold(
               appBar: AppBar(
-                backgroundColor: Theme.of(context).colorScheme.surfaceContainerLow,
-                surfaceTintColor: Theme.of(context).colorScheme.surfaceContainerLow,
+                backgroundColor: Theme.of(
+                  context,
+                ).colorScheme.surfaceContainerLow,
+                surfaceTintColor: Theme.of(
+                  context,
+                ).colorScheme.surfaceContainerLow,
                 title: const Text('Apps'),
                 actions: [
                   IconButton(
@@ -192,6 +197,7 @@ class _UpdatesScreenState extends State<UpdatesScreen>
                     _buildUpdatesTab(
                       context,
                       appProvider,
+                      context.read<SettingsProvider>(),
                       updatableApps,
                       repositoryLoaded,
                       repositoryState,
@@ -199,7 +205,13 @@ class _UpdatesScreenState extends State<UpdatesScreen>
                     ),
 
                     // Tab 2: All Installed F-Droid Apps
-                    _buildInstalledAppsTab(context, appProvider, allFDroidApps, updatableApps),
+                    _buildInstalledAppsTab(
+                      context,
+                      appProvider,
+                      context.read<SettingsProvider>(),
+                      allFDroidApps,
+                      updatableApps,
+                    ),
                   ],
                 ),
               ),
@@ -213,6 +225,7 @@ class _UpdatesScreenState extends State<UpdatesScreen>
   Widget _buildUpdatesTab(
     BuildContext context,
     AppProvider appProvider,
+    SettingsProvider settingsProvider,
     List<FDroidApp> updatableApps,
     bool repositoryLoaded,
     LoadingState repositoryState,
@@ -322,11 +335,19 @@ class _UpdatesScreenState extends State<UpdatesScreen>
     }
 
     return Scaffold(
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => _updateAllApps(context, updatableApps),
-        icon: const Icon(Symbols.system_update),
-        label: const Text('Update All'),
-      ).animate().scale(duration: 300.ms, curve: Curves.easeOutBack),
+      floatingActionButton: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          FloatingActionButton.extended(
+            onPressed: () => _updateAllApps(context, updatableApps),
+            icon: const Icon(Symbols.system_update),
+            label: const Text('Update All'),
+          ).animate().scale(duration: 300.ms, curve: Curves.easeOutBack),
+          settingsProvider.themeStyle == ThemeStyle.florid
+              ? SizedBox(height: 86)
+              : SizedBox.shrink(),
+        ],
+      ),
       body: Column(
         children: [
           // Header
@@ -362,7 +383,12 @@ class _UpdatesScreenState extends State<UpdatesScreen>
           // Apps list
           Expanded(
             child: ListView.builder(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+              padding: EdgeInsets.fromLTRB(
+                8,
+                8,
+                8,
+                settingsProvider.themeStyle == ThemeStyle.florid ? 96 : 16,
+              ),
               itemCount: updatableApps.length,
               itemBuilder: (context, index) {
                 final app = updatableApps[index];
@@ -434,6 +460,7 @@ class _UpdatesScreenState extends State<UpdatesScreen>
   Widget _buildInstalledAppsTab(
     BuildContext context,
     AppProvider appProvider,
+    SettingsProvider settingsProvider,
     List<FDroidApp> allFDroidApps,
     List<FDroidApp> updatableApps,
   ) {
@@ -466,8 +493,12 @@ class _UpdatesScreenState extends State<UpdatesScreen>
       );
     }
 
+    final bottomPadding = settingsProvider.themeStyle == ThemeStyle.florid
+        ? 96.0
+        : 16.0;
+
     return ListView.builder(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+      padding: EdgeInsets.fromLTRB(8, 8, 8, bottomPadding),
       itemCount: allFDroidApps.length,
       itemBuilder: (context, index) {
         final app = allFDroidApps[index];
@@ -475,7 +506,6 @@ class _UpdatesScreenState extends State<UpdatesScreen>
         final hasUpdate = updatableApps.any(
           (updateApp) => updateApp.packageName == app.packageName,
         );
-
         return Card(
           elevation: 0,
           child: Column(

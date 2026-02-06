@@ -97,31 +97,39 @@ class AppListItem extends StatelessWidget {
       ),
       subtitle: Text(app.summary, maxLines: 2, overflow: TextOverflow.ellipsis),
       trailing: showInstallStatus
-          ? Consumer<AppProvider>(
-              builder: (context, appProvider, _) {
-                final isInstalled = appProvider.isAppInstalled(app.packageName);
-                final installedApp = appProvider.getInstalledApp(
-                  app.packageName,
-                );
-                final latestVersion = app.latestVersion;
+          ? Padding(
+              padding: const EdgeInsets.only(right: 8.0),
+              child: Consumer<AppProvider>(
+                builder: (context, appProvider, _) {
+                  final isInstalled = appProvider.isAppInstalled(
+                    app.packageName,
+                  );
+                  final installedApp = appProvider.getInstalledApp(
+                    app.packageName,
+                  );
+                  final latestVersion = app.latestVersion;
 
-                // Check if update is available
-                final hasUpdate =
-                    isInstalled &&
-                    installedApp != null &&
-                    installedApp.versionCode != null &&
-                    latestVersion != null &&
-                    installedApp.versionCode! < latestVersion.versionCode;
+                  // Check if update is available
+                  final hasUpdate =
+                      isInstalled &&
+                      installedApp != null &&
+                      installedApp.versionCode != null &&
+                      latestVersion != null &&
+                      installedApp.versionCode! < latestVersion.versionCode;
 
-                if (hasUpdate) {
-                  return TextButton(onPressed: onUpdate, child: Text('Update'));
-                }
+                  if (hasUpdate) {
+                    return TextButton(
+                      onPressed: onUpdate,
+                      child: Text('Update'),
+                    );
+                  }
 
-                if (isInstalled) {
-                  return Icon(Symbols.check_circle, weight: 400);
-                }
-                return const SizedBox.shrink();
-              },
+                  if (isInstalled) {
+                    return Icon(Symbols.check_circle, weight: 400);
+                  }
+                  return const SizedBox.shrink();
+                },
+              ),
             )
           : null,
       dense: true,

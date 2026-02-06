@@ -1,5 +1,6 @@
 import 'package:florid/constants.dart';
 import 'package:flutter/material.dart';
+import 'package:material_symbols_icons/symbols.dart';
 
 class AppThemes {
   // Material Theme (Original)
@@ -32,6 +33,7 @@ class AppThemes {
         ),
         filled: true,
       ),
+      progressIndicatorTheme: ProgressIndicatorThemeData(year2023: false),
     );
   }
 
@@ -64,6 +66,7 @@ class AppThemes {
         ),
         filled: true,
       ),
+      progressIndicatorTheme: ProgressIndicatorThemeData(year2023: false),
     );
   }
 
@@ -148,9 +151,23 @@ class AppThemes {
             return ColorScheme.fromSeed(
               seedColor: kAppColor,
               brightness: Brightness.light,
-            ).primaryContainer;
+            ).primary;
           }
           return null; // Use the default thumb color
+        }),
+        thumbIcon: WidgetStateProperty.resolveWith<Icon?>((
+          Set<WidgetState> states,
+        ) {
+          if (states.contains(WidgetState.selected)) {
+            return Icon(
+              Symbols.check,
+              color: ColorScheme.fromSeed(
+                seedColor: kAppColor,
+                brightness: Brightness.light,
+              ).onPrimary,
+            );
+          }
+          return null; // Use the default thumb icon
         }),
         trackColor: WidgetStateProperty.resolveWith<Color?>((
           Set<WidgetState> states,
@@ -159,14 +176,17 @@ class AppThemes {
             return ColorScheme.fromSeed(
               seedColor: kAppColor,
               brightness: Brightness.light,
-            ).secondary;
+            ).surfaceDim;
           }
-          return null; // Use the default track color
+          return ColorScheme.fromSeed(
+            seedColor: kAppColor,
+            brightness: Brightness.light,
+          ).surfaceDim;
         }),
         trackOutlineWidth: WidgetStateProperty.resolveWith<double?>((
           Set<WidgetState> states,
         ) {
-          return 1;
+          return -1;
         }),
       ),
       navigationBarTheme: NavigationBarThemeData(
@@ -289,6 +309,7 @@ class AppThemes {
           width: 1.5,
         ),
       ),
+      progressIndicatorTheme: ProgressIndicatorThemeData(year2023: false),
     );
   }
 
@@ -379,6 +400,14 @@ class AppThemes {
           }
           return null; // Use the default thumb color
         }),
+        thumbIcon: WidgetStateProperty.resolveWith<Icon?>((
+          Set<WidgetState> states,
+        ) {
+          if (states.contains(WidgetState.selected)) {
+            return Icon(Symbols.check);
+          }
+          return null; // Use the default thumb icon
+        }),
         trackColor: WidgetStateProperty.resolveWith<Color?>((
           Set<WidgetState> states,
         ) {
@@ -386,14 +415,17 @@ class AppThemes {
             return ColorScheme.fromSeed(
               seedColor: kAppColor,
               brightness: Brightness.dark,
-            ).secondary;
+            ).surfaceContainerLowest;
           }
-          return null; // Use the default track color
+          return ColorScheme.fromSeed(
+            seedColor: kAppColor,
+            brightness: Brightness.dark,
+          ).surfaceContainerLowest; // Use the default track color
         }),
         trackOutlineWidth: WidgetStateProperty.resolveWith<double?>((
           Set<WidgetState> states,
         ) {
-          return 1;
+          return -1;
         }),
       ),
       navigationBarTheme: NavigationBarThemeData(
@@ -520,6 +552,7 @@ class AppThemes {
           width: 1.5,
         ),
       ),
+      progressIndicatorTheme: ProgressIndicatorThemeData(year2023: false),
     );
   }
 }

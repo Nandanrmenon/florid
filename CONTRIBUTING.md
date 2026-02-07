@@ -53,38 +53,41 @@ Feature suggestions are welcome! Please:
 
 ### Contributing Translations
 
-We use `easy_localization` for internationalization. Contributing translations is easy and highly appreciated!
+We use Flutter's built-in localization with ARB files and Crowdin for managing translations. Contributing translations is easy and highly appreciated!
 
-#### Adding a New Language
+**The easiest way to contribute translations is through our Crowdin project: [https://crowdin.com/project/florid](https://crowdin.com/project/florid)**
 
-1. **Create a translation file:**
-   - Navigate to `assets/translations/`
-   - Create a new JSON file named with the language code (e.g., `fr.json` for French, `de.json` for German)
-   - Copy the structure from `en.json`
+#### Contributing via Crowdin (Recommended)
+
+1. **Visit the Crowdin project:** [https://crowdin.com/project/florid](https://crowdin.com/project/florid)
+2. **Select your language** or request a new one
+3. **Start translating** strings directly in the web interface
+4. Your translations will be automatically synced to the repository
+
+#### Contributing via GitHub
+
+If you prefer to contribute translations directly via GitHub:
+
+1. **Create or edit an ARB file:**
+   - Navigate to `lib/l10n/`
+   - For a new language, create a new ARB file named `app_<language_code>.arb` (e.g., `app_fr.arb` for French, `app_es.arb` for Spanish)
+   - Copy the structure from `app_en.arb`
 
 2. **Translate all keys:**
 
    ```json
    {
+     "@@locale": "fr",
      "app_name": "Florid",
-     "welcome": "Your translation here",
-     "search": "Your translation here",
+     "welcome": "Votre traduction ici",
+     "search": "Votre traduction ici",
      ...
    }
    ```
 
-3. **Update main.dart:**
-   Add your locale to the supported locales list:
-
-   ```dart
-   EasyLocalization(
-     supportedLocales: const [
-       Locale('en'),
-       Locale('es'),
-       Locale('fr'),  // Your new language
-     ],
-     // ...
-   )
+3. **Generate localization files:**
+   ```bash
+   flutter gen-l10n
    ```
 
 4. **Test your translations:**
@@ -94,24 +97,25 @@ We use `easy_localization` for internationalization. Contributing translations i
 
 #### Improving Existing Translations
 
-1. Open the relevant JSON file in `assets/translations/`
+1. Open the relevant ARB file in `lib/l10n/`
 2. Update the translation values
 3. Ensure translations are:
    - **Accurate** and contextually appropriate
    - **Natural** in the target language
    - **Consistent** with app terminology
-4. Test the changes in the app
+4. Run `flutter gen-l10n` to regenerate localization files
+5. Test the changes in the app
 
 #### Translation Guidelines
 
 - **Keep keys unchanged** - Only modify the values, never the keys
+- **Include locale metadata** - Each ARB file should have a `"@@locale"` key at the top
+- **Add descriptions for placeholders** - Use metadata annotations for strings with parameters
 - **Maintain consistency** - Use the same terms throughout for repeated concepts
 - **Consider context** - Some words have different meanings in different contexts
 - **Test thoroughly** - Verify translations in the actual UI
 - **Be concise** - Mobile UIs have limited space
 - **Use native conventions** - Follow target language conventions for dates, numbers, etc.
-
-See [LOCALIZATION.md](LOCALIZATION.md) for detailed localization documentation.
 
 ## Development Setup
 
@@ -146,6 +150,7 @@ See [LOCALIZATION.md](LOCALIZATION.md) for detailed localization documentation.
 
 ```
 lib/
+├── l10n/            # Localization (ARB files)
 ├── models/          # Data models
 ├── providers/       # State management (Provider)
 ├── screens/         # UI screens
@@ -156,7 +161,9 @@ lib/
 └── main.dart        # App entry point
 
 assets/
-└── translations/    # Translation JSON files
+├── fonts/           # Custom fonts
+├── screenshots/     # App screenshots
+└── translations/    # Legacy translation files (deprecated)
 ```
 
 ## Pull Request Process
@@ -251,20 +258,38 @@ Future<FDroidApp?> fetchAppDetails(String packageName) async { ... }
 When adding new UI text:
 
 1. **Never hardcode strings** in UI code
-2. **Add to all translation files** (at minimum `en.json` and `es.json`)
-3. **Use descriptive keys** with underscores:
+2. **Add to the base ARB file** (`lib/l10n/app_en.arb`)
+3. **Add to Crowdin** - translations will sync to other languages
+4. **Use descriptive keys** with underscores:
 
    ```json
    {
      "error_network_title": "Network Error",
+     "@error_network_title": {
+       "description": "Title shown when a network error occurs"
+     },
      "error_network_message": "Please check your internet connection",
-     "button_retry": "Retry"
+     "@error_network_message": {
+       "description": "Message explaining the network error to the user"
+     },
+     "button_retry": "Retry",
+     "@button_retry": {
+       "description": "Button label to retry a failed operation"
+     }
    }
    ```
 
-4. **Use the string in code:**
+5. **Use the string in code:**
    ```dart
-   Text('error_network_title'.tr())
+   import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+   
+   // In your widget
+   Text(AppLocalizations.of(context)!.error_network_title)
+   ```
+
+6. **Regenerate localization files:**
+   ```bash
+   flutter gen-l10n
    ```
 
 ### Translation Key Naming
@@ -279,12 +304,41 @@ Examples:
 - `button_download`
 - `label_version_name`
 
+### Strings with Placeholders
+
+For strings with dynamic content, use placeholders:
+
+```json
+{
+  "welcome_user": "Welcome, {userName}!",
+  "@welcome_user": {
+    "description": "Welcome message with the user's name",
+    "placeholders": {
+      "userName": {
+        "type": "String",
+        "example": "John"
+      }
+    }
+  }
+}
+```
+
+Usage in code:
+```dart
+Text(AppLocalizations.of(context)!.welcome_user(userName))
+```
+
 ### Context for Translators
 
-When adding strings that might be ambiguous, add a comment in the PR:
+When adding strings that might be ambiguous, add a description in the metadata:
 
-```
-Added "bank" key - refers to river bank, not financial institution
+```json
+{
+  "bank": "Bank",
+  "@bank": {
+    "description": "Refers to river bank, not financial institution"
+  }
+}
 ```
 
 ## Questions?

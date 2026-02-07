@@ -18,6 +18,10 @@ jobs:
   sync-crowdin:
     runs-on: ubuntu-latest
     
+    permissions:
+      contents: write      # Needed to push commits
+      pull-requests: write # Needed to create PRs
+    
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4

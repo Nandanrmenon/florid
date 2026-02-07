@@ -4,6 +4,7 @@ import 'package:florid/l10n/app_localizations.dart';
 import 'package:florid/l10n/crowdin_localizations.dart';
 import 'package:florid/providers/settings_provider.dart';
 import 'package:florid/screens/florid_app.dart';
+import 'package:florid/services/crowdin_service.dart';
 import 'package:florid/themes/app_themes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -21,6 +22,10 @@ import 'services/izzy_stats_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  
+  // Initialize Crowdin SDK for over-the-air translation updates
+  await CrowdinService.initialize();
+  
   runApp(MainApp());
 }
 

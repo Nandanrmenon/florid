@@ -123,6 +123,39 @@ MaterialApp(
 
 This allows translations to be updated dynamically from Crowdin without requiring an app update.
 
+#### Configuring OTA Updates
+
+To enable Crowdin's over-the-air translation updates:
+
+1. **Get your distribution hash from Crowdin:**
+   - Log in to your Crowdin project
+   - Go to Settings → Distributions
+   - Create or select a distribution
+   - Copy the distribution hash
+
+2. **Update the configuration file:**
+   Edit `assets/crowdin_config.json`:
+   ```json
+   {
+     "distributionHash": "YOUR_DISTRIBUTION_HASH_HERE",
+     "sourceLanguage": "en",
+     "organizationName": "florid",
+     "files": [
+       "/lib/l10n/app_en.arb"
+     ]
+   }
+   ```
+
+3. **How it works:**
+   - The Crowdin SDK is initialized at app startup
+   - It fetches the latest translations from the distribution manifest
+   - Translations are cached locally for offline use
+   - Updates are checked periodically (every 15 minutes by default)
+   - Users get the latest translations without needing to update the app
+
+4. **Fallback behavior:**
+   If OTA updates fail or aren't configured, the app uses the bundled ARB translations as fallback.
+
 ## Adding a New Language
 
 ### 1. Create ARB File
@@ -363,12 +396,39 @@ Make sure placeholders in the ARB metadata match those in the string:
 3. Regenerate: `flutter gen-l10n`
 4. Restart the IDE/editor
 
+### Crowdin OTA updates not working
+
+1. **Check configuration:**
+   - Verify `assets/crowdin_config.json` has a valid distribution hash
+   - Ensure the distribution hash is not the placeholder value
+
+2. **Check logs:**
+   - Run the app in debug mode
+   - Look for Crowdin initialization messages in the console
+   - Check for any error messages related to Crowdin
+
+3. **Verify distribution settings:**
+   - Log in to Crowdin project
+   - Go to Settings → Distributions
+   - Ensure the distribution is published and active
+   - Verify the distribution includes the correct files
+
+4. **Network issues:**
+   - Ensure the device has internet connectivity
+   - Check if any firewall or proxy is blocking Crowdin's CDN
+   - The SDK requires network access to fetch the manifest
+
+5. **Fallback behavior:**
+   - If OTA fails, the app will use bundled ARB files
+   - This ensures the app always has translations available
+
 ## Resources
 
 - [Flutter Internationalization](https://docs.flutter.dev/development/accessibility-and-localization/internationalization)
 - [ARB File Format](https://github.com/google/app-resource-bundle/wiki/ApplicationResourceBundleSpecification)
 - [Crowdin Documentation](https://support.crowdin.com/enterprise/getting-started-for-developers/)
 - [Crowdin Flutter SDK](https://github.com/crowdin/flutter-sdk)
+- [Crowdin Distributions](https://support.crowdin.com/content-delivery/) - OTA update documentation
 
 ## Contributing
 

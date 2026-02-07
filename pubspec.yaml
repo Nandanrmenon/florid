@@ -112,6 +112,7 @@ flutter:
     - assets/Foreground.png
     - assets/Splash.png
     - assets/repositories.json
+    - assets/crowdin_config.json
   #   - images/a_dot_burr.jpeg
   #   - images/a_dot_ham.jpeg
 

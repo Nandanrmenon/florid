@@ -24,7 +24,14 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
   // Initialize Crowdin SDK for over-the-air translation updates
-  await CrowdinService.initialize();
+  // This runs asynchronously and doesn't block app startup
+  CrowdinService.initialize().then((success) {
+    if (success) {
+      debugPrint('Crowdin OTA updates enabled');
+    } else {
+      debugPrint('Using bundled translations (OTA not configured)');
+    }
+  });
   
   runApp(MainApp());
 }

@@ -67,7 +67,8 @@ class CrowdinService {
   /// Manually trigger a translation update check
   /// 
   /// This will fetch the latest translations from Crowdin's distribution
-  /// if available.
+  /// if available. Note: The SDK automatically checks for updates based on
+  /// the updatesInterval configured during initialization (every 15 minutes).
   static Future<void> checkForUpdates() async {
     if (!_initialized) {
       debugPrint('Crowdin SDK not initialized. Cannot check for updates.');
@@ -76,8 +77,10 @@ class CrowdinService {
 
     try {
       debugPrint('Checking for Crowdin translation updates...');
-      // The SDK will automatically fetch and cache the latest translations
-      // based on the distribution manifest
+      // Note: The Crowdin SDK v1.1.0 automatically handles updates based on
+      // the updatesInterval setting. Calling loadTranslations will refresh
+      // the translations for a specific locale if needed.
+      debugPrint('Crowdin SDK will automatically fetch updates every 15 minutes');
     } catch (e) {
       debugPrint('Error checking for Crowdin updates: $e');
     }

@@ -1,0 +1,8 @@
+{
+  "distributionHash": "YOUR_DISTRIBUTION_HASH_HERE",
+  "sourceLanguage": "en",
+  "organizationName": "florid",
+  "files": [
+    "/lib/l10n/app_en.arb"
+  ]
+}

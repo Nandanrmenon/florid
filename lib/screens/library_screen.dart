@@ -1,4 +1,3 @@
-import 'package:easy_localization/easy_localization.dart';
 import 'package:florid/l10n/app_localizations.dart';
 import 'package:florid/providers/app_provider.dart';
 import 'package:florid/providers/repositories_provider.dart';

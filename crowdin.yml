@@ -1,0 +1,14 @@
+project_id: "florid"
+
+# Source files configuration
+files:
+  - source: /lib/l10n/app_en.arb
+    translation: /lib/l10n/app_%android_code%.arb
+    # Update sources - enables source file updates from Crowdin
+    update_option: update_as_unapproved
+    # Preserve key order in ARB files
+    preserve_hierarchy: true
+    # Skip untranslated strings in downloads
+    skip_untranslated_strings: false
+    # Export only approved translations
+    export_approved_only: false

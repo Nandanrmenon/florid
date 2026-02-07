@@ -84,10 +84,18 @@ Issues and PRs are welcome! Check out [CONTRIBUTING.md](https://github.com/Nanda
 
 Help translate Florid into other languages at [Crowdin](https://crowdin.com/project/florid).
 
+### Over-The-Air (OTA) Updates
+
+Florid supports Crowdin's OTA content delivery, allowing translation updates to be pushed to users without requiring an app update. See [CROWDIN_SETUP_GUIDE.md](assets/CROWDIN_SETUP_GUIDE.md) for setup instructions.
+
+### Current Languages
+
 | Language | Code | Contributors                                                                                                       |
 | -------- | ---- | ------------------------------------------------------------------------------------------------------------------ |
 | English  | en   | @Nandanrmenon                                                                                                      |
 | German   | de   | [@JasmineLowen](https://github.com/JasmineLowen), [@mondlicht-und-sterne](https://github.com/mondlicht-und-sterne) |
+
+For detailed localization documentation, see [LOCALIZATION.md](LOCALIZATION.md).
 
 ## License
 

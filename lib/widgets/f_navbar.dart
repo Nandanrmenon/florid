@@ -20,10 +20,10 @@ class FNavBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    final baseColor = scheme.primary;
-    final accentColor = scheme.surface;
-    final selectedColor = scheme.onSurface;
-    final unselectedColor = scheme.onPrimary;
+    final baseColor = scheme.surfaceContainer;
+    final accentColor = scheme.primary.withValues(alpha: 0.2);
+    final selectedColor = scheme.primary;
+    final unselectedColor = scheme.onSurfaceVariant;
 
     return SafeArea(
       top: false,
@@ -41,6 +41,7 @@ class FNavBar extends StatelessWidget {
                   final item = items[index];
                   final selected = index == currentIndex;
                   return Expanded(
+                    flex: selected ? 2 : 1,
                     child: AnimatedContainer(
                       duration: const Duration(milliseconds: 180),
                       curve: Curves.easeOut,
@@ -54,7 +55,7 @@ class FNavBar extends StatelessWidget {
                         child: SizedBox(
                           height: double.infinity,
                           child: Row(
-                            spacing: 8.0,
+                            spacing: 16.0,
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               IconTheme(
@@ -64,21 +65,33 @@ class FNavBar extends StatelessWidget {
                                       : unselectedColor,
                                 ),
                                 child: selected ? item.selectedIcon : item.icon,
-                              ).animate().fadeIn(duration: 180.ms),
-                              AnimatedDefaultTextStyle(
-                                duration: const Duration(milliseconds: 180),
-                                curve: Curves.easeOut,
-                                style: TextStyle(
-                                  color: selected
-                                      ? selectedColor
-                                      : unselectedColor,
-                                  fontSize: 14,
-                                  fontVariations: [FontVariation('ROND', 100)],
-                                ),
-                                child: Text(
-                                  item.label,
-                                ).animate().fadeIn(duration: 180.ms),
                               ),
+
+                              if (selected)
+                                AnimatedDefaultTextStyle(
+                                      duration: const Duration(
+                                        milliseconds: 180,
+                                      ),
+                                      curve: Curves.easeOut,
+                                      style: TextStyle(
+                                        color: selected
+                                            ? selectedColor
+                                            : unselectedColor,
+                                        fontSize: 14,
+                                        fontVariations: [
+                                          FontVariation('ROND', 100),
+                                        ],
+                                      ),
+                                      child: Text(item.label),
+                                    )
+                                    .animate()
+                                    .fadeIn(duration: 180.ms)
+                                    .slideX(
+                                      begin: 0.5,
+                                      end: 0,
+                                      duration: 180.ms,
+                                      curve: Curves.easeOut,
+                                    ),
                             ],
                           ),
                         ),

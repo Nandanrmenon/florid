@@ -1,4 +1,3 @@
-import 'package:easy_localization/easy_localization.dart';
 import 'package:florid/l10n/app_localizations.dart';
 import 'package:florid/providers/app_provider.dart';
 import 'package:florid/providers/repositories_provider.dart';
@@ -90,8 +89,14 @@ class _LibraryScreenState extends State<LibraryScreen>
             _tabController.animateTo(index);
           },
           items: [
-            FloridTabBarItem(icon: Symbols.home, label: AppLocalizations.of(context)!.home),
-            FloridTabBarItem(icon: Symbols.category, label: AppLocalizations.of(context)!.categories),
+            FloridTabBarItem(
+              icon: Symbols.home,
+              label: AppLocalizations.of(context)!.home,
+            ),
+            FloridTabBarItem(
+              icon: Symbols.category,
+              label: AppLocalizations.of(context)!.categories,
+            ),
           ],
         ),
       ),

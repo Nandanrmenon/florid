@@ -129,7 +129,6 @@ class _CategoryAppsScreenState extends State<CategoryAppsScreen> {
                 children: [
                   const Icon(Symbols.apps, size: 64, color: Colors.grey),
                   const SizedBox(height: 16),
-                  // Text('no_apps_in_category'.tr(args: [widget.category])),
                   Text(
                     AppLocalizations.of(
                       context,

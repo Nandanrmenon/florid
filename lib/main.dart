@@ -1,14 +1,11 @@
 import 'dart:convert';
 
 import 'package:florid/l10n/app_localizations.dart';
-import 'package:florid/l10n/crowdin_localizations.dart';
 import 'package:florid/providers/settings_provider.dart';
 import 'package:florid/screens/florid_app.dart';
 import 'package:florid/themes/app_themes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-// import 'package:easy_localization/easy_localization.dart';
-// import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
 
 import 'providers/app_provider.dart';
@@ -55,7 +52,11 @@ class MainApp extends StatelessWidget {
             return service;
           },
         ),
-        ChangeNotifierProxyProvider2<FDroidApiService, SettingsProvider, AppProvider>(
+        ChangeNotifierProxyProvider2<
+          FDroidApiService,
+          SettingsProvider,
+          AppProvider
+        >(
           create: (context) => AppProvider(
             Provider.of<FDroidApiService>(context, listen: false),
             Provider.of<SettingsProvider>(context, listen: false),
@@ -94,7 +95,7 @@ class MainApp extends StatelessWidget {
           return MaterialApp(
             title: 'Florid - F-Droid Client',
             debugShowCheckedModeBanner: false,
-            localizationsDelegates: CrowdinLocalization.localizationsDelegates,
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
             supportedLocales: AppLocalizations.supportedLocales,
             theme: settings.themeStyle == ThemeStyle.florid
                 ? AppThemes.floridLightTheme()

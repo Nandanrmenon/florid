@@ -53,14 +53,13 @@ Feature suggestions are welcome! Please:
 
 ### Contributing Translations
 
-We use `easy_localization` for internationalization. Contributing translations is easy and highly appreciated!
+Florid uses Flutter ARB files for localization. The source-of-truth strings live in `lib/l10n/app_en.arb`.
 
 #### Adding a New Language
 
-1. **Create a translation file:**
-   - Navigate to `assets/translations/`
-   - Create a new JSON file named with the language code (e.g., `fr.json` for French, `de.json` for German)
-   - Copy the structure from `en.json`
+1. **Create a new ARB file:**
+   - Add a file in `lib/l10n/` named `app_<locale>.arb` (e.g., `app_fr.arb`)
+   - Copy the structure from `app_en.arb`
 
 2. **Translate all keys:**
 
@@ -68,23 +67,14 @@ We use `easy_localization` for internationalization. Contributing translations i
    {
      "app_name": "Florid",
      "welcome": "Your translation here",
-     "search": "Your translation here",
-     ...
+     "search": "Your translation here"
    }
    ```
 
-3. **Update main.dart:**
-   Add your locale to the supported locales list:
+3. **Regenerate localization classes:**
 
-   ```dart
-   EasyLocalization(
-     supportedLocales: const [
-       Locale('en'),
-       Locale('es'),
-       Locale('fr'),  // Your new language
-     ],
-     // ...
-   )
+   ```bash
+   flutter gen-l10n
    ```
 
 4. **Test your translations:**
@@ -94,24 +84,13 @@ We use `easy_localization` for internationalization. Contributing translations i
 
 #### Improving Existing Translations
 
-1. Open the relevant JSON file in `assets/translations/`
+1. Open the relevant ARB file in `lib/l10n/`
 2. Update the translation values
 3. Ensure translations are:
    - **Accurate** and contextually appropriate
    - **Natural** in the target language
    - **Consistent** with app terminology
 4. Test the changes in the app
-
-#### Translation Guidelines
-
-- **Keep keys unchanged** - Only modify the values, never the keys
-- **Maintain consistency** - Use the same terms throughout for repeated concepts
-- **Consider context** - Some words have different meanings in different contexts
-- **Test thoroughly** - Verify translations in the actual UI
-- **Be concise** - Mobile UIs have limited space
-- **Use native conventions** - Follow target language conventions for dates, numbers, etc.
-
-See [LOCALIZATION.md](LOCALIZATION.md) for detailed localization documentation.
 
 ## Development Setup
 
@@ -155,8 +134,7 @@ lib/
 ├── widgets/         # Reusable widgets
 └── main.dart        # App entry point
 
-assets/
-└── translations/    # Translation JSON files
+lib/l10n/           # ARB localization files
 ```
 
 ## Pull Request Process

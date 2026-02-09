@@ -1,4 +1,3 @@
-import 'package:crowdin_sdk/crowdin_sdk.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -134,23 +133,10 @@ class SettingsProvider extends ChangeNotifier {
     if (!availableLocales.contains(locale)) {
       throw ArgumentError('Unsupported locale: $locale');
     }
-    // Load translations from Crowdin for the specified locale
-    final localeObj = _parseLocale(locale);
-    await Crowdin.loadTranslations(localeObj);
     _locale = locale;
     notifyListeners();
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_localeKey, locale);
-  }
-
-  /// Helper to parse a locale string like 'en-US' or 'en' to a Locale object
-  Locale _parseLocale(String locale) {
-    final parts = locale.split('-');
-    if (parts.length == 2) {
-      return Locale(parts[0], parts[1]);
-    } else {
-      return Locale(locale);
-    }
   }
 
   Future<void> setOnboardingComplete([bool value = true]) async {

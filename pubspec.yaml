@@ -75,15 +75,11 @@ dependencies:
   flutter_native_splash: ^2.4.7
   flutter_animate: ^4.5.2
 
-  # Localization
-  easy_localization: ^3.0.8
-
   # HTML rendering
   flutter_html: ^3.0.0-beta.2
   flutter_localizations:
     sdk: flutter
   intl: any
-  crowdin_sdk: ^1.1.0
 
 dev_dependencies:
   flutter_test:
@@ -113,7 +109,6 @@ flutter:
     - assets/Foreground.png
     - assets/Splash.png
     - assets/repositories.json
-    - assets/translations/
   #   - images/a_dot_burr.jpeg
   #   - images/a_dot_ham.jpeg
 

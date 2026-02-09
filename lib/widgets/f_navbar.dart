@@ -20,7 +20,7 @@ class FNavBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    final baseColor = scheme.surfaceContainer;
+    final baseColor = scheme.surfaceContainerHigh;
     final accentColor = scheme.primary.withValues(alpha: 0.2);
     final selectedColor = scheme.primary;
     final unselectedColor = scheme.onSurfaceVariant;

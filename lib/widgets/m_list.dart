@@ -20,7 +20,8 @@ class MListItemData {
 
 class MListHeader extends StatefulWidget {
   final String title;
-  const MListHeader({super.key, required this.title});
+  final IconData? icon;
+  const MListHeader({super.key, required this.title, this.icon});
 
   @override
   State<MListHeader> createState() => _MListHeaderState();
@@ -34,6 +35,8 @@ class _MListHeaderState extends State<MListHeader> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
+          if (widget.icon != null) Icon(widget.icon, size: 20),
+          if (widget.icon != null) SizedBox(width: 8),
           Text(
             widget.title,
             style: TextStyle(
@@ -137,7 +140,7 @@ class MListViewBuilder extends StatelessWidget {
       key: ValueKey(isDarkMode),
       shrinkWrap: shrinkWrap != null ? false : true,
       padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-      physics: enableScroll != null 
+      physics: enableScroll != null
           ? AlwaysScrollableScrollPhysics()
           : NeverScrollableScrollPhysics(),
       itemCount: itemCount,

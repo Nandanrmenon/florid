@@ -12,6 +12,7 @@ import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../constants.dart';
 import '../models/fdroid_app.dart';
 import '../providers/app_provider.dart';
 import '../providers/download_provider.dart';
@@ -1971,13 +1972,35 @@ class _IncludeUnstableSectionState extends State<IncludeUnstableSection> {
   }
 }
 
-class _VersionInfoSection extends StatelessWidget {
+class _VersionInfoSection extends StatefulWidget {
   final FDroidVersion version;
 
   const _VersionInfoSection({required this.version});
 
   @override
+  State<_VersionInfoSection> createState() => _VersionInfoSectionState();
+}
+
+class _VersionInfoSectionState extends State<_VersionInfoSection> {
+  bool _showMinAndroid = true;
+  bool _showTargetAndroid = true;
+
+  String _androidVersionName(int sdk) {
+    return kAndroidSdkVersions[sdk] ?? 'Android (SDK $sdk)';
+  }
+
+  String _androidVersionLabel(String sdkValue) {
+    final sdk = int.tryParse(sdkValue);
+    if (sdk == null) {
+      return 'Android (SDK $sdkValue)';
+    }
+    return _androidVersionName(sdk);
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final version = widget.version;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -2001,15 +2024,29 @@ class _VersionInfoSection extends StatelessWidget {
             ),
             if (version.minSdkVersion != null)
               MListItemData(
-                title: 'Min SDK',
-                subtitle: version.minSdkVersion!,
-                onTap: () {},
+                title: _showMinAndroid ? 'Minimum Android Version' : 'Min SDK',
+                subtitle: _showMinAndroid
+                    ? _androidVersionLabel(version.minSdkVersion!)
+                    : version.minSdkVersion!,
+                onTap: () {
+                  setState(() {
+                    _showMinAndroid = !_showMinAndroid;
+                  });
+                },
               ),
             if (version.targetSdkVersion != null)
               MListItemData(
-                title: 'Target SDK',
-                subtitle: version.targetSdkVersion!,
-                onTap: () {},
+                title: _showTargetAndroid
+                    ? 'Target Android Version'
+                    : 'Target SDK',
+                subtitle: _showTargetAndroid
+                    ? _androidVersionLabel(version.targetSdkVersion!)
+                    : version.targetSdkVersion!,
+                onTap: () {
+                  setState(() {
+                    _showTargetAndroid = !_showTargetAndroid;
+                  });
+                },
               ),
           ],
         ),

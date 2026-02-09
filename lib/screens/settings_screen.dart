@@ -295,6 +295,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           MListItemData(
                             leading: Icon(Symbols.code_rounded),
                             title: 'Source code',
+                            subtitle: 'View the Florid source code on GitHub',
+                            suffix: Icon(Symbols.open_in_new),
                             onTap: () async {
                               final url = Uri.parse(
                                 'https://github.com/Nandanrmenon/florid',
@@ -307,6 +309,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           MListItemData(
                             leading: Icon(Symbols.bug_report_rounded),
                             title: 'Report an issue',
+                            subtitle: 'Found a bug? Let us know!',
+                            suffix: Icon(Symbols.open_in_new),
                             onTap: () async {
                               final url = Uri.parse(
                                 'https://github.com/Nandanrmenon/florid/issues/new?template=bug_report.md',
@@ -317,8 +321,24 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             },
                           ),
                           MListItemData(
+                            leading: Icon(Symbols.volunteer_activism),
+                            title: 'Donate',
+                            subtitle: 'Support continued development of Florid',
+                            suffix: Icon(Symbols.open_in_new),
+                            onTap: () async {
+                              final url = Uri.parse(
+                                'https://ko-fi.com/nandanrmenon',
+                              );
+                              if (await canLaunchUrl(url)) {
+                                await launchUrl(url);
+                              }
+                            },
+                          ),
+                          MListItemData(
                             leading: Icon(Symbols.share),
                             title: 'Share Florid',
+                            subtitle:
+                                'Let your nerdy friends know about Florid!',
                             onTap: () {
                               SharePlus.instance.share(
                                 ShareParams(

@@ -2358,7 +2358,13 @@ class _VersionDownloadButton extends StatelessWidget {
           version.versionName,
         );
 
-        if (isInstalled && installedApp != null) {
+        final isInstalledVersion = isInstalled && installedApp != null
+            ? (installedApp.versionCode != null
+                  ? installedApp.versionCode == version.versionCode
+                  : installedApp.versionName == version.versionName)
+            : false;
+
+        if (isInstalledVersion) {
           return Row(
             spacing: 8,
             children: [

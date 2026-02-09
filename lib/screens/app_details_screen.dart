@@ -174,8 +174,7 @@ class _AppDetailsScreenState extends State<AppDetailsScreen> {
           }
 
           await downloadProvider.installApk(downloadInfo!.filePath!);
-          await Future.delayed(const Duration(milliseconds: 100));
-          await appProvider.fetchInstalledApps();
+          await appProvider.waitForInstalled(widget.app.packageName);
           if (context.mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
@@ -2469,8 +2468,7 @@ class _VersionDownloadButton extends StatelessWidget {
               try {
                 if (downloadInfo.filePath != null) {
                   await downloadProvider.installApk(downloadInfo.filePath!);
-                  await Future.delayed(const Duration(milliseconds: 100));
-                  await appProvider.fetchInstalledApps();
+                  await appProvider.waitForInstalled(app.packageName);
                   if (context.mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(content: Text('Installing ${app.name}...')),

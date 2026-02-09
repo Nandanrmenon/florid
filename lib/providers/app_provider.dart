@@ -550,7 +550,9 @@ class AppProvider extends ChangeNotifier {
           .toList();
 
       // Clean up preferences for uninstalled apps
-      final installedPackages = _installedApps.map((app) => app.packageName).toSet();
+      final installedPackages = _installedApps
+          .map((app) => app.packageName)
+          .toSet();
       await _preferencesService.cleanupUninstalledApps(installedPackages);
 
       _installedAppsState = LoadingState.success;
@@ -616,7 +618,9 @@ class AppProvider extends ChangeNotifier {
 
   /// Gets the latest version for an app based on per-app unstable preference
   Future<FDroidVersion?> getLatestVersion(FDroidApp app) async {
-    final includeUnstable = await _preferencesService.getIncludeUnstable(app.packageName);
+    final includeUnstable = await _preferencesService.getIncludeUnstable(
+      app.packageName,
+    );
     return app.getLatestVersion(includeUnstable: includeUnstable);
   }
 
@@ -642,6 +646,23 @@ class AppProvider extends ChangeNotifier {
       debugPrint('Error opening app $packageName: $e');
       return false;
     }
+  }
+
+  /// Polls until an app shows up as installed or timeout is reached.
+  Future<bool> waitForInstalled(
+    String packageName, {
+    Duration timeout = const Duration(seconds: 20),
+    Duration interval = const Duration(milliseconds: 800),
+  }) async {
+    final deadline = DateTime.now().add(timeout);
+    while (DateTime.now().isBefore(deadline)) {
+      await fetchInstalledApps();
+      if (isAppInstalled(packageName)) {
+        return true;
+      }
+      await Future.delayed(interval);
+    }
+    return isAppInstalled(packageName);
   }
 
   /// Refreshes all data

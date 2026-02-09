@@ -31,6 +31,7 @@ class FNavBar extends StatelessWidget {
         padding: margin,
         child: Material(
           color: baseColor,
+          elevation: 1,
           borderRadius: BorderRadius.circular(999),
           child: SizedBox(
             height: height,

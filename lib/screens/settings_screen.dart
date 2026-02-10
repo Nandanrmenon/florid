@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:florid/l10n/app_localizations.dart';
 import 'package:florid/widgets/m_list.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:material_symbols_icons/symbols.dart';
@@ -19,6 +20,7 @@ import '../providers/download_provider.dart';
 import '../providers/settings_provider.dart';
 import '../screens/repositories_screen.dart';
 import '../services/fdroid_api_service.dart';
+import '../services/update_check_service.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -213,6 +215,112 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
+  String _updateNetworkPolicyLabel(UpdateNetworkPolicy policy) {
+    switch (policy) {
+      case UpdateNetworkPolicy.wifiOnly:
+        return 'Wi-Fi only';
+      case UpdateNetworkPolicy.wifiAndCharging:
+        return 'Wi-Fi + charging';
+      case UpdateNetworkPolicy.any:
+      default:
+        return 'Mobile data or Wi-Fi';
+    }
+  }
+
+  Future<void> _showUpdateNetworkPolicyDialog(
+    BuildContext context,
+    SettingsProvider settings,
+  ) async {
+    await showDialog<void>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Update network'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: UpdateNetworkPolicy.values
+              .map(
+                (policy) => RadioListTile<UpdateNetworkPolicy>(
+                  value: policy,
+                  groupValue: settings.updateNetworkPolicy,
+                  title: Text(_updateNetworkPolicyLabel(policy)),
+                  onChanged: (value) async {
+                    if (value == null) return;
+                    await settings.setUpdateNetworkPolicy(value);
+                    await UpdateCheckService.scheduleFromPrefs();
+                    if (!context.mounted) return;
+                    Navigator.of(context).pop();
+                  },
+                ),
+              )
+              .toList(),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Close'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _updateIntervalLabel(int hours) {
+    switch (hours) {
+      case 1:
+        return 'Every 1 hour';
+      case 2:
+        return 'Every 2 hours';
+      case 3:
+        return 'Every 3 hours';
+      case 6:
+        return 'Every 6 hours';
+      case 12:
+        return 'Every 12 hours';
+      case 24:
+        return 'Daily';
+      default:
+        return 'Every $hours hours';
+    }
+  }
+
+  Future<void> _showUpdateIntervalDialog(
+    BuildContext context,
+    SettingsProvider settings,
+  ) async {
+    const intervals = [1, 2, 3, 6, 12, 24];
+    await showDialog<void>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Update interval'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: intervals
+              .map(
+                (hours) => RadioListTile<int>(
+                  value: hours,
+                  groupValue: settings.updateIntervalHours,
+                  title: Text(_updateIntervalLabel(hours)),
+                  onChanged: (value) async {
+                    if (value == null) return;
+                    await settings.setUpdateIntervalHours(value);
+                    await UpdateCheckService.scheduleFromPrefs();
+                    if (!context.mounted) return;
+                    Navigator.of(context).pop();
+                  },
+                ),
+              )
+              .toList(),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Close'),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Consumer<SettingsProvider>(
@@ -365,6 +473,79 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             subtitle: 'Import favourites from a JSON file',
                             onTap: () => _importFavorites(context),
                           ),
+                        ],
+                      ),
+                    ],
+                  ),
+                  Column(
+                    spacing: 4,
+                    children: [
+                      MListHeader(title: 'Background updates'),
+                      MListView(
+                        items: [
+                          MListItemData(
+                            leading: Icon(Symbols.notifications),
+                            title: 'Check for updates in background',
+                            subtitle: 'Notify when updates are available',
+                            onTap: () async {
+                              await settings.setBackgroundUpdatesEnabled(
+                                !settings.backgroundUpdatesEnabled,
+                              );
+                              await UpdateCheckService.scheduleFromPrefs();
+                            },
+                            suffix: Switch(
+                              value: settings.backgroundUpdatesEnabled,
+                              onChanged: (value) async {
+                                await settings.setBackgroundUpdatesEnabled(
+                                  value,
+                                );
+                                await UpdateCheckService.scheduleFromPrefs();
+                              },
+                            ),
+                          ),
+                          MListItemData(
+                            leading: Icon(Symbols.network_check),
+                            title: 'Update network',
+                            subtitle: _updateNetworkPolicyLabel(
+                              settings.updateNetworkPolicy,
+                            ),
+                            onTap: () => _showUpdateNetworkPolicyDialog(
+                              context,
+                              settings,
+                            ),
+                            suffix: Icon(Symbols.chevron_right),
+                          ),
+                          MListItemData(
+                            leading: Icon(Symbols.schedule),
+                            title: 'Update interval',
+                            subtitle: _updateIntervalLabel(
+                              settings.updateIntervalHours,
+                            ),
+                            onTap: () =>
+                                _showUpdateIntervalDialog(context, settings),
+                            suffix: Icon(Symbols.chevron_right),
+                          ),
+                          if (kDebugMode)
+                            MListItemData(
+                              leading: Icon(Symbols.bolt),
+                              title: 'Run debug check in 10s',
+                              subtitle:
+                                  'Shows a test notification and runs after 10s',
+                              onTap: () async {
+                                await UpdateCheckService.showDebugNotificationNow(
+                                  'Debug check scheduled',
+                                );
+                                await UpdateCheckService.runDebugInApp();
+                                if (!context.mounted) return;
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text(
+                                      'Debug update check will run in 10 seconds',
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
                         ],
                       ),
                     ],

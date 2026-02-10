@@ -15,9 +15,14 @@ import 'screens/onboarding_screen.dart';
 import 'services/database_service.dart';
 import 'services/fdroid_api_service.dart';
 import 'services/izzy_stats_service.dart';
+import 'services/notification_service.dart';
+import 'services/update_check_service.dart';
+import 'utils/app_navigator.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await NotificationService().init();
+  await UpdateCheckService.initialize();
   runApp(MainApp());
 }
 
@@ -95,6 +100,7 @@ class MainApp extends StatelessWidget {
           return MaterialApp(
             title: 'Florid - F-Droid Client',
             debugShowCheckedModeBanner: false,
+            navigatorKey: appNavigatorKey,
             localizationsDelegates: AppLocalizations.localizationsDelegates,
             supportedLocales: AppLocalizations.supportedLocales,
             theme: settings.themeStyle == ThemeStyle.florid

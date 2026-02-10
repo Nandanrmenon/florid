@@ -3,6 +3,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 enum ThemeStyle { material, florid }
 
+enum UpdateNetworkPolicy { any, wifiOnly, wifiAndCharging }
+
 class SettingsProvider extends ChangeNotifier {
   static const _themeModeKey = 'theme_mode';
   static const _themeStyleKey = 'theme_style';
@@ -11,6 +13,9 @@ class SettingsProvider extends ChangeNotifier {
   static const _localeKey = 'locale';
   static const _onboardingCompleteKey = 'onboarding_complete';
   static const _sniBypassKey = 'sni_bypass_enabled';
+  static const backgroundUpdatesKey = 'background_updates_enabled';
+  static const updateIntervalHoursKey = 'background_update_interval_hours';
+  static const updateNetworkPolicyKey = 'background_update_network_policy';
 
   ThemeMode _themeMode = ThemeMode.system;
   ThemeStyle _themeStyle = ThemeStyle.florid;
@@ -19,6 +24,9 @@ class SettingsProvider extends ChangeNotifier {
   String _locale = 'en-US';
   bool _onboardingComplete = false;
   bool _sniBypassEnabled = true;
+  bool _backgroundUpdatesEnabled = true;
+  int _updateIntervalHours = 6;
+  UpdateNetworkPolicy _updateNetworkPolicy = UpdateNetworkPolicy.any;
   bool _loaded = false;
 
   SettingsProvider() {
@@ -33,6 +41,9 @@ class SettingsProvider extends ChangeNotifier {
   String get locale => _locale;
   bool get onboardingComplete => _onboardingComplete;
   bool get sniBypassEnabled => _sniBypassEnabled;
+  bool get backgroundUpdatesEnabled => _backgroundUpdatesEnabled;
+  int get updateIntervalHours => _updateIntervalHours;
+  UpdateNetworkPolicy get updateNetworkPolicy => _updateNetworkPolicy;
 
   /// Available locales for F-Droid repository data
   static const List<String> availableLocales = [
@@ -97,6 +108,13 @@ class SettingsProvider extends ChangeNotifier {
     _locale = prefs.getString(_localeKey) ?? 'en-US';
     _onboardingComplete = prefs.getBool(_onboardingCompleteKey) ?? false;
     _sniBypassEnabled = prefs.getBool(_sniBypassKey) ?? true;
+    _backgroundUpdatesEnabled = prefs.getBool(backgroundUpdatesKey) ?? true;
+    _updateIntervalHours = prefs.getInt(updateIntervalHoursKey) ?? 6;
+    final policyIndex =
+        prefs.getInt(updateNetworkPolicyKey) ?? UpdateNetworkPolicy.any.index;
+    if (policyIndex >= 0 && policyIndex < UpdateNetworkPolicy.values.length) {
+      _updateNetworkPolicy = UpdateNetworkPolicy.values[policyIndex];
+    }
     _loaded = true;
     notifyListeners();
   }
@@ -151,5 +169,26 @@ class SettingsProvider extends ChangeNotifier {
     notifyListeners();
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_sniBypassKey, value);
+  }
+
+  Future<void> setBackgroundUpdatesEnabled(bool value) async {
+    _backgroundUpdatesEnabled = value;
+    notifyListeners();
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(backgroundUpdatesKey, value);
+  }
+
+  Future<void> setUpdateIntervalHours(int hours) async {
+    _updateIntervalHours = hours;
+    notifyListeners();
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt(updateIntervalHoursKey, hours);
+  }
+
+  Future<void> setUpdateNetworkPolicy(UpdateNetworkPolicy policy) async {
+    _updateNetworkPolicy = policy;
+    notifyListeners();
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt(updateNetworkPolicyKey, policy.index);
   }
 }

@@ -1,6 +1,10 @@
+import 'dart:convert';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+
+import '../utils/app_navigator.dart';
 
 class NotificationService {
   static final NotificationService _instance = NotificationService._internal();
@@ -48,6 +52,13 @@ class NotificationService {
 
     // Request notification permission on Android 13+
     await requestPermission();
+
+    final launchDetails = await _flutterLocalNotificationsPlugin
+        .getNotificationAppLaunchDetails();
+    if (launchDetails?.didNotificationLaunchApp ?? false) {
+      final payload = launchDetails?.notificationResponse?.payload;
+      _handleNotificationPayload(payload);
+    }
 
     // Create download notification channel
     await _createDownloadChannel();
@@ -222,5 +233,22 @@ class NotificationService {
     debugPrint(
       '[NotificationService] Notification tapped: ${response.payload}',
     );
+    _handleNotificationPayload(response.payload);
+  }
+
+  void _handleNotificationPayload(String? payload) {
+    if (payload == null || payload.isEmpty) return;
+    try {
+      final decoded = jsonDecode(payload);
+      if (decoded is Map && decoded['type'] == 'updates') {
+        openUpdatesScreen();
+        return;
+      }
+      if (decoded is Map && decoded['type'] == 'debug_update_check') {
+        openUpdatesScreen();
+      }
+    } catch (_) {
+      // Ignore invalid payloads.
+    }
   }
 }

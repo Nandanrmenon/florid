@@ -135,6 +135,19 @@ class AppProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> setFavorites(Set<String> favorites, {bool merge = false}) async {
+    if (merge) {
+      _favoritePackages = {..._favoritePackages, ...favorites};
+    } else {
+      _favoritePackages = {...favorites};
+    }
+    await _preferencesService.setFavorites(_favoritePackages);
+    if (_repository == null && _repositoryState != LoadingState.loading) {
+      await fetchRepository();
+    }
+    notifyListeners();
+  }
+
   Future<void> _loadFavorites() async {
     _favoritePackages = await _preferencesService.getFavorites();
     notifyListeners();

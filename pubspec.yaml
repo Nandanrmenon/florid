@@ -57,6 +57,7 @@ dependencies:
 
   # File picker and downloads
   dio: ^5.4.1
+  file_picker: ^10.1.2
 
   # App installer for APK installation
   app_installer: ^1.1.0

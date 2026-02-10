@@ -1,13 +1,20 @@
+import 'dart:convert';
+import 'dart:io';
+
+import 'package:file_picker/file_picker.dart';
 import 'package:florid/l10n/app_localizations.dart';
 import 'package:florid/widgets/m_list.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:path/path.dart' as p;
+import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../providers/app_provider.dart';
 import '../providers/download_provider.dart';
 import '../providers/settings_provider.dart';
 import '../screens/repositories_screen.dart';
@@ -19,6 +26,8 @@ class SettingsScreen extends StatefulWidget {
   @override
   State<SettingsScreen> createState() => _SettingsScreenState();
 }
+
+enum _FavoritesImportAction { merge, replace }
 
 class _SettingsScreenState extends State<SettingsScreen> {
   String _appVersion = '';
@@ -65,6 +74,140 @@ class _SettingsScreenState extends State<SettingsScreen> {
           deleted > 0
               ? 'Deleted $deleted APK file${deleted == 1 ? '' : 's'}'
               : 'No APK downloads to delete',
+        ),
+      ),
+    );
+  }
+
+  Future<void> _exportFavorites(BuildContext context) async {
+    final appProvider = context.read<AppProvider>();
+    final favorites = appProvider.favoritePackages.toList()..sort();
+
+    if (favorites.isEmpty) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('No favourites to export')));
+      return;
+    }
+
+    final payload = jsonEncode({'favorites': favorites});
+    final fileName =
+        'florid-favourites-${DateTime.now().millisecondsSinceEpoch}.json';
+
+    Directory? downloadsDir;
+    if (Platform.isAndroid) {
+      downloadsDir = Directory('/storage/emulated/0/Download');
+    } else {
+      downloadsDir = await getDownloadsDirectory();
+    }
+
+    if (downloadsDir == null) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Unable to access Downloads folder')),
+      );
+      return;
+    }
+
+    final exportFile = File(p.join(downloadsDir.path, fileName));
+    await exportFile.writeAsString(payload);
+
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Saved to Downloads: ${downloadsDir.path}/$fileName'),
+      ),
+    );
+  }
+
+  Set<String> _parseFavoritesPayload(String raw) {
+    final trimmed = raw.trim();
+    if (trimmed.isEmpty) return <String>{};
+
+    try {
+      final decoded = jsonDecode(trimmed);
+      if (decoded is List) {
+        return decoded.whereType<String>().toSet();
+      }
+      if (decoded is Map && decoded['favorites'] is List) {
+        final list = decoded['favorites'] as List;
+        return list.whereType<String>().toSet();
+      }
+    } catch (_) {
+      // Fallback to parsing as a comma/whitespace-separated list.
+    }
+
+    return trimmed
+        .split(RegExp(r'[\s,]+'))
+        .where((item) => item.isNotEmpty)
+        .toSet();
+  }
+
+  Future<void> _importFavorites(BuildContext context) async {
+    final appProvider = context.read<AppProvider>();
+    final picked = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: ['json'],
+      withData: true,
+    );
+    if (picked == null || picked.files.isEmpty) return;
+
+    final file = picked.files.first;
+    final raw = file.bytes != null
+        ? utf8.decode(file.bytes!)
+        : file.path != null
+        ? await File(file.path!).readAsString()
+        : '';
+
+    final parsed = _parseFavoritesPayload(raw);
+    if (parsed.isEmpty) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('No favourites found to import')),
+      );
+      return;
+    }
+
+    final result = await showDialog<_FavoritesImportAction>(
+      context: context,
+      builder: (context) => AlertDialog(
+        icon: const Icon(Symbols.star),
+        title: const Text('Import favourites'),
+        content: Text(
+          'Found ${parsed.length} favourite${parsed.length == 1 ? '' : 's'} in ${file.name}.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () =>
+                Navigator.of(context).pop(_FavoritesImportAction.merge),
+            child: const Text('Merge'),
+          ),
+          FilledButton(
+            onPressed: () =>
+                Navigator.of(context).pop(_FavoritesImportAction.replace),
+            child: const Text('Replace'),
+          ),
+        ],
+      ),
+    );
+
+    if (result == null) return;
+
+    await appProvider.setFavorites(
+      parsed,
+      merge: result == _FavoritesImportAction.merge,
+    );
+
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          'Imported ${parsed.length} favourite${parsed.length == 1 ? '' : 's'}',
         ),
       ),
     );
@@ -199,6 +342,28 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             },
                             subtitle: 'Add or remove F-Droid repositories',
                             suffix: Icon(Symbols.chevron_right),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                  Column(
+                    spacing: 4,
+                    children: [
+                      MListHeader(title: 'Favourites'),
+                      MListView(
+                        items: [
+                          MListItemData(
+                            leading: Icon(Symbols.upload),
+                            title: 'Export favourites',
+                            subtitle: 'Save a JSON file to Downloads',
+                            onTap: () => _exportFavorites(context),
+                          ),
+                          MListItemData(
+                            leading: Icon(Symbols.download),
+                            title: 'Import favourites',
+                            subtitle: 'Import favourites from a JSON file',
+                            onTap: () => _importFavorites(context),
                           ),
                         ],
                       ),

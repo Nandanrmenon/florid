@@ -60,6 +60,7 @@ class FTabBar extends StatelessWidget implements PreferredSizeWidget {
         color: isFlorid
             ? Theme.of(context).colorScheme.surfaceContainerHighest
             : Colors.transparent,
+        clipBehavior: isFlorid ? Clip.antiAlias : Clip.none,
         child: TabBar(
           controller: controller,
           indicator: indicator,

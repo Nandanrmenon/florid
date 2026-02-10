@@ -19,8 +19,6 @@ class PermissionsScreen extends StatefulWidget {
 }
 
 class _PermissionsScreenState extends State<PermissionsScreen> {
-  final Set<String> _showRawPermissions = {};
-
   String _permissionDescription(String permission) {
     return kPermissionDescriptions[permission] ?? 'Permission required by app.';
   }
@@ -138,29 +136,14 @@ class _PermissionsScreenState extends State<PermissionsScreen> {
                         itemCount: permissions.length,
                         itemBuilder: (index) {
                           final permission = permissions[index];
-                          final showRaw = _showRawPermissions.contains(
-                            permission,
-                          );
                           final description = _permissionDescription(
                             permission,
                           );
 
                           return MListItemData(
-                            leading: Icon(
-                              Symbols.security,
-                              color: Theme.of(context).colorScheme.primary,
-                            ),
-                            title: description,
-                            subtitle: showRaw ? permission : null,
-                            onTap: () {
-                              setState(() {
-                                if (showRaw) {
-                                  _showRawPermissions.remove(permission);
-                                } else {
-                                  _showRawPermissions.add(permission);
-                                }
-                              });
-                            },
+                            title: permission,
+                            subtitle: description,
+                            onTap: () {},
                           );
                         },
                       ),

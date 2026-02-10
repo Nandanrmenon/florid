@@ -36,14 +36,6 @@ Browse, search, and install open‑source Android apps from the F‑Droid reposi
 - Localization: Choose repository content language (e.g., en‑US, de‑DE)
 - Offline cache: Fast local database with smart network/cache fallback
 
-## Screenshots
-
-|                                                               |                                                                |                                                               |                                                               |
-| :-----------------------------------------------------------: | :------------------------------------------------------------: | :-----------------------------------------------------------: | :-----------------------------------------------------------: |
-| <img src="assets/screenshots/Screenshot-1.png" width="260" /> | <img src="assets/screenshots/Screenshot-2.png" width="260" />  | <img src="assets/screenshots/Screenshot-3.png" width="260" /> | <img src="assets/screenshots/Screenshot-4.png" width="260" /> |
-| <img src="assets/screenshots/Screenshot-5.png" width="260" /> | <img src="assets/screenshots/Screenshot-6.png" width="260" />  | <img src="assets/screenshots/Screenshot-7.png" width="260" /> | <img src="assets/screenshots/Screenshot-8.png" width="260" /> |
-| <img src="assets/screenshots/Screenshot-9.png" width="260" /> | <img src="assets/screenshots/Screenshot-10.png" width="260" /> |                                                               |                                                               |
-
 ## Getting Started
 
 ### Prerequisites
@@ -88,6 +80,7 @@ Help translate Florid into other languages at [Crowdin](https://crowdin.com/proj
 | -------- | ---- | ------------------------------------------------------------------------------------------------------------------ |
 | English  | en   | @Nandanrmenon                                                                                                      |
 | German   | de   | [@JasmineLowen](https://github.com/JasmineLowen), [@mondlicht-und-sterne](https://github.com/mondlicht-und-sterne) |
+| Czech   | cz   | [@mondlicht-und-sterne](https://github.com/mondlicht-und-sterne) |
 
 ## License
 

@@ -15,13 +15,11 @@ import 'screens/onboarding_screen.dart';
 import 'services/database_service.dart';
 import 'services/fdroid_api_service.dart';
 import 'services/izzy_stats_service.dart';
-import 'services/notification_service.dart';
 import 'services/update_check_service.dart';
 import 'utils/app_navigator.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await NotificationService().init();
   await UpdateCheckService.initialize();
   runApp(MainApp());
 }

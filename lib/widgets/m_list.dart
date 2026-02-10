@@ -248,7 +248,7 @@ class MRadioListView<T> extends StatelessWidget {
             color: Theme.of(context).colorScheme.surfaceContainer,
             clipBehavior: Clip.antiAlias,
             child: RadioListTile<T>(
-              contentPadding: EdgeInsets.only(left: 16.0, right: 4.0),
+              contentPadding: EdgeInsets.only(left: 16.0, right: 18.0),
               title: Text(items[index].title),
               subtitle: items[index].subtitle.isNotEmpty
                   ? Text(items[index].subtitle)

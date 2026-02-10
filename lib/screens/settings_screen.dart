@@ -1,14 +1,10 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:android_intent_plus/android_intent.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:florid/l10n/app_localizations.dart';
 import 'package:florid/widgets/m_list.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path/path.dart' as p;
@@ -18,9 +14,11 @@ import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../providers/app_provider.dart';
-import '../providers/download_provider.dart';
 import '../providers/settings_provider.dart';
+import '../screens/appearance_screen.dart';
 import '../screens/repositories_screen.dart';
+import '../screens/troubleshooting_screen.dart';
+import '../screens/update_settings_screen.dart';
 import '../services/fdroid_api_service.dart';
 import '../services/update_check_service.dart';
 
@@ -34,17 +32,12 @@ class SettingsScreen extends StatefulWidget {
 enum _FavoritesImportAction { merge, replace }
 
 class _SettingsScreenState extends State<SettingsScreen> {
-  static const MethodChannel _batteryChannel = MethodChannel(
-    'florid/battery_optimizations',
-  );
   String _appVersion = '';
-  bool? _isIgnoringBatteryOptimizations;
 
   @override
   void initState() {
     super.initState();
     _loadVersion();
-    _loadBatteryOptimizationStatus();
   }
 
   Future<void> _loadVersion() async {
@@ -53,70 +46,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
     setState(() {
       _appVersion = '${info.version}+${info.buildNumber}';
     });
-  }
-
-  Future<void> _loadBatteryOptimizationStatus() async {
-    if (!Platform.isAndroid) return;
-    try {
-      final isIgnoring = await _batteryChannel.invokeMethod<bool>(
-        'isIgnoringBatteryOptimizations',
-      );
-      if (!mounted) return;
-      setState(() {
-        _isIgnoringBatteryOptimizations = isIgnoring ?? false;
-      });
-    } on PlatformException {
-      if (!mounted) return;
-      setState(() {
-        _isIgnoringBatteryOptimizations = null;
-      });
-    }
-  }
-
-  Future<void> _clearRepoCache(BuildContext context) async {
-    final api = context.read<FDroidApiService>();
-    await api.clearRepositoryCache();
-    if (!mounted) return;
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text('Repository cache cleared')));
-  }
-
-  Future<void> _clearImageCache(BuildContext context) async {
-    await DefaultCacheManager().emptyCache();
-    imageCache.clear();
-    imageCache.clearLiveImages();
-    if (!mounted) return;
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text('Image cache cleared')));
-  }
-
-  Future<void> _clearApkDownloads(BuildContext context) async {
-    final deleted = await context.read<DownloadProvider>().clearAllDownloads();
-    if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          deleted > 0
-              ? 'Deleted $deleted APK file${deleted == 1 ? '' : 's'}'
-              : 'No APK downloads to delete',
-        ),
-      ),
-    );
-  }
-
-  Future<void> _requestDisableBatteryOptimizations() async {
-    if (!Platform.isAndroid) return;
-    final info = await PackageInfo.fromPlatform();
-
-    final intent = AndroidIntent(
-      action: 'android.settings.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS',
-      data: 'package:${info.packageName}',
-    );
-    await intent.launch();
-    await Future.delayed(const Duration(seconds: 1));
-    await _loadBatteryOptimizationStatus();
   }
 
   Future<void> _exportFavorites(BuildContext context) async {
@@ -375,96 +304,27 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   Column(
                     spacing: 4,
                     children: [
-                      MListHeader(title: 'Theme Mode'),
-                      MRadioListView(
-                        items: [
-                          MRadioListItemData<ThemeMode>(
-                            title: 'Follow system theme',
-                            subtitle: '',
-                            value: ThemeMode.system,
-                          ),
-                          MRadioListItemData<ThemeMode>(
-                            title: 'Light theme',
-                            subtitle: '',
-                            value: ThemeMode.light,
-                          ),
-                          MRadioListItemData<ThemeMode>(
-                            title: 'Dark theme',
-                            subtitle: '',
-                            value: ThemeMode.dark,
-                          ),
-                        ],
-                        groupValue: settings.themeMode,
-                        onChanged: (mode) {
-                          settings.setThemeMode(mode);
-                        },
-                      ),
-                      MListHeader(title: 'Theme Style'),
-                      MRadioListView(
-                        items: [
-                          MRadioListItemData<ThemeStyle>(
-                            title: 'Material style',
-                            subtitle: '',
-                            value: ThemeStyle.material,
-                          ),
-                          MRadioListItemData<ThemeStyle>(
-                            title: 'Florid style',
-                            subtitle: '',
-                            suffix: Container(
-                              margin: const EdgeInsets.only(right: 8.0),
-                              child: Material(
-                                color: Theme.of(context).colorScheme.secondary,
-                                borderRadius: BorderRadius.circular(99.0),
-                                child: Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 12.0,
-                                    vertical: 2.0,
-                                  ),
-                                  child: Text(
-                                    'Beta',
-                                    style: TextStyle(
-                                      color: Theme.of(
-                                        context,
-                                      ).colorScheme.onSecondary,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                            value: ThemeStyle.florid,
-                          ),
-                        ],
-                        groupValue: settings.themeStyle,
-                        onChanged: (style) {
-                          settings.setThemeStyle(style);
-                        },
+                      MListHeader(
+                        title: 'General Settings',
+                        icon: Symbols.settings,
                       ),
                       MListView(
                         items: [
                           MListItemData(
-                            leading: Icon(Symbols.feedback),
-                            title: 'Fedback on Florid theme',
-                            subtitle:
-                                'Help improve the Florid theme by providing feedback',
+                            leading: Icon(Symbols.palette),
+                            title: 'Appearance',
+                            subtitle: 'Theme mode and style',
                             onTap: () {
-                              launchUrl(
-                                Uri.parse(
-                                  'https://github.com/Nandanrmenon/florid/discussions/5',
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      const AppearanceScreen(),
                                 ),
                               );
                             },
-                            suffix: Icon(Symbols.open_in_new),
+                            suffix: Icon(Symbols.chevron_right),
                           ),
-                        ],
-                      ),
-                    ],
-                  ),
-                  Column(
-                    spacing: 4,
-                    children: [
-                      MListHeader(title: 'General Settings'),
-                      MListView(
-                        items: [
                           MListItemData(
                             leading: Icon(Symbols.language),
                             title: 'App content language',
@@ -489,186 +349,64 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             subtitle: 'Add or remove F-Droid repositories',
                             suffix: Icon(Symbols.chevron_right),
                           ),
+                          MListItemData(
+                            leading: Icon(Symbols.update),
+                            title: 'Update settings',
+                            subtitle: 'Manage background updates',
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      const UpdateSettingsScreen(),
+                                ),
+                              );
+                            },
+                            suffix: Icon(Symbols.chevron_right),
+                          ),
                         ],
                       ),
                     ],
                   ),
                   Column(
-                    spacing: 4,
+                    spacing: 4.0,
                     children: [
-                      MListHeader(title: 'Favourites'),
+                      MListHeader(
+                        title: 'Miscellaneous',
+                        icon: Symbols.more_horiz,
+                      ),
                       MListView(
                         items: [
                           MListItemData(
-                            leading: Icon(Symbols.upload),
+                            leading: Icon(Symbols.file_upload),
                             title: 'Export favourites',
                             subtitle: 'Save a JSON file to Downloads',
                             onTap: () => _exportFavorites(context),
                           ),
                           MListItemData(
-                            leading: Icon(Symbols.download),
+                            leading: Icon(Symbols.file_download),
                             title: 'Import favourites',
                             subtitle: 'Import favourites from a JSON file',
                             onTap: () => _importFavorites(context),
                           ),
                         ],
                       ),
-                    ],
-                  ),
-                  Column(
-                    spacing: 4,
-                    children: [
-                      MListHeader(title: 'Background updates'),
                       MListView(
                         items: [
                           MListItemData(
-                            leading: Icon(Symbols.notifications),
-                            title: 'Check for updates in background',
-                            subtitle: 'Notify when updates are available',
-                            onTap: () async {
-                              await settings.setBackgroundUpdatesEnabled(
-                                !settings.backgroundUpdatesEnabled,
+                            leading: Icon(Symbols.build),
+                            title: 'Troubleshooting',
+                            subtitle: 'Storage, cache, and downloads',
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      const TroubleshootingScreen(),
+                                ),
                               );
-                              await UpdateCheckService.scheduleFromPrefs();
                             },
-                            suffix: Switch(
-                              value: settings.backgroundUpdatesEnabled,
-                              onChanged: (value) async {
-                                await settings.setBackgroundUpdatesEnabled(
-                                  value,
-                                );
-                                await UpdateCheckService.scheduleFromPrefs();
-                              },
-                            ),
-                          ),
-                          MListItemData(
-                            leading: Icon(Symbols.network_check),
-                            title: 'Update network',
-                            subtitle: _updateNetworkPolicyLabel(
-                              settings.updateNetworkPolicy,
-                            ),
-                            onTap: () => _showUpdateNetworkPolicyDialog(
-                              context,
-                              settings,
-                            ),
                             suffix: Icon(Symbols.chevron_right),
-                          ),
-                          MListItemData(
-                            leading: Icon(Symbols.schedule),
-                            title: 'Update interval',
-                            subtitle: _updateIntervalLabel(
-                              settings.updateIntervalHours,
-                            ),
-                            onTap: () =>
-                                _showUpdateIntervalDialog(context, settings),
-                            suffix: Icon(Symbols.chevron_right),
-                          ),
-                          if (_isIgnoringBatteryOptimizations == false)
-                            MListItemData(
-                              selected: true,
-                              leading: Icon(
-                                Symbols.battery_saver,
-                                fill: 1,
-                                color: Theme.of(context).colorScheme.error,
-                              ),
-                              title: 'Disable battery optimization',
-                              subtitle:
-                                  'Allow background checks to run reliably',
-                              onTap: _requestDisableBatteryOptimizations,
-                            ),
-                          if (kDebugMode)
-                            MListItemData(
-                              leading: Icon(Symbols.bolt),
-                              title: 'Run debug check in 10s',
-                              subtitle:
-                                  'Shows a test notification and runs after 10s',
-                              onTap: () async {
-                                await UpdateCheckService.showDebugNotificationNow(
-                                  'Debug check scheduled',
-                                );
-                                await UpdateCheckService.runDebugInApp();
-                                if (!context.mounted) return;
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text(
-                                      'Debug update check will run in 10 seconds',
-                                    ),
-                                  ),
-                                );
-                              },
-                            ),
-                        ],
-                      ),
-                    ],
-                  ),
-
-                  Column(
-                    spacing: 4,
-                    children: [
-                      MListHeader(title: 'Downloads & Storage'),
-                      MListView(
-                        items: [
-                          MListItemData(
-                            title: 'Auto-install after download',
-                            onTap: () {
-                              settings.setAutoInstallApk(
-                                !settings.autoInstallApk,
-                              );
-                            },
-                            subtitle:
-                                'Install APKs automatically once download finishes',
-                            suffix: Switch(
-                              value: settings.autoInstallApk,
-                              onChanged: (value) {
-                                settings.setAutoInstallApk(value);
-                              },
-                            ),
-                          ),
-                          MListItemData(
-                            title: 'Delete APK after install',
-                            onTap: () {
-                              settings.setAutoInstallApk(
-                                !settings.autoInstallApk,
-                              );
-                            },
-                            subtitle:
-                                'Remove installer files after successful installation',
-                            suffix: Switch(
-                              value: settings.autoDeleteApk,
-                              onChanged: (value) {
-                                settings.setAutoDeleteApk(value);
-                              },
-                            ),
-                          ),
-                        ],
-                      ),
-                      MListView(
-                        items: [
-                          MListItemData(
-                            leading: Icon(Symbols.cleaning_services),
-                            title: 'Clear repository cache',
-                            onTap: () {
-                              _clearRepoCache(context);
-                            },
-                            subtitle:
-                                'Refresh app list and metadata on next load',
-                          ),
-                          MListItemData(
-                            leading: Icon(Symbols.delete_sweep),
-                            title: 'Clear APK downloads',
-                            onTap: () {
-                              _clearApkDownloads(context);
-                            },
-                            subtitle:
-                                'Remove downloaded installer files from storage',
-                          ),
-                          MListItemData(
-                            leading: Icon(Symbols.image_not_supported),
-                            title: 'Clear image cache',
-                            onTap: () {
-                              _clearImageCache(context);
-                            },
-                            subtitle: 'Remove cached icons and screenshots',
                           ),
                         ],
                       ),
@@ -678,7 +416,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   Column(
                     spacing: 4,
                     children: [
-                      MListHeader(title: 'About'),
+                      MListHeader(title: 'About', icon: Symbols.android),
                       MListView(
                         items: [
                           MListItemData(

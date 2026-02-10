@@ -187,7 +187,7 @@ class _UpdatesScreenState extends State<UpdatesScreen>
                     ),
                     FloridTabBarItem(
                       icon: Symbols.favorite,
-                      label: 'Favourites',
+                      label: AppLocalizations.of(context)!.favourites,
                       badgeCount: favoriteApps.isNotEmpty
                           ? favoriteApps.length
                           : 0,

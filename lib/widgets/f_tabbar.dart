@@ -89,7 +89,7 @@ class FTabBar extends StatelessWidget implements PreferredSizeWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  if (showBadge)
+                  if (showBadge && item.badgeCount > 0)
                     Container(
                       margin: const EdgeInsets.only(left: 6),
                       child: CircleAvatar(

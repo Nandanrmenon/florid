@@ -188,7 +188,9 @@ class _UpdatesScreenState extends State<UpdatesScreen>
                     FloridTabBarItem(
                       icon: Symbols.favorite,
                       label: 'Favourites',
-                      badgeCount: favoriteApps.length,
+                      badgeCount: favoriteApps.isNotEmpty
+                          ? favoriteApps.length
+                          : 0,
                     ),
                   ],
                   onTabChanged: (index) {

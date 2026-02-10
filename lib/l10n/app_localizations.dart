@@ -627,6 +627,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No categories found'**
   String get no_categories_found;
+
+  /// No description provided for @on_device.
+  ///
+  /// In en, this message translates to:
+  /// **'On Device'**
+  String get on_device;
+
+  /// No description provided for @favourites.
+  ///
+  /// In en, this message translates to:
+  /// **'Favourites'**
+  String get favourites;
+
+  /// No description provided for @loading_repository.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading repository…'**
+  String get loading_repository;
+
+  /// No description provided for @unable_to_load_repository.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to load repository'**
+  String get unable_to_load_repository;
+
+  /// No description provided for @repository_loading_error_descrption.
+  ///
+  /// In en, this message translates to:
+  /// **'Check your connection or repository settings, then try again.'**
+  String get repository_loading_error_descrption;
 }
 
 class _AppLocalizationsDelegate

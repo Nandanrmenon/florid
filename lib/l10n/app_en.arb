@@ -99,5 +99,10 @@
     }
   },
   "loading_categories": "Loading categories...",
-  "no_categories_found": "No categories found"
+  "no_categories_found": "No categories found",
+  "on_device": "On Device",
+  "favourites": "Favourites",
+  "loading_repository": "Loading repository…",
+  "unable_to_load_repository": "Unable to load repository",
+  "repository_loading_error_descrption": "Check your connection or repository settings, then try again."
 }

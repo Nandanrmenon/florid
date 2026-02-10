@@ -275,4 +275,20 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get no_categories_found => 'No categories found';
+
+  @override
+  String get on_device => 'On Device';
+
+  @override
+  String get favourites => 'Favourites';
+
+  @override
+  String get loading_repository => 'Loading repository…';
+
+  @override
+  String get unable_to_load_repository => 'Unable to load repository';
+
+  @override
+  String get repository_loading_error_descrption =>
+      'Check your connection or repository settings, then try again.';
 }

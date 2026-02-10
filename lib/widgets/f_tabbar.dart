@@ -10,11 +10,17 @@ class FTabBar extends StatelessWidget implements PreferredSizeWidget {
     required this.items,
     required this.onTabChanged,
     required this.controller,
+    this.isScrollable = false,
+    this.showBadge = false,
+    this.badgeText = '',
   });
 
   final List<FloridTabBarItem> items;
   final Function(int) onTabChanged;
   final TabController controller;
+  final bool isScrollable;
+  final bool showBadge;
+  final String badgeText;
 
   // Give AppBar a consistent height hint; actual height adjusts inside.
   @override
@@ -46,7 +52,8 @@ class FTabBar extends StatelessWidget implements PreferredSizeWidget {
         ? const EdgeInsets.only(left: 16.0, right: 16.0, bottom: 8.0)
         : EdgeInsets.zero;
 
-    return Padding(
+    return Container(
+      width: double.infinity,
       padding: padding,
       child: Material(
         borderRadius: isFlorid ? BorderRadius.circular(99) : null,
@@ -66,6 +73,8 @@ class FTabBar extends StatelessWidget implements PreferredSizeWidget {
               ? BorderRadius.circular(99)
               : BorderRadius.zero,
           onTap: onTabChanged,
+          isScrollable: isScrollable,
+          tabAlignment: isScrollable ? TabAlignment.start : null,
           padding: isFlorid ? const EdgeInsets.all(4) : null,
           tabs: items.map((item) {
             return Tab(
@@ -74,7 +83,25 @@ class FTabBar extends StatelessWidget implements PreferredSizeWidget {
                 children: [
                   Icon(item.icon, fill: 1, size: 18),
                   const SizedBox(width: 8),
-                  Text(item.label),
+                  Text(
+                    item.label,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  if (showBadge)
+                    Container(
+                      margin: const EdgeInsets.only(left: 6),
+                      child: CircleAvatar(
+                        radius: 11,
+                        child: Text(
+                          item.badgeCount.toString(),
+                          style: const TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
                 ],
               ),
             );
@@ -86,8 +113,13 @@ class FTabBar extends StatelessWidget implements PreferredSizeWidget {
 }
 
 class FloridTabBarItem {
-  const FloridTabBarItem({required this.icon, required this.label});
+  const FloridTabBarItem({
+    required this.icon,
+    required this.label,
+    this.badgeCount = 0,
+  });
 
   final IconData icon;
   final String label;
+  final int badgeCount;
 }

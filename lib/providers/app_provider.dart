@@ -30,7 +30,9 @@ class AppProvider extends ChangeNotifier {
   SettingsProvider? _settingsProvider;
   final AppPreferencesService _preferencesService = AppPreferencesService();
 
-  AppProvider(this._apiService, [this._settingsProvider]);
+  AppProvider(this._apiService, [this._settingsProvider]) {
+    _loadFavorites();
+  }
 
   void updateSettings(SettingsProvider settings) {
     _settingsProvider = settings;
@@ -72,6 +74,9 @@ class AppProvider extends ChangeNotifier {
   LoadingState _repositoryState = LoadingState.idle;
   String? _repositoryError;
 
+  // Favorites state
+  Set<String> _favoritePackages = {};
+
   // Getters
   List<FDroidApp> get latestApps => _latestApps;
   LoadingState get latestAppsState => _latestAppsState;
@@ -100,6 +105,40 @@ class AppProvider extends ChangeNotifier {
   FDroidRepository? get repository => _repository;
   LoadingState get repositoryState => _repositoryState;
   String? get repositoryError => _repositoryError;
+
+  Set<String> get favoritePackages => _favoritePackages;
+  bool isFavorite(String packageName) =>
+      _favoritePackages.contains(packageName);
+
+  List<FDroidApp> getFavoriteApps() {
+    if (_repository == null || _favoritePackages.isEmpty) {
+      return <FDroidApp>[];
+    }
+
+    final favorites = _favoritePackages
+        .map((packageName) => _repository!.apps[packageName])
+        .whereType<FDroidApp>()
+        .toList();
+    favorites.sort(
+      (a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()),
+    );
+    return favorites;
+  }
+
+  Future<void> toggleFavorite(String packageName) async {
+    if (_favoritePackages.contains(packageName)) {
+      _favoritePackages.remove(packageName);
+    } else {
+      _favoritePackages.add(packageName);
+    }
+    await _preferencesService.setFavorites(_favoritePackages);
+    notifyListeners();
+  }
+
+  Future<void> _loadFavorites() async {
+    _favoritePackages = await _preferencesService.getFavorites();
+    notifyListeners();
+  }
 
   /// Fetches the complete repository (cached for performance)
   Future<void> fetchRepository() async {

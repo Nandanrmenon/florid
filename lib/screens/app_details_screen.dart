@@ -464,6 +464,25 @@ class _AppDetailsScreenState extends State<AppDetailsScreen> {
               ],
             ),
             actions: [
+              Consumer<AppProvider>(
+                builder: (context, appProvider, _) {
+                  final isFavorite = appProvider.isFavorite(
+                    widget.app.packageName,
+                  );
+                  return IconButton(
+                    tooltip: isFavorite
+                        ? 'Remove from Favourites'
+                        : 'Add to Favourites',
+                    icon: Icon(
+                      Symbols.favorite_rounded,
+                      fill: isFavorite ? 1 : 0,
+                    ),
+                    onPressed: () {
+                      appProvider.toggleFavorite(widget.app.packageName);
+                    },
+                  );
+                },
+              ),
               IconButton(
                 icon: const Icon(Symbols.share),
                 onPressed: () {
@@ -1335,9 +1354,7 @@ class _DownloadSectionState extends State<_DownloadSection> {
                                 duration: Duration(milliseconds: 300),
                               ),
                           const SizedBox(height: 8),
-                          LinearProgressIndicator(
-                                value: progress,
-                              )
+                          LinearProgressIndicator(value: progress)
                               .animate()
                               .fadeIn(duration: Duration(milliseconds: 300))
                               .slideY(

@@ -13,6 +13,7 @@ class AppListItem extends StatelessWidget {
   final VoidCallback? onUpdate;
   final bool showCategory;
   final bool showInstallStatus;
+  final bool showFavorite;
 
   const AppListItem({
     super.key,
@@ -21,6 +22,7 @@ class AppListItem extends StatelessWidget {
     this.onUpdate,
     this.showCategory = true,
     this.showInstallStatus = true,
+    this.showFavorite = false,
   });
 
   @override
@@ -29,9 +31,8 @@ class AppListItem extends StatelessWidget {
     return ListTile(
       onTap: onTap,
       onLongPress: () => _showQuickViewModal(context),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
       contentPadding: const EdgeInsets.symmetric(vertical: 6),
-      // minLeadingWidth: 64,
       leading: Consumer2<AppProvider, DownloadProvider>(
         builder: (context, appProvider, downloadProvider, _) {
           final version = app.latestVersion;
@@ -95,7 +96,7 @@ class AppListItem extends StatelessWidget {
         overflow: TextOverflow.ellipsis,
       ),
       subtitle: Text(app.summary, maxLines: 2, overflow: TextOverflow.ellipsis),
-      trailing: showInstallStatus
+      trailing: showInstallStatus || showFavorite
           ? Padding(
               padding: const EdgeInsets.only(right: 8.0),
               child: Consumer<AppProvider>(
@@ -107,6 +108,7 @@ class AppListItem extends StatelessWidget {
                     app.packageName,
                   );
                   final latestVersion = app.latestVersion;
+                  final isFavorite = appProvider.isFavorite(app.packageName);
 
                   // Check if update is available
                   final hasUpdate =
@@ -116,17 +118,37 @@ class AppListItem extends StatelessWidget {
                       latestVersion != null &&
                       installedApp.versionCode! < latestVersion.versionCode;
 
-                  if (hasUpdate) {
-                    return TextButton(
-                      onPressed: onUpdate,
-                      child: Text('Update'),
-                    );
-                  }
+                  final statusWidget = showInstallStatus
+                      ? hasUpdate
+                            ? TextButton(
+                                onPressed: onUpdate,
+                                child: const Text('Update'),
+                              )
+                            : isInstalled
+                            ? Icon(Symbols.check_circle, weight: 400)
+                            : const SizedBox.shrink()
+                      : const SizedBox.shrink();
 
-                  if (isInstalled) {
-                    return Icon(Symbols.check_circle, weight: 400);
-                  }
-                  return const SizedBox.shrink();
+                  return Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (showInstallStatus) statusWidget,
+                      if (showFavorite)
+                        IconButton(
+                          tooltip: isFavorite
+                              ? 'Remove from Favourites'
+                              : 'Add to Favourites',
+                          icon: Icon(
+                            Symbols.favorite_rounded,
+                            fill: isFavorite ? 1 : 0,
+                            color: isFavorite ? Colors.red : null,
+                          ),
+                          onPressed: () {
+                            appProvider.toggleFavorite(app.packageName);
+                          },
+                        ),
+                    ],
+                  );
                 },
               ),
             )

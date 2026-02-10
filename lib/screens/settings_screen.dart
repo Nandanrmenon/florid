@@ -1,11 +1,13 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:android_intent_plus/android_intent.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:florid/l10n/app_localizations.dart';
 import 'package:florid/widgets/m_list.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:package_info_plus/package_info_plus.dart';
@@ -32,12 +34,17 @@ class SettingsScreen extends StatefulWidget {
 enum _FavoritesImportAction { merge, replace }
 
 class _SettingsScreenState extends State<SettingsScreen> {
+  static const MethodChannel _batteryChannel = MethodChannel(
+    'florid/battery_optimizations',
+  );
   String _appVersion = '';
+  bool? _isIgnoringBatteryOptimizations;
 
   @override
   void initState() {
     super.initState();
     _loadVersion();
+    _loadBatteryOptimizationStatus();
   }
 
   Future<void> _loadVersion() async {
@@ -46,6 +53,24 @@ class _SettingsScreenState extends State<SettingsScreen> {
     setState(() {
       _appVersion = '${info.version}+${info.buildNumber}';
     });
+  }
+
+  Future<void> _loadBatteryOptimizationStatus() async {
+    if (!Platform.isAndroid) return;
+    try {
+      final isIgnoring = await _batteryChannel.invokeMethod<bool>(
+        'isIgnoringBatteryOptimizations',
+      );
+      if (!mounted) return;
+      setState(() {
+        _isIgnoringBatteryOptimizations = isIgnoring ?? false;
+      });
+    } on PlatformException {
+      if (!mounted) return;
+      setState(() {
+        _isIgnoringBatteryOptimizations = null;
+      });
+    }
   }
 
   Future<void> _clearRepoCache(BuildContext context) async {
@@ -79,6 +104,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
         ),
       ),
     );
+  }
+
+  Future<void> _requestDisableBatteryOptimizations() async {
+    if (!Platform.isAndroid) return;
+    final info = await PackageInfo.fromPlatform();
+
+    final intent = AndroidIntent(
+      action: 'android.settings.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS',
+      data: 'package:${info.packageName}',
+    );
+    await intent.launch();
+    await Future.delayed(const Duration(seconds: 1));
+    await _loadBatteryOptimizationStatus();
   }
 
   Future<void> _exportFavorites(BuildContext context) async {
@@ -525,6 +563,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                 _showUpdateIntervalDialog(context, settings),
                             suffix: Icon(Symbols.chevron_right),
                           ),
+                          if (_isIgnoringBatteryOptimizations == false)
+                            MListItemData(
+                              selected: true,
+                              leading: Icon(
+                                Symbols.battery_saver,
+                                fill: 1,
+                                color: Theme.of(context).colorScheme.error,
+                              ),
+                              title: 'Disable battery optimization',
+                              subtitle:
+                                  'Allow background checks to run reliably',
+                              onTap: _requestDisableBatteryOptimizations,
+                            ),
                           if (kDebugMode)
                             MListItemData(
                               leading: Icon(Symbols.bolt),

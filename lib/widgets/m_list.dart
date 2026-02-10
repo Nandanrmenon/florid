@@ -52,7 +52,7 @@ class _MListHeaderState extends State<MListHeader> {
 }
 
 class MListView extends StatelessWidget {
-  final items;
+  final List items;
   final bool? enableScroll;
   final bool? shrinkWrap;
   const MListView({

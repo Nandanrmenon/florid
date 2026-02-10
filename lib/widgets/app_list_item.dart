@@ -63,7 +63,6 @@ class AppListItem extends StatelessWidget {
                       child: CircularProgressIndicator(
                         value: isDownloading ? progress : null,
                         strokeWidth: 2,
-                        year2023: false,
                         backgroundColor:
                             theme.colorScheme.surfaceContainerHighest,
                       ),
@@ -196,7 +195,7 @@ class _MultiIconState extends State<_MultiIcon> {
         child: const SizedBox(
           width: 20,
           height: 20,
-          child: CircularProgressIndicator(strokeWidth: 2, year2023: false),
+          child: CircularProgressIndicator(strokeWidth: 2),
         ),
       ),
       errorWidget: (context, url, error) {
@@ -284,7 +283,6 @@ class _QuickViewModal extends StatelessWidget {
                               child: CircularProgressIndicator(
                                 value: isDownloading ? progress : null,
                                 strokeWidth: 4,
-                                year2023: false,
                                 backgroundColor:
                                     theme.colorScheme.surfaceContainerHighest,
                               ),

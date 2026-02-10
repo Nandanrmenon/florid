@@ -211,7 +211,7 @@ class _SearchScreenState extends State<SearchScreen> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    CircularProgressIndicator(year2023: false),
+                    CircularProgressIndicator(),
                     SizedBox(height: 16),
                     Text(AppLocalizations.of(context)!.searching),
                   ],

@@ -564,7 +564,7 @@ Future<void> _toggleRepositoryWithDialog(
 
       return ValueListenableBuilder<double>(
         valueListenable: progress,
-        builder: (_, value, __) {
+        builder: (_, value, _) {
           final pct = (value * 100).clamp(0, 100).round();
           return Padding(
             padding: const EdgeInsets.symmetric(
@@ -599,7 +599,6 @@ Future<void> _toggleRepositoryWithDialog(
                 SizedBox(height: 16),
                 LinearProgressIndicator(
                   value: value == 0.0 ? null : value,
-                  year2023: false,
                 ),
                 const SizedBox(height: 8),
                 Text('$pct%', textAlign: TextAlign.right),
@@ -638,7 +637,7 @@ Future<void> _runRepositoryActionWithDialog(
 
       return ValueListenableBuilder<double>(
         valueListenable: progress,
-        builder: (_, value, __) {
+        builder: (_, value, _) {
           final pct = (value * 100).clamp(0, 100).round();
           return Padding(
             padding: const EdgeInsets.symmetric(
@@ -673,7 +672,6 @@ Future<void> _runRepositoryActionWithDialog(
                 SizedBox(height: 16),
                 LinearProgressIndicator(
                   value: value == 0.0 ? null : value,
-                  year2023: false,
                 ),
                 const SizedBox(height: 8),
                 Text('$pct%', textAlign: TextAlign.right),
@@ -700,39 +698,38 @@ class _AddRepositoryDialog extends StatefulWidget {
 class _AddRepositoryDialogState extends State<_AddRepositoryDialog> {
   late TextEditingController _nameController;
   late TextEditingController _urlController;
-  List<Map<String, String>> _presets = [];
-  final bool _showPresets = true;
+
 
   @override
   void initState() {
     super.initState();
     _nameController = TextEditingController();
     _urlController = TextEditingController();
-    _loadPresets();
+    // _loadPresets();
   }
 
-  Future<void> _loadPresets() async {
-    try {
-      final jsonString = await DefaultAssetBundle.of(
-        context,
-      ).loadString('assets/repositories.json');
-      final jsonData = jsonDecode(jsonString);
-      final repos = (jsonData['repositories'] as List)
-          .map(
-            (e) => {
-              'name': e['name'] as String,
-              'url': e['url'] as String,
-              'description': e['description'] as String? ?? '',
-            },
-          )
-          .toList();
-      setState(() {
-        _presets = repos;
-      });
-    } catch (e) {
-      debugPrint('Error loading presets: $e');
-    }
-  }
+  // Future<void> _loadPresets() async {
+  //   try {
+  //     final jsonString = await DefaultAssetBundle.of(
+  //       context,
+  //     ).loadString('assets/repositories.json');
+  //     final jsonData = jsonDecode(jsonString);
+  //     final repos = (jsonData['repositories'] as List)
+  //         .map(
+  //           (e) => {
+  //             'name': e['name'] as String,
+  //             'url': e['url'] as String,
+  //             'description': e['description'] as String? ?? '',
+  //           },
+  //         )
+  //         .toList();
+  //     setState(() {
+  //       _presets = repos;
+  //     });
+  //   } catch (e) {
+  //     debugPrint('Error loading presets: $e');
+  //   }
+  // }
 
   @override
   void dispose() {

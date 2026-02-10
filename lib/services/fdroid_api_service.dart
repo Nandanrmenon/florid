@@ -763,9 +763,9 @@ class FDroidApiService {
 
       // Log download URL and file path
       final downloadUrl = version.downloadUrl(repositoryUrl);
-      print('[FDroidApiService] Downloading APK:');
-      print('  URL: $downloadUrl');
-      print('  To: $filePath');
+      debugPrint('[FDroidApiService] Downloading APK:');
+      debugPrint('  URL: $downloadUrl');
+      debugPrint('  To: $filePath');
 
       final token = cancelToken ?? CancelToken();
       _downloadTokens[packageName] = token;
@@ -785,7 +785,7 @@ class FDroidApiService {
       try {
         final status = response.statusCode;
         final contentType = response.headers.value('content-type');
-        print(
+        debugPrint(
           '[FDroidApiService] Download response: status=$status, contentType=$contentType',
         );
       } catch (_) {}
@@ -814,7 +814,7 @@ class FDroidApiService {
             magic[2] == 0x03 &&
             magic[3] == 0x04;
 
-        print(
+        debugPrint(
           '[FDroidApiService] Downloaded file: $filePath (exists: $fileExists, size: $fileSize bytes, zipMagic=$isZip, magicBytes=$magic)',
         );
 
@@ -822,7 +822,7 @@ class FDroidApiService {
           throw Exception('Downloaded APK is invalid or missing');
         }
       } catch (e) {
-        print('[FDroidApiService] Error checking file after download: $e');
+        debugPrint('[FDroidApiService] Error checking file after download: $e');
         rethrow;
       }
 
@@ -830,7 +830,7 @@ class FDroidApiService {
       return filePath;
     } catch (e) {
       _downloadTokens.remove(packageName);
-      print('[FDroidApiService] Error downloading APK: $e');
+      debugPrint('[FDroidApiService] Error downloading APK: $e');
       throw Exception('Error downloading APK: $e');
     }
   }

@@ -476,6 +476,7 @@ class _AppDetailsScreenState extends State<AppDetailsScreen> {
                     icon: Icon(
                       Symbols.favorite_rounded,
                       fill: isFavorite ? 1 : 0,
+                      color: isFavorite ? Colors.red : null,
                     ),
                     onPressed: () {
                       appProvider.toggleFavorite(widget.app.packageName);

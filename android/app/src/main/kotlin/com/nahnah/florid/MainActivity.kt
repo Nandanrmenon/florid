@@ -1,7 +1,6 @@
 package com.nahnah.florid
 
 import android.content.Context
-import android.content.pm.PackageInstaller
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.PowerManager
@@ -9,9 +8,7 @@ import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
 import rikka.shizuku.Shizuku
-import rikka.shizuku.ShizukuProvider
 import java.io.File
-import java.io.FileInputStream
 
 class MainActivity : FlutterActivity() {
 	private val SHIZUKU_CHANNEL = "com.nahnah.florid/shizuku"

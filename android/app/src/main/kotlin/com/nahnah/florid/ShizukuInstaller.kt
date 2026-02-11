@@ -1,10 +1,9 @@
 package com.nahnah.florid
 
 import android.content.pm.IPackageInstaller
-import android.content.pm.IPackageInstallerSession
+import android.content.pm.IPackageManager
 import android.content.pm.PackageInstaller
-import android.os.Build
-import rikka.shizuku.Shizuku
+import android.os.ParcelFileDescriptor
 import rikka.shizuku.ShizukuBinderWrapper
 import rikka.shizuku.SystemServiceHelper
 import java.io.File
@@ -13,50 +12,64 @@ import java.io.FileInputStream
 object ShizukuInstaller {
     
     fun installApk(apkPath: String): Boolean {
-        try {
+        return try {
             val file = File(apkPath)
             if (!file.exists()) {
                 return false
             }
 
             // Get IPackageManager through Shizuku
-            val packageManager = IPackageInstaller.Stub.asInterface(
-                ShizukuBinderWrapper(
-                    SystemServiceHelper.getSystemService("package")
-                        .let { 
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                                it.getClass().getMethod("getPackageInstaller").invoke(it) as android.os.IBinder
-                            } else {
-                                it.getClass().getMethod("getPackageInstaller").invoke(it) as android.os.IBinder
-                            }
-                        }
-                )
+            val iPackageManager = IPackageManager.Stub.asInterface(
+                ShizukuBinderWrapper(SystemServiceHelper.getSystemService("package"))
             )
-
-            // Create session
-            val params = PackageInstaller.SessionParams(PackageInstaller.SessionParams.MODE_FULL_INSTALL)
-            val sessionId = packageManager.createSession(params, "com.nahnah.florid", null, 0)
             
-            val session = IPackageInstallerSession.Stub.asInterface(
-                ShizukuBinderWrapper(packageManager.openSession(sessionId).asBinder())
+            // Get the package installer
+            val iPackageInstaller = IPackageInstaller.Stub.asInterface(
+                ShizukuBinderWrapper(iPackageManager.packageInstaller.asBinder())
             )
-
-            // Write APK to session
-            FileInputStream(file).use { input ->
-                session.openWrite("base.apk", 0, -1).use { output ->
-                    input.copyTo(output)
-                    session.fsync(output)
+            
+            // Create installation session parameters
+            val params = PackageInstaller.SessionParams(PackageInstaller.SessionParams.MODE_FULL_INSTALL)
+            
+            // Create the session
+            val sessionId = iPackageInstaller.createSession(params, "com.nahnah.florid", null, 0)
+            
+            // Open the session
+            val sessionBinder = iPackageInstaller.openSession(sessionId)
+            val session = android.content.pm.IPackageInstallerSession.Stub.asInterface(
+                ShizukuBinderWrapper(sessionBinder.asBinder())
+            )
+            
+            // Open write stream for the APK
+            val pfd = ParcelFileDescriptor.open(
+                file,
+                ParcelFileDescriptor.MODE_READ_ONLY
+            )
+            
+            // Write the APK data to the session
+            FileInputStream(pfd.fileDescriptor).use { inputStream ->
+                val out = session.openWrite("base.apk", 0, file.length())
+                ParcelFileDescriptor.AutoCloseOutputStream(out).use { outputStream ->
+                    val buffer = ByteArray(65536)
+                    var bytesRead: Int
+                    while (inputStream.read(buffer).also { bytesRead = it } != -1) {
+                        outputStream.write(buffer, 0, bytesRead)
+                    }
+                    outputStream.flush()
+                    session.fsync(out)
                 }
             }
-
-            // Commit the session
+            
+            pfd.close()
+            
+            // Commit the session to install
             session.commit(null, 0)
             session.close()
-
-            return true
+            
+            true
         } catch (e: Exception) {
             e.printStackTrace()
-            return false
+            false
         }
     }
 }

@@ -2,12 +2,15 @@ import 'dart:io';
 
 import 'package:app_installer/app_installer.dart';
 import 'package:flutter/foundation.dart';
-import 'package:shizuku_apk_installer/shizuku_apk_installer.dart';
+import 'package:flutter/services.dart';
 
 import '../providers/settings_provider.dart';
 
 /// Service to handle APK installation using different methods
 class AppInstallationService {
+  static const MethodChannel _channel =
+      MethodChannel('com.nahnah.florid/shizuku');
+
   /// Installs an APK file using the specified installation method
   static Future<void> installApk(
     String filePath,
@@ -47,7 +50,7 @@ class AppInstallationService {
   static Future<void> _installViaShizuku(String filePath) async {
     try {
       // Check if Shizuku is available
-      final isShizukuAvailable = await ShizukuApkInstaller.isShizukuAvailable();
+      final isShizukuAvailable = await isShizukuAvailable();
       if (!isShizukuAvailable) {
         throw Exception(
           'Shizuku is not available. Please install and start Shizuku service.',
@@ -55,20 +58,26 @@ class AppInstallationService {
       }
 
       // Check if Shizuku permission is granted
-      final hasPermission = await ShizukuApkInstaller.checkPermission();
+      final hasPermission = await hasShizukuPermission();
       if (!hasPermission) {
         // Request permission
-        final granted = await ShizukuApkInstaller.requestPermission();
+        final granted = await requestShizukuPermission();
         if (!granted) {
           throw Exception('Shizuku permission denied');
         }
       }
 
-      // Install the APK
-      final result = await ShizukuApkInstaller.installApk(filePath);
-      if (!result) {
+      // Install the APK using Shizuku
+      final result = await _channel.invokeMethod<bool>(
+        'installApk',
+        {'filePath': filePath},
+      );
+      
+      if (result != true) {
         throw Exception('Shizuku installation failed');
       }
+    } on PlatformException catch (e) {
+      throw Exception('Shizuku installation error: ${e.message}');
     } catch (e) {
       throw Exception('Shizuku installation error: $e');
     }
@@ -77,7 +86,11 @@ class AppInstallationService {
   /// Checks if Shizuku is available on the device
   static Future<bool> isShizukuAvailable() async {
     try {
-      return await ShizukuApkInstaller.isShizukuAvailable();
+      final result = await _channel.invokeMethod<bool>('isShizukuAvailable');
+      return result ?? false;
+    } on PlatformException catch (e) {
+      debugPrint('[AppInstallationService] Error checking Shizuku: ${e.message}');
+      return false;
     } catch (e) {
       debugPrint('[AppInstallationService] Error checking Shizuku: $e');
       return false;
@@ -87,7 +100,11 @@ class AppInstallationService {
   /// Checks if Shizuku permission is granted
   static Future<bool> hasShizukuPermission() async {
     try {
-      return await ShizukuApkInstaller.checkPermission();
+      final result = await _channel.invokeMethod<bool>('checkPermission');
+      return result ?? false;
+    } on PlatformException catch (e) {
+      debugPrint('[AppInstallationService] Error checking Shizuku permission: ${e.message}');
+      return false;
     } catch (e) {
       debugPrint('[AppInstallationService] Error checking Shizuku permission: $e');
       return false;
@@ -97,7 +114,11 @@ class AppInstallationService {
   /// Requests Shizuku permission
   static Future<bool> requestShizukuPermission() async {
     try {
-      return await ShizukuApkInstaller.requestPermission();
+      final result = await _channel.invokeMethod<bool>('requestPermission');
+      return result ?? false;
+    } on PlatformException catch (e) {
+      debugPrint('[AppInstallationService] Error requesting Shizuku permission: ${e.message}');
+      return false;
     } catch (e) {
       debugPrint('[AppInstallationService] Error requesting Shizuku permission: $e');
       return false;

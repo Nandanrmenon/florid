@@ -64,7 +64,8 @@ dependencies:
   app_installer: ^1.1.0
 
   # Shizuku API for privileged installation
-  shizuku_apk_installer: ^0.1.0
+  # Note: If this package doesn't exist, we'll use method channels
+  # shizuku_apk_installer: ^0.1.0
 
   # Share plus for sharing apps
   share_plus: ^12.0.1

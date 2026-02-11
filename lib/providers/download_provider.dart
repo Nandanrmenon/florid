@@ -1,12 +1,12 @@
 import 'dart:io';
 
 import 'package:android_intent_plus/android_intent.dart';
-import 'package:app_installer/app_installer.dart';
 import 'package:flutter/foundation.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 import '../models/fdroid_app.dart';
 import '../providers/settings_provider.dart';
+import '../services/app_installation_service.dart';
 import '../services/app_preferences_service.dart';
 import '../services/fdroid_api_service.dart';
 import '../services/installation_tracking_service.dart';
@@ -393,7 +393,10 @@ class DownloadProvider extends ChangeNotifier {
         throw Exception('APK file missing or empty');
       }
 
-      await AppInstaller.installApk(filePath);
+      await AppInstallationService.installApk(
+        filePath,
+        _settingsProvider.installMethod,
+      );
     } catch (e) {
       throw Exception('Failed to install APK: $e');
     }

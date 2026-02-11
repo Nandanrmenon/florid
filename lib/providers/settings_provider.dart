@@ -5,6 +5,8 @@ enum ThemeStyle { material, florid }
 
 enum UpdateNetworkPolicy { any, wifiOnly, wifiAndCharging }
 
+enum InstallMethod { systemDefault, shizuku }
+
 class SettingsProvider extends ChangeNotifier {
   static const _themeModeKey = 'theme_mode';
   static const _themeStyleKey = 'theme_style';
@@ -16,6 +18,7 @@ class SettingsProvider extends ChangeNotifier {
   static const backgroundUpdatesKey = 'background_updates_enabled';
   static const updateIntervalHoursKey = 'background_update_interval_hours';
   static const updateNetworkPolicyKey = 'background_update_network_policy';
+  static const _installMethodKey = 'install_method';
 
   ThemeMode _themeMode = ThemeMode.system;
   ThemeStyle _themeStyle = ThemeStyle.florid;
@@ -27,6 +30,7 @@ class SettingsProvider extends ChangeNotifier {
   bool _backgroundUpdatesEnabled = true;
   int _updateIntervalHours = 6;
   UpdateNetworkPolicy _updateNetworkPolicy = UpdateNetworkPolicy.any;
+  InstallMethod _installMethod = InstallMethod.systemDefault;
   bool _loaded = false;
 
   SettingsProvider() {
@@ -44,6 +48,7 @@ class SettingsProvider extends ChangeNotifier {
   bool get backgroundUpdatesEnabled => _backgroundUpdatesEnabled;
   int get updateIntervalHours => _updateIntervalHours;
   UpdateNetworkPolicy get updateNetworkPolicy => _updateNetworkPolicy;
+  InstallMethod get installMethod => _installMethod;
 
   /// Available locales for F-Droid repository data
   static const List<String> availableLocales = [
@@ -114,6 +119,12 @@ class SettingsProvider extends ChangeNotifier {
         prefs.getInt(updateNetworkPolicyKey) ?? UpdateNetworkPolicy.any.index;
     if (policyIndex >= 0 && policyIndex < UpdateNetworkPolicy.values.length) {
       _updateNetworkPolicy = UpdateNetworkPolicy.values[policyIndex];
+    }
+    final installMethodIndex =
+        prefs.getInt(_installMethodKey) ?? InstallMethod.systemDefault.index;
+    if (installMethodIndex >= 0 &&
+        installMethodIndex < InstallMethod.values.length) {
+      _installMethod = InstallMethod.values[installMethodIndex];
     }
     _loaded = true;
     notifyListeners();
@@ -190,5 +201,22 @@ class SettingsProvider extends ChangeNotifier {
     notifyListeners();
     final prefs = await SharedPreferences.getInstance();
     await prefs.setInt(updateNetworkPolicyKey, policy.index);
+  }
+
+  Future<void> setInstallMethod(InstallMethod method) async {
+    _installMethod = method;
+    notifyListeners();
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt(_installMethodKey, method.index);
+  }
+
+  /// Get install method display name
+  static String getInstallMethodDisplayName(InstallMethod method) {
+    switch (method) {
+      case InstallMethod.systemDefault:
+        return 'System Default';
+      case InstallMethod.shizuku:
+        return 'Shizuku';
+    }
   }
 }

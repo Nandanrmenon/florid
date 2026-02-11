@@ -15,6 +15,9 @@
     <!-- Permission to query installed packages -->
     <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" />
     
+    <!-- Shizuku permission for privileged installation -->
+    <uses-permission android:name="moe.shizuku.manager.permission.API_V23" />
+    
     <!-- Permission for package installer -->
     <uses-permission android:name="android.permission.INSTALL_PACKAGES"
                      tools:ignore="ProtectedPermissions" />

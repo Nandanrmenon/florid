@@ -1,5 +1,6 @@
 import 'package:florid/providers/download_provider.dart';
 import 'package:florid/providers/settings_provider.dart';
+import 'package:florid/services/app_installation_service.dart';
 import 'package:florid/services/fdroid_api_service.dart';
 import 'package:florid/widgets/m_list.dart';
 import 'package:flutter/material.dart';
@@ -7,9 +8,14 @@ import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:provider/provider.dart';
 
-class TroubleshootingScreen extends StatelessWidget {
+class TroubleshootingScreen extends StatefulWidget {
   const TroubleshootingScreen({super.key});
 
+  @override
+  State<TroubleshootingScreen> createState() => _TroubleshootingScreenState();
+}
+
+class _TroubleshootingScreenState extends State<TroubleshootingScreen> {
   Future<void> _clearRepoCache(BuildContext context) async {
     final api = context.read<FDroidApiService>();
     await api.clearRepositoryCache();
@@ -39,6 +45,76 @@ class TroubleshootingScreen extends StatelessWidget {
               ? 'Deleted $deleted APK file${deleted == 1 ? '' : 's'}'
               : 'No APK downloads to delete',
         ),
+      ),
+    );
+  }
+
+  Future<void> _showInstallMethodDialog(
+    BuildContext context,
+    SettingsProvider settings,
+  ) async {
+    await showDialog<void>(
+      context: context,
+      builder: (context) => AlertDialog(
+        icon: const Icon(Symbols.install_mobile),
+        title: const Text('Installation method'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ...InstallMethod.values.map(
+              (method) => RadioListTile<InstallMethod>(
+                value: method,
+                groupValue: settings.installMethod,
+                title: Text(SettingsProvider.getInstallMethodDisplayName(method)),
+                subtitle: method == InstallMethod.shizuku
+                    ? FutureBuilder<bool>(
+                        future: AppInstallationService.isShizukuAvailable(),
+                        builder: (context, snapshot) {
+                          if (snapshot.hasData && !snapshot.data!) {
+                            return const Text(
+                              'Shizuku not available',
+                              style: TextStyle(color: Colors.orange),
+                            );
+                          }
+                          return const Text('Requires Shizuku app and service');
+                        },
+                      )
+                    : const Text('Standard Android installer'),
+                onChanged: (value) async {
+                  if (value == null) return;
+                  
+                  // Check if Shizuku is available when selected
+                  if (value == InstallMethod.shizuku) {
+                    final isAvailable =
+                        await AppInstallationService.isShizukuAvailable();
+                    if (!isAvailable) {
+                      if (!context.mounted) return;
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text(
+                            'Shizuku is not available. Please install and start Shizuku.',
+                          ),
+                          duration: Duration(seconds: 4),
+                        ),
+                      );
+                      return;
+                    }
+                  }
+                  
+                  await settings.setInstallMethod(value);
+                  if (!context.mounted) return;
+                  Navigator.of(context).pop();
+                },
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Close'),
+          ),
+        ],
       ),
     );
   }
@@ -93,6 +169,15 @@ class TroubleshootingScreen extends StatelessWidget {
                                 settings.setAutoDeleteApk(value);
                               },
                             ),
+                          ),
+                          MListItemData(
+                            leading: Icon(Symbols.install_mobile),
+                            title: 'Installation method',
+                            subtitle: SettingsProvider.getInstallMethodDisplayName(
+                              settings.installMethod,
+                            ),
+                            onTap: () => _showInstallMethodDialog(context, settings),
+                            suffix: Icon(Symbols.chevron_right),
                           ),
                         ],
                       ),

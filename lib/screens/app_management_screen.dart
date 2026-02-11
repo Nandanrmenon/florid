@@ -1,6 +1,9 @@
 import 'dart:io';
 
 import 'package:android_intent_plus/android_intent.dart';
+import 'package:florid/providers/settings_provider.dart';
+import 'package:florid/services/update_check_service.dart';
+import 'package:florid/widgets/m_list.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -8,22 +11,18 @@ import 'package:material_symbols_icons/symbols.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:provider/provider.dart';
 
-import '../providers/settings_provider.dart';
-import '../services/update_check_service.dart';
-import '../widgets/m_list.dart';
+class AppManagementScreen extends StatefulWidget {
+  const AppManagementScreen({super.key});
 
-class UpdateSettingsScreen extends StatefulWidget {
-  const UpdateSettingsScreen({super.key});
-
-  @override
-  State<UpdateSettingsScreen> createState() => _UpdateSettingsScreenState();
-}
-
-class _UpdateSettingsScreenState extends State<UpdateSettingsScreen> {
   static const MethodChannel _batteryChannel = MethodChannel(
     'florid/battery_optimizations',
   );
 
+  @override
+  State<AppManagementScreen> createState() => _AppManagementScreenState();
+}
+
+class _AppManagementScreenState extends State<AppManagementScreen> {
   bool? _isIgnoringBatteryOptimizations;
 
   @override
@@ -32,12 +31,59 @@ class _UpdateSettingsScreenState extends State<UpdateSettingsScreen> {
     _loadBatteryOptimizationStatus();
   }
 
+  String _installMethodLabel(InstallMethod method) {
+    switch (method) {
+      case InstallMethod.shizuku:
+        return 'Shizuku';
+      case InstallMethod.system:
+        return 'System installer';
+    }
+  }
+
+  Future<void> _showInstallMethodDialog(
+    BuildContext context,
+    SettingsProvider settings,
+  ) async {
+    await showDialog<void>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Installation method'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: InstallMethod.values
+              .map(
+                (method) => RadioListTile<InstallMethod>(
+                  value: method,
+                  groupValue: settings.installMethod,
+                  title: Text(_installMethodLabel(method)),
+                  subtitle: method == InstallMethod.shizuku
+                      ? const Text('Requires Shizuku to be running')
+                      : const Text('Uses the standard system installer'),
+                  onChanged: (value) async {
+                    if (value == null) return;
+                    await settings.setInstallMethod(value);
+                    if (!context.mounted) return;
+                    Navigator.of(context).pop();
+                  },
+                ),
+              )
+              .toList(),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Close'),
+          ),
+        ],
+      ),
+    );
+  }
+
   Future<void> _loadBatteryOptimizationStatus() async {
     if (!Platform.isAndroid) return;
     try {
-      final isIgnoring = await _batteryChannel.invokeMethod<bool>(
-        'isIgnoringBatteryOptimizations',
-      );
+      final isIgnoring = await AppManagementScreen._batteryChannel
+          .invokeMethod<bool>('isIgnoringBatteryOptimizations');
       if (!mounted) return;
       setState(() {
         _isIgnoringBatteryOptimizations = isIgnoring ?? false;
@@ -173,7 +219,7 @@ class _UpdateSettingsScreenState extends State<UpdateSettingsScreen> {
     return Consumer<SettingsProvider>(
       builder: (context, settings, _) {
         return Scaffold(
-          appBar: AppBar(title: const Text('Update settings')),
+          appBar: AppBar(title: const Text('App Management')),
           body: SingleChildScrollView(
             child: Padding(
               padding: const EdgeInsets.symmetric(vertical: 16.0),
@@ -181,6 +227,72 @@ class _UpdateSettingsScreenState extends State<UpdateSettingsScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 spacing: 16,
                 children: [
+                  Column(
+                    spacing: 4,
+                    children: [
+                      MListHeader(title: 'Installation method'),
+                      MRadioListView<InstallMethod>(
+                        items: InstallMethod.values
+                            .map(
+                              (method) => MRadioListItemData<InstallMethod>(
+                                title: _installMethodLabel(method),
+                                subtitle: method == InstallMethod.shizuku
+                                    ? 'Requires Shizuku to be running'
+                                    : 'Uses the standard system installer',
+                                value: method,
+                              ),
+                            )
+                            .toList(),
+                        groupValue: settings.installMethod,
+                        onChanged: (value) async {
+                          await settings.setInstallMethod(value);
+                        },
+                      ),
+                    ],
+                  ),
+
+                  Column(
+                    spacing: 4,
+                    children: [
+                      MListHeader(title: 'Downloads & Storage'),
+                      MListView(
+                        items: [
+                          MListItemData(
+                            title: 'Auto-install after download',
+                            onTap: () {
+                              settings.setAutoInstallApk(
+                                !settings.autoInstallApk,
+                              );
+                            },
+                            subtitle:
+                                'Install APKs automatically once download finishes',
+                            suffix: Switch(
+                              value: settings.autoInstallApk,
+                              onChanged: (value) {
+                                settings.setAutoInstallApk(value);
+                              },
+                            ),
+                          ),
+                          MListItemData(
+                            title: 'Delete APK after install',
+                            onTap: () {
+                              settings.setAutoInstallApk(
+                                !settings.autoInstallApk,
+                              );
+                            },
+                            subtitle:
+                                'Remove installer files after successful installation',
+                            suffix: Switch(
+                              value: settings.autoDeleteApk,
+                              onChanged: (value) {
+                                settings.setAutoDeleteApk(value);
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                   Column(
                     spacing: 4,
                     children: [

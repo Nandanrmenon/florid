@@ -65,7 +65,7 @@ class AppThemes {
           borderSide: BorderSide.none,
         ),
         filled: true,
-      ),  
+      ),
       progressIndicatorTheme: ProgressIndicatorThemeData(year2023: false),
     );
   }

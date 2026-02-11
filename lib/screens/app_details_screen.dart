@@ -17,6 +17,7 @@ import '../models/fdroid_app.dart';
 import '../providers/app_provider.dart';
 import '../providers/download_provider.dart';
 import '../providers/repositories_provider.dart';
+import '../providers/settings_provider.dart';
 import '../services/izzy_stats_service.dart';
 
 class AppDetailsScreen extends StatefulWidget {
@@ -174,6 +175,11 @@ class _AppDetailsScreenState extends State<AppDetailsScreen> {
           final hasPermission = await downloadProvider
               .requestInstallPermission();
           if (!hasPermission) {
+            final settings = context.read<SettingsProvider>();
+            if (settings.installMethod == InstallMethod.shizuku) {
+              await _handleShizukuUnavailable(context, settings);
+              return;
+            }
             if (context.mounted) {
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
@@ -298,6 +304,69 @@ class _AppDetailsScreenState extends State<AppDetailsScreen> {
             );
           }
         }
+      }
+    }
+  }
+
+  Future<void> _handleShizukuUnavailable(
+    BuildContext context,
+    SettingsProvider settings,
+  ) async {
+    final action = await showDialog<_ShizukuAction>(
+      context: context,
+      builder: (context) => SimpleDialog(
+        contentPadding: EdgeInsets.all(24),
+        title: const Text('Shizuku is not running'),
+        children: [
+          Text(
+            'Start the Shizuku app to continue, or switch to the system installer instead.',
+          ),
+          SizedBox(height: 16),
+          Column(
+            spacing: 2.0,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              FilledButton(
+                onPressed: () async {
+                  try {
+                    final appProvider = context.read<AppProvider>();
+                    await appProvider.openInstalledApp(
+                      'moe.shizuku.privileged.api',
+                    );
+                  } catch (e) {
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Unable to open Shizuku app'),
+                        ),
+                      );
+                    }
+                  }
+                },
+                child: const Text('Open Shizuku'),
+              ),
+              FilledButton.tonal(
+                onPressed: () =>
+                    Navigator.of(context).pop(_ShizukuAction.switchToSystem),
+                child: const Text('Use System Installer'),
+              ),
+              TextButton(
+                onPressed: () =>
+                    Navigator.of(context).pop(_ShizukuAction.cancel),
+                child: const Text('Cancel'),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+
+    if (action == _ShizukuAction.switchToSystem) {
+      await settings.setInstallMethod(InstallMethod.system);
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Switched to system installer')),
+        );
       }
     }
   }
@@ -2531,9 +2600,14 @@ class _VersionDownloadButton extends StatelessWidget {
         if (isDownloaded) {
           return FilledButton.icon(
             onPressed: () async {
+              final settings = context.read<SettingsProvider>();
               final hasPermission = await downloadProvider
                   .requestInstallPermission();
               if (!hasPermission) {
+                if (settings.installMethod == InstallMethod.shizuku) {
+                  await _handleShizukuUnavailable(context, settings);
+                  return;
+                }
                 if (context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
@@ -2603,6 +2677,72 @@ class _VersionDownloadButton extends StatelessWidget {
         );
       },
     );
+  }
+}
+
+enum _ShizukuAction { openApp, switchToSystem, cancel }
+
+Future<void> _handleShizukuUnavailable(
+  BuildContext context,
+  SettingsProvider settings,
+) async {
+  final action = await showDialog<_ShizukuAction>(
+    context: context,
+    builder: (context) => SimpleDialog(
+      alignment: Alignment.bottomCenter,
+      // icon: const Icon(Symbols.warning, size: 48),
+      contentPadding: EdgeInsets.all(24),
+      title: const Text('Shizuku is not running'),
+      children: [
+        Text(
+          'Start the Shizuku app to continue, or switch to the system installer instead.',
+        ),
+        SizedBox(height: 16),
+        Column(
+          spacing: 2.0,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            FilledButton(
+              onPressed: () async {
+                try {
+                  final appProvider = context.read<AppProvider>();
+                  await appProvider.openInstalledApp(
+                    'moe.shizuku.privileged.api',
+                  );
+                } catch (e) {
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Unable to open Shizuku app'),
+                      ),
+                    );
+                  }
+                }
+              },
+              child: const Text('Open Shizuku'),
+            ),
+            FilledButton.tonal(
+              onPressed: () =>
+                  Navigator.of(context).pop(_ShizukuAction.switchToSystem),
+              child: const Text('Use System Installer'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(_ShizukuAction.cancel),
+              child: const Text('Cancel'),
+            ),
+          ],
+        ),
+      ],
+    ),
+  );
+
+  if (action == _ShizukuAction.switchToSystem) {
+    await settings.setInstallMethod(InstallMethod.system);
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Switched to system installer')),
+      );
+    }
   }
 }
 

@@ -55,7 +55,9 @@ class _FloridAppState extends State<FloridApp> {
     return Scaffold(
       backgroundColor: MediaQuery.sizeOf(context).width < Responsive.largeWidth
           ? Theme.of(context).colorScheme.surface
-          : Theme.of(context).colorScheme.surfaceContainer,
+          : context.watch<SettingsProvider>().themeStyle == ThemeStyle.florid
+          ? Theme.of(context).colorScheme.surfaceContainer
+          : Theme.of(context).colorScheme.surface,
       body: Consumer2<AppProvider, SettingsProvider>(
         builder: (context, appProvider, settings, child) {
           return FutureBuilder<List<FDroidApp>>(
@@ -170,7 +172,8 @@ class _FloridAppState extends State<FloridApp> {
                           child: SafeArea(
                             child: Material(
                               clipBehavior: Clip.antiAlias,
-                              borderRadius: BorderRadius.circular(16),
+                              borderRadius: BorderRadius.circular(24),
+                              elevation: 1,
                               child: IndexedStack(
                                 index: _currentIndex,
                                 children: _screens,
@@ -239,7 +242,8 @@ class _FloridAppState extends State<FloridApp> {
       bottomNavigationBar: Visibility(
         visible:
             Provider.of<SettingsProvider>(context).themeStyle ==
-            ThemeStyle.material,
+                ThemeStyle.material &&
+            MediaQuery.sizeOf(context).width < Responsive.largeWidth,
         child: Consumer2<AppProvider, SettingsProvider>(
           builder: (context, appProvider, settings, child) {
             return FutureBuilder<List<FDroidApp>>(

@@ -33,6 +33,37 @@ class AppThemes {
         ),
         filled: true,
       ),
+      navigationRailTheme: NavigationRailThemeData(
+        backgroundColor: ColorScheme.fromSeed(
+          seedColor: kAppColor,
+          brightness: Brightness.light,
+        ).surface,
+        selectedIconTheme: IconThemeData(
+          color: ColorScheme.fromSeed(
+            seedColor: kAppColor,
+            brightness: Brightness.light,
+          ).onPrimaryContainer,
+        ),
+        labelType: NavigationRailLabelType.all,
+        unselectedIconTheme: IconThemeData(
+          color: ColorScheme.fromSeed(
+            seedColor: kAppColor,
+            brightness: Brightness.light,
+          ).onSurface,
+        ),
+        selectedLabelTextStyle: TextStyle(
+          color: ColorScheme.fromSeed(
+            seedColor: kAppColor,
+            brightness: Brightness.light,
+          ).onPrimaryContainer,
+        ),
+        unselectedLabelTextStyle: TextStyle(
+          color: ColorScheme.fromSeed(
+            seedColor: kAppColor,
+            brightness: Brightness.light,
+          ).onSurface,
+        ),
+      ),
       progressIndicatorTheme: ProgressIndicatorThemeData(year2023: false),
     );
   }
@@ -65,6 +96,37 @@ class AppThemes {
           borderSide: BorderSide.none,
         ),
         filled: true,
+      ),
+      navigationRailTheme: NavigationRailThemeData(
+        backgroundColor: ColorScheme.fromSeed(
+          seedColor: kAppColor,
+          brightness: Brightness.dark,
+        ).surface,
+        selectedIconTheme: IconThemeData(
+          color: ColorScheme.fromSeed(
+            seedColor: kAppColor,
+            brightness: Brightness.dark,
+          ).onPrimaryContainer,
+        ),
+        labelType: NavigationRailLabelType.all,
+        unselectedIconTheme: IconThemeData(
+          color: ColorScheme.fromSeed(
+            seedColor: kAppColor,
+            brightness: Brightness.dark,
+          ).onSurface,
+        ),
+        selectedLabelTextStyle: TextStyle(
+          color: ColorScheme.fromSeed(
+            seedColor: kAppColor,
+            brightness: Brightness.dark,
+          ).onPrimaryContainer,
+        ),
+        unselectedLabelTextStyle: TextStyle(
+          color: ColorScheme.fromSeed(
+            seedColor: kAppColor,
+            brightness: Brightness.dark,
+          ).onSurface,
+        ),
       ),
       progressIndicatorTheme: ProgressIndicatorThemeData(year2023: false),
     );
@@ -505,6 +567,38 @@ class AppThemes {
         }),
         labelBehavior: NavigationDestinationLabelBehavior.onlyShowSelected,
         elevation: 0,
+      ),
+      navigationRailTheme: NavigationRailThemeData(
+        backgroundColor: ColorScheme.fromSeed(
+          seedColor: kAppColor,
+          brightness: Brightness.dark,
+        ).surfaceContainer,
+        groupAlignment: 0.0,
+        selectedIconTheme: IconThemeData(
+          color: ColorScheme.fromSeed(
+            seedColor: kAppColor,
+            brightness: Brightness.dark,
+          ).onPrimaryContainer,
+        ),
+        labelType: NavigationRailLabelType.selected,
+        unselectedIconTheme: IconThemeData(
+          color: ColorScheme.fromSeed(
+            seedColor: kAppColor,
+            brightness: Brightness.dark,
+          ).onSurface,
+        ),
+        selectedLabelTextStyle: TextStyle(
+          color: ColorScheme.fromSeed(
+            seedColor: kAppColor,
+            brightness: Brightness.dark,
+          ).onPrimaryContainer,
+        ),
+        unselectedLabelTextStyle: TextStyle(
+          color: ColorScheme.fromSeed(
+            seedColor: kAppColor,
+            brightness: Brightness.dark,
+          ).onSurface,
+        ),
       ),
       popupMenuTheme: PopupMenuThemeData(
         elevation: 1,

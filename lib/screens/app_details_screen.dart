@@ -32,6 +32,7 @@ class _AppDetailsScreenState extends State<AppDetailsScreen> {
   late Future<List<String>> _screenshotsFuture;
   late Future<IzzyStats> _statsFuture;
   late Future<FDroidApp> _enrichedAppFuture;
+  bool _isInstalling = false;
 
   @override
   void initState() {
@@ -69,7 +70,7 @@ class _AppDetailsScreenState extends State<AppDetailsScreen> {
         // Use tracked repository if available, otherwise use app's default repository
         final defaultRepoUrl = snapshot.data ?? app.repositoryUrl;
 
-        return AnimatedSwitcher(
+        final button = AnimatedSwitcher(
           duration: const Duration(milliseconds: 300),
           transitionBuilder: (child, animation) {
             return ScaleTransition(
@@ -140,6 +141,17 @@ class _AppDetailsScreenState extends State<AppDetailsScreen> {
                   ),
                 ),
         );
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            if (_isInstalling) ...[
+              const LinearProgressIndicator(),
+              const SizedBox(height: 8),
+            ],
+            if (!_isInstalling) button,
+          ],
+        );
       },
     );
   }
@@ -174,17 +186,33 @@ class _AppDetailsScreenState extends State<AppDetailsScreen> {
             return;
           }
 
-          await downloadProvider.installApk(downloadInfo!.filePath!);
-          await appProvider.waitForInstalled(widget.app.packageName);
-          if (context.mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text('${widget.app.name} installation started!'),
-              ),
-            );
+          setState(() {
+            _isInstalling = true;
+          });
+          try {
+            await downloadProvider.installApk(downloadInfo!.filePath!);
+            await appProvider.waitForInstalled(widget.app.packageName);
+            if (context.mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('${widget.app.name} installation started!'),
+                ),
+              );
+            }
+          } finally {
+            if (mounted) {
+              setState(() {
+                _isInstalling = false;
+              });
+            }
           }
         }
       } catch (e) {
+        if (mounted) {
+          setState(() {
+            _isInstalling = false;
+          });
+        }
         if (context.mounted) {
           print('Installation failed: $e');
           ScaffoldMessenger.of(context).showSnackBar(

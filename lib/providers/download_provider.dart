@@ -3,7 +3,11 @@ import 'dart:io';
 import 'package:android_intent_plus/android_intent.dart';
 import 'package:app_installer/app_installer.dart';
 import 'package:flutter/foundation.dart';
+import 'package:package_info_plus/package_info_plus.dart';
+import 'package:path/path.dart' as p;
+import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:shizuku_api/shizuku_api.dart';
 
 import '../models/fdroid_app.dart';
 import '../providers/settings_provider.dart';
@@ -80,8 +84,11 @@ class DownloadProvider extends ChangeNotifier {
   SettingsProvider _settingsProvider;
   final Map<String, DownloadInfo> _downloads = {};
   final NotificationService _notificationService = NotificationService();
-  final InstallationTrackingService _trackingService = InstallationTrackingService();
+  final InstallationTrackingService _trackingService =
+      InstallationTrackingService();
   final AppPreferencesService _preferencesService = AppPreferencesService();
+  final ShizukuApi _shizukuApi = ShizukuApi();
+  String? _androidPackageName;
 
   DownloadProvider(this._apiService, this._settingsProvider) {
     _initNotifications();
@@ -393,15 +400,136 @@ class DownloadProvider extends ChangeNotifier {
         throw Exception('APK file missing or empty');
       }
 
-      await AppInstaller.installApk(filePath);
+      if (_settingsProvider.installMethod == InstallMethod.shizuku) {
+        await _installWithShizuku(filePath);
+        return;
+      }
+
+      await _installWithSystemInstaller(filePath);
     } catch (e) {
       throw Exception('Failed to install APK: $e');
     }
   }
 
+  Future<void> _installWithSystemInstaller(String filePath) async {
+    await AppInstaller.installApk(filePath);
+  }
+
+  Future<void> _installWithShizuku(String filePath) async {
+    if (!Platform.isAndroid) {
+      throw Exception('Shizuku install is only available on Android');
+    }
+
+    final isBinderRunning = await _shizukuApi.pingBinder() ?? false;
+    if (!isBinderRunning) {
+      throw Exception('Shizuku is not running');
+    }
+
+    var hasPermission = await _shizukuApi.checkPermission() ?? false;
+    if (!hasPermission) {
+      hasPermission = await _shizukuApi.requestPermission() ?? false;
+    }
+    if (!hasPermission) {
+      throw Exception('Shizuku permission denied');
+    }
+
+    final packageName = await _getAndroidPackageName();
+    final sourcePath = await _prepareShizukuSource(filePath);
+    final escapedPath = _escapeForDoubleQuotes(sourcePath);
+    final fileName = Uri.file(sourcePath).pathSegments.last;
+    final tempPath = '/data/local/tmp/$fileName';
+
+    try {
+      // Copy into /data/local/tmp so system_server can read it.
+      final copyCommand = _buildShizukuCopyCommand(
+        packageName: packageName,
+        sourcePath: escapedPath,
+        destPath: tempPath,
+      );
+      final copyResult = await _shizukuApi.runCommand(copyCommand);
+      if (copyResult == null) {
+        throw Exception('Shizuku copy returned no response');
+      }
+      final copyLower = copyResult.toLowerCase();
+      if (copyLower.contains('permission denied') ||
+          copyLower.contains('no such file') ||
+          copyLower.contains('error')) {
+        throw Exception('Shizuku copy failed: $copyResult');
+      }
+
+      final installCommand = 'pm install -r -g "$tempPath"';
+      final result = await _shizukuApi.runCommand(installCommand);
+      if (result == null) {
+        throw Exception('Shizuku install returned no response');
+      }
+
+      final normalized = result.toLowerCase();
+      final success = normalized.contains('success');
+      if (!success) {
+        throw Exception('Shizuku install failed: $result');
+      }
+    } finally {
+      await _shizukuApi.runCommand('rm -f "$tempPath"');
+    }
+  }
+
+  Future<String> _prepareShizukuSource(String filePath) async {
+    final tempDir = await getTemporaryDirectory();
+    final fileName = Uri.file(filePath).pathSegments.last;
+    final stagedPath = p.join(tempDir.path, fileName);
+    if (filePath == stagedPath) {
+      return stagedPath;
+    }
+
+    final sourceFile = File(filePath);
+    final stagedFile = File(stagedPath);
+    await stagedFile.parent.create(recursive: true);
+    await sourceFile.copy(stagedPath);
+    return stagedPath;
+  }
+
+  String _buildShizukuCopyCommand({
+    required String packageName,
+    required String sourcePath,
+    required String destPath,
+  }) {
+    final isInternal =
+        sourcePath.startsWith('/data/user/0/$packageName/') ||
+        sourcePath.startsWith('/data/data/$packageName/');
+    if (isInternal) {
+      return 'sh -c "run-as $packageName cat \\"$sourcePath\\" > \\"$destPath\\""';
+    }
+    return 'cp "$sourcePath" "$destPath"';
+  }
+
+  Future<String> _getAndroidPackageName() async {
+    if (_androidPackageName != null) {
+      return _androidPackageName!;
+    }
+    final info = await PackageInfo.fromPlatform();
+    final packageName = info.packageName;
+    _androidPackageName = packageName;
+    return packageName;
+  }
+
+  String _escapeForDoubleQuotes(String value) {
+    return value.replaceAll('\\', '\\\\').replaceAll('"', '\\"');
+  }
+
   /// Requests install permission
   Future<bool> requestInstallPermission() async {
     try {
+      if (_settingsProvider.installMethod == InstallMethod.shizuku) {
+        final isBinderRunning = await _shizukuApi.pingBinder() ?? false;
+        if (!isBinderRunning) {
+          return false;
+        }
+        final hasPermission = await _shizukuApi.checkPermission() ?? false;
+        if (hasPermission) {
+          return true;
+        }
+        return await _shizukuApi.requestPermission() ?? false;
+      }
       final status = await Permission.requestInstallPackages.request();
       return status.isGranted;
     } catch (e) {
@@ -432,7 +560,7 @@ class DownloadProvider extends ChangeNotifier {
         data: 'package:$packageName',
       );
       await intent.launch();
-      
+
       // Remove tracking data when app is uninstalled
       // Note: This is best-effort. The actual uninstall is handled by Android
       // and we can't know for sure if it succeeded immediately

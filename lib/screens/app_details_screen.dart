@@ -186,6 +186,7 @@ class _AppDetailsScreenState extends State<AppDetailsScreen> {
         }
       } catch (e) {
         if (context.mounted) {
+          print('Installation failed: $e');
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text('Installation failed: ${e.toString()}')),
           );

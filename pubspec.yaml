@@ -63,6 +63,9 @@ dependencies:
   # App installer for APK installation
   app_installer: ^1.1.0
 
+  # Shizuku-based installer
+  shizuku_api: 1.2.2
+
   # Share plus for sharing apps
   share_plus: ^12.0.1
 

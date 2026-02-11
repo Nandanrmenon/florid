@@ -455,7 +455,7 @@ class _QuickViewModal extends StatelessWidget {
                                             ).showSnackBar(
                                               const SnackBar(
                                                 content: Text(
-                                                  'Install permission required',
+                                                  'Install access required',
                                                 ),
                                               ),
                                             );

@@ -5,11 +5,14 @@ enum ThemeStyle { material, florid }
 
 enum UpdateNetworkPolicy { any, wifiOnly, wifiAndCharging }
 
+enum InstallMethod { system, shizuku }
+
 class SettingsProvider extends ChangeNotifier {
   static const _themeModeKey = 'theme_mode';
   static const _themeStyleKey = 'theme_style';
   static const _autoInstallKey = 'auto_install_apk';
   static const _autoDeleteKey = 'auto_delete_apk';
+  static const _installMethodKey = 'install_method';
   static const _localeKey = 'locale';
   static const _onboardingCompleteKey = 'onboarding_complete';
   static const _sniBypassKey = 'sni_bypass_enabled';
@@ -21,6 +24,7 @@ class SettingsProvider extends ChangeNotifier {
   ThemeStyle _themeStyle = ThemeStyle.florid;
   bool _autoInstallApk = true;
   bool _autoDeleteApk = true;
+  InstallMethod _installMethod = InstallMethod.system;
   String _locale = 'en-US';
   bool _onboardingComplete = false;
   bool _sniBypassEnabled = true;
@@ -38,6 +42,7 @@ class SettingsProvider extends ChangeNotifier {
   ThemeStyle get themeStyle => _themeStyle;
   bool get autoInstallApk => _autoInstallApk;
   bool get autoDeleteApk => _autoDeleteApk;
+  InstallMethod get installMethod => _installMethod;
   String get locale => _locale;
   bool get onboardingComplete => _onboardingComplete;
   bool get sniBypassEnabled => _sniBypassEnabled;
@@ -105,6 +110,12 @@ class SettingsProvider extends ChangeNotifier {
     }
     _autoInstallApk = prefs.getBool(_autoInstallKey) ?? true;
     _autoDeleteApk = prefs.getBool(_autoDeleteKey) ?? true;
+    final installMethodIndex = prefs.getInt(_installMethodKey);
+    if (installMethodIndex != null &&
+        installMethodIndex >= 0 &&
+        installMethodIndex < InstallMethod.values.length) {
+      _installMethod = InstallMethod.values[installMethodIndex];
+    }
     _locale = prefs.getString(_localeKey) ?? 'en-US';
     _onboardingComplete = prefs.getBool(_onboardingCompleteKey) ?? false;
     _sniBypassEnabled = prefs.getBool(_sniBypassKey) ?? true;
@@ -145,6 +156,13 @@ class SettingsProvider extends ChangeNotifier {
     notifyListeners();
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_autoDeleteKey, value);
+  }
+
+  Future<void> setInstallMethod(InstallMethod method) async {
+    _installMethod = method;
+    notifyListeners();
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt(_installMethodKey, method.index);
   }
 
   Future<void> setLocale(String locale) async {

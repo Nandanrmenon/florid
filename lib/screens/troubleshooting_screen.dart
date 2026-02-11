@@ -10,6 +10,55 @@ import 'package:provider/provider.dart';
 class TroubleshootingScreen extends StatelessWidget {
   const TroubleshootingScreen({super.key});
 
+  String _installMethodLabel(InstallMethod method) {
+    switch (method) {
+      case InstallMethod.shizuku:
+        return 'Shizuku';
+      case InstallMethod.system:
+      default:
+        return 'System installer';
+    }
+  }
+
+  Future<void> _showInstallMethodDialog(
+    BuildContext context,
+    SettingsProvider settings,
+  ) async {
+    await showDialog<void>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Installation method'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: InstallMethod.values
+              .map(
+                (method) => RadioListTile<InstallMethod>(
+                  value: method,
+                  groupValue: settings.installMethod,
+                  title: Text(_installMethodLabel(method)),
+                  subtitle: method == InstallMethod.shizuku
+                      ? const Text('Requires Shizuku to be running')
+                      : const Text('Uses the standard system installer'),
+                  onChanged: (value) async {
+                    if (value == null) return;
+                    await settings.setInstallMethod(value);
+                    if (!context.mounted) return;
+                    Navigator.of(context).pop();
+                  },
+                ),
+              )
+              .toList(),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Close'),
+          ),
+        ],
+      ),
+    );
+  }
+
   Future<void> _clearRepoCache(BuildContext context) async {
     final api = context.read<FDroidApiService>();
     await api.clearRepositoryCache();
@@ -62,6 +111,15 @@ class TroubleshootingScreen extends StatelessWidget {
                       MListHeader(title: 'Downloads & Storage'),
                       MListView(
                         items: [
+                          MListItemData(
+                            title: 'Installation method',
+                            subtitle: _installMethodLabel(
+                              settings.installMethod,
+                            ),
+                            onTap: () =>
+                                _showInstallMethodDialog(context, settings),
+                            suffix: const Icon(Symbols.chevron_right),
+                          ),
                           MListItemData(
                             title: 'Auto-install after download',
                             onTap: () {

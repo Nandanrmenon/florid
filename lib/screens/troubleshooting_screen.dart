@@ -171,13 +171,13 @@ class _TroubleshootingScreenState extends State<TroubleshootingScreen> {
                             ),
                           ),
                           MListItemData(
-                            leading: Icon(Symbols.install_mobile),
+                            leading: const Icon(Symbols.install_mobile),
                             title: 'Installation method',
                             subtitle: SettingsProvider.getInstallMethodDisplayName(
                               settings.installMethod,
                             ),
                             onTap: () => _showInstallMethodDialog(context, settings),
-                            suffix: Icon(Symbols.chevron_right),
+                            suffix: const Icon(Symbols.chevron_right),
                           ),
                         ],
                       ),

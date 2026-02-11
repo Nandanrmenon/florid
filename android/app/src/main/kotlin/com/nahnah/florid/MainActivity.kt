@@ -98,8 +98,8 @@ class MainActivity : FlutterActivity() {
 			// Request permission
 			val requestCode = 1
 			Shizuku.addRequestPermissionResultListener(object : Shizuku.OnRequestPermissionResultListener {
-				override fun onRequestPermissionResult(requestCode: Int, grantResult: Int) {
-					if (requestCode == requestCode) {
+				override fun onRequestPermissionResult(reqCode: Int, grantResult: Int) {
+					if (reqCode == requestCode) {
 						Shizuku.removeRequestPermissionResultListener(this)
 						result.success(grantResult == PackageManager.PERMISSION_GRANTED)
 					}

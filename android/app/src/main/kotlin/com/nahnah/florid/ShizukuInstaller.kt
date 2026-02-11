@@ -47,9 +47,11 @@ object ShizukuInstaller {
             )
             
             // Write the APK data to the session
-            FileInputStream(pfd.fileDescriptor).use { inputStream ->
+            val inputStream = FileInputStream(pfd.fileDescriptor)
+            try {
                 val out = session.openWrite("base.apk", 0, file.length())
-                ParcelFileDescriptor.AutoCloseOutputStream(out).use { outputStream ->
+                val outputStream = ParcelFileDescriptor.AutoCloseOutputStream(out)
+                try {
                     val buffer = ByteArray(65536)
                     var bytesRead: Int
                     while (inputStream.read(buffer).also { bytesRead = it } != -1) {
@@ -57,7 +59,11 @@ object ShizukuInstaller {
                     }
                     outputStream.flush()
                     session.fsync(out)
+                } finally {
+                    outputStream.close()
                 }
+            } finally {
+                inputStream.close()
             }
             
             pfd.close()

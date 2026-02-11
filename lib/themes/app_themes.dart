@@ -231,6 +231,38 @@ class AppThemes {
         labelBehavior: NavigationDestinationLabelBehavior.onlyShowSelected,
         elevation: 0,
       ),
+      navigationRailTheme: NavigationRailThemeData(
+        backgroundColor: ColorScheme.fromSeed(
+          seedColor: kAppColor,
+          brightness: Brightness.light,
+        ).surfaceContainer,
+        groupAlignment: 0.0,
+        selectedIconTheme: IconThemeData(
+          color: ColorScheme.fromSeed(
+            seedColor: kAppColor,
+            brightness: Brightness.light,
+          ).onPrimaryContainer,
+        ),
+        labelType: NavigationRailLabelType.selected,
+        unselectedIconTheme: IconThemeData(
+          color: ColorScheme.fromSeed(
+            seedColor: kAppColor,
+            brightness: Brightness.light,
+          ).onSurface,
+        ),
+        selectedLabelTextStyle: TextStyle(
+          color: ColorScheme.fromSeed(
+            seedColor: kAppColor,
+            brightness: Brightness.light,
+          ).onPrimaryContainer,
+        ),
+        unselectedLabelTextStyle: TextStyle(
+          color: ColorScheme.fromSeed(
+            seedColor: kAppColor,
+            brightness: Brightness.light,
+          ).onSurface,
+        ),
+      ),
       popupMenuTheme: PopupMenuThemeData(
         elevation: 1,
         color: ColorScheme.fromSeed(

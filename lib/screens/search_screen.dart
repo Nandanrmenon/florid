@@ -1,6 +1,7 @@
 import 'package:florid/l10n/app_localizations.dart';
 import 'package:florid/providers/settings_provider.dart';
 import 'package:florid/utils/menu_actions.dart';
+import 'package:florid/utils/responsive.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -136,14 +137,15 @@ class _SearchScreenState extends State<SearchScreen> {
                 }
               },
               itemBuilder: (context) => [
-                const PopupMenuItem(
-                  value: 'settings',
-                  child: ListTile(
-                    leading: Icon(Symbols.settings),
-                    title: Text('Settings'),
-                    contentPadding: EdgeInsets.zero,
+                if (!context.isLargeScreen)
+                  const PopupMenuItem(
+                    value: 'settings',
+                    child: ListTile(
+                      leading: Icon(Symbols.settings),
+                      title: Text('Settings'),
+                      contentPadding: EdgeInsets.zero,
+                    ),
                   ),
-                ),
                 const PopupMenuItem(
                   value: 'about',
                   child: ListTile(

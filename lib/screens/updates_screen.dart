@@ -1,6 +1,7 @@
 import 'package:florid/l10n/app_localizations.dart';
 import 'package:florid/providers/settings_provider.dart';
 import 'package:florid/utils/menu_actions.dart';
+import 'package:florid/utils/responsive.dart';
 import 'package:florid/widgets/changelog_preview.dart';
 import 'package:florid/widgets/f_tabbar.dart';
 import 'package:flutter/material.dart';
@@ -133,37 +134,42 @@ class _UpdatesScreenState extends State<UpdatesScreen>
                 ).colorScheme.surfaceContainerLow,
                 title: const Text('Apps'),
                 actions: [
-                  IconButton(
-                    onPressed: () {
-                      _onRefresh();
-                    },
-                    icon: Icon(Symbols.refresh),
-                  ),
                   PopupMenuButton<String>(
                     onSelected: (value) {
                       switch (value) {
                         case 'settings':
                           MenuActions.showSettings(context);
                           break;
+                        case 'refresh':
+                          _onRefresh();
                         case 'about':
                           MenuActions.showAbout(context);
                           break;
                       }
                     },
                     itemBuilder: (context) => [
-                      const PopupMenuItem(
-                        value: 'settings',
+                      if (!context.isLargeScreen)
+                        PopupMenuItem(
+                          value: 'settings',
+                          child: ListTile(
+                            leading: Icon(Symbols.settings),
+                            title: Text(AppLocalizations.of(context)!.settings),
+                            contentPadding: EdgeInsets.zero,
+                          ),
+                        ),
+                      PopupMenuItem(
+                        value: 'refresh',
                         child: ListTile(
-                          leading: Icon(Symbols.settings),
-                          title: Text('Settings'),
+                          leading: Icon(Symbols.refresh),
+                          title: Text(AppLocalizations.of(context)!.refresh),
                           contentPadding: EdgeInsets.zero,
                         ),
                       ),
-                      const PopupMenuItem(
+                      PopupMenuItem(
                         value: 'about',
                         child: ListTile(
                           leading: Icon(Symbols.info),
-                          title: Text('About'),
+                          title: Text(AppLocalizations.of(context)!.about),
                           contentPadding: EdgeInsets.zero,
                         ),
                       ),

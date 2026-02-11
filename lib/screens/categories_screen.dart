@@ -128,8 +128,12 @@ class _CategoriesScreenState extends State<CategoriesScreen>
               padding: const EdgeInsets.all(16),
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
+              gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+                // crossAxisCount:
+                //     MediaQuery.sizeOf(context).width < Responsive.largeWidth
+                //     ? 2
+                //     : 3,
+                maxCrossAxisExtent: 300,
                 crossAxisSpacing: 8,
                 mainAxisSpacing: 8,
                 childAspectRatio: 2.5,

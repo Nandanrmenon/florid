@@ -1,6 +1,8 @@
 import 'package:florid/l10n/app_localizations.dart';
 import 'package:florid/models/fdroid_app.dart';
 import 'package:florid/screens/library_screen.dart';
+import 'package:florid/screens/settings_screen.dart';
+import 'package:florid/utils/responsive.dart';
 import 'package:florid/widgets/f_navbar.dart';
 import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/symbols.dart';
@@ -51,6 +53,9 @@ class _FloridAppState extends State<FloridApp> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: MediaQuery.sizeOf(context).width < Responsive.largeWidth
+          ? Theme.of(context).colorScheme.surface
+          : Theme.of(context).colorScheme.surfaceContainer,
       body: Consumer2<AppProvider, SettingsProvider>(
         builder: (context, appProvider, settings, child) {
           return FutureBuilder<List<FDroidApp>>(
@@ -75,8 +80,108 @@ class _FloridAppState extends State<FloridApp> {
 
               return Stack(
                 children: [
-                  IndexedStack(index: _currentIndex, children: _screens),
-                  if (isFlorid)
+                  Row(
+                    children: [
+                      if (MediaQuery.sizeOf(context).width >=
+                          Responsive.largeWidth)
+                        NavigationRail(
+                          selectedIndex: _currentIndex,
+                          onDestinationSelected: (index) {
+                            setState(() {
+                              _currentIndex = index;
+                            });
+                            _tabNotifier.value = index;
+                          },
+                          destinations: [
+                            NavigationRailDestination(
+                              icon: buildIcon(
+                                Symbols.newsstand_rounded,
+                                selected: false,
+                              ),
+                              selectedIcon: buildIcon(
+                                Symbols.newsstand_rounded,
+                                selected: true,
+                              ),
+                              label: Text(localizations.home),
+                            ),
+                            NavigationRailDestination(
+                              icon: buildIcon(Symbols.search, selected: false),
+                              selectedIcon: buildIcon(
+                                Symbols.search,
+                                selected: true,
+                              ),
+                              label: Text(localizations.search),
+                            ),
+                            NavigationRailDestination(
+                              icon: buildIcon(
+                                Symbols.mobile_3_rounded,
+                                selected: false,
+                              ),
+                              selectedIcon: buildIcon(
+                                Symbols.mobile_3_rounded,
+                                selected: true,
+                              ),
+                              label: Text(localizations.device),
+                            ),
+                          ],
+                          trailingAtBottom: true,
+                          trailing: Column(
+                            children: [
+                              InkWell(
+                                borderRadius: BorderRadius.circular(16),
+                                onTap: () => Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        const SettingsScreen(),
+                                  ),
+                                ),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Column(
+                                    children: [
+                                      const Icon(Symbols.settings),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        localizations.settings,
+                                        style: TextStyle(fontSize: 12),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: 32),
+                            ],
+                          ),
+                        ),
+                      // For small screens
+                      if (MediaQuery.sizeOf(context).width <
+                          Responsive.largeWidth)
+                        Expanded(
+                          child: IndexedStack(
+                            index: _currentIndex,
+                            children: _screens,
+                          ),
+                        ),
+                      // For big screens
+                      if (MediaQuery.sizeOf(context).width >=
+                          Responsive.largeWidth)
+                        Expanded(
+                          child: SafeArea(
+                            child: Material(
+                              clipBehavior: Clip.antiAlias,
+                              borderRadius: BorderRadius.circular(16),
+                              child: IndexedStack(
+                                index: _currentIndex,
+                                children: _screens,
+                              ),
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                  if (isFlorid &&
+                      MediaQuery.sizeOf(context).width < Responsive.largeWidth)
                     Positioned(
                       left: 0,
                       right: 0,

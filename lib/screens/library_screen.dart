@@ -4,6 +4,7 @@ import 'package:florid/providers/repositories_provider.dart';
 import 'package:florid/screens/categories_screen.dart';
 import 'package:florid/screens/home_screen.dart';
 import 'package:florid/utils/menu_actions.dart';
+import 'package:florid/utils/responsive.dart';
 import 'package:florid/widgets/f_tabbar.dart';
 import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/material_symbols_icons.dart';
@@ -64,14 +65,15 @@ class _LibraryScreenState extends State<LibraryScreen>
                   contentPadding: EdgeInsets.zero,
                 ),
               ),
-              PopupMenuItem(
-                value: 'settings',
-                child: ListTile(
-                  leading: const Icon(Symbols.settings),
-                  title: Text(AppLocalizations.of(context)!.settings),
-                  contentPadding: EdgeInsets.zero,
+              if (!context.isLargeScreen)
+                PopupMenuItem(
+                  value: 'settings',
+                  child: ListTile(
+                    leading: const Icon(Symbols.settings),
+                    title: Text(AppLocalizations.of(context)!.settings),
+                    contentPadding: EdgeInsets.zero,
+                  ),
                 ),
-              ),
               PopupMenuItem(
                 value: 'about',
                 child: ListTile(

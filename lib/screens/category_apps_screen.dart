@@ -1,5 +1,6 @@
 import 'package:florid/l10n/app_localizations.dart';
 import 'package:florid/providers/settings_provider.dart';
+import 'package:florid/utils/responsive.dart';
 import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:provider/provider.dart';
@@ -141,18 +142,50 @@ class _CategoryAppsScreenState extends State<CategoryAppsScreen> {
 
           return RefreshIndicator(
             onRefresh: _onRefresh,
-            child: ListView.builder(
-              padding: const EdgeInsets.symmetric(horizontal: 8),
-              itemCount: apps.length,
-              itemBuilder: (context, index) {
-                final app = apps[index];
-                return AppListItem(
-                  app: app,
-                  showInstallStatus: false,
-                  onTap: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (context) => AppDetailsScreen(app: app),
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                if (MediaQuery.sizeOf(context).width < Responsive.largeWidth) {
+                  return ListView.builder(
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                    itemCount: apps.length,
+                    itemBuilder: (context, index) {
+                      final app = apps[index];
+                      return AppListItem(
+                        app: app,
+                        showInstallStatus: false,
+                        onTap: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (context) => AppDetailsScreen(app: app),
+                            ),
+                          );
+                        },
+                      );
+                    },
+                  );
+                }
+                return GridView.builder(
+                  padding: const EdgeInsets.all(16),
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    crossAxisSpacing: 4,
+                    mainAxisSpacing: 4,
+                    childAspectRatio: 4.4,
+                  ),
+                  itemCount: apps.length,
+                  itemBuilder: (context, index) {
+                    final app = apps[index];
+                    return Card(
+                      child: AppListItem(
+                        app: app,
+                        showInstallStatus: false,
+                        onTap: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (context) => AppDetailsScreen(app: app),
+                            ),
+                          );
+                        },
                       ),
                     );
                   },

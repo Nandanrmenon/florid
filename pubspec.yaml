@@ -37,6 +37,9 @@ dependencies:
   # Material Symbols icon pack
   material_symbols_icons: ^4.2771.0
 
+  # Material You dynamic color
+  dynamic_color: ^1.7.0
+
   # Local key-value storage for settings
   shared_preferences: ^2.3.2
 

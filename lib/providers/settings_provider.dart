@@ -16,6 +16,7 @@ class SettingsProvider extends ChangeNotifier {
   static const _localeKey = 'locale';
   static const _onboardingCompleteKey = 'onboarding_complete';
   static const _sniBypassKey = 'sni_bypass_enabled';
+  static const _dynamicColorKey = 'dynamic_color_enabled';
   static const backgroundUpdatesKey = 'background_updates_enabled';
   static const updateIntervalHoursKey = 'background_update_interval_hours';
   static const updateNetworkPolicyKey = 'background_update_network_policy';
@@ -28,6 +29,7 @@ class SettingsProvider extends ChangeNotifier {
   String _locale = 'en-US';
   bool _onboardingComplete = false;
   bool _sniBypassEnabled = true;
+  bool _dynamicColorEnabled = false;
   bool _backgroundUpdatesEnabled = true;
   int _updateIntervalHours = 6;
   UpdateNetworkPolicy _updateNetworkPolicy = UpdateNetworkPolicy.any;
@@ -46,6 +48,7 @@ class SettingsProvider extends ChangeNotifier {
   String get locale => _locale;
   bool get onboardingComplete => _onboardingComplete;
   bool get sniBypassEnabled => _sniBypassEnabled;
+  bool get dynamicColorEnabled => _dynamicColorEnabled;
   bool get backgroundUpdatesEnabled => _backgroundUpdatesEnabled;
   int get updateIntervalHours => _updateIntervalHours;
   UpdateNetworkPolicy get updateNetworkPolicy => _updateNetworkPolicy;
@@ -119,6 +122,7 @@ class SettingsProvider extends ChangeNotifier {
     _locale = prefs.getString(_localeKey) ?? 'en-US';
     _onboardingComplete = prefs.getBool(_onboardingCompleteKey) ?? false;
     _sniBypassEnabled = prefs.getBool(_sniBypassKey) ?? true;
+    _dynamicColorEnabled = prefs.getBool(_dynamicColorKey) ?? false;
     _backgroundUpdatesEnabled = prefs.getBool(backgroundUpdatesKey) ?? true;
     _updateIntervalHours = prefs.getInt(updateIntervalHoursKey) ?? 6;
     final policyIndex =
@@ -187,6 +191,13 @@ class SettingsProvider extends ChangeNotifier {
     notifyListeners();
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_sniBypassKey, value);
+  }
+
+  Future<void> setDynamicColorEnabled(bool value) async {
+    _dynamicColorEnabled = value;
+    notifyListeners();
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_dynamicColorKey, value);
   }
 
   Future<void> setBackgroundUpdatesEnabled(bool value) async {

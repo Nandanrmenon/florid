@@ -57,6 +57,33 @@ class AppearanceScreen extends StatelessWidget {
                   Column(
                     spacing: 4,
                     children: [
+                      MListHeader(title: 'Dynamic Color'),
+                      MListView(
+                        items: [
+                          MListItemData(
+                            leading: Icon(Symbols.palette),
+                            title: 'Material You Dynamic',
+                            subtitle:
+                                'Use system colors on supported Android devices',
+                            onTap: () {
+                              settings.setDynamicColorEnabled(
+                                !settings.dynamicColorEnabled,
+                              );
+                            },
+                            suffix: Switch(
+                              value: settings.dynamicColorEnabled,
+                              onChanged: (value) {
+                                settings.setDynamicColorEnabled(value);
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                  Column(
+                    spacing: 4,
+                    children: [
                       MListHeader(title: 'Theme Style'),
                       MRadioListView(
                         items: [

@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:dynamic_color/dynamic_color.dart';
 import 'package:florid/l10n/app_localizations.dart';
 import 'package:florid/providers/settings_provider.dart';
 import 'package:florid/screens/florid_app.dart';
@@ -95,26 +96,36 @@ class MainApp extends StatelessWidget {
       ],
       child: Consumer<SettingsProvider>(
         builder: (context, settings, _) {
-          return MaterialApp(
-            title: 'Florid - F-Droid Client',
-            debugShowCheckedModeBanner: false,
-            navigatorKey: appNavigatorKey,
-            localizationsDelegates: AppLocalizations.localizationsDelegates,
-            supportedLocales: AppLocalizations.supportedLocales,
-            theme: settings.themeStyle == ThemeStyle.florid
-                ? AppThemes.floridLightTheme()
-                : AppThemes.materialLightTheme(),
-            darkTheme: settings.themeStyle == ThemeStyle.florid
-                ? AppThemes.floridDarkTheme()
-                : AppThemes.materialDarkTheme(),
-            themeMode: settings.themeMode,
-            home: !settings.isLoaded
-                ? const Scaffold(
-                    body: Center(child: CircularProgressIndicator()),
-                  )
-                : settings.onboardingComplete
-                ? const FloridApp()
-                : const OnboardingScreen(),
+          return DynamicColorBuilder(
+            builder: (lightDynamic, darkDynamic) {
+              final useDynamic = settings.dynamicColorEnabled;
+              final lightScheme = useDynamic
+                  ? lightDynamic
+                  : null;
+              final darkScheme = useDynamic ? darkDynamic : null;
+
+              return MaterialApp(
+                title: 'Florid - F-Droid Client',
+                debugShowCheckedModeBanner: false,
+                navigatorKey: appNavigatorKey,
+                localizationsDelegates: AppLocalizations.localizationsDelegates,
+                supportedLocales: AppLocalizations.supportedLocales,
+                theme: settings.themeStyle == ThemeStyle.florid
+                    ? AppThemes.floridLightTheme(colorScheme: lightScheme)
+                    : AppThemes.materialLightTheme(colorScheme: lightScheme),
+                darkTheme: settings.themeStyle == ThemeStyle.florid
+                    ? AppThemes.floridDarkTheme(colorScheme: darkScheme)
+                    : AppThemes.materialDarkTheme(colorScheme: darkScheme),
+                themeMode: settings.themeMode,
+                home: !settings.isLoaded
+                    ? const Scaffold(
+                        body: Center(child: CircularProgressIndicator()),
+                      )
+                    : settings.onboardingComplete
+                    ? const FloridApp()
+                    : const OnboardingScreen(),
+              );
+            },
           );
         },
       ),

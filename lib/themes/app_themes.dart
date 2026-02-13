@@ -4,12 +4,22 @@ import 'package:material_symbols_icons/symbols.dart';
 
 class AppThemes {
   // Material Theme (Original)
-  static ThemeData materialLightTheme() {
-    return ThemeData(
-      colorScheme: ColorScheme.fromSeed(
+  static ThemeData materialLightTheme({ColorScheme? colorScheme}) {
+    final ColorScheme scheme;
+    if (colorScheme != null) {
+      scheme = ColorScheme.fromSeed(
+        seedColor: colorScheme.primary,
+        brightness: Brightness.light,
+      );
+    } else {
+      scheme = ColorScheme.fromSeed(
         seedColor: kAppColor,
         brightness: Brightness.light,
-      ),
+      );
+    }
+
+    return ThemeData(
+      colorScheme: scheme,
       appBarTheme: const AppBarTheme(),
       useMaterial3: true,
       inputDecorationTheme: InputDecorationTheme(
@@ -19,13 +29,7 @@ class AppThemes {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
-          borderSide: BorderSide(
-            color: ColorScheme.fromSeed(
-              seedColor: kAppColor,
-              brightness: Brightness.light,
-            ).primary,
-            width: 2,
-          ),
+          borderSide: BorderSide(color: scheme.primary, width: 2),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
@@ -34,46 +38,33 @@ class AppThemes {
         filled: true,
       ),
       navigationRailTheme: NavigationRailThemeData(
-        backgroundColor: ColorScheme.fromSeed(
-          seedColor: kAppColor,
-          brightness: Brightness.light,
-        ).surface,
-        selectedIconTheme: IconThemeData(
-          color: ColorScheme.fromSeed(
-            seedColor: kAppColor,
-            brightness: Brightness.light,
-          ).onPrimaryContainer,
-        ),
+        backgroundColor: scheme.surface,
+        selectedIconTheme: IconThemeData(color: scheme.onPrimaryContainer),
         labelType: NavigationRailLabelType.all,
-        unselectedIconTheme: IconThemeData(
-          color: ColorScheme.fromSeed(
-            seedColor: kAppColor,
-            brightness: Brightness.light,
-          ).onSurface,
-        ),
-        selectedLabelTextStyle: TextStyle(
-          color: ColorScheme.fromSeed(
-            seedColor: kAppColor,
-            brightness: Brightness.light,
-          ).onPrimaryContainer,
-        ),
-        unselectedLabelTextStyle: TextStyle(
-          color: ColorScheme.fromSeed(
-            seedColor: kAppColor,
-            brightness: Brightness.light,
-          ).onSurface,
-        ),
+        unselectedIconTheme: IconThemeData(color: scheme.onSurface),
+        selectedLabelTextStyle: TextStyle(color: scheme.onPrimaryContainer),
+        unselectedLabelTextStyle: TextStyle(color: scheme.onSurface),
       ),
       progressIndicatorTheme: ProgressIndicatorThemeData(year2023: false),
     );
   }
 
-  static ThemeData materialDarkTheme() {
-    return ThemeData(
-      colorScheme: ColorScheme.fromSeed(
+  static ThemeData materialDarkTheme({ColorScheme? colorScheme}) {
+    final ColorScheme scheme;
+    if (colorScheme != null) {
+      scheme = ColorScheme.fromSeed(
+        seedColor: colorScheme.primary,
+        brightness: Brightness.dark,
+      );
+    } else {
+      scheme = ColorScheme.fromSeed(
         seedColor: kAppColor,
         brightness: Brightness.dark,
-      ),
+      );
+    }
+
+    return ThemeData(
+      colorScheme: scheme,
       appBarTheme: const AppBarTheme(),
       useMaterial3: true,
       inputDecorationTheme: InputDecorationTheme(
@@ -83,13 +74,7 @@ class AppThemes {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
-          borderSide: BorderSide(
-            color: ColorScheme.fromSeed(
-              seedColor: kAppColor,
-              brightness: Brightness.dark,
-            ).primary,
-            width: 2,
-          ),
+          borderSide: BorderSide(color: scheme.primary, width: 2),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
@@ -98,48 +83,48 @@ class AppThemes {
         filled: true,
       ),
       navigationRailTheme: NavigationRailThemeData(
-        backgroundColor: ColorScheme.fromSeed(
-          seedColor: kAppColor,
-          brightness: Brightness.dark,
-        ).surface,
-        selectedIconTheme: IconThemeData(
-          color: ColorScheme.fromSeed(
-            seedColor: kAppColor,
-            brightness: Brightness.dark,
-          ).onPrimaryContainer,
-        ),
+        backgroundColor: scheme.surface,
+        selectedIconTheme: IconThemeData(color: scheme.onPrimaryContainer),
         labelType: NavigationRailLabelType.all,
-        unselectedIconTheme: IconThemeData(
-          color: ColorScheme.fromSeed(
-            seedColor: kAppColor,
-            brightness: Brightness.dark,
-          ).onSurface,
-        ),
-        selectedLabelTextStyle: TextStyle(
-          color: ColorScheme.fromSeed(
-            seedColor: kAppColor,
-            brightness: Brightness.dark,
-          ).onPrimaryContainer,
-        ),
-        unselectedLabelTextStyle: TextStyle(
-          color: ColorScheme.fromSeed(
-            seedColor: kAppColor,
-            brightness: Brightness.dark,
-          ).onSurface,
-        ),
+        unselectedIconTheme: IconThemeData(color: scheme.onSurface),
+        selectedLabelTextStyle: TextStyle(color: scheme.onPrimaryContainer),
+        unselectedLabelTextStyle: TextStyle(color: scheme.onSurface),
       ),
       progressIndicatorTheme: ProgressIndicatorThemeData(year2023: false),
     );
   }
 
   // Florid Custom Theme
-  static ThemeData floridLightTheme() {
-    return ThemeData(
-      useMaterial3: true,
-      colorScheme: ColorScheme.fromSeed(
+  static ThemeData floridLightTheme({ColorScheme? colorScheme}) {
+    final ColorScheme scheme;
+    if (colorScheme != null) {
+      scheme = ColorScheme.fromSeed(
+        seedColor: colorScheme.primary,
+        brightness: Brightness.light,
+      );
+    } else {
+      scheme = ColorScheme.fromSeed(
         seedColor: kAppColor,
         brightness: Brightness.light,
-      ),
+      );
+    }
+
+    final ColorScheme darkScheme;
+    if (colorScheme != null) {
+      darkScheme = ColorScheme.fromSeed(
+        seedColor: colorScheme.primary,
+        brightness: Brightness.dark,
+      );
+    } else {
+      darkScheme = ColorScheme.fromSeed(
+        seedColor: kAppColor,
+        brightness: Brightness.dark,
+      );
+    }
+
+    return ThemeData(
+      useMaterial3: true,
+      colorScheme: scheme,
       fontFamily: 'Google Sans Flex',
       appBarTheme: AppBarTheme(
         centerTitle: true,
@@ -151,22 +136,13 @@ class AppThemes {
             FontVariation('ROND', 100),
             FontVariation('wdth', 125),
           ],
-          color: ColorScheme.fromSeed(
-            seedColor: kAppColor,
-            brightness: Brightness.light,
-          ).onSurface,
+          color: scheme.onSurface,
         ),
       ),
       floatingActionButtonTheme: FloatingActionButtonThemeData(
         elevation: 0,
-        backgroundColor: ColorScheme.fromSeed(
-          seedColor: kAppColor,
-          brightness: Brightness.light,
-        ).primary,
-        foregroundColor: ColorScheme.fromSeed(
-          seedColor: kAppColor,
-          brightness: Brightness.light,
-        ).onPrimary,
+        backgroundColor: scheme.primary,
+        foregroundColor: scheme.onPrimary,
         extendedTextStyle: TextStyle(
           fontFamily: 'Google Sans Flex',
           fontVariations: [
@@ -174,18 +150,12 @@ class AppThemes {
             FontVariation('ROND', 100),
             FontVariation('wdth', 125),
           ],
-          color: ColorScheme.fromSeed(
-            seedColor: kAppColor,
-            brightness: Brightness.dark,
-          ).onSurface,
+          color: darkScheme.onSurface,
         ),
       ),
       cardTheme: CardThemeData(
         elevation: 0,
-        color: ColorScheme.fromSeed(
-          seedColor: kAppColor,
-          brightness: Brightness.light,
-        ).surfaceContainer,
+        color: scheme.surfaceContainer,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(24),
           side: BorderSide(width: 0, style: BorderStyle.none),
@@ -210,10 +180,7 @@ class AppThemes {
           Set<WidgetState> states,
         ) {
           if (states.contains(WidgetState.selected)) {
-            return ColorScheme.fromSeed(
-              seedColor: kAppColor,
-              brightness: Brightness.light,
-            ).primary;
+            return scheme.primary;
           }
           return null; // Use the default thumb color
         }),
@@ -221,29 +188,14 @@ class AppThemes {
           Set<WidgetState> states,
         ) {
           if (states.contains(WidgetState.selected)) {
-            return Icon(
-              Symbols.check,
-              color: ColorScheme.fromSeed(
-                seedColor: kAppColor,
-                brightness: Brightness.light,
-              ).onPrimary,
-            );
+            return Icon(Symbols.check, color: scheme.onPrimary);
           }
           return null; // Use the default thumb icon
         }),
         trackColor: WidgetStateProperty.resolveWith<Color?>((
           Set<WidgetState> states,
         ) {
-          if (states.contains(WidgetState.selected)) {
-            return ColorScheme.fromSeed(
-              seedColor: kAppColor,
-              brightness: Brightness.light,
-            ).surfaceDim;
-          }
-          return ColorScheme.fromSeed(
-            seedColor: kAppColor,
-            brightness: Brightness.light,
-          ).surfaceDim;
+          return scheme.surfaceDim;
         }),
         trackOutlineWidth: WidgetStateProperty.resolveWith<double?>((
           Set<WidgetState> states,
@@ -252,85 +204,33 @@ class AppThemes {
         }),
       ),
       navigationBarTheme: NavigationBarThemeData(
-        backgroundColor: ColorScheme.fromSeed(
-          seedColor: kAppColor,
-          brightness: Brightness.light,
-        ).onPrimaryFixedVariant,
+        backgroundColor: scheme.onPrimaryFixedVariant,
         iconTheme: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
           if (states.contains(WidgetState.selected)) {
-            return IconThemeData(
-              color: ColorScheme.fromSeed(
-                seedColor: kAppColor,
-                brightness: Brightness.light,
-              ).onPrimaryContainer,
-            );
+            return IconThemeData(color: scheme.onPrimaryContainer);
           }
-          return IconThemeData(
-            color: ColorScheme.fromSeed(
-              seedColor: kAppColor,
-              brightness: Brightness.light,
-            ).onInverseSurface,
-          );
+          return IconThemeData(color: scheme.onInverseSurface);
         }),
         labelTextStyle: WidgetStateProperty.resolveWith((
           Set<WidgetState> states,
         ) {
-          if (states.contains(WidgetState.selected)) {
-            return TextStyle(
-              color: ColorScheme.fromSeed(
-                seedColor: kAppColor,
-                brightness: Brightness.light,
-              ).onInverseSurface,
-            );
-          }
-          return TextStyle(
-            color: ColorScheme.fromSeed(
-              seedColor: kAppColor,
-              brightness: Brightness.light,
-            ).onInverseSurface,
-          );
+          return TextStyle(color: scheme.onInverseSurface);
         }),
         labelBehavior: NavigationDestinationLabelBehavior.onlyShowSelected,
         elevation: 0,
       ),
       navigationRailTheme: NavigationRailThemeData(
-        backgroundColor: ColorScheme.fromSeed(
-          seedColor: kAppColor,
-          brightness: Brightness.light,
-        ).surfaceContainer,
+        backgroundColor: scheme.surfaceContainer,
         groupAlignment: 0.0,
-        selectedIconTheme: IconThemeData(
-          color: ColorScheme.fromSeed(
-            seedColor: kAppColor,
-            brightness: Brightness.light,
-          ).onPrimaryContainer,
-        ),
+        selectedIconTheme: IconThemeData(color: scheme.onPrimaryContainer),
         labelType: NavigationRailLabelType.selected,
-        unselectedIconTheme: IconThemeData(
-          color: ColorScheme.fromSeed(
-            seedColor: kAppColor,
-            brightness: Brightness.light,
-          ).onSurface,
-        ),
-        selectedLabelTextStyle: TextStyle(
-          color: ColorScheme.fromSeed(
-            seedColor: kAppColor,
-            brightness: Brightness.light,
-          ).onPrimaryContainer,
-        ),
-        unselectedLabelTextStyle: TextStyle(
-          color: ColorScheme.fromSeed(
-            seedColor: kAppColor,
-            brightness: Brightness.light,
-          ).onSurface,
-        ),
+        unselectedIconTheme: IconThemeData(color: scheme.onSurface),
+        selectedLabelTextStyle: TextStyle(color: scheme.onPrimaryContainer),
+        unselectedLabelTextStyle: TextStyle(color: scheme.onSurface),
       ),
       popupMenuTheme: PopupMenuThemeData(
         elevation: 1,
-        color: ColorScheme.fromSeed(
-          seedColor: kAppColor,
-          brightness: Brightness.light,
-        ).surfaceContainerHighest,
+        color: scheme.surfaceContainerHighest,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
       ),
       inputDecorationTheme: InputDecorationTheme(
@@ -342,20 +242,11 @@ class AppThemes {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(99),
-          borderSide: BorderSide(
-            color: ColorScheme.fromSeed(
-              seedColor: kAppColor,
-              brightness: Brightness.light,
-            ).primary,
-            width: 1,
-          ),
+          borderSide: BorderSide(color: scheme.primary, width: 1),
         ),
       ),
       bottomSheetTheme: BottomSheetThemeData(
-        backgroundColor: ColorScheme.fromSeed(
-          seedColor: kAppColor,
-          brightness: Brightness.light,
-        ).surface,
+        backgroundColor: scheme.surface,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
         ),
@@ -365,10 +256,7 @@ class AppThemes {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
       ),
       dialogTheme: DialogThemeData(
-        backgroundColor: ColorScheme.fromSeed(
-          seedColor: kAppColor,
-          brightness: Brightness.light,
-        ).surfaceContainer,
+        backgroundColor: scheme.surfaceContainer,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
       ),
       checkboxTheme: CheckboxThemeData(
@@ -377,10 +265,7 @@ class AppThemes {
           Set<WidgetState> states,
         ) {
           if (states.contains(WidgetState.selected)) {
-            return ColorScheme.fromSeed(
-              seedColor: kAppColor,
-              brightness: Brightness.light,
-            ).onPrimary;
+            return scheme.onPrimary;
           }
           return null; // Use the default check color
         }),
@@ -388,32 +273,33 @@ class AppThemes {
           Set<WidgetState> states,
         ) {
           if (states.contains(WidgetState.selected)) {
-            return ColorScheme.fromSeed(
-              seedColor: kAppColor,
-              brightness: Brightness.light,
-            ).primary;
+            return scheme.primary;
           }
           return null; // Use the default fill color
         }),
-        side: BorderSide(
-          color: ColorScheme.fromSeed(
-            seedColor: kAppColor,
-            brightness: Brightness.light,
-          ).onSurfaceVariant,
-          width: 1.5,
-        ),
+        side: BorderSide(color: scheme.onSurfaceVariant, width: 1.5),
       ),
       progressIndicatorTheme: ProgressIndicatorThemeData(year2023: false),
     );
   }
 
-  static ThemeData floridDarkTheme() {
-    return ThemeData(
-      useMaterial3: true,
-      colorScheme: ColorScheme.fromSeed(
+  static ThemeData floridDarkTheme({ColorScheme? colorScheme}) {
+    final ColorScheme scheme;
+    if (colorScheme != null) {
+      scheme = ColorScheme.fromSeed(
+        seedColor: colorScheme.primary,
+        brightness: Brightness.dark,
+      );
+    } else {
+      scheme = ColorScheme.fromSeed(
         seedColor: kAppColor,
         brightness: Brightness.dark,
-      ),
+      );
+    }
+
+    return ThemeData(
+      useMaterial3: true,
+      colorScheme: scheme,
       fontFamily: 'Google Sans Flex',
       appBarTheme: AppBarThemeData(
         centerTitle: true,
@@ -425,22 +311,13 @@ class AppThemes {
             FontVariation('ROND', 100),
             FontVariation('wdth', 125),
           ],
-          color: ColorScheme.fromSeed(
-            seedColor: kAppColor,
-            brightness: Brightness.dark,
-          ).onSurface,
+          color: scheme.onSurface,
         ),
       ),
       floatingActionButtonTheme: FloatingActionButtonThemeData(
         elevation: 0,
-        backgroundColor: ColorScheme.fromSeed(
-          seedColor: kAppColor,
-          brightness: Brightness.dark,
-        ).primary,
-        foregroundColor: ColorScheme.fromSeed(
-          seedColor: kAppColor,
-          brightness: Brightness.dark,
-        ).onPrimary,
+        backgroundColor: scheme.primary,
+        foregroundColor: scheme.onPrimary,
         extendedTextStyle: TextStyle(
           fontFamily: 'Google Sans Flex',
           fontVariations: [
@@ -448,18 +325,12 @@ class AppThemes {
             FontVariation('ROND', 100),
             FontVariation('wdth', 125),
           ],
-          color: ColorScheme.fromSeed(
-            seedColor: kAppColor,
-            brightness: Brightness.dark,
-          ).onSurface,
+          color: scheme.onSurface,
         ),
       ),
       cardTheme: CardThemeData(
         elevation: 0,
-        color: ColorScheme.fromSeed(
-          seedColor: kAppColor,
-          brightness: Brightness.dark,
-        ).surfaceContainer,
+        color: scheme.surfaceContainer,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(24),
           side: BorderSide(width: 0, style: BorderStyle.none),
@@ -487,10 +358,7 @@ class AppThemes {
           Set<WidgetState> states,
         ) {
           if (states.contains(WidgetState.selected)) {
-            return ColorScheme.fromSeed(
-              seedColor: kAppColor,
-              brightness: Brightness.dark,
-            ).primaryContainer;
+            return scheme.primaryContainer;
           }
           return null; // Use the default thumb color
         }),
@@ -505,16 +373,7 @@ class AppThemes {
         trackColor: WidgetStateProperty.resolveWith<Color?>((
           Set<WidgetState> states,
         ) {
-          if (states.contains(WidgetState.selected)) {
-            return ColorScheme.fromSeed(
-              seedColor: kAppColor,
-              brightness: Brightness.dark,
-            ).surfaceContainerLowest;
-          }
-          return ColorScheme.fromSeed(
-            seedColor: kAppColor,
-            brightness: Brightness.dark,
-          ).surfaceContainerLowest; // Use the default track color
+          return scheme.surfaceContainerLowest;
         }),
         trackOutlineWidth: WidgetStateProperty.resolveWith<double?>((
           Set<WidgetState> states,
@@ -523,89 +382,34 @@ class AppThemes {
         }),
       ),
       navigationBarTheme: NavigationBarThemeData(
-        backgroundColor: ColorScheme.fromSeed(
-          seedColor: kAppColor,
-          brightness: Brightness.dark,
-        ).onPrimaryFixedVariant,
+        backgroundColor: scheme.onPrimaryFixedVariant,
         iconTheme: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
           if (states.contains(WidgetState.selected)) {
-            return IconThemeData(
-              color: ColorScheme.fromSeed(
-                seedColor: kAppColor,
-                brightness: Brightness.dark,
-              ).onInverseSurface,
-            );
+            return IconThemeData(color: scheme.onInverseSurface);
           }
-          return IconThemeData(
-            color: ColorScheme.fromSeed(
-              seedColor: kAppColor,
-              brightness: Brightness.dark,
-            ).onSurface,
-          );
+          return IconThemeData(color: scheme.onSurface);
         }),
-        indicatorColor: ColorScheme.fromSeed(
-          seedColor: kAppColor,
-          brightness: Brightness.dark,
-        ).onSurface,
+        indicatorColor: scheme.onSurface,
         labelTextStyle: WidgetStateProperty.resolveWith((
           Set<WidgetState> states,
         ) {
-          if (states.contains(WidgetState.selected)) {
-            return TextStyle(
-              color: ColorScheme.fromSeed(
-                seedColor: kAppColor,
-                brightness: Brightness.dark,
-              ).onSurface,
-            );
-          }
-          return TextStyle(
-            color: ColorScheme.fromSeed(
-              seedColor: kAppColor,
-              brightness: Brightness.dark,
-            ).onSurface,
-          );
+          return TextStyle(color: scheme.onSurface);
         }),
         labelBehavior: NavigationDestinationLabelBehavior.onlyShowSelected,
         elevation: 0,
       ),
       navigationRailTheme: NavigationRailThemeData(
-        backgroundColor: ColorScheme.fromSeed(
-          seedColor: kAppColor,
-          brightness: Brightness.dark,
-        ).surfaceContainer,
+        backgroundColor: scheme.surfaceContainer,
         groupAlignment: 0.0,
-        selectedIconTheme: IconThemeData(
-          color: ColorScheme.fromSeed(
-            seedColor: kAppColor,
-            brightness: Brightness.dark,
-          ).onPrimaryContainer,
-        ),
+        selectedIconTheme: IconThemeData(color: scheme.onPrimaryContainer),
         labelType: NavigationRailLabelType.selected,
-        unselectedIconTheme: IconThemeData(
-          color: ColorScheme.fromSeed(
-            seedColor: kAppColor,
-            brightness: Brightness.dark,
-          ).onSurface,
-        ),
-        selectedLabelTextStyle: TextStyle(
-          color: ColorScheme.fromSeed(
-            seedColor: kAppColor,
-            brightness: Brightness.dark,
-          ).onPrimaryContainer,
-        ),
-        unselectedLabelTextStyle: TextStyle(
-          color: ColorScheme.fromSeed(
-            seedColor: kAppColor,
-            brightness: Brightness.dark,
-          ).onSurface,
-        ),
+        unselectedIconTheme: IconThemeData(color: scheme.onSurface),
+        selectedLabelTextStyle: TextStyle(color: scheme.onPrimaryContainer),
+        unselectedLabelTextStyle: TextStyle(color: scheme.onSurface),
       ),
       popupMenuTheme: PopupMenuThemeData(
         elevation: 1,
-        color: ColorScheme.fromSeed(
-          seedColor: kAppColor,
-          brightness: Brightness.dark,
-        ).surfaceContainerHighest,
+        color: scheme.surfaceContainerHighest,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
       ),
       inputDecorationTheme: InputDecorationTheme(
@@ -617,20 +421,11 @@ class AppThemes {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(99),
-          borderSide: BorderSide(
-            color: ColorScheme.fromSeed(
-              seedColor: kAppColor,
-              brightness: Brightness.dark,
-            ).primary,
-            width: 1,
-          ),
+          borderSide: BorderSide(color: scheme.primary, width: 1),
         ),
       ),
       bottomSheetTheme: BottomSheetThemeData(
-        backgroundColor: ColorScheme.fromSeed(
-          seedColor: kAppColor,
-          brightness: Brightness.dark,
-        ).surface,
+        backgroundColor: scheme.surface,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
         ),
@@ -640,10 +435,7 @@ class AppThemes {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
       ),
       dialogTheme: DialogThemeData(
-        backgroundColor: ColorScheme.fromSeed(
-          seedColor: kAppColor,
-          brightness: Brightness.dark,
-        ).surfaceContainer,
+        backgroundColor: scheme.surfaceContainer,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
       ),
       checkboxTheme: CheckboxThemeData(
@@ -652,10 +444,7 @@ class AppThemes {
           Set<WidgetState> states,
         ) {
           if (states.contains(WidgetState.selected)) {
-            return ColorScheme.fromSeed(
-              seedColor: kAppColor,
-              brightness: Brightness.dark,
-            ).onPrimaryContainer;
+            return scheme.onPrimaryContainer;
           }
           return null; // Use the default check color
         }),
@@ -663,20 +452,11 @@ class AppThemes {
           Set<WidgetState> states,
         ) {
           if (states.contains(WidgetState.selected)) {
-            return ColorScheme.fromSeed(
-              seedColor: kAppColor,
-              brightness: Brightness.dark,
-            ).primaryContainer;
+            return scheme.primaryContainer;
           }
           return null; // Use the default fill color
         }),
-        side: BorderSide(
-          color: ColorScheme.fromSeed(
-            seedColor: kAppColor,
-            brightness: Brightness.dark,
-          ).onSurfaceVariant,
-          width: 1.5,
-        ),
+        side: BorderSide(color: scheme.onSurfaceVariant, width: 1.5),
       ),
       progressIndicatorTheme: ProgressIndicatorThemeData(year2023: false),
     );

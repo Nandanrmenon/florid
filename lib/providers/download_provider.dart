@@ -16,7 +16,7 @@ import '../services/fdroid_api_service.dart';
 import '../services/installation_tracking_service.dart';
 import '../services/notification_service.dart';
 
-enum DownloadStatus { idle, downloading, completed, error, cancelled }
+enum DownloadStatus { idle, downloading, completed, installing, error, cancelled }
 
 class DownloadInfo {
   final String packageName;
@@ -307,7 +307,7 @@ class DownloadProvider extends ChangeNotifier {
             Future.microtask(() async {
               debugPrint('[DownloadProvider] Auto-install (shizuku) start');
               try {
-                await installApk(filePath);
+                await installApk(filePath, app.packageName, version.versionName);
                 debugPrint('[DownloadProvider] Auto-install (shizuku) done');
               } catch (e) {
                 debugPrint('Auto-install (shizuku) failed: $e');
@@ -315,7 +315,7 @@ class DownloadProvider extends ChangeNotifier {
             });
           } else {
             debugPrint('[DownloadProvider] Auto-install (system) start');
-            await installApk(filePath);
+            await installApk(filePath, app.packageName, version.versionName);
             debugPrint('[DownloadProvider] Auto-install (system) done');
           }
         } catch (e) {
@@ -411,8 +411,14 @@ class DownloadProvider extends ChangeNotifier {
   }
 
   /// Installs an APK file
-  Future<void> installApk(String filePath) async {
+  Future<void> installApk(
+    String filePath,
+    String packageName,
+    String versionName,
+  ) async {
     debugPrint('[DownloadProvider] installApk entry: $filePath');
+    final key = '${packageName}_$versionName';
+    
     try {
       final file = File(filePath);
       final exists = await file.exists();
@@ -425,15 +431,34 @@ class DownloadProvider extends ChangeNotifier {
         throw Exception('APK file missing or empty');
       }
 
+      // Update status to installing
+      final downloadInfo = _downloads[key];
+      if (downloadInfo != null) {
+        _downloads[key] = downloadInfo.copyWith(status: DownloadStatus.installing);
+        notifyListeners();
+      }
+
       if (_settingsProvider.installMethod == InstallMethod.shizuku) {
         // Schedule Shizuku install work off the immediate call stack to avoid
         // blocking UI when the platform channel does synchronous work.
         await Future<void>(() => _installWithShizuku(filePath));
-        return;
+      } else {
+        await _installWithSystemInstaller(filePath);
       }
 
-      await _installWithSystemInstaller(filePath);
+      // Update status back to completed after installation
+      final updatedInfo = _downloads[key];
+      if (updatedInfo != null) {
+        _downloads[key] = updatedInfo.copyWith(status: DownloadStatus.completed);
+        notifyListeners();
+      }
     } catch (e) {
+      // On error, revert status back to completed
+      final downloadInfo = _downloads[key];
+      if (downloadInfo != null) {
+        _downloads[key] = downloadInfo.copyWith(status: DownloadStatus.completed);
+        notifyListeners();
+      }
       throw Exception('Failed to install APK: $e');
     }
   }

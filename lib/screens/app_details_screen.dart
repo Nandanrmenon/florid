@@ -231,7 +231,11 @@ class _AppDetailsScreenState extends State<AppDetailsScreen> {
             _isInstalling = true;
           });
           try {
-            await downloadProvider.installApk(downloadInfo!.filePath!);
+            await downloadProvider.installApk(
+              downloadInfo!.filePath!,
+              widget.app.packageName,
+              downloadInfo.versionName,
+            );
             await appProvider.waitForInstalled(widget.app.packageName);
             if (context.mounted) {
               ScaffoldMessenger.of(context).showSnackBar(
@@ -363,7 +367,11 @@ class _AppDetailsScreenState extends State<AppDetailsScreen> {
                 if (settings.installMethod == InstallMethod.shizuku) {
                   Future<void>(() async {
                     try {
-                      await downloadProvider.installApk(downloadInfo.filePath!);
+                      await downloadProvider.installApk(
+                        downloadInfo.filePath!,
+                        widget.app.packageName,
+                        downloadInfo.versionName,
+                      );
                       await Future.delayed(const Duration(seconds: 1));
                       await appProvider.fetchInstalledApps();
                       _startBackgroundCleanup(
@@ -394,7 +402,11 @@ class _AppDetailsScreenState extends State<AppDetailsScreen> {
                   });
                 } else {
                   downloadProvider
-                      .installApk(downloadInfo.filePath!)
+                      .installApk(
+                        downloadInfo.filePath!,
+                        widget.app.packageName,
+                        downloadInfo.versionName,
+                      )
                       .then((_) async {
                         debugPrint('[AppDetails] Auto-install completed');
                         try {
@@ -2622,6 +2634,8 @@ class _VersionDownloadButton extends StatelessWidget {
         );
         final isDownloading =
             downloadInfo?.status == DownloadStatus.downloading;
+        final isInstalling =
+            downloadInfo?.status == DownloadStatus.installing;
         final isCancelled = downloadInfo?.status == DownloadStatus.cancelled;
         final fileExists = downloadInfo?.filePath != null
             ? File(downloadInfo!.filePath!).existsSync()
@@ -2728,6 +2742,22 @@ class _VersionDownloadButton extends StatelessWidget {
           );
         }
 
+        if (isInstalling) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Installing...',
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+              ),
+              const SizedBox(height: 8),
+              const LinearProgressIndicator(),
+            ],
+          );
+        }
+
         if (isDownloaded) {
           return FilledButton.icon(
             onPressed: () async {
@@ -2751,7 +2781,11 @@ class _VersionDownloadButton extends StatelessWidget {
 
               try {
                 if (downloadInfo.filePath != null) {
-                  await downloadProvider.installApk(downloadInfo.filePath!);
+                  await downloadProvider.installApk(
+                    downloadInfo.filePath!,
+                    app.packageName,
+                    version.versionName,
+                  );
                   await appProvider.waitForInstalled(app.packageName);
                   await appProvider.fetchInstalledApps();
                   if (context.mounted) {

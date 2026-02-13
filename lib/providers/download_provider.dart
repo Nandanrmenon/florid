@@ -450,8 +450,12 @@ class DownloadProvider extends ChangeNotifier {
         // blocking UI when the platform channel does synchronous work.
         await Future<void>(() => _installWithShizuku(filePath));
 
-        // For Shizuku, keep the installing status for a bit longer to allow
-        // the UI to fetch installed apps before reverting to completed status
+        // Keep the installing status for a bit longer to allow the UI layer
+        // (which has access to AppProvider) to call fetchInstalledApps().
+        // Note: This is a workaround for the architectural constraint that
+        // DownloadProvider doesn't have access to AppProvider. A better solution
+        // would be to use a callback or event system, but that would require
+        // larger architectural changes.
         await Future.delayed(_shizukuInstallSettleDelay);
       } else {
         await _installWithSystemInstaller(filePath);
@@ -464,7 +468,8 @@ class DownloadProvider extends ChangeNotifier {
         notifyListeners();
       }
     } catch (e) {
-      // On error, revert status back to completed
+      // On error, revert status back to completed so the install button
+      // remains clickable, allowing the user to retry the installation
       final downloadInfo = _downloads[key];
       if (downloadInfo != null) {
         _downloads[key] = downloadInfo.copyWith(status: DownloadStatus.completed);

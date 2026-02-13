@@ -161,7 +161,10 @@ class DownloadProvider extends ChangeNotifier {
   }
 
   /// Downloads an APK file
-  Future<String?> downloadApk(FDroidApp app) async {
+  Future<String?> downloadApk(
+    FDroidApp app, {
+    bool skipAutoInstall = false,
+  }) async {
     final version = app.latestVersion;
     if (version == null) {
       throw Exception('No version available for download');
@@ -295,12 +298,33 @@ class DownloadProvider extends ChangeNotifier {
       );
 
       // Auto-install after download completes if enabled
-      if (_settingsProvider.autoInstallApk) {
+      if (_settingsProvider.autoInstallApk && !skipAutoInstall) {
+        debugPrint(
+          '[DownloadProvider] Auto-install queued for ${app.packageName} ${version.versionName} (method: ${_settingsProvider.installMethod})',
+        );
         try {
-          await installApk(filePath);
+          if (_settingsProvider.installMethod == InstallMethod.shizuku) {
+            Future.microtask(() async {
+              debugPrint('[DownloadProvider] Auto-install (shizuku) start');
+              try {
+                await installApk(filePath);
+                debugPrint('[DownloadProvider] Auto-install (shizuku) done');
+              } catch (e) {
+                debugPrint('Auto-install (shizuku) failed: $e');
+              }
+            });
+          } else {
+            debugPrint('[DownloadProvider] Auto-install (system) start');
+            await installApk(filePath);
+            debugPrint('[DownloadProvider] Auto-install (system) done');
+          }
         } catch (e) {
           debugPrint('Auto-install failed: $e');
         }
+      } else {
+        debugPrint(
+          '[DownloadProvider] Auto-install skipped (enabled=${_settingsProvider.autoInstallApk}, skipAutoInstall=$skipAutoInstall)',
+        );
       }
 
       return filePath;
@@ -388,6 +412,7 @@ class DownloadProvider extends ChangeNotifier {
 
   /// Installs an APK file
   Future<void> installApk(String filePath) async {
+    debugPrint('[DownloadProvider] installApk entry: $filePath');
     try {
       final file = File(filePath);
       final exists = await file.exists();
@@ -401,7 +426,9 @@ class DownloadProvider extends ChangeNotifier {
       }
 
       if (_settingsProvider.installMethod == InstallMethod.shizuku) {
-        await _installWithShizuku(filePath);
+        // Schedule Shizuku install work off the immediate call stack to avoid
+        // blocking UI when the platform channel does synchronous work.
+        await Future<void>(() => _installWithShizuku(filePath));
         return;
       }
 

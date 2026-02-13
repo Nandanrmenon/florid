@@ -53,6 +53,41 @@ class _AppDetailsScreenState extends State<AppDetailsScreen> {
     );
   }
 
+  /// Background cleanup task that waits for installation and auto-deletes APK
+  Future<void> _startBackgroundCleanup(
+    AppProvider appProvider,
+    DownloadProvider downloadProvider,
+    SettingsProvider settings,
+  ) async {
+    // Poll for installation completion in background
+    for (int i = 0; i < 15; i++) {
+      await Future.delayed(const Duration(milliseconds: 800));
+      await appProvider.fetchInstalledApps();
+      if (appProvider.isAppInstalled(widget.app.packageName)) {
+        // App installed, clean up if auto-delete enabled
+        if (settings.autoDeleteApk) {
+          final latestVersion = await appProvider.getLatestVersion(widget.app);
+          if (latestVersion != null) {
+            final downloadInfo = downloadProvider.getDownloadInfo(
+              widget.app.packageName,
+              latestVersion.versionName,
+            );
+            if (downloadInfo?.filePath != null) {
+              try {
+                await downloadProvider.deleteDownloadedFile(
+                  downloadInfo!.filePath!,
+                );
+              } catch (e) {
+                debugPrint('Failed to auto-delete APK: $e');
+              }
+            }
+          }
+        }
+        break;
+      }
+    }
+  }
+
   Widget _buildInstallButton(
     BuildContext context,
     DownloadProvider downloadProvider,
@@ -211,6 +246,13 @@ class _AppDetailsScreenState extends State<AppDetailsScreen> {
                 _isInstalling = false;
               });
             }
+            await Future.delayed(const Duration(seconds: 2));
+            await appProvider.fetchInstalledApps();
+            _startBackgroundCleanup(
+              appProvider,
+              downloadProvider,
+              context.read<SettingsProvider>(),
+            );
           }
         }
       } catch (e) {
@@ -272,6 +314,158 @@ class _AppDetailsScreenState extends State<AppDetailsScreen> {
         await downloadProvider.downloadApk(appWithVersion);
 
         if (context.mounted) {
+          final settings = context.read<SettingsProvider>();
+
+          // Auto-install if enabled
+          if (settings.autoInstallApk) {
+            final downloadInfo = downloadProvider.getDownloadInfo(
+              widget.app.packageName,
+              version.versionName,
+            );
+
+            if (downloadInfo?.filePath != null &&
+                File(downloadInfo!.filePath!).existsSync()) {
+              debugPrint(
+                '[AppDetails] Auto-install start ${widget.app.packageName} ${version.versionName}',
+              );
+              try {
+                // Ensure the chosen installer is available (system permission or Shizuku binder)
+                final hasPermission = await downloadProvider
+                    .requestInstallPermission();
+                debugPrint(
+                  '[AppDetails] Auto-install permission result: $hasPermission',
+                );
+                if (!hasPermission) {
+                  if (!context.mounted) return;
+                  if (settings.installMethod == InstallMethod.shizuku) {
+                    await _handleShizukuUnavailable(context, settings);
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text(
+                          'Install permission required for auto-install',
+                        ),
+                      ),
+                    );
+                  }
+                  return;
+                }
+
+                if (mounted) {
+                  setState(() {
+                    _isInstalling = true;
+                  });
+                }
+                debugPrint(_isInstalling as String?);
+
+                // Trigger install without waiting (non-blocking). For Shizuku,
+                // run fire-and-forget to avoid UI stalls; for system, await as before.
+                if (settings.installMethod == InstallMethod.shizuku) {
+                  Future<void>(() async {
+                    try {
+                      await downloadProvider.installApk(downloadInfo.filePath!);
+                      await Future.delayed(const Duration(seconds: 1));
+                      await appProvider.fetchInstalledApps();
+                      _startBackgroundCleanup(
+                        appProvider,
+                        downloadProvider,
+                        settings,
+                      );
+                    } catch (e) {
+                      debugPrint(
+                        '[AppDetails] Shizuku auto-install failed: $e',
+                      );
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              'Auto-install failed: ${e.toString()}',
+                            ),
+                          ),
+                        );
+                      }
+                    } finally {
+                      if (mounted) {
+                        setState(() {
+                          _isInstalling = false;
+                        });
+                      }
+                    }
+                  });
+                } else {
+                  downloadProvider
+                      .installApk(downloadInfo.filePath!)
+                      .then((_) async {
+                        debugPrint('[AppDetails] Auto-install completed');
+                        try {
+                          await appProvider.waitForInstalled(
+                            widget.app.packageName,
+                          );
+                        } catch (_) {
+                          // Best-effort; UI will refresh on next poll
+                        }
+                        await Future.delayed(const Duration(seconds: 2));
+                        await appProvider.fetchInstalledApps();
+                        _startBackgroundCleanup(
+                          appProvider,
+                          downloadProvider,
+                          settings,
+                        );
+                      })
+                      .catchError((e) {
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                'Auto-install failed: ${e.toString()}',
+                              ),
+                            ),
+                          );
+                        }
+                      })
+                      .whenComplete(() async {
+                        if (mounted) {
+                          setState(() {
+                            _isInstalling = false;
+                          });
+                        }
+                        await Future.delayed(const Duration(milliseconds: 500));
+                        await appProvider.fetchInstalledApps();
+                      });
+                }
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Installing ${widget.app.name}...')),
+                  );
+                }
+
+                // Best-effort refresh a moment later so the UI can flip to Installed
+                Future.delayed(const Duration(seconds: 2), () async {
+                  await appProvider.fetchInstalledApps();
+                });
+
+                // Return early - don't wait for installation
+                return;
+              } catch (e) {
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Auto-install failed: ${e.toString()}'),
+                    ),
+                  );
+                }
+                return;
+              }
+            } else {
+              debugPrint(
+                '[AppDetails] Auto-install skipped: downloadInfo missing or file not found',
+              );
+            }
+          }
+
+          // Only run this polling loop when NOT auto-installing
+          // (i.e., when download completes but auto-install is disabled)
+          // This avoids UI hanging during auto-install
           for (int i = 0; i < 15; i++) {
             await Future.delayed(const Duration(milliseconds: 800));
             await appProvider.fetchInstalledApps();
@@ -284,7 +478,7 @@ class _AppDetailsScreenState extends State<AppDetailsScreen> {
                   widget.app.packageName,
                   latestVersion.versionName,
                 );
-                if (downloadInfo?.filePath != null) {
+                if (downloadInfo?.filePath != null && settings.autoDeleteApk) {
                   await downloadProvider.deleteDownloadedFile(
                     downloadInfo!.filePath!,
                   );
@@ -304,69 +498,6 @@ class _AppDetailsScreenState extends State<AppDetailsScreen> {
             );
           }
         }
-      }
-    }
-  }
-
-  Future<void> _handleShizukuUnavailable(
-    BuildContext context,
-    SettingsProvider settings,
-  ) async {
-    final action = await showDialog<_ShizukuAction>(
-      context: context,
-      builder: (context) => SimpleDialog(
-        contentPadding: EdgeInsets.all(24),
-        title: const Text('Shizuku is not running'),
-        children: [
-          Text(
-            'Start the Shizuku app to continue, or switch to the system installer instead.',
-          ),
-          SizedBox(height: 16),
-          Column(
-            spacing: 2.0,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              FilledButton(
-                onPressed: () async {
-                  try {
-                    final appProvider = context.read<AppProvider>();
-                    await appProvider.openInstalledApp(
-                      'moe.shizuku.privileged.api',
-                    );
-                  } catch (e) {
-                    if (context.mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Unable to open Shizuku app'),
-                        ),
-                      );
-                    }
-                  }
-                },
-                child: const Text('Open Shizuku'),
-              ),
-              FilledButton.tonal(
-                onPressed: () =>
-                    Navigator.of(context).pop(_ShizukuAction.switchToSystem),
-                child: const Text('Use System Installer'),
-              ),
-              TextButton(
-                onPressed: () =>
-                    Navigator.of(context).pop(_ShizukuAction.cancel),
-                child: const Text('Cancel'),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-
-    if (action == _ShizukuAction.switchToSystem) {
-      await settings.setInstallMethod(InstallMethod.system);
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Switched to system installer')),
-        );
       }
     }
   }
@@ -2622,6 +2753,7 @@ class _VersionDownloadButton extends StatelessWidget {
                 if (downloadInfo.filePath != null) {
                   await downloadProvider.installApk(downloadInfo.filePath!);
                   await appProvider.waitForInstalled(app.packageName);
+                  await appProvider.fetchInstalledApps();
                   if (context.mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(content: Text('Installing ${app.name}...')),
@@ -2689,8 +2821,6 @@ Future<void> _handleShizukuUnavailable(
   final action = await showDialog<_ShizukuAction>(
     context: context,
     builder: (context) => SimpleDialog(
-      alignment: Alignment.bottomCenter,
-      // icon: const Icon(Symbols.warning, size: 48),
       contentPadding: EdgeInsets.all(24),
       title: const Text('Shizuku is not running'),
       children: [

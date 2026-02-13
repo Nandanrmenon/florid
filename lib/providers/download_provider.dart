@@ -90,6 +90,9 @@ class DownloadProvider extends ChangeNotifier {
   final ShizukuApi _shizukuApi = ShizukuApi();
   String? _androidPackageName;
 
+  // Delay after Shizuku installation to allow UI to fetch installed apps
+  static const Duration _shizukuInstallSettleDelay = Duration(seconds: 2);
+
   DownloadProvider(this._apiService, this._settingsProvider) {
     _initNotifications();
   }
@@ -418,7 +421,7 @@ class DownloadProvider extends ChangeNotifier {
   ) async {
     debugPrint('[DownloadProvider] installApk entry: $filePath');
     final key = '${packageName}_$versionName';
-    
+
     try {
       final file = File(filePath);
       final exists = await file.exists();
@@ -436,16 +439,20 @@ class DownloadProvider extends ChangeNotifier {
       if (downloadInfo != null) {
         _downloads[key] = downloadInfo.copyWith(status: DownloadStatus.installing);
         notifyListeners();
+      } else {
+        debugPrint(
+          '[DownloadProvider] Warning: downloadInfo is null for $key, UI status will not update',
+        );
       }
 
       if (_settingsProvider.installMethod == InstallMethod.shizuku) {
         // Schedule Shizuku install work off the immediate call stack to avoid
         // blocking UI when the platform channel does synchronous work.
         await Future<void>(() => _installWithShizuku(filePath));
-        
+
         // For Shizuku, keep the installing status for a bit longer to allow
         // the UI to fetch installed apps before reverting to completed status
-        await Future.delayed(const Duration(seconds: 2));
+        await Future.delayed(_shizukuInstallSettleDelay);
       } else {
         await _installWithSystemInstaller(filePath);
       }

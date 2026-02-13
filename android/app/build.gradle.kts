@@ -62,6 +62,12 @@ android {
     }
 
     buildTypes {
+        debug {
+            // Use a different application ID for debug builds
+            applicationIdSuffix = ".debug"
+            // Optional: Add a label suffix to distinguish the app icon
+            manifestPlaceholders["appLabel"] = "Florid Debug"
+        }
         release {
             // TODO: Add your own signing config for the release build.
             // Signing with the debug keys for now, so `flutter run --release` works.
@@ -70,6 +76,7 @@ android {
             } else {
                 signingConfigs.getByName("debug")
             }
+            manifestPlaceholders["appLabel"] = "Florid"
         }
     }
 }

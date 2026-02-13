@@ -442,6 +442,10 @@ class DownloadProvider extends ChangeNotifier {
         // Schedule Shizuku install work off the immediate call stack to avoid
         // blocking UI when the platform channel does synchronous work.
         await Future<void>(() => _installWithShizuku(filePath));
+        
+        // For Shizuku, keep the installing status for a bit longer to allow
+        // the UI to fetch installed apps before reverting to completed status
+        await Future.delayed(const Duration(seconds: 2));
       } else {
         await _installWithSystemInstaller(filePath);
       }

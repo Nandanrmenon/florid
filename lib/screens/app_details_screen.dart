@@ -315,7 +315,8 @@ class _AppDetailsScreenState extends State<AppDetailsScreen> {
         final appWithVersion = widget.app
             .copyWithVersion(version)
             .copyWith(repositoryUrl: repositoryUrl);
-        await downloadProvider.downloadApk(appWithVersion);
+        // Skip DownloadProvider's auto-install since we handle it here with proper UI updates
+        await downloadProvider.downloadApk(appWithVersion, skipAutoInstall: true);
 
         if (context.mounted) {
           final settings = context.read<SettingsProvider>();

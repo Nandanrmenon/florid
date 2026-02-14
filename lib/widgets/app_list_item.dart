@@ -101,53 +101,58 @@ class AppListItem extends StatelessWidget {
               padding: const EdgeInsets.only(right: 8.0),
               child: Consumer<AppProvider>(
                 builder: (context, appProvider, _) {
-                  final isInstalled = appProvider.isAppInstalled(
-                    app.packageName,
-                  );
-                  final installedApp = appProvider.getInstalledApp(
-                    app.packageName,
-                  );
-                  final latestVersion = app.latestVersion;
                   final isFavorite = appProvider.isFavorite(app.packageName);
 
-                  // Check if update is available
-                  final hasUpdate =
-                      isInstalled &&
-                      installedApp != null &&
-                      installedApp.versionCode != null &&
-                      latestVersion != null &&
-                      installedApp.versionCode! < latestVersion.versionCode;
+                  return FutureBuilder<FDroidVersion?>(
+                    future: appProvider.getLatestVersion(app),
+                    builder: (context, snapshot) {
+                      final latestVersion = snapshot.data;
+                      final isInstalled = appProvider.isAppInstalled(
+                        app.packageName,
+                      );
+                      final installedApp = appProvider.getInstalledApp(
+                        app.packageName,
+                      );
 
-                  final statusWidget = showInstallStatus
-                      ? hasUpdate
-                            ? TextButton(
-                                onPressed: onUpdate,
-                                child: const Text('Update'),
-                              )
-                            : isInstalled
-                            ? Icon(Symbols.check_circle, weight: 400)
-                            : const SizedBox.shrink()
-                      : const SizedBox.shrink();
+                      final hasUpdate =
+                          isInstalled &&
+                          installedApp != null &&
+                          installedApp.versionCode != null &&
+                          latestVersion != null &&
+                          installedApp.versionCode! < latestVersion.versionCode;
 
-                  return Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      if (showInstallStatus) statusWidget,
-                      if (showFavorite)
-                        IconButton(
-                          tooltip: isFavorite
-                              ? 'Remove from Favourites'
-                              : 'Add to Favourites',
-                          icon: Icon(
-                            Symbols.favorite_rounded,
-                            fill: isFavorite ? 1 : 0,
-                            color: isFavorite ? Colors.red : null,
-                          ),
-                          onPressed: () {
-                            appProvider.toggleFavorite(app.packageName);
-                          },
-                        ),
-                    ],
+                      final statusWidget = showInstallStatus
+                          ? hasUpdate
+                                ? TextButton(
+                                    onPressed: onUpdate,
+                                    child: const Text('Update'),
+                                  )
+                                : isInstalled
+                                ? Icon(Symbols.check_circle, weight: 400)
+                                : const SizedBox.shrink()
+                          : const SizedBox.shrink();
+
+                      return Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          if (showInstallStatus) statusWidget,
+                          if (showFavorite)
+                            IconButton(
+                              tooltip: isFavorite
+                                  ? 'Remove from Favourites'
+                                  : 'Add to Favourites',
+                              icon: Icon(
+                                Symbols.favorite_rounded,
+                                fill: isFavorite ? 1 : 0,
+                                color: isFavorite ? Colors.red : null,
+                              ),
+                              onPressed: () {
+                                appProvider.toggleFavorite(app.packageName);
+                              },
+                            ),
+                        ],
+                      );
+                    },
                   );
                 },
               ),

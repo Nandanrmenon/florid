@@ -2,7 +2,6 @@ import 'package:florid/l10n/app_localizations.dart';
 import 'package:florid/providers/settings_provider.dart';
 import 'package:florid/utils/menu_actions.dart';
 import 'package:florid/utils/responsive.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:material_symbols_icons/symbols.dart';
@@ -14,13 +13,7 @@ import '../widgets/app_list_item.dart';
 import 'app_details_screen.dart';
 
 class SearchScreen extends StatefulWidget {
-  const SearchScreen({super.key, this.tabIndexListenable, this.tabIndex = 1});
-
-  /// Notifies the screen when the search tab becomes active.
-  final ValueListenable<int>? tabIndexListenable;
-
-  /// The index of the search tab in the parent navigation.
-  final int tabIndex;
+  const SearchScreen({super.key});
 
   @override
   State<SearchScreen> createState() => _SearchScreenState();
@@ -30,8 +23,10 @@ class _SearchScreenState extends State<SearchScreen> {
   final TextEditingController _searchController = TextEditingController();
   final FocusNode _searchFocus = FocusNode();
 
-  void _requestFocus() {
-    // Defer to ensure the widget tree is ready, then show keyboard.
+  @override
+  void initState() {
+    super.initState();
+    // Auto-focus search field when screen opens
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       _searchFocus.requestFocus();
@@ -39,25 +34,8 @@ class _SearchScreenState extends State<SearchScreen> {
     });
   }
 
-  void _handleTabChange() {
-    if (!mounted) return;
-    final current = widget.tabIndexListenable?.value;
-    if (current == widget.tabIndex) {
-      _requestFocus();
-    } else {
-      _searchFocus.unfocus();
-    }
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    widget.tabIndexListenable?.addListener(_handleTabChange);
-  }
-
   @override
   void dispose() {
-    widget.tabIndexListenable?.removeListener(_handleTabChange);
     _searchController.dispose();
     _searchFocus.dispose();
     super.dispose();

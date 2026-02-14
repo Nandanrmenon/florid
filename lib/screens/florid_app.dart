@@ -33,9 +33,8 @@ class _FloridAppState extends State<FloridApp> {
 
   late final List<Widget> _screens = [
     const LibraryScreen(),
-    SearchScreen(tabIndexListenable: _tabNotifier, tabIndex: 1),
-    const UpdatesScreen(),
-    const UserScreen(),
+    UpdatesScreen(),
+    UserScreen(),
   ];
 
   @override
@@ -266,12 +265,6 @@ class _FloridAppState extends State<FloridApp> {
                   selectedIcon: homeSelectedIcon,
                   label: Text(localizations.home),
                 ),
-                if (!isFlorid)
-                  NavigationRailDestination(
-                    icon: searchIcon,
-                    selectedIcon: searchSelectedIcon,
-                    label: Text(localizations.search),
-                  ),
                 NavigationRailDestination(
                   icon: deviceIcon,
                   selectedIcon: deviceSelectedIcon,
@@ -284,18 +277,20 @@ class _FloridAppState extends State<FloridApp> {
                 ),
               ];
 
-              final floridNavIndex = _currentIndex == 2
+              final floridNavIndex = _currentIndex == 1
                   ? 1
-                  : _currentIndex == 3
+                  : _currentIndex == 2
                   ? 2
                   : 0;
 
               final searchFab = FloatingActionButton(
                 onPressed: () {
-                  setState(() {
-                    _currentIndex = 1;
-                  });
-                  _tabNotifier.value = 1;
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const SearchScreen(),
+                    ),
+                  );
                 },
                 child: const Icon(Symbols.search),
               );
@@ -306,21 +301,12 @@ class _FloridAppState extends State<FloridApp> {
                     children: [
                       if (isWide)
                         NavigationRail(
-                          selectedIndex: isFlorid
-                              ? floridNavIndex
-                              : _currentIndex,
+                          selectedIndex: _currentIndex,
                           onDestinationSelected: (index) {
-                            final targetIndex = isFlorid
-                                ? (index == 0
-                                      ? 0
-                                      : index == 1
-                                      ? 2
-                                      : 3)
-                                : index;
                             setState(() {
-                              _currentIndex = targetIndex;
+                              _currentIndex = index;
                             });
-                            _tabNotifier.value = targetIndex;
+                            _tabNotifier.value = index;
                           },
                           destinations: navRailDestinations,
                           trailingAtBottom: true,
@@ -393,15 +379,10 @@ class _FloridAppState extends State<FloridApp> {
                         child: FNavBar(
                           currentIndex: floridNavIndex,
                           onChanged: (index) {
-                            final targetIndex = index == 0
-                                ? 0
-                                : index == 1
-                                ? 2
-                                : 3;
                             setState(() {
-                              _currentIndex = targetIndex;
+                              _currentIndex = index;
                             });
-                            _tabNotifier.value = targetIndex;
+                            _tabNotifier.value = index;
                           },
                           items: floridNavItems,
                           fab: searchFab,
@@ -419,6 +400,18 @@ class _FloridAppState extends State<FloridApp> {
                           ),
                         ),
                       ),
+                    ),
+                  if (!isFlorid && !isWide)
+                    Positioned(
+                      right: 16,
+                      bottom: 16,
+                      child: SafeArea(child: searchFab),
+                    ),
+                  if (!isFlorid && isWide)
+                    Positioned(
+                      right: 24,
+                      bottom: 24,
+                      child: SafeArea(child: searchFab),
                     ),
                 ],
               );
@@ -448,15 +441,6 @@ class _FloridAppState extends State<FloridApp> {
                       weight: 600,
                     ),
                     label: localizations.home,
-                  ),
-                  NavigationDestination(
-                    icon: const Icon(Symbols.search),
-                    selectedIcon: const Icon(
-                      Symbols.search,
-                      fill: 1,
-                      weight: 600,
-                    ),
-                    label: localizations.search,
                   ),
                   NavigationDestination(
                     icon: updatableAppsCount > 0

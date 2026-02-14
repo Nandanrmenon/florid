@@ -242,6 +242,35 @@ class _AppManagementScreenState extends State<AppManagementScreen> {
                                         ? 'Requires Shizuku to be running'
                                         : 'Uses the standard system installer',
                                     value: method,
+                                    suffix: method == InstallMethod.shizuku
+                                        ? Container(
+                                            margin: const EdgeInsets.only(
+                                              right: 8.0,
+                                            ),
+                                            child: Material(
+                                              color: Theme.of(
+                                                context,
+                                              ).colorScheme.secondary,
+                                              borderRadius:
+                                                  BorderRadius.circular(99.0),
+                                              child: Padding(
+                                                padding:
+                                                    const EdgeInsets.symmetric(
+                                                      horizontal: 12.0,
+                                                      vertical: 2.0,
+                                                    ),
+                                                child: Text(
+                                                  'Alpha',
+                                                  style: TextStyle(
+                                                    color: Theme.of(
+                                                      context,
+                                                    ).colorScheme.onSecondary,
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                          )
+                                        : null,
                                   ),
                                 )
                                 .toList(),

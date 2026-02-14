@@ -7,7 +7,7 @@ import '../models/fdroid_app.dart';
 
 class DatabaseService {
   static const String _databaseName = 'fdroid_repository.db';
-  static const int _databaseVersion = 4;
+  static const int _databaseVersion = 5;
 
   // Table names
   static const String _appsTable = 'apps';
@@ -82,6 +82,7 @@ class DatabaseService {
         bitcoin TEXT,
         flattr_id TEXT,
         license TEXT NOT NULL,
+        anti_features TEXT,
         suggested_version_name TEXT,
         suggested_version_code INTEGER,
         added INTEGER,
@@ -168,6 +169,16 @@ class DatabaseService {
     if (oldVersion < 4) {
       // Add whats_new column to versions table for v3 to v4 upgrade
       await db.execute('ALTER TABLE $_versionsTable ADD COLUMN whats_new TEXT');
+      // Force re-sync so new field is populated from repository
+      await db.delete(
+        _metadataTable,
+        where: 'key = ?',
+        whereArgs: ['last_sync'],
+      );
+    }
+    if (oldVersion < 5) {
+      // Add anti_features column to apps table for v4 to v5 upgrade
+      await db.execute('ALTER TABLE $_appsTable ADD COLUMN anti_features TEXT');
       // Force re-sync so new field is populated from repository
       await db.delete(
         _metadataTable,
@@ -311,6 +322,9 @@ class DatabaseService {
         'bitcoin': app.bitcoin,
         'flattr_id': app.flattrID,
         'license': app.license,
+        'anti_features': app.antiFeatures != null
+            ? jsonEncode(app.antiFeatures)
+            : null,
         'suggested_version_name': app.suggestedVersionName,
         'suggested_version_code': app.suggestedVersionCode,
         'added': app.added?.millisecondsSinceEpoch,
@@ -853,6 +867,26 @@ class DatabaseService {
     List<Map<String, dynamic>> versionMaps, {
     String? repositoryUrl,
   }) {
+    List<String>? decodeStringList(dynamic raw) {
+      if (raw == null) return null;
+      if (raw is List) {
+        return raw.map((e) => e.toString()).toList();
+      }
+      if (raw is String) {
+        final trimmed = raw.trim();
+        if (trimmed.isEmpty) return null;
+        try {
+          final decoded = jsonDecode(trimmed);
+          if (decoded is List) {
+            return decoded.map((e) => e.toString()).toList();
+          }
+        } catch (_) {
+          return <String>[trimmed];
+        }
+      }
+      return null;
+    }
+
     final packages = <String, FDroidVersion>{};
     for (final versionMap in versionMaps) {
       final version = FDroidVersion(
@@ -899,6 +933,7 @@ class DatabaseService {
       flattrID: appMap['flattr_id'] as String?,
       license: appMap['license'] as String,
       categories: categories.isEmpty ? null : categories,
+      antiFeatures: decodeStringList(appMap['anti_features']),
       packages: packages.isEmpty ? null : packages,
       suggestedVersionName: appMap['suggested_version_name'] as String?,
       suggestedVersionCode: appMap['suggested_version_code'] as int?,

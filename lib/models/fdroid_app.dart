@@ -7,10 +7,7 @@ class RepositorySource {
   final String name;
   final String url;
 
-  const RepositorySource({
-    required this.name,
-    required this.url,
-  });
+  const RepositorySource({required this.name, required this.url});
 
   @override
   bool operator ==(Object other) =>
@@ -43,6 +40,7 @@ class FDroidApp {
   final String? flattrID;
   final String license;
   final List<String>? categories;
+  final List<String>? antiFeatures;
   final Map<String, FDroidVersion>? packages;
   final String? suggestedVersionName;
   final int? suggestedVersionCode;
@@ -71,6 +69,7 @@ class FDroidApp {
     this.flattrID,
     required this.license,
     this.categories,
+    this.antiFeatures,
     this.packages,
     this.suggestedVersionName,
     this.suggestedVersionCode,
@@ -137,17 +136,17 @@ class FDroidApp {
   /// Gets the latest version, optionally filtering out unstable versions
   FDroidVersion? getLatestVersion({bool includeUnstable = true}) {
     if (packages == null || packages!.isEmpty) return null;
-    
+
     var versions = packages!.values.toList();
-    
+
     // Filter out unstable versions if requested
     if (!includeUnstable) {
       versions = versions.where((v) => !v.isUnstable).toList();
-      
+
       // If no stable versions exist, return null
       if (versions.isEmpty) return null;
     }
-    
+
     versions.sort((a, b) => b.versionCode.compareTo(a.versionCode));
     return versions.first;
   }
@@ -172,6 +171,7 @@ class FDroidApp {
       flattrID: flattrID,
       license: license,
       categories: categories,
+      antiFeatures: antiFeatures,
       packages: {version.versionCode.toString(): version},
       suggestedVersionName: suggestedVersionName,
       suggestedVersionCode: suggestedVersionCode,
@@ -200,6 +200,7 @@ class FDroidApp {
     String? flattrID,
     String? license,
     List<String>? categories,
+    List<String>? antiFeatures,
     Map<String, FDroidVersion>? packages,
     String? suggestedVersionName,
     int? suggestedVersionCode,
@@ -226,13 +227,15 @@ class FDroidApp {
       flattrID: flattrID ?? this.flattrID,
       license: license ?? this.license,
       categories: categories ?? this.categories,
+      antiFeatures: antiFeatures ?? this.antiFeatures,
       packages: packages ?? this.packages,
       suggestedVersionName: suggestedVersionName ?? this.suggestedVersionName,
       suggestedVersionCode: suggestedVersionCode ?? this.suggestedVersionCode,
       added: added ?? this.added,
       lastUpdated: lastUpdated ?? this.lastUpdated,
       repositoryUrl: repositoryUrl ?? this.repositoryUrl,
-      availableRepositories: availableRepositories ?? this.availableRepositories,
+      availableRepositories:
+          availableRepositories ?? this.availableRepositories,
     );
   }
 }
@@ -252,6 +255,7 @@ class FDroidVersion {
   final String? sig;
   final List<String>? permissions;
   final List<String>? features;
+  final List<String>? antiFeatures;
   final List<String>? nativecode;
   final String? whatsNew;
 
@@ -269,6 +273,7 @@ class FDroidVersion {
     this.sig,
     this.permissions,
     this.features,
+    this.antiFeatures,
     this.nativecode,
     this.whatsNew,
   });
@@ -427,7 +432,54 @@ class FDroidRepository {
           return raw.toString();
         }
 
+        List<String>? parseAntiFeatures(dynamic raw) {
+          if (raw == null) return null;
+          if (raw is List) {
+            final values = raw.map((e) {
+              if (e is Map) {
+                if (e['name'] != null) return e['name'].toString();
+                if (e['id'] != null) return e['id'].toString();
+              }
+              return e.toString();
+            }).toList();
+            return values.where((e) => e.trim().isNotEmpty).toList();
+          }
+          if (raw is Map) {
+            final values = <String>[];
+            raw.forEach((key, value) {
+              String? description;
+              if (value is Map || value is String) {
+                final localized = extractLocalized(value);
+                if (localized.trim().isNotEmpty) {
+                  description = localized.trim();
+                }
+              } else if (value != null) {
+                final asText = value.toString().trim();
+                if (asText.isNotEmpty) {
+                  description = asText;
+                }
+              }
+
+              final keyText = key.toString().trim();
+              if (keyText.isEmpty &&
+                  (description == null || description.isEmpty)) {
+                return;
+              }
+
+              if (description != null && description.isNotEmpty) {
+                values.add('$keyText: $description');
+              } else {
+                values.add(keyText);
+              }
+            });
+            return values.isEmpty ? null : values;
+          }
+          final value = raw.toString().trim();
+          return value.isEmpty ? null : <String>[value];
+        }
+
         final Map<String, FDroidVersion> versionObjs = {};
+        final versionAntiFeatures = <String>{};
         versionsMap.forEach((vCodeKey, vData) {
           try {
             final versionData = (vData as Map).cast<String, dynamic>();
@@ -515,6 +567,13 @@ class FDroidRepository {
                 )
                 .toList();
 
+            final antiFeatures = parseAntiFeatures(
+              versionData['antiFeatures'] ?? versionData['antiFeature'],
+            );
+            if (antiFeatures != null) {
+              versionAntiFeatures.addAll(antiFeatures);
+            }
+
             List<String>? nativecode = (versionData['nativecode'] as List?)
                 ?.map((e) => e.toString())
                 .toList();
@@ -556,6 +615,7 @@ class FDroidRepository {
               hashType: hashType,
               permissions: permissions,
               features: features,
+              antiFeatures: antiFeatures,
               nativecode: nativecode,
               minSdkVersion: minSdkVersion,
               targetSdkVersion: targetSdkVersion,
@@ -615,6 +675,20 @@ class FDroidRepository {
           return null;
         }
 
+        final combinedAntiFeatures = <String>{};
+        final metaAntiFeatures = parseAntiFeatures(
+          metadata['antiFeatures'] ??
+              metadata['antiFeature'] ??
+              pkgMap['antiFeatures'] ??
+              pkgMap['antiFeature'],
+        );
+        if (metaAntiFeatures != null) {
+          combinedAntiFeatures.addAll(metaAntiFeatures);
+        }
+        if (versionAntiFeatures.isNotEmpty) {
+          combinedAntiFeatures.addAll(versionAntiFeatures);
+        }
+
         final app = FDroidApp(
           packageName: pkgName,
           name: extractLocalized(
@@ -644,6 +718,9 @@ class FDroidRepository {
           categories: (metadata['categories'] as List?)
               ?.map((e) => e.toString())
               .toList(),
+          antiFeatures: combinedAntiFeatures.isEmpty
+              ? null
+              : combinedAntiFeatures.toList(),
           packages: versionObjs.isEmpty
               ? null
               : versionObjs.map((k, v) => MapEntry(k, v)),

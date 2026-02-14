@@ -26,6 +26,9 @@ FDroidApp _$FDroidAppFromJson(Map<String, dynamic> json) => FDroidApp(
   categories: (json['categories'] as List<dynamic>?)
       ?.map((e) => e as String)
       .toList(),
+  antiFeatures: (json['antiFeatures'] as List<dynamic>?)
+      ?.map((e) => e as String)
+      .toList(),
   packages: (json['packages'] as Map<String, dynamic>?)?.map(
     (k, e) => MapEntry(k, FDroidVersion.fromJson(e as Map<String, dynamic>)),
   ),
@@ -55,6 +58,7 @@ Map<String, dynamic> _$FDroidAppToJson(FDroidApp instance) => <String, dynamic>{
   'flattrID': instance.flattrID,
   'license': instance.license,
   'categories': instance.categories,
+  'antiFeatures': instance.antiFeatures,
   'packages': instance.packages,
   'suggestedVersionName': instance.suggestedVersionName,
   'suggestedVersionCode': instance.suggestedVersionCode,
@@ -81,6 +85,9 @@ FDroidVersion _$FDroidVersionFromJson(Map<String, dynamic> json) =>
       features: (json['features'] as List<dynamic>?)
           ?.map((e) => e as String)
           .toList(),
+      antiFeatures: (json['antiFeatures'] as List<dynamic>?)
+          ?.map((e) => e as String)
+          .toList(),
       nativecode: (json['nativecode'] as List<dynamic>?)
           ?.map((e) => e as String)
           .toList(),
@@ -102,6 +109,7 @@ Map<String, dynamic> _$FDroidVersionToJson(FDroidVersion instance) =>
       'sig': instance.sig,
       'permissions': instance.permissions,
       'features': instance.features,
+      'antiFeatures': instance.antiFeatures,
       'nativecode': instance.nativecode,
       'whatsNew': instance.whatsNew,
     };

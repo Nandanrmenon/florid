@@ -1974,69 +1974,112 @@ class _AppInfoSection extends StatelessWidget {
 
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
+              spacing: 16,
               children: [
-                MListHeader(title: 'App Information'),
-                MListView(
-                  items: [
-                    MListItemData(
-                      leading: Icon(
-                        Symbols.package_rounded,
-                        color: Theme.of(context).colorScheme.primary,
-                      ),
-                      title: 'Package Name',
-                      subtitle: app.packageName,
-                      onTap: () {},
-                    ),
-                    MListItemData(
-                      leading: Icon(
-                        Symbols.license_rounded,
-                        color: Theme.of(context).colorScheme.primary,
-                      ),
-                      title: 'License',
-                      subtitle: app.license,
-                      onTap: () {},
-                    ),
-                    if (app.added != null)
-                      MListItemData(
-                        leading: Icon(
-                          Symbols.add,
-                          color: Theme.of(context).colorScheme.primary,
+                if (app.antiFeatures != null)
+                  Column(
+                    spacing: 4,
+                    children: [
+                      MListHeader(title: 'Anti-features'),
+                      Card(
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.tertiary.withValues(alpha: 0.2),
+                        margin: const EdgeInsets.symmetric(horizontal: 16.0),
+                        child: Padding(
+                          padding: const EdgeInsets.all(12.0),
+                          child: app.antiFeatures?.isNotEmpty == true
+                              ? Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  spacing: 16,
+                                  children: app.antiFeatures!
+                                      .map(
+                                        (antiFeature) => Text(
+                                          '- $antiFeature',
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .bodyMedium
+                                              ?.copyWith(
+                                                color: Theme.of(
+                                                  context,
+                                                ).colorScheme.error,
+                                              ),
+                                        ),
+                                      )
+                                      .toList(),
+                                )
+                              : const Text('No anti-features listed'),
                         ),
-                        title: 'Added',
-                        subtitle: _formatDate(app.added!),
-                        onTap: () {},
                       ),
-                    if (app.added != null)
-                      MListItemData(
-                        leading: Icon(
-                          Symbols.update,
-                          color: Theme.of(context).colorScheme.primary,
+                    ],
+                  ),
+                Column(
+                  spacing: 4,
+                  children: [
+                    MListHeader(title: 'App Information'),
+                    MListView(
+                      items: [
+                        MListItemData(
+                          leading: Icon(
+                            Symbols.package_rounded,
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
+                          title: 'Package Name',
+                          subtitle: app.packageName,
+                          onTap: () {},
                         ),
-                        title: 'Last Updated',
-                        subtitle: _formatDate(app.lastUpdated!),
-                        onTap: () {},
-                      ),
-                    if (latestVersion?.permissions?.isNotEmpty == true)
-                      MListItemData(
-                        leading: Icon(
-                          Symbols.security,
-                          color: Theme.of(context).colorScheme.primary,
+                        MListItemData(
+                          leading: Icon(
+                            Symbols.license_rounded,
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
+                          title: 'License',
+                          subtitle: app.license,
+                          onTap: () {},
                         ),
-                        title: 'Permissions ',
-                        subtitle: '(${latestVersion!.permissions!.length})',
-                        suffix: Icon(Symbols.arrow_forward),
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => PermissionsScreen(
-                                permissions: latestVersion.permissions!,
-                                appName: app.name,
-                              ),
+                        if (app.added != null)
+                          MListItemData(
+                            leading: Icon(
+                              Symbols.add,
+                              color: Theme.of(context).colorScheme.primary,
                             ),
-                          );
-                        },
-                      ),
+                            title: 'Added',
+                            subtitle: _formatDate(app.added!),
+                            onTap: () {},
+                          ),
+                        if (app.added != null)
+                          MListItemData(
+                            leading: Icon(
+                              Symbols.update,
+                              color: Theme.of(context).colorScheme.primary,
+                            ),
+                            title: 'Last Updated',
+                            subtitle: _formatDate(app.lastUpdated!),
+                            onTap: () {},
+                          ),
+                        if (latestVersion?.permissions?.isNotEmpty == true)
+                          MListItemData(
+                            leading: Icon(
+                              Symbols.security,
+                              color: Theme.of(context).colorScheme.primary,
+                            ),
+                            title: 'Permissions ',
+                            subtitle: '(${latestVersion!.permissions!.length})',
+                            suffix: Icon(Symbols.arrow_forward),
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => PermissionsScreen(
+                                    permissions: latestVersion.permissions!,
+                                    appName: app.name,
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                      ],
+                    ),
                   ],
                 ),
               ],

@@ -1,5 +1,7 @@
+import 'package:florid/providers/settings_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:provider/provider.dart';
 
 class FNavBar extends StatelessWidget {
   const FNavBar({
@@ -30,6 +32,8 @@ class FNavBar extends StatelessWidget {
     final accentColor = scheme.primary.withValues(alpha: 0.2);
     final selectedColor = scheme.primary;
     final unselectedColor = scheme.onSurfaceVariant;
+    final settings = context.watch<SettingsProvider>();
+    final isFlorid = settings.themeStyle == ThemeStyle.florid;
 
     return SafeArea(
       top: false,
@@ -87,15 +91,20 @@ class FNavBar extends StatelessWidget {
                                               milliseconds: 180,
                                             ),
                                             curve: Curves.easeOut,
-                                            style: TextStyle(
-                                              color: selected
-                                                  ? selectedColor
-                                                  : unselectedColor,
-                                              fontSize: 14,
-                                              fontVariations: [
-                                                FontVariation('ROND', 100),
-                                              ],
-                                            ),
+                                            style: isFlorid
+                                                ? TextStyle(
+                                                    color: selected
+                                                        ? selectedColor
+                                                        : unselectedColor,
+                                                    fontSize: 14,
+                                                    fontVariations: [
+                                                      FontVariation(
+                                                        'ROND',
+                                                        100,
+                                                      ),
+                                                    ],
+                                                  )
+                                                : TextStyle(inherit: true),
                                             child: Text(item.label),
                                           )
                                           .animate()

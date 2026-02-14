@@ -91,6 +91,7 @@ dependencies:
   flutter_localizations:
     sdk: flutter
   intl: any
+  flutter_svg: ^2.2.3
 
 dev_dependencies:
   flutter_test:
@@ -119,6 +120,7 @@ flutter:
     - assets/Florid.png
     - assets/Foreground.png
     - assets/Splash.png
+    - assets/Florid.svg
     - assets/repositories.json
     - CHANGELOGS.md
   #   - images/a_dot_burr.jpeg

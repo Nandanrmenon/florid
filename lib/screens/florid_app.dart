@@ -349,9 +349,27 @@ class _FloridAppState extends State<FloridApp> {
                         ),
                       if (!isWide)
                         Expanded(
-                          child: IndexedStack(
-                            index: _currentIndex,
-                            children: _screens,
+                          child: AnimatedSwitcher(
+                            duration: const Duration(milliseconds: 250),
+                            switchInCurve: Curves.easeOut,
+                            switchOutCurve: Curves.easeIn,
+                            transitionBuilder: (child, animation) {
+                              final scaleAnimation = Tween<double>(
+                                begin: 0.98,
+                                end: 1.0,
+                              ).animate(animation);
+                              return FadeTransition(
+                                opacity: animation,
+                                child: ScaleTransition(
+                                  scale: scaleAnimation,
+                                  child: child,
+                                ),
+                              );
+                            },
+                            child: KeyedSubtree(
+                              key: ValueKey<int>(_currentIndex),
+                              child: _screens[_currentIndex],
+                            ),
                           ),
                         ),
                       if (isWide)
@@ -361,9 +379,27 @@ class _FloridAppState extends State<FloridApp> {
                               clipBehavior: Clip.antiAlias,
                               borderRadius: BorderRadius.circular(24),
                               elevation: 1,
-                              child: IndexedStack(
-                                index: _currentIndex,
-                                children: _screens,
+                              child: AnimatedSwitcher(
+                                duration: const Duration(milliseconds: 250),
+                                switchInCurve: Curves.easeOut,
+                                switchOutCurve: Curves.easeIn,
+                                transitionBuilder: (child, animation) {
+                                  final scaleAnimation = Tween<double>(
+                                    begin: 0.98,
+                                    end: 1.0,
+                                  ).animate(animation);
+                                  return FadeTransition(
+                                    opacity: animation,
+                                    child: ScaleTransition(
+                                      scale: scaleAnimation,
+                                      child: child,
+                                    ),
+                                  );
+                                },
+                                child: KeyedSubtree(
+                                  key: ValueKey<int>(_currentIndex),
+                                  child: _screens[_currentIndex],
+                                ),
                               ),
                             ),
                           ),

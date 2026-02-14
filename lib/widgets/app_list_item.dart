@@ -465,6 +465,8 @@ class _QuickViewModal extends StatelessWidget {
 
                                         await downloadProvider.installApk(
                                           downloadInfo!.filePath!,
+                                          app.packageName,
+                                          version.versionName,
                                         );
                                         if (context.mounted) {
                                           Navigator.pop(context);

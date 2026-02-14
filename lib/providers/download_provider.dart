@@ -16,7 +16,14 @@ import '../services/fdroid_api_service.dart';
 import '../services/installation_tracking_service.dart';
 import '../services/notification_service.dart';
 
-enum DownloadStatus { idle, downloading, completed, installing, error, cancelled }
+enum DownloadStatus {
+  idle,
+  downloading,
+  completed,
+  installing,
+  error,
+  cancelled,
+}
 
 class DownloadInfo {
   final String packageName;
@@ -164,11 +171,9 @@ class DownloadProvider extends ChangeNotifier {
   }
 
   /// Downloads an APK file
-  Future<String?> downloadApk(
-    FDroidApp app, {
-    bool skipAutoInstall = false,
-  }) async {
+  Future<String?> downloadApk(FDroidApp app, {bool? skipAutoInstall}) async {
     final version = app.latestVersion;
+    skipAutoInstall = _settingsProvider.autoInstallApk;
     if (version == null) {
       throw Exception('No version available for download');
     }
@@ -301,7 +306,7 @@ class DownloadProvider extends ChangeNotifier {
       );
 
       // Auto-install after download completes if enabled
-      if (_settingsProvider.autoInstallApk && !skipAutoInstall) {
+      if (_settingsProvider.autoInstallApk) {
         debugPrint(
           '[DownloadProvider] Auto-install queued for ${app.packageName} ${version.versionName} (method: ${_settingsProvider.installMethod})',
         );
@@ -310,7 +315,11 @@ class DownloadProvider extends ChangeNotifier {
             Future.microtask(() async {
               debugPrint('[DownloadProvider] Auto-install (shizuku) start');
               try {
-                await installApk(filePath, app.packageName, version.versionName);
+                await installApk(
+                  filePath,
+                  app.packageName,
+                  version.versionName,
+                );
                 debugPrint('[DownloadProvider] Auto-install (shizuku) done');
               } catch (e) {
                 debugPrint('Auto-install (shizuku) failed: $e');
@@ -437,7 +446,9 @@ class DownloadProvider extends ChangeNotifier {
       // Update status to installing
       final downloadInfo = _downloads[key];
       if (downloadInfo != null) {
-        _downloads[key] = downloadInfo.copyWith(status: DownloadStatus.installing);
+        _downloads[key] = downloadInfo.copyWith(
+          status: DownloadStatus.installing,
+        );
         notifyListeners();
       } else {
         debugPrint(
@@ -464,7 +475,9 @@ class DownloadProvider extends ChangeNotifier {
       // Update status back to completed after installation
       final updatedInfo = _downloads[key];
       if (updatedInfo != null) {
-        _downloads[key] = updatedInfo.copyWith(status: DownloadStatus.completed);
+        _downloads[key] = updatedInfo.copyWith(
+          status: DownloadStatus.completed,
+        );
         notifyListeners();
       }
     } catch (e) {
@@ -472,7 +485,9 @@ class DownloadProvider extends ChangeNotifier {
       // remains clickable, allowing the user to retry the installation
       final downloadInfo = _downloads[key];
       if (downloadInfo != null) {
-        _downloads[key] = downloadInfo.copyWith(status: DownloadStatus.completed);
+        _downloads[key] = downloadInfo.copyWith(
+          status: DownloadStatus.completed,
+        );
         notifyListeners();
       }
       throw Exception('Failed to install APK: $e');

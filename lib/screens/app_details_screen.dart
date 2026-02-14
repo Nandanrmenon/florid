@@ -126,6 +126,7 @@ class _AppDetailsScreenState extends State<AppDetailsScreen> {
                           onPressed: () => _handleInstall(
                             context,
                             downloadProvider,
+                            context.read<SettingsProvider>(),
                             appProvider,
                             isDownloaded,
                             version,
@@ -165,6 +166,7 @@ class _AppDetailsScreenState extends State<AppDetailsScreen> {
                     onPressed: () => _handleInstall(
                       context,
                       downloadProvider,
+                      context.read<SettingsProvider>(),
                       appProvider,
                       isDownloaded,
                       version,
@@ -195,6 +197,7 @@ class _AppDetailsScreenState extends State<AppDetailsScreen> {
   Future<void> _handleInstall(
     BuildContext context,
     DownloadProvider downloadProvider,
+    SettingsProvider settingsProvider,
     AppProvider appProvider,
     bool isDownloaded,
     FDroidVersion version,
@@ -316,7 +319,10 @@ class _AppDetailsScreenState extends State<AppDetailsScreen> {
             .copyWithVersion(version)
             .copyWith(repositoryUrl: repositoryUrl);
         // Skip DownloadProvider's auto-install since we handle it here with proper UI updates
-        await downloadProvider.downloadApk(appWithVersion, skipAutoInstall: true);
+        await downloadProvider.downloadApk(
+          appWithVersion,
+          skipAutoInstall: settingsProvider.autoInstallApk,
+        );
 
         if (context.mounted) {
           final settings = context.read<SettingsProvider>();
@@ -608,6 +614,7 @@ class _AppDetailsScreenState extends State<AppDetailsScreen> {
                     _handleInstall(
                       context,
                       downloadProvider,
+                      context.read<SettingsProvider>(),
                       appProvider,
                       isDownloaded,
                       version,
@@ -2635,8 +2642,7 @@ class _VersionDownloadButton extends StatelessWidget {
         );
         final isDownloading =
             downloadInfo?.status == DownloadStatus.downloading;
-        final isInstalling =
-            downloadInfo?.status == DownloadStatus.installing;
+        final isInstalling = downloadInfo?.status == DownloadStatus.installing;
         final isCancelled = downloadInfo?.status == DownloadStatus.cancelled;
         final fileExists = downloadInfo?.filePath != null
             ? File(downloadInfo!.filePath!).existsSync()

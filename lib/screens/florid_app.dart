@@ -3,9 +3,12 @@ import 'package:florid/models/fdroid_app.dart';
 import 'package:florid/screens/library_screen.dart';
 import 'package:florid/screens/settings_screen.dart';
 import 'package:florid/utils/responsive.dart';
+import 'package:florid/utils/whats_new.dart';
 import 'package:florid/widgets/f_navbar.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/symbols.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:provider/provider.dart';
 
 import '../providers/app_provider.dart';
@@ -24,6 +27,8 @@ class FloridApp extends StatefulWidget {
 class _FloridAppState extends State<FloridApp> {
   int _currentIndex = 0;
   final ValueNotifier<int> _tabNotifier = ValueNotifier<int>(0);
+  bool _hasCheckedWhatsNew = false;
+  bool _isShowingWhatsNew = false;
 
   late final List<Widget> _screens = [
     const LibraryScreen(),
@@ -41,7 +46,126 @@ class _FloridAppState extends State<FloridApp> {
 
       appProvider.fetchInstalledApps();
       repositoriesProvider.loadRepositories();
+      _maybeShowWhatsNewDialog();
     });
+  }
+
+  Future<void> _maybeShowWhatsNewDialog() async {
+    if (_hasCheckedWhatsNew) return;
+    _hasCheckedWhatsNew = true;
+    await _showWhatsNew(force: false, markSeen: true);
+  }
+
+  Future<void> _showWhatsNew({
+    required bool force,
+    required bool markSeen,
+  }) async {
+    if (_isShowingWhatsNew) return;
+    _isShowingWhatsNew = true;
+
+    final settings = context.read<SettingsProvider>();
+    if (!settings.isLoaded) {
+      _isShowingWhatsNew = false;
+      return;
+    }
+
+    final info = await PackageInfo.fromPlatform();
+    final currentVersion = '${info.version}+${info.buildNumber}';
+    if (!force && settings.lastSeenVersion == currentVersion) {
+      _isShowingWhatsNew = false;
+      return;
+    }
+
+    final whatsNew = await WhatsNewLoader.loadForVersion(currentVersion);
+    if (!mounted) {
+      _isShowingWhatsNew = false;
+      return;
+    }
+
+    await showModalBottomSheet<void>(
+      context: context,
+      useSafeArea: true,
+      builder: (context) {
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 32.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            spacing: 24,
+            children: [
+              Expanded(
+                child: SingleChildScrollView(
+                  child: Column(
+                    spacing: 16,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        "What's new in $currentVersion",
+                        style: Theme.of(context).textTheme.headlineSmall,
+                      ),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        spacing: 12,
+                        children: _buildWhatsNewContent(context, whatsNew),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              FilledButton(onPressed: () {}, child: Text("Close")),
+            ],
+          ),
+        );
+      },
+    );
+
+    if (markSeen) {
+      await settings.setLastSeenVersion(currentVersion);
+    }
+
+    _isShowingWhatsNew = false;
+  }
+
+  static Future<void> triggerWhatsNew(
+    BuildContext context, {
+    bool markSeen = true,
+  }) async {
+    final state = context.findAncestorStateOfType<_FloridAppState>();
+    if (state != null) {
+      await state._showWhatsNew(force: true, markSeen: markSeen);
+    }
+  }
+
+  List<Widget> _buildWhatsNewContent(BuildContext context, WhatsNewData? data) {
+    if (data == null || data.sections.isEmpty) {
+      return const [
+        Text('Thanks for updating Florid!'),
+        Text('Enjoy the latest improvements.'),
+      ];
+    }
+
+    final titleStyle = Theme.of(context).textTheme.titleMedium;
+
+    return data.sections
+        .map(
+          (section) => Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            spacing: 8,
+            children: [
+              Text(section.title, style: titleStyle),
+              ...section.items.map(
+                (item) => Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text('• '),
+                    Expanded(child: Text(item)),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        )
+        .toList();
   }
 
   @override
@@ -58,6 +182,13 @@ class _FloridAppState extends State<FloridApp> {
           : context.watch<SettingsProvider>().themeStyle == ThemeStyle.florid
           ? Theme.of(context).colorScheme.surfaceContainer
           : Theme.of(context).colorScheme.surface,
+
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          _showWhatsNew(force: true, markSeen: false);
+        },
+        child: Text('s'),
+      ),
       body: Consumer2<AppProvider, SettingsProvider>(
         builder: (context, appProvider, settings, child) {
           return FutureBuilder<List<FDroidApp>>(
@@ -152,6 +283,14 @@ class _FloridAppState extends State<FloridApp> {
                                   ),
                                 ),
                               ),
+                              if (kDebugMode)
+                                TextButton(
+                                  onPressed: () => _showWhatsNew(
+                                    force: true,
+                                    markSeen: false,
+                                  ),
+                                  child: const Text("Show what's new"),
+                                ),
                               const SizedBox(height: 32),
                             ],
                           ),

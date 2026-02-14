@@ -120,6 +120,7 @@ flutter:
     - assets/Foreground.png
     - assets/Splash.png
     - assets/repositories.json
+    - CHANGELOGS.md
   #   - images/a_dot_burr.jpeg
   #   - images/a_dot_ham.jpeg
 

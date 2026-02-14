@@ -1,10 +1,7 @@
 import 'package:florid/l10n/app_localizations.dart';
-import 'package:florid/providers/app_provider.dart';
-import 'package:florid/providers/repositories_provider.dart';
+import 'package:florid/providers/settings_provider.dart';
 import 'package:florid/screens/categories_screen.dart';
 import 'package:florid/screens/home_screen.dart';
-import 'package:florid/utils/menu_actions.dart';
-import 'package:florid/utils/responsive.dart';
 import 'package:florid/widgets/f_tabbar.dart';
 import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/material_symbols_icons.dart';
@@ -36,119 +33,87 @@ class _LibraryScreenState extends State<LibraryScreen>
 
   @override
   Widget build(BuildContext context) {
+    final settingsProvider = context.watch<SettingsProvider>();
+
     return Scaffold(
-      appBar: AppBar(
-        title: Text(AppLocalizations.of(context)!.app_name),
-        backgroundColor: Theme.of(context).colorScheme.surfaceContainerLow,
-        surfaceTintColor: Theme.of(context).colorScheme.surfaceContainerLow,
-        actions: [
-          PopupMenuButton<String>(
-            onSelected: (value) {
-              switch (value) {
-                case 'refresh':
-                  _refreshData();
-                  break;
-                case 'settings':
-                  MenuActions.showSettings(context);
-                  break;
-                case 'about':
-                  MenuActions.showAbout(context);
-                  break;
-              }
-            },
-            itemBuilder: (context) => [
-              PopupMenuItem(
-                value: 'refresh',
-                child: ListTile(
-                  leading: const Icon(Symbols.refresh),
-                  title: Text(AppLocalizations.of(context)!.refresh),
-                  contentPadding: EdgeInsets.zero,
-                ),
-              ),
-              if (!context.isLargeScreen)
-                PopupMenuItem(
-                  value: 'settings',
-                  child: ListTile(
-                    leading: const Icon(Symbols.settings),
-                    title: Text(AppLocalizations.of(context)!.settings),
-                    contentPadding: EdgeInsets.zero,
+      body: NestedScrollView(
+        headerSliverBuilder: (context, innerBoxIsScrolled) {
+          return [
+            SliverAppBar.medium(
+              title: Text(AppLocalizations.of(context)!.app_name),
+              backgroundColor: Theme.of(
+                context,
+              ).colorScheme.surfaceContainerLow,
+              surfaceTintColor: Theme.of(
+                context,
+              ).colorScheme.surfaceContainerLow,
+              pinned: false,
+            ),
+            SliverPersistentHeader(
+              delegate: _FTabBarHeaderDelegate(
+                height: settingsProvider.themeStyle == ThemeStyle.florid
+                    ? 68
+                    : 56,
+                child: Material(
+                  color: Theme.of(context).colorScheme.surfaceContainerLow,
+                  surfaceTintColor: Theme.of(
+                    context,
+                  ).colorScheme.surfaceContainerLow,
+                  child: Container(
+                    margin: settingsProvider.themeStyle == ThemeStyle.florid
+                        ? const EdgeInsets.only(top: 8)
+                        : null,
+                    child: FTabBar(
+                      controller: _tabController,
+                      onTabChanged: (index) {
+                        _tabController.animateTo(index);
+                      },
+                      items: [
+                        FloridTabBarItem(
+                          icon: Symbols.home,
+                          label: AppLocalizations.of(context)!.home,
+                        ),
+                        FloridTabBarItem(
+                          icon: Symbols.category,
+                          label: AppLocalizations.of(context)!.categories,
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-              PopupMenuItem(
-                value: 'about',
-                child: ListTile(
-                  leading: Icon(Symbols.info),
-                  title: Text(AppLocalizations.of(context)!.about),
-                  contentPadding: EdgeInsets.zero,
-                ),
               ),
-            ],
-          ),
-        ],
-        bottom: FTabBar(
-          controller: _tabController,
-          onTabChanged: (index) {
-            _tabController.animateTo(index);
-          },
-          items: [
-            FloridTabBarItem(
-              icon: Symbols.home,
-              label: AppLocalizations.of(context)!.home,
             ),
-            FloridTabBarItem(
-              icon: Symbols.category,
-              label: AppLocalizations.of(context)!.categories,
-            ),
-          ],
-        ),
-      ),
-      body: Column(
-        children: [
-          Expanded(
-            child: TabBarView(controller: _tabController, children: tabs),
-          ),
-        ],
+          ];
+        },
+        body: TabBarView(controller: _tabController, children: tabs),
       ),
     );
   }
+}
 
-  void _refreshData() {
-    final currentIndex = _tabController.index;
+class _FTabBarHeaderDelegate extends SliverPersistentHeaderDelegate {
+  _FTabBarHeaderDelegate({required this.height, required this.child});
 
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text('Refreshing data...')));
+  final double height;
+  final Widget child;
 
-    Future.microtask(() async {
-      try {
-        final appProvider = context.read<AppProvider>();
-        final repositoriesProvider = context.read<RepositoriesProvider>();
+  @override
+  double get minExtent => height;
 
-        if (currentIndex == 0) {
-          // Refresh Home (Latest and Recently Updated)
-          await Future.wait([
-            appProvider.fetchLatestApps(
-              repositoriesProvider: repositoriesProvider,
-            ),
-            appProvider.fetchRecentlyUpdatedApps(
-              repositoriesProvider: repositoriesProvider,
-            ),
-          ]);
-        } else if (currentIndex == 1) {
-          // Refresh Categories
-          await appProvider.fetchCategories();
-        }
+  @override
+  double get maxExtent => height;
 
-        if (!mounted) return;
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('Data refreshed')));
-      } catch (e) {
-        if (!mounted) return;
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Refresh failed: $e')));
-      }
-    });
+  @override
+  Widget build(
+    BuildContext context,
+    double shrinkOffset,
+    bool overlapsContent,
+  ) {
+    return SizedBox.expand(child: child);
+  }
+
+  @override
+  bool shouldRebuild(covariant _FTabBarHeaderDelegate oldDelegate) {
+    return oldDelegate.height != height || oldDelegate.child != child;
   }
 }

@@ -513,7 +513,8 @@ class AppProvider extends ChangeNotifier {
     String query, {
     RepositoriesProvider? repositoriesProvider,
   }) async {
-    if (query.trim().isEmpty) {
+    final trimmedQuery = query.trim();
+    if (trimmedQuery.isEmpty) {
       _searchResults = [];
       _searchQuery = '';
       notifyListeners();
@@ -521,55 +522,44 @@ class AppProvider extends ChangeNotifier {
     }
 
     // Prevent duplicate searches for the same query
-    if (_searchQuery == query && _searchState == LoadingState.loading) {
+    if (_searchQuery == trimmedQuery && _searchState == LoadingState.loading) {
       return;
     }
 
-    _searchQuery = query;
+    _searchQuery = trimmedQuery;
     _searchState = LoadingState.loading;
     _searchError = null;
     notifyListeners();
 
     try {
-      final combined = <String, FDroidApp>{};
-
-      // Search in custom repositories from database
+      final enabledRepoUrls = <String>{};
       if (repositoriesProvider != null) {
         if (repositoriesProvider.repositories.isEmpty &&
             !repositoriesProvider.isLoading) {
           await repositoriesProvider.loadRepositories();
         }
 
-        // For each enabled custom repo, search in database
-        final customRepos = repositoriesProvider.enabledRepositories;
-        if (customRepos.isNotEmpty) {
-          // Search from database for custom repos (they should be imported there)
-          for (final customRepo in customRepos) {
-            try {
-              // Search in database - results should be there if repo was previously imported
-              final results = await _apiService.searchAppsFromRepositoryUrl(
-                query,
-                customRepo.url,
-              );
-              for (final app in results) {
-                combined[app.packageName] = app;
-              }
-            } catch (e) {
-              debugPrint('Error searching custom repo ${customRepo.name}: $e');
-            }
-          }
+        enabledRepoUrls.addAll(
+          repositoriesProvider.enabledRepositories.map((repo) => repo.url),
+        );
+      }
+
+      final dbResults = await _apiService.searchAppsDatabaseOnly(trimmedQuery);
+
+      final filteredResults = dbResults.where((app) {
+        if (enabledRepoUrls.isEmpty) {
+          return true;
         }
-      }
 
-      // Official F-Droid search as fallback/merge
-      final officialResults = await _apiService.searchApps(query);
-      for (final app in officialResults) {
-        combined.putIfAbsent(app.packageName, () => app);
-      }
+        final repoUrl = app.repositoryUrl ?? '';
+        if (repoUrl == 'https://f-droid.org/repo') {
+          return true;
+        }
 
-      // Sort results alphabetically for stability
-      _searchResults = combined.values.toList()
-        ..sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
+        return enabledRepoUrls.contains(repoUrl);
+      }).toList();
+
+      _searchResults = filteredResults;
       _searchState = LoadingState.success;
     } catch (e) {
       _searchError = e.toString();

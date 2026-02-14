@@ -151,6 +151,13 @@ class _UpdatesScreenState extends State<UpdatesScreen>
                     _tabController.animateTo(index);
                   },
                 ),
+                actions: [
+                  IconButton(
+                    icon: const Icon(Symbols.refresh),
+                    onPressed: _onRefresh,
+                    tooltip: AppLocalizations.of(context)!.refresh,
+                  ),
+                ],
               ),
               body: RefreshIndicator(
                 onRefresh: _onRefresh,
@@ -299,19 +306,6 @@ class _UpdatesScreenState extends State<UpdatesScreen>
     }
 
     return Scaffold(
-      floatingActionButton: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          FloatingActionButton.extended(
-            onPressed: () => _updateAllApps(context, updatableApps),
-            icon: const Icon(Symbols.system_update),
-            label: const Text('Update All'),
-          ).animate().scale(duration: 300.ms, curve: Curves.easeOutBack),
-          settingsProvider.themeStyle == ThemeStyle.florid
-              ? SizedBox(height: 86)
-              : SizedBox.shrink(),
-        ],
-      ),
       body: Column(
         children: [
           // Header
@@ -329,14 +323,17 @@ class _UpdatesScreenState extends State<UpdatesScreen>
                 ),
                 child: Row(
                   children: [
-                    Icon(Symbols.system_update),
-                    const SizedBox(width: 12),
                     Expanded(
                       child: Text(
-                        '${updatableApps.length} updates available',
+                        '${updatableApps.length} ${updatableApps.length == 1 ? 'update' : 'updates'} available',
                         style: Theme.of(context).textTheme.titleMedium
                             ?.copyWith(fontWeight: FontWeight.w600),
                       ),
+                    ),
+
+                    TextButton(
+                      onPressed: () => _updateAllApps(context, updatableApps),
+                      child: const Text('Update All'),
                     ),
                   ],
                 ),

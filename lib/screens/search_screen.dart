@@ -27,6 +27,11 @@ class _SearchScreenState extends State<SearchScreen> {
     // Auto-focus search field when screen opens
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
+
+      // Clear any previous search results
+      final appProvider = context.read<AppProvider>();
+      appProvider.clearSearch();
+
       _searchFocus.requestFocus();
       SystemChannels.textInput.invokeMethod('TextInput.show');
     });
@@ -34,6 +39,13 @@ class _SearchScreenState extends State<SearchScreen> {
 
   @override
   void dispose() {
+    // Clear search results when leaving the screen (before super.dispose)
+    try {
+      final appProvider = context.read<AppProvider>();
+      appProvider.clearSearch();
+    } catch (e) {
+      // Context might not be available
+    }
     _searchController.dispose();
     _searchFocus.dispose();
     super.dispose();

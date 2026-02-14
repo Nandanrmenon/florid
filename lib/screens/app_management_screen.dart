@@ -219,181 +219,187 @@ class _AppManagementScreenState extends State<AppManagementScreen> {
     return Consumer<SettingsProvider>(
       builder: (context, settings, _) {
         return Scaffold(
-          appBar: AppBar(title: const Text('App Management')),
-          body: SingleChildScrollView(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                spacing: 16,
-                children: [
-                  Column(
-                    spacing: 4,
+          body: CustomScrollView(
+            slivers: [
+              SliverAppBar.large(title: Text('App Management')),
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    spacing: 16,
                     children: [
-                      MListHeader(title: 'Installation method'),
-                      MRadioListView<InstallMethod>(
-                        items: InstallMethod.values
-                            .map(
-                              (method) => MRadioListItemData<InstallMethod>(
-                                title: _installMethodLabel(method),
-                                subtitle: method == InstallMethod.shizuku
-                                    ? 'Requires Shizuku to be running'
-                                    : 'Uses the standard system installer',
-                                value: method,
-                              ),
-                            )
-                            .toList(),
-                        groupValue: settings.installMethod,
-                        onChanged: (value) async {
-                          await settings.setInstallMethod(value);
-                        },
+                      Column(
+                        spacing: 4,
+                        children: [
+                          MListHeader(title: 'Installation method'),
+                          MRadioListView<InstallMethod>(
+                            items: InstallMethod.values
+                                .map(
+                                  (method) => MRadioListItemData<InstallMethod>(
+                                    title: _installMethodLabel(method),
+                                    subtitle: method == InstallMethod.shizuku
+                                        ? 'Requires Shizuku to be running'
+                                        : 'Uses the standard system installer',
+                                    value: method,
+                                  ),
+                                )
+                                .toList(),
+                            groupValue: settings.installMethod,
+                            onChanged: (value) async {
+                              await settings.setInstallMethod(value);
+                            },
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
 
-                  Column(
-                    spacing: 4,
-                    children: [
-                      MListHeader(title: 'Downloads & Storage'),
-                      MListView(
-                        items: [
-                          MListItemData(
-                            title: 'Auto-install after download',
-                            onTap: () {
-                              settings.setAutoInstallApk(
-                                !settings.autoInstallApk,
-                              );
-                            },
-                            subtitle:
-                                'Install APKs automatically once download finishes',
-                            suffix: Switch(
-                              value: settings.autoInstallApk,
-                              onChanged: (value) {
-                                settings.setAutoInstallApk(value);
-                              },
-                            ),
-                          ),
-                          MListItemData(
-                            title: 'Delete APK after install',
-                            onTap: () {
-                              settings.setAutoInstallApk(
-                                !settings.autoInstallApk,
-                              );
-                            },
-                            subtitle:
-                                'Remove installer files after successful installation',
-                            suffix: Switch(
-                              value: settings.autoDeleteApk,
-                              onChanged: (value) {
-                                settings.setAutoDeleteApk(value);
-                              },
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                  Column(
-                    spacing: 4,
-                    children: [
-                      MListHeader(title: 'Background updates'),
-                      MListView(
-                        items: [
-                          MListItemData(
-                            leading: Icon(Symbols.notifications),
-                            title: 'Check for updates in background',
-                            subtitle: 'Notify when updates are available',
-                            onTap: () async {
-                              await settings.setBackgroundUpdatesEnabled(
-                                !settings.backgroundUpdatesEnabled,
-                              );
-                              await UpdateCheckService.scheduleFromPrefs();
-                            },
-                            suffix: Switch(
-                              value: settings.backgroundUpdatesEnabled,
-                              onChanged: (value) async {
-                                await settings.setBackgroundUpdatesEnabled(
-                                  value,
-                                );
-                                await UpdateCheckService.scheduleFromPrefs();
-                              },
-                            ),
-                          ),
-                          MListItemData(
-                            leading: Icon(Symbols.network_check),
-                            title: 'Update network',
-                            subtitle: _updateNetworkPolicyLabel(
-                              settings.updateNetworkPolicy,
-                            ),
-                            onTap: () => _showUpdateNetworkPolicyDialog(
-                              context,
-                              settings,
-                            ),
-                            suffix: Icon(Symbols.chevron_right),
-                          ),
-                          MListItemData(
-                            leading: Icon(Symbols.schedule),
-                            title: 'Update interval',
-                            subtitle: _updateIntervalLabel(
-                              settings.updateIntervalHours,
-                            ),
-                            onTap: () =>
-                                _showUpdateIntervalDialog(context, settings),
-                            suffix: Icon(Symbols.chevron_right),
+                      Column(
+                        spacing: 4,
+                        children: [
+                          MListHeader(title: 'Downloads & Storage'),
+                          MListView(
+                            items: [
+                              MListItemData(
+                                title: 'Auto-install after download',
+                                onTap: () {
+                                  settings.setAutoInstallApk(
+                                    !settings.autoInstallApk,
+                                  );
+                                },
+                                subtitle:
+                                    'Install APKs automatically once download finishes',
+                                suffix: Switch(
+                                  value: settings.autoInstallApk,
+                                  onChanged: (value) {
+                                    settings.setAutoInstallApk(value);
+                                  },
+                                ),
+                              ),
+                              MListItemData(
+                                title: 'Delete APK after install',
+                                onTap: () {
+                                  settings.setAutoInstallApk(
+                                    !settings.autoInstallApk,
+                                  );
+                                },
+                                subtitle:
+                                    'Remove installer files after successful installation',
+                                suffix: Switch(
+                                  value: settings.autoDeleteApk,
+                                  onChanged: (value) {
+                                    settings.setAutoDeleteApk(value);
+                                  },
+                                ),
+                              ),
+                            ],
                           ),
                         ],
                       ),
-                    ],
-                  ),
-                  Column(
-                    spacing: 4,
-                    children: [
-                      if (settings.backgroundUpdatesEnabled &&
-                          _isIgnoringBatteryOptimizations == false)
-                        MListHeader(title: 'Reliability'),
-                      MListView(
-                        items: [
+                      Column(
+                        spacing: 4,
+                        children: [
+                          MListHeader(title: 'Background updates'),
+                          MListView(
+                            items: [
+                              MListItemData(
+                                leading: Icon(Symbols.notifications),
+                                title: 'Check for updates in background',
+                                subtitle: 'Notify when updates are available',
+                                onTap: () async {
+                                  await settings.setBackgroundUpdatesEnabled(
+                                    !settings.backgroundUpdatesEnabled,
+                                  );
+                                  await UpdateCheckService.scheduleFromPrefs();
+                                },
+                                suffix: Switch(
+                                  value: settings.backgroundUpdatesEnabled,
+                                  onChanged: (value) async {
+                                    await settings.setBackgroundUpdatesEnabled(
+                                      value,
+                                    );
+                                    await UpdateCheckService.scheduleFromPrefs();
+                                  },
+                                ),
+                              ),
+                              MListItemData(
+                                leading: Icon(Symbols.network_check),
+                                title: 'Update network',
+                                subtitle: _updateNetworkPolicyLabel(
+                                  settings.updateNetworkPolicy,
+                                ),
+                                onTap: () => _showUpdateNetworkPolicyDialog(
+                                  context,
+                                  settings,
+                                ),
+                                suffix: Icon(Symbols.chevron_right),
+                              ),
+                              MListItemData(
+                                leading: Icon(Symbols.schedule),
+                                title: 'Update interval',
+                                subtitle: _updateIntervalLabel(
+                                  settings.updateIntervalHours,
+                                ),
+                                onTap: () => _showUpdateIntervalDialog(
+                                  context,
+                                  settings,
+                                ),
+                                suffix: Icon(Symbols.chevron_right),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                      Column(
+                        spacing: 4,
+                        children: [
                           if (settings.backgroundUpdatesEnabled &&
                               _isIgnoringBatteryOptimizations == false)
-                            MListItemData(
-                              leading: Icon(
-                                Symbols.battery_saver,
-                                fill: 1,
-                                color: Theme.of(context).colorScheme.error,
-                              ),
-                              title: 'Disable battery optimization',
-                              subtitle:
-                                  'Allow background checks to run reliably',
-                              onTap: _requestDisableBatteryOptimizations,
-                            ),
-                          if (kDebugMode)
-                            MListItemData(
-                              leading: Icon(Symbols.bolt),
-                              title: 'Run debug check in 10s',
-                              subtitle:
-                                  'Shows a test notification and runs after 10s',
-                              onTap: () async {
-                                await UpdateCheckService.showDebugNotificationNow(
-                                  'Debug check scheduled',
-                                );
-                                await UpdateCheckService.runDebugInApp();
-                                if (!context.mounted) return;
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text(
-                                      'Debug update check will run in 10 seconds',
-                                    ),
+                            MListHeader(title: 'Reliability'),
+                          MListView(
+                            items: [
+                              if (settings.backgroundUpdatesEnabled &&
+                                  _isIgnoringBatteryOptimizations == false)
+                                MListItemData(
+                                  leading: Icon(
+                                    Symbols.battery_saver,
+                                    fill: 1,
+                                    color: Theme.of(context).colorScheme.error,
                                   ),
-                                );
-                              },
-                            ),
+                                  title: 'Disable battery optimization',
+                                  subtitle:
+                                      'Allow background checks to run reliably',
+                                  onTap: _requestDisableBatteryOptimizations,
+                                ),
+                              if (kDebugMode)
+                                MListItemData(
+                                  leading: Icon(Symbols.bolt),
+                                  title: 'Run debug check in 10s',
+                                  subtitle:
+                                      'Shows a test notification and runs after 10s',
+                                  onTap: () async {
+                                    await UpdateCheckService.showDebugNotificationNow(
+                                      'Debug check scheduled',
+                                    );
+                                    await UpdateCheckService.runDebugInApp();
+                                    if (!context.mounted) return;
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                        content: Text(
+                                          'Debug update check will run in 10 seconds',
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                ),
+                            ],
+                          ),
                         ],
                       ),
                     ],
                   ),
-                ],
+                ),
               ),
-            ),
+            ],
           ),
         );
       },

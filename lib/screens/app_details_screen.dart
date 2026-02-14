@@ -1468,8 +1468,7 @@ class _DownloadSectionState extends State<_DownloadSection> {
             if (latestVersion == null) {
               return Container(
                 width: double.infinity,
-                margin: const EdgeInsets.symmetric(horizontal: 16),
-                padding: const EdgeInsets.all(20),
+                padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
                   color: Theme.of(context).colorScheme.errorContainer,
                   borderRadius: BorderRadius.circular(16),

@@ -2472,21 +2472,43 @@ class _AllVersionsSection extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<AppProvider>(
       builder: (context, appProvider, _) {
-        return FutureBuilder<bool>(
-          future: appProvider.getIncludeUnstable(app.packageName),
+        return FutureBuilder<List<Object?>>(
+          future: Future.wait([
+            appProvider.getIncludeUnstable(app.packageName),
+            appProvider.getSupportedAbis(),
+          ]),
           builder: (context, snapshot) {
-            final includeUnstable = snapshot.data ?? false;
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const SizedBox.shrink();
+            }
+
+            final includeUnstable = (snapshot.data?[0] as bool?) ?? false;
+            final supportedAbis =
+                (snapshot.data?[1] as List<String>?) ?? const <String>[];
 
             var versions = app.packages?.values.toList() ?? [];
             if (versions.isEmpty) return const SizedBox.shrink();
 
-            // Filter out unstable versions if not enabled
             if (!includeUnstable) {
               versions = versions.where((v) => !v.isUnstable).toList();
               if (versions.isEmpty) return const SizedBox.shrink();
             }
 
-            // Sort versions by version code descending
+            bool isUniversal(FDroidVersion v) =>
+                v.nativecode == null || v.nativecode!.isEmpty;
+
+            bool supportsDevice(FDroidVersion v) {
+              if (isUniversal(v)) return true;
+              if (supportedAbis.isEmpty) return true;
+              return v.nativecode!.any((abi) => supportedAbis.contains(abi));
+            }
+
+            // Filter out incompatible ABIs; if none remain, fall back to show all
+            final compatible = versions.where(supportsDevice).toList();
+            if (compatible.isNotEmpty) {
+              versions = compatible;
+            }
+
             versions.sort((a, b) => b.versionCode.compareTo(a.versionCode));
 
             return Column(
@@ -2500,6 +2522,7 @@ class _AllVersionsSection extends StatelessWidget {
                     children: [
                       ...versions.map((version) {
                         final isLatest = version == versions.first;
+                        final compatibleAbi = supportsDevice(version);
 
                         return Container(
                           padding: const EdgeInsets.all(12),
@@ -2555,30 +2578,55 @@ class _AllVersionsSection extends StatelessWidget {
                                       ],
                                     ),
                                   ),
-                                  if (isLatest)
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 8,
-                                        vertical: 4,
-                                      ),
-                                      decoration: BoxDecoration(
-                                        color: Theme.of(
-                                          context,
-                                        ).colorScheme.primary,
-                                        borderRadius: BorderRadius.circular(4),
-                                      ),
-                                      child: Text(
-                                        'Latest',
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .labelSmall
-                                            ?.copyWith(
-                                              color: Theme.of(
-                                                context,
-                                              ).colorScheme.onPrimary,
+                                  Column(
+                                    crossAxisAlignment: CrossAxisAlignment.end,
+                                    children: [
+                                      if (isLatest)
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 8,
+                                            vertical: 4,
+                                          ),
+                                          decoration: BoxDecoration(
+                                            color: Theme.of(
+                                              context,
+                                            ).colorScheme.primary,
+                                            borderRadius: BorderRadius.circular(
+                                              4,
                                             ),
-                                      ),
-                                    ),
+                                          ),
+                                          child: Text(
+                                            'Latest',
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .labelSmall
+                                                ?.copyWith(
+                                                  color: Theme.of(
+                                                    context,
+                                                  ).colorScheme.onPrimary,
+                                                ),
+                                          ),
+                                        ),
+                                      if (!compatibleAbi)
+                                        Padding(
+                                          padding: const EdgeInsets.only(
+                                            top: 4.0,
+                                          ),
+                                          child: Text(
+                                            'Incompatible ABI',
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .labelSmall
+                                                ?.copyWith(
+                                                  color: Theme.of(
+                                                    context,
+                                                  ).colorScheme.error,
+                                                  fontWeight: FontWeight.w600,
+                                                ),
+                                          ),
+                                        ),
+                                    ],
+                                  ),
                                 ],
                               ),
                               const SizedBox(height: 8),
@@ -2657,6 +2705,8 @@ class _VersionDownloadButton extends StatelessWidget {
           version.versionName,
         );
 
+        final supportedAbisFuture = appProvider.getSupportedAbis();
+
         final isInstalledVersion = isInstalled && installedApp != null
             ? (installedApp.versionCode != null
                   ? installedApp.versionCode == version.versionCode
@@ -2694,159 +2744,191 @@ class _VersionDownloadButton extends StatelessWidget {
                 child: FilledButton.icon(
                   onPressed: () async {
                     try {
-                      final opened = await appProvider.openInstalledApp(
-                        app.packageName,
-                      );
-                      if (!opened && context.mounted) {
+                      final appWithVersion = app.copyWithVersion(version);
+                      await downloadProvider.downloadApk(appWithVersion);
+                      if (context.mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('Failed to open ${app.name}')),
+                          SnackBar(
+                            content: Text(
+                              'Downloading ${version.versionName}...',
+                            ),
+                          ),
                         );
                       }
                     } catch (e) {
                       if (context.mounted) {
-                        ScaffoldMessenger.of(
-                          context,
-                        ).showSnackBar(SnackBar(content: Text('Error: $e')));
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Download failed: $e')),
+                        );
                       }
                     }
                   },
-                  icon: const Icon(Symbols.open_in_new_rounded, size: 18),
-                  label: const Text('Open'),
+                  icon: const Icon(Symbols.download, size: 18),
+                  label: const Text('Download'),
                 ),
               ),
             ],
           );
         }
 
-        if (isDownloading) {
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        return FutureBuilder<List<String>>(
+          future: supportedAbisFuture,
+          builder: (context, snapshot) {
+            final supportedAbis = snapshot.data ?? const <String>[];
+            final native = version.nativecode ?? const <String>[];
+            final isUniversal = native.isEmpty;
+            final isAbiCompatible =
+                isUniversal ||
+                supportedAbis.isEmpty ||
+                native.any((abi) => supportedAbis.contains(abi));
+
+            if (!isAbiCompatible) {
+              return OutlinedButton.icon(
+                onPressed: null,
+                icon: const Icon(Symbols.block, size: 18),
+                label: Text(
+                  native.isEmpty
+                      ? 'Incompatible APK'
+                      : 'Incompatible (${native.join(', ')})',
+                ),
+              );
+            }
+
+            if (isDownloading) {
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Downloading... ${(progress * 100).toInt()}%',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                      OutlinedButton.icon(
+                        onPressed: () {
+                          downloadProvider.cancelDownload(
+                            app.packageName,
+                            version.versionName,
+                          );
+                        },
+                        icon: const Icon(Symbols.close, size: 18),
+                        label: const Text('Cancel'),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  LinearProgressIndicator(value: progress),
+                ],
+              );
+            }
+
+            if (isInstalling) {
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Downloading... ${(progress * 100).toInt()}%',
+                    'Installing...',
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
                       color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
                   ),
+                  const SizedBox(height: 8),
+                  const LinearProgressIndicator(),
+                ],
+              );
+            }
+
+            if (isDownloaded) {
+              return Row(
+                spacing: 8,
+                children: [
+                  Expanded(
+                    child: FilledButton.icon(
+                      onPressed: () async {
+                        try {
+                          await downloadProvider.installApk(
+                            downloadInfo.filePath!,
+                            app.packageName,
+                            version.versionName,
+                          );
+                        } catch (e) {
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('Install failed: $e')),
+                            );
+                          }
+                        }
+                      },
+                      icon: const Icon(
+                        Symbols.install_mobile_rounded,
+                        size: 18,
+                      ),
+                      label: const Text('Install'),
+                    ),
+                  ),
                   OutlinedButton.icon(
-                    onPressed: () {
-                      downloadProvider.cancelDownload(
-                        app.packageName,
-                        version.versionName,
-                      );
+                    onPressed: () async {
+                      try {
+                        await downloadProvider.deleteDownloadedFile(
+                          downloadInfo.filePath!,
+                        );
+                        downloadProvider.removeDownload(
+                          app.packageName,
+                          version.versionName,
+                        );
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('APK deleted')),
+                        );
+                      } catch (e) {
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('Delete failed: $e')),
+                          );
+                        }
+                      }
                     },
-                    icon: const Icon(Symbols.close, size: 18),
-                    label: const Text('Cancel'),
+                    icon: const Icon(Symbols.delete_rounded, size: 18),
+                    label: const Text('Delete'),
                   ),
                 ],
-              ),
-              const SizedBox(height: 8),
-              LinearProgressIndicator(value: progress),
-            ],
-          );
-        }
+              );
+            }
 
-        if (isInstalling) {
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Installing...',
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+            return Row(
+              spacing: 8,
+              children: [
+                Expanded(
+                  child: FilledButton.icon(
+                    onPressed: () async {
+                      try {
+                        final appWithVersion = app.copyWithVersion(version);
+                        await downloadProvider.downloadApk(appWithVersion);
+                      } catch (e) {
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('Download failed: $e')),
+                          );
+                        }
+                      }
+                    },
+                    icon: const Icon(Symbols.download_rounded, size: 18),
+                    label: const Text('Download'),
+                  ),
                 ),
-              ),
-              const SizedBox(height: 8),
-              const LinearProgressIndicator(),
-            ],
-          );
-        }
-
-        if (isDownloaded) {
-          return FilledButton.icon(
-            onPressed: () async {
-              final settings = context.read<SettingsProvider>();
-              final hasPermission = await downloadProvider
-                  .requestInstallPermission();
-              if (!hasPermission) {
-                if (settings.installMethod == InstallMethod.shizuku) {
-                  await _handleShizukuUnavailable(context, settings);
-                  return;
-                }
-                if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Install permission is required'),
-                    ),
-                  );
-                }
-                return;
-              }
-
-              try {
-                if (downloadInfo.filePath != null) {
-                  await downloadProvider.installApk(
-                    downloadInfo.filePath!,
-                    app.packageName,
-                    version.versionName,
-                  );
-                  await appProvider.waitForInstalled(app.packageName);
-                  await appProvider.fetchInstalledApps();
-                  if (context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Installing ${app.name}...')),
-                    );
-                  }
-                }
-              } catch (e) {
-                if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Installation failed: $e')),
-                  );
-                }
-              }
-            },
-            icon: const Icon(Symbols.install_mobile, size: 18),
-            label: const Text('Install'),
-          );
-        }
-
-        return FilledButton.tonalIcon(
-          onPressed: () async {
-            final hasPermission = await downloadProvider.requestPermissions();
-            if (!hasPermission) {
-              if (context.mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Storage permission is required'),
-                  ),
-                );
-              }
-              return;
-            }
-
-            try {
-              await downloadProvider.downloadApk(app.copyWithVersion(version));
-              if (context.mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('Downloading ${version.versionName}...'),
-                  ),
-                );
-              }
-            } catch (e) {
-              if (context.mounted) {
-                ScaffoldMessenger.of(
-                  context,
-                ).showSnackBar(SnackBar(content: Text('Download failed: $e')));
-              }
-            }
+                FilledButton.tonalIcon(
+                  onPressed: () {
+                    final url = version.downloadUrl(app.repositoryUrl);
+                    launchUrl(Uri.parse(url));
+                  },
+                  icon: const Icon(Symbols.open_in_new_rounded, size: 18),
+                  label: const Text('Open link'),
+                ),
+              ],
+            );
           },
-          icon: const Icon(Symbols.download, size: 18),
-          label: const Text('Download'),
         );
       },
     );

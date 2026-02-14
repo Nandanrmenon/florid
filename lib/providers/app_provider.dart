@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:installed_apps/app_info.dart' as installed;
 import 'package:installed_apps/installed_apps.dart';
@@ -76,6 +79,9 @@ class AppProvider extends ChangeNotifier {
 
   // Favorites state
   Set<String> _favoritePackages = {};
+
+  // Cached device ABI list
+  List<String>? _supportedAbis;
 
   // Getters
   List<FDroidApp> get latestApps => _latestApps;
@@ -673,7 +679,7 @@ class AppProvider extends ChangeNotifier {
     final includeUnstable = await _preferencesService.getIncludeUnstable(
       app.packageName,
     );
-    return app.getLatestVersion(includeUnstable: includeUnstable);
+    return _selectBestVersionForDevice(app, includeUnstable: includeUnstable);
   }
 
   /// Gets whether unstable versions should be included for a specific app
@@ -686,6 +692,87 @@ class AppProvider extends ChangeNotifier {
   Future<void> setIncludeUnstable(String packageName, bool include) async {
     await _preferencesService.setIncludeUnstable(packageName, include);
     notifyListeners();
+  }
+
+  Future<List<String>> _getSupportedAbis() async {
+    if (_supportedAbis != null) return _supportedAbis!;
+
+    if (!Platform.isAndroid) {
+      _supportedAbis = const [];
+      return _supportedAbis!;
+    }
+
+    try {
+      final info = await DeviceInfoPlugin().androidInfo;
+      final rawAbis =
+          info.supportedAbis ??
+          info.supported64BitAbis ??
+          info.supported32BitAbis ??
+          const <String>[];
+      final abis = rawAbis.where((abi) => abi.isNotEmpty).toList();
+      if (abis.isNotEmpty) {
+        _supportedAbis = abis;
+        return abis;
+      }
+    } catch (e) {
+      debugPrint('[AppProvider] Failed to read supported ABIs: $e');
+    }
+
+    _supportedAbis = const [];
+    return _supportedAbis!;
+  }
+
+  Future<List<String>> getSupportedAbis() => _getSupportedAbis();
+
+  Future<FDroidVersion?> _selectBestVersionForDevice(
+    FDroidApp app, {
+    required bool includeUnstable,
+  }) async {
+    if (app.packages == null || app.packages!.isEmpty) return null;
+
+    var versions = app.packages!.values.toList();
+    if (!includeUnstable) {
+      versions = versions.where((v) => !v.isUnstable).toList();
+      if (versions.isEmpty) return null;
+    }
+
+    final abis = await _getSupportedAbis();
+
+    bool isUniversal(FDroidVersion v) =>
+        v.nativecode == null || v.nativecode!.isEmpty;
+
+    bool supportsDevice(FDroidVersion v) {
+      if (isUniversal(v)) return true;
+      if (abis.isEmpty) return true;
+      return v.nativecode!.any((abi) => abis.contains(abi));
+    }
+
+    final compatible = versions.where(supportsDevice).toList();
+    final candidates = compatible.isNotEmpty ? compatible : versions;
+
+    int abiRank(FDroidVersion v) {
+      if (isUniversal(v)) return abis.length + 1;
+      final matches = v.nativecode!
+          .map((abi) => abis.indexOf(abi))
+          .where((idx) => idx >= 0)
+          .toList();
+      return matches.isEmpty
+          ? abis.length + 2
+          : matches.reduce((a, b) => a < b ? a : b);
+    }
+
+    candidates.sort((a, b) {
+      final versionCompare = b.versionCode.compareTo(a.versionCode);
+      if (versionCompare != 0) return versionCompare;
+      if (abis.isEmpty) return 0;
+      return abiRank(a).compareTo(abiRank(b));
+    });
+
+    final chosen = candidates.first;
+    debugPrint(
+      '[AppProvider] ABI selection for ${app.packageName}: chosen ${chosen.versionName} (${chosen.apkName}), deviceAbis=$abis, native=${chosen.nativecode}',
+    );
+    return chosen;
   }
 
   /// Attempts to launch an installed app by package name

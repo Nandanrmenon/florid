@@ -1,7 +1,5 @@
 import 'package:florid/l10n/app_localizations.dart';
 import 'package:florid/providers/settings_provider.dart';
-import 'package:florid/utils/menu_actions.dart';
-import 'package:florid/utils/responsive.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:material_symbols_icons/symbols.dart';
@@ -64,78 +62,48 @@ class _SearchScreenState extends State<SearchScreen> {
         }
       },
       child: Scaffold(
-        appBar: AppBar(
-          scrolledUnderElevation: 0,
-          elevation: 0,
-          backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
-          toolbarHeight: 80,
-          title: TextField(
-            controller: _searchController,
-            focusNode: _searchFocus,
-            decoration: InputDecoration(
-              hintText: 'Search F-Droid apps...',
-              prefixIcon: const Icon(Symbols.search),
+        extendBody: true,
+        bottomNavigationBar: Padding(
+          padding: MediaQuery.of(context).viewInsets,
+          child: BottomAppBar(
+            color: Colors.transparent,
+            child: TextField(
+              controller: _searchController,
+              focusNode: _searchFocus,
+              decoration: InputDecoration(
+                hintText: 'Search F-Droid apps...',
+                prefixIcon: const Icon(Symbols.search),
+                suffixIcon: _searchController.text.isNotEmpty
+                    ? IconButton(
+                        icon: const Icon(Symbols.close),
+                        onPressed: _clearSearch,
+                      )
+                    : null,
+              ),
+              textInputAction: TextInputAction.search,
+              onSubmitted: _performSearch,
+              onChanged: (query) {
+                // Rebuild to show/hide clear button
+                setState(() {});
+
+                // Debounced search - search after user stops typing
+                if (query.trim().isNotEmpty) {
+                  Future.delayed(const Duration(milliseconds: 500), () {
+                    if (_searchController.text.trim() == query.trim()) {
+                      _performSearch(query.trim());
+                    }
+                  });
+                } else {
+                  _clearSearch();
+                }
+              },
             ),
-            textInputAction: TextInputAction.search,
-            onSubmitted: _performSearch,
-            onChanged: (query) {
-              // Debounced search - search after user stops typing
-              if (query.trim().isNotEmpty) {
-                Future.delayed(const Duration(milliseconds: 500), () {
-                  if (_searchController.text.trim() == query.trim()) {
-                    _performSearch(query.trim());
-                  }
-                });
-              } else {
-                _clearSearch();
-              }
-            },
           ),
-          actions: [
-            Consumer<AppProvider>(
-              builder: (context, appProvider, child) {
-                if (appProvider.searchQuery.isNotEmpty) {
-                  return IconButton(
-                    icon: const Icon(Symbols.close),
-                    onPressed: _clearSearch,
-                  );
-                }
-                return const SizedBox.shrink();
-              },
-            ),
-            PopupMenuButton<String>(
-              onSelected: (value) {
-                switch (value) {
-                  case 'settings':
-                    MenuActions.showSettings(context);
-                    break;
-                  case 'about':
-                    MenuActions.showAbout(context);
-                    break;
-                }
-              },
-              itemBuilder: (context) => [
-                if (!context.isLargeScreen)
-                  const PopupMenuItem(
-                    value: 'settings',
-                    child: ListTile(
-                      leading: Icon(Symbols.settings),
-                      title: Text('Settings'),
-                      contentPadding: EdgeInsets.zero,
-                    ),
-                  ),
-                const PopupMenuItem(
-                  value: 'about',
-                  child: ListTile(
-                    leading: Icon(Symbols.info),
-                    title: Text('About'),
-                    contentPadding: EdgeInsets.zero,
-                  ),
-                ),
-              ],
-            ),
-            SizedBox(width: 8),
-          ],
+        ),
+        appBar: AppBar(
+          // scrolledUnderElevation: 0,
+          // elevation: 0,
+          // backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
         ),
         body: Consumer<AppProvider>(
           builder: (context, appProvider, child) {
@@ -150,37 +118,31 @@ class _SearchScreenState extends State<SearchScreen> {
 
             // Show initial state
             if (query.isEmpty) {
-              return Center(
-                child: SingleChildScrollView(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Symbols.search,
-                        size: 64,
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        'Search F-Droid Apps',
-                        style: Theme.of(context).textTheme.headlineSmall,
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        'Find free and open-source Android apps',
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        ),
-                      ),
-                      const SizedBox(height: 32),
-                      _SearchSuggestions(
-                        onSuggestionTap: (suggestion) {
+              return SingleChildScrollView(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    SizedBox(height: 64),
+                    Icon(
+                      Symbols.search,
+                      size: 64,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      'Search Apps',
+                      style: Theme.of(context).textTheme.headlineSmall,
+                    ),
+                    const SizedBox(height: 32),
+                    _SearchSuggestions(
+                      onSuggestionTap: (suggestion) {
+                        setState(() {
                           _searchController.text = suggestion;
-                          _performSearch(suggestion);
-                        },
-                      ),
-                    ],
-                  ),
+                        });
+                        _performSearch(suggestion);
+                      },
+                    ),
+                  ],
                 ),
               );
             }

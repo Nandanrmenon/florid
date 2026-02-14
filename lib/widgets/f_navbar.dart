@@ -74,47 +74,59 @@ class FNavBar extends StatelessWidget {
                                   spacing: 16.0,
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    IconTheme(
-                                      data: IconThemeData(
-                                        color: selected
-                                            ? selectedColor
-                                            : unselectedColor,
+                                    Flexible(
+                                      child: IconTheme(
+                                        data: IconThemeData(
+                                          color: selected
+                                              ? selectedColor
+                                              : unselectedColor,
+                                        ),
+                                        child: selected
+                                            ? item.selectedIcon
+                                            : item.icon,
                                       ),
-                                      child: selected
-                                          ? item.selectedIcon
-                                          : item.icon,
                                     ),
 
                                     if (selected)
-                                      AnimatedDefaultTextStyle(
-                                            duration: const Duration(
-                                              milliseconds: 180,
-                                            ),
-                                            curve: Curves.easeOut,
-                                            style: isFlorid
-                                                ? TextStyle(
-                                                    color: selected
-                                                        ? selectedColor
-                                                        : unselectedColor,
-                                                    fontSize: 14,
-                                                    fontVariations: [
-                                                      FontVariation(
-                                                        'ROND',
-                                                        100,
-                                                      ),
-                                                    ],
-                                                  )
-                                                : TextStyle(inherit: true),
-                                            child: Text(item.label),
-                                          )
-                                          .animate()
-                                          .fadeIn(duration: 180.ms)
-                                          .slideX(
-                                            begin: 0.5,
-                                            end: 0,
-                                            duration: 180.ms,
-                                            curve: Curves.easeOut,
-                                          ),
+                                      Flexible(
+                                        child:
+                                            AnimatedDefaultTextStyle(
+                                                  duration: const Duration(
+                                                    milliseconds: 180,
+                                                  ),
+                                                  curve: Curves.easeOut,
+                                                  style: isFlorid
+                                                      ? TextStyle(
+                                                          color: selected
+                                                              ? selectedColor
+                                                              : unselectedColor,
+                                                          fontSize: 14,
+                                                          fontVariations: [
+                                                            FontVariation(
+                                                              'ROND',
+                                                              100,
+                                                            ),
+                                                          ],
+                                                        )
+                                                      : TextStyle(
+                                                          inherit: true,
+                                                        ),
+                                                  child: Text(
+                                                    item.label,
+                                                    maxLines: 1,
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
+                                                  ),
+                                                )
+                                                .animate()
+                                                .fadeIn(duration: 180.ms)
+                                                .slideX(
+                                                  begin: 0.5,
+                                                  end: 0,
+                                                  duration: 180.ms,
+                                                  curve: Curves.easeOut,
+                                                ),
+                                      ),
                                   ],
                                 ),
                               ),

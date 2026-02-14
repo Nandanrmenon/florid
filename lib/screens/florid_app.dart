@@ -255,7 +255,11 @@ class _FloridAppState extends State<FloridApp> {
                 FloridNavBarItem(
                   icon: userIcon,
                   selectedIcon: userSelectedIcon,
-                  label: "User",
+                  label: settings.userName.isNotEmpty
+                      ? (settings.userName.length > 10
+                            ? '${settings.userName.substring(0, 10)}...'
+                            : settings.userName)
+                      : 'User',
                 ),
               ];
 
@@ -273,7 +277,13 @@ class _FloridAppState extends State<FloridApp> {
                 NavigationRailDestination(
                   icon: userIcon,
                   selectedIcon: userSelectedIcon,
-                  label: const Text('Me'),
+                  label: Text(
+                    settings.userName.isNotEmpty
+                        ? (settings.userName.length > 10
+                              ? '${settings.userName.substring(0, 10)}...'
+                              : settings.userName)
+                        : 'User',
+                  ),
                 ),
               ];
 
@@ -501,14 +511,18 @@ class _FloridAppState extends State<FloridApp> {
                           ),
                     label: localizations.device,
                   ),
-                  const NavigationDestination(
+                  NavigationDestination(
                     icon: Icon(Symbols.person_rounded),
                     selectedIcon: Icon(
                       Symbols.person_rounded,
                       fill: 1,
                       weight: 600,
                     ),
-                    label: 'User',
+                    label: settings.userName.isNotEmpty
+                        ? (settings.userName.length > 10
+                              ? '${settings.userName.substring(0, 10)}...'
+                              : settings.userName)
+                        : 'User',
                   ),
                 ];
 

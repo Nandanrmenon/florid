@@ -282,10 +282,14 @@ class _UserScreenState extends State<UserScreen>
                       : const Icon(Symbols.person),
                 ),
                 const SizedBox(width: 12),
-                Text(
-                  settingsProvider.userName.isNotEmpty
-                      ? settingsProvider.userName
-                      : 'User',
+                Flexible(
+                  child: Text(
+                    settingsProvider.userName.isNotEmpty
+                        ? settingsProvider.userName
+                        : 'User',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ),
               ],
             ),

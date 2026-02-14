@@ -182,13 +182,6 @@ class _FloridAppState extends State<FloridApp> {
           : context.watch<SettingsProvider>().themeStyle == ThemeStyle.florid
           ? Theme.of(context).colorScheme.surfaceContainer
           : Theme.of(context).colorScheme.surface,
-
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          _showWhatsNew(force: true, markSeen: false);
-        },
-        child: Text('s'),
-      ),
       body: Consumer2<AppProvider, SettingsProvider>(
         builder: (context, appProvider, settings, child) {
           return FutureBuilder<List<FDroidApp>>(

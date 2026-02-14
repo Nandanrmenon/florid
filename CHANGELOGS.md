@@ -1,5 +1,23 @@
 # Changelogs
 
+## v1.0.8+9
+Well, I need some rest after this update. The application is reaching a point where it's usable for most people. I am sure there are still some bugs and edge cases that I haven't tested but I will try to fix them as soon as possible. Thank you for the support and love ❤️.
+### New Features
+- [WARNING] (Use with caution) Shizuku support is here! You can now use Shizuku to grant permissions to apps that require it. You can enable it from the app detail screen if the app requires Shizuku permissions. Please note that you need to have Shizuku installed and set up on your device for this to work. This feature is still in alpha and may not work perfectly. If you encounter any issues, please report them to me.
+- Support Material You dynamic color theming. If you have a supported device and Android 12 or above, you can now enable dynamic colors in the appearance settings.
+- There is now a new "User" tab. You can view your favourite apps, manage your repositories, and view your app statistics from this tab. You can also export and import your favourite apps list from this tab.
+-  Select APKs by device ABI compatibility. You can now filter the available APKs for an app based on your device's ABI (Application Binary Interface) compatibility. This will help you find the right APK for your device and avoid downloading incompatible versions.
+- Display Anti-feature on app detail screen.
+
+### Improvements
+- Much better search experience [#44](https://github.com/Nandanrmenon/florid/issues/44)
+- Better Navigation bar for floird theme.
+- Organise Settings page for better visibility
+- Support for Large devices and foldables
+- Show what's new for Florid
+- UI Improvements
+- Bug Fixes
+
 ## v1.0.7+8
 Thank you for the 100 ⭐️ on GitHub! It means a lot to me ❤️. Your comments have been amazing and I am glad that you are enjoying the app.
 ### New Features

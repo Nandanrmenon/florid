@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:android_intent_plus/android_intent.dart';
 import 'package:app_installer/app_installer.dart';
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path/path.dart' as p;
@@ -96,6 +97,7 @@ class DownloadProvider extends ChangeNotifier {
   final AppPreferencesService _preferencesService = AppPreferencesService();
   final ShizukuApi _shizukuApi = ShizukuApi();
   String? _androidPackageName;
+  List<String>? _supportedAbis;
 
   // Delay after Shizuku installation to allow UI to fetch installed apps
   static const Duration _shizukuInstallSettleDelay = Duration(seconds: 2);
@@ -170,9 +172,87 @@ class DownloadProvider extends ChangeNotifier {
     return false;
   }
 
+  Future<List<String>> _getSupportedAbis() async {
+    if (_supportedAbis != null) {
+      return _supportedAbis!;
+    }
+
+    if (!Platform.isAndroid) {
+      _supportedAbis = const [];
+      return _supportedAbis!;
+    }
+
+    try {
+      final info = await DeviceInfoPlugin().androidInfo;
+      final rawAbis =
+          info.supportedAbis ??
+          info.supported64BitAbis ??
+          info.supported32BitAbis ??
+          const <String>[];
+      final abis = rawAbis.where((abi) => abi.isNotEmpty).toList();
+      if (abis.isNotEmpty) {
+        _supportedAbis = abis;
+        return abis;
+      }
+    } catch (e) {
+      debugPrint('[DownloadProvider] Failed to read supported ABIs: $e');
+    }
+
+    _supportedAbis = const [];
+    return _supportedAbis!;
+  }
+
+  Future<FDroidVersion?> _selectBestVersionForDevice(FDroidApp app) async {
+    final versions = app.packages?.values.toList() ?? [];
+    if (versions.isEmpty) return null;
+
+    final abis = await _getSupportedAbis();
+
+    bool isUniversal(FDroidVersion v) =>
+        v.nativecode == null || v.nativecode!.isEmpty;
+
+    bool supportsDevice(FDroidVersion v) {
+      if (isUniversal(v)) return true;
+      if (abis.isEmpty) return true;
+      return v.nativecode!.any((abi) => abis.contains(abi));
+    }
+
+    final compatible = versions.where(supportsDevice).toList();
+    if (compatible.isEmpty) {
+      debugPrint(
+        '[DownloadProvider] No ABI-specific match found, using latest version',
+      );
+      return app.getLatestVersion();
+    }
+
+    int abiRank(FDroidVersion v) {
+      if (isUniversal(v)) return abis.length + 1;
+      final matches = v.nativecode!
+          .map((abi) => abis.indexOf(abi))
+          .where((idx) => idx >= 0)
+          .toList();
+      return matches.isEmpty
+          ? abis.length + 2
+          : matches.reduce((a, b) => a < b ? a : b);
+    }
+
+    compatible.sort((a, b) {
+      final versionCompare = b.versionCode.compareTo(a.versionCode);
+      if (versionCompare != 0) return versionCompare;
+      if (abis.isEmpty) return 0;
+      return abiRank(a).compareTo(abiRank(b));
+    });
+
+    final chosen = compatible.first;
+    debugPrint(
+      '[DownloadProvider] ABI selection for ${app.packageName}: chosen ${chosen.versionName} (${chosen.apkName}), deviceAbis=$abis, native=${chosen.nativecode}',
+    );
+    return chosen;
+  }
+
   /// Downloads an APK file
   Future<String?> downloadApk(FDroidApp app, {bool? skipAutoInstall}) async {
-    final version = app.latestVersion;
+    final version = await _selectBestVersionForDevice(app);
     skipAutoInstall = _settingsProvider.autoInstallApk;
     if (version == null) {
       throw Exception('No version available for download');

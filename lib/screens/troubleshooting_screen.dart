@@ -97,92 +97,96 @@ class TroubleshootingScreen extends StatelessWidget {
     return Consumer<SettingsProvider>(
       builder: (context, settings, _) {
         return Scaffold(
-          appBar: AppBar(title: const Text('Troubleshooting')),
-          body: SingleChildScrollView(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                spacing: 16,
-                children: [
-                  Column(
-                    spacing: 4,
+          body: CustomScrollView(
+            slivers: [
+              SliverAppBar.large(title: Text('Troubleshooting')),
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    spacing: 16,
                     children: [
-                      MListHeader(title: 'Downloads & Storage'),
-                      MListView(
-                        items: [
-                          MListItemData(
-                            title: 'Installation method',
-                            subtitle: _installMethodLabel(
-                              settings.installMethod,
-                            ),
-                            onTap: () =>
-                                _showInstallMethodDialog(context, settings),
-                            suffix: const Icon(Symbols.chevron_right),
+                      Column(
+                        spacing: 4,
+                        children: [
+                          MListHeader(title: 'Downloads & Storage'),
+                          MListView(
+                            items: [
+                              MListItemData(
+                                title: 'Installation method',
+                                subtitle: _installMethodLabel(
+                                  settings.installMethod,
+                                ),
+                                onTap: () =>
+                                    _showInstallMethodDialog(context, settings),
+                                suffix: const Icon(Symbols.chevron_right),
+                              ),
+                              MListItemData(
+                                title: 'Auto-install after download',
+                                onTap: () {
+                                  settings.setAutoInstallApk(
+                                    !settings.autoInstallApk,
+                                  );
+                                },
+                                subtitle:
+                                    'Install APKs automatically once download finishes',
+                                suffix: Switch(
+                                  value: settings.autoInstallApk,
+                                  onChanged: (value) {
+                                    settings.setAutoInstallApk(value);
+                                  },
+                                ),
+                              ),
+                              MListItemData(
+                                title: 'Delete APK after install',
+                                onTap: () {
+                                  settings.setAutoInstallApk(
+                                    !settings.autoInstallApk,
+                                  );
+                                },
+                                subtitle:
+                                    'Remove installer files after successful installation',
+                                suffix: Switch(
+                                  value: settings.autoDeleteApk,
+                                  onChanged: (value) {
+                                    settings.setAutoDeleteApk(value);
+                                  },
+                                ),
+                              ),
+                            ],
                           ),
-                          MListItemData(
-                            title: 'Auto-install after download',
-                            onTap: () {
-                              settings.setAutoInstallApk(
-                                !settings.autoInstallApk,
-                              );
-                            },
-                            subtitle:
-                                'Install APKs automatically once download finishes',
-                            suffix: Switch(
-                              value: settings.autoInstallApk,
-                              onChanged: (value) {
-                                settings.setAutoInstallApk(value);
-                              },
-                            ),
-                          ),
-                          MListItemData(
-                            title: 'Delete APK after install',
-                            onTap: () {
-                              settings.setAutoInstallApk(
-                                !settings.autoInstallApk,
-                              );
-                            },
-                            subtitle:
-                                'Remove installer files after successful installation',
-                            suffix: Switch(
-                              value: settings.autoDeleteApk,
-                              onChanged: (value) {
-                                settings.setAutoDeleteApk(value);
-                              },
-                            ),
-                          ),
-                        ],
-                      ),
-                      MListView(
-                        items: [
-                          MListItemData(
-                            leading: Icon(Symbols.cleaning_services),
-                            title: 'Clear repository cache',
-                            onTap: () => _clearRepoCache(context),
-                            subtitle:
-                                'Refresh app list and metadata on next load',
-                          ),
-                          MListItemData(
-                            leading: Icon(Symbols.delete_sweep),
-                            title: 'Clear APK downloads',
-                            onTap: () => _clearApkDownloads(context),
-                            subtitle:
-                                'Remove downloaded installer files from storage',
-                          ),
-                          MListItemData(
-                            leading: Icon(Symbols.image_not_supported),
-                            title: 'Clear image cache',
-                            onTap: () => _clearImageCache(context),
-                            subtitle: 'Remove cached icons and screenshots',
+                          MListView(
+                            items: [
+                              MListItemData(
+                                leading: Icon(Symbols.cleaning_services),
+                                title: 'Clear repository cache',
+                                onTap: () => _clearRepoCache(context),
+                                subtitle:
+                                    'Refresh app list and metadata on next load',
+                              ),
+                              MListItemData(
+                                leading: Icon(Symbols.delete_sweep),
+                                title: 'Clear APK downloads',
+                                onTap: () => _clearApkDownloads(context),
+                                subtitle:
+                                    'Remove downloaded installer files from storage',
+                              ),
+                              MListItemData(
+                                leading: Icon(Symbols.image_not_supported),
+                                title: 'Clear image cache',
+                                onTap: () => _clearImageCache(context),
+                                subtitle: 'Remove cached icons and screenshots',
+                              ),
+                            ],
                           ),
                         ],
                       ),
                     ],
                   ),
-                ],
+                ),
               ),
-            ),
+            ],
           ),
         );
       },

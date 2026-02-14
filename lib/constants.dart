@@ -5,6 +5,8 @@ var kAppColor = Color(0xFF74DAB6);
 String kAppName = 'Florid';
 const kAppPackageName = 'com.nahnah.florid';
 
+const kAppLogoSvg = 'assets/Florid.svg';
+
 const kAndroidSdkVersions = <int, String>{
   14: 'Android 4.0',
   15: 'Android 4.0.3',

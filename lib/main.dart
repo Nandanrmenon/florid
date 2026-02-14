@@ -99,9 +99,7 @@ class MainApp extends StatelessWidget {
           return DynamicColorBuilder(
             builder: (lightDynamic, darkDynamic) {
               final useDynamic = settings.dynamicColorEnabled;
-              final lightScheme = useDynamic
-                  ? lightDynamic
-                  : null;
+              final lightScheme = useDynamic ? lightDynamic : null;
               final darkScheme = useDynamic ? darkDynamic : null;
 
               return MaterialApp(

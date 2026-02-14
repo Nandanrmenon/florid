@@ -676,6 +676,15 @@ class FDroidApiService {
     }
   }
 
+  /// Searches for apps using the local database only
+  Future<List<FDroidApp>> searchAppsDatabaseOnly(String query) async {
+    try {
+      return await _databaseService.searchApps(query);
+    } catch (e) {
+      throw Exception('Error searching apps in database: $e');
+    }
+  }
+
   /// Searches for apps from a specific custom repository using database
   Future<List<FDroidApp>> searchAppsFromRepositoryUrl(
     String query,

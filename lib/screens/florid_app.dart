@@ -2,10 +2,14 @@ import 'package:florid/l10n/app_localizations.dart';
 import 'package:florid/models/fdroid_app.dart';
 import 'package:florid/screens/library_screen.dart';
 import 'package:florid/screens/settings_screen.dart';
+import 'package:florid/screens/user_screen.dart';
 import 'package:florid/utils/responsive.dart';
+import 'package:florid/utils/whats_new.dart';
 import 'package:florid/widgets/f_navbar.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/symbols.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:provider/provider.dart';
 
 import '../providers/app_provider.dart';
@@ -24,11 +28,13 @@ class FloridApp extends StatefulWidget {
 class _FloridAppState extends State<FloridApp> {
   int _currentIndex = 0;
   final ValueNotifier<int> _tabNotifier = ValueNotifier<int>(0);
+  bool _hasCheckedWhatsNew = false;
+  bool _isShowingWhatsNew = false;
 
   late final List<Widget> _screens = [
     const LibraryScreen(),
-    SearchScreen(tabIndexListenable: _tabNotifier, tabIndex: 1),
-    const UpdatesScreen(),
+    UpdatesScreen(),
+    UserScreen(),
   ];
 
   @override
@@ -41,7 +47,126 @@ class _FloridAppState extends State<FloridApp> {
 
       appProvider.fetchInstalledApps();
       repositoriesProvider.loadRepositories();
+      _maybeShowWhatsNewDialog();
     });
+  }
+
+  Future<void> _maybeShowWhatsNewDialog() async {
+    if (_hasCheckedWhatsNew) return;
+    _hasCheckedWhatsNew = true;
+    await _showWhatsNew(force: false, markSeen: true);
+  }
+
+  Future<void> _showWhatsNew({
+    required bool force,
+    required bool markSeen,
+  }) async {
+    if (_isShowingWhatsNew) return;
+    _isShowingWhatsNew = true;
+
+    final settings = context.read<SettingsProvider>();
+    if (!settings.isLoaded) {
+      _isShowingWhatsNew = false;
+      return;
+    }
+
+    final info = await PackageInfo.fromPlatform();
+    final currentVersion = '${info.version}+${info.buildNumber}';
+    if (!force && settings.lastSeenVersion == currentVersion) {
+      _isShowingWhatsNew = false;
+      return;
+    }
+
+    final whatsNew = await WhatsNewLoader.loadForVersion(currentVersion);
+    if (!mounted) {
+      _isShowingWhatsNew = false;
+      return;
+    }
+
+    await showModalBottomSheet<void>(
+      context: context,
+      useSafeArea: true,
+      builder: (context) {
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 32.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            spacing: 24,
+            children: [
+              Expanded(
+                child: SingleChildScrollView(
+                  child: Column(
+                    spacing: 16,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        "What's new in $currentVersion",
+                        style: Theme.of(context).textTheme.headlineSmall,
+                      ),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        spacing: 12,
+                        children: _buildWhatsNewContent(context, whatsNew),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              FilledButton(onPressed: () {}, child: Text("Close")),
+            ],
+          ),
+        );
+      },
+    );
+
+    if (markSeen) {
+      await settings.setLastSeenVersion(currentVersion);
+    }
+
+    _isShowingWhatsNew = false;
+  }
+
+  static Future<void> triggerWhatsNew(
+    BuildContext context, {
+    bool markSeen = true,
+  }) async {
+    final state = context.findAncestorStateOfType<_FloridAppState>();
+    if (state != null) {
+      await state._showWhatsNew(force: true, markSeen: markSeen);
+    }
+  }
+
+  List<Widget> _buildWhatsNewContent(BuildContext context, WhatsNewData? data) {
+    if (data == null || data.sections.isEmpty) {
+      return const [
+        Text('Thanks for updating Florid!'),
+        Text('Enjoy the latest improvements.'),
+      ];
+    }
+
+    final titleStyle = Theme.of(context).textTheme.titleMedium;
+
+    return data.sections
+        .map(
+          (section) => Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            spacing: 8,
+            children: [
+              Text(section.title, style: titleStyle),
+              ...section.items.map(
+                (item) => Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text('• '),
+                    Expanded(child: Text(item)),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        )
+        .toList();
   }
 
   @override
@@ -52,8 +177,11 @@ class _FloridAppState extends State<FloridApp> {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.sizeOf(context).width;
+    final isWide = screenWidth >= Responsive.largeWidth;
+
     return Scaffold(
-      backgroundColor: MediaQuery.sizeOf(context).width < Responsive.largeWidth
+      backgroundColor: screenWidth < Responsive.largeWidth
           ? Theme.of(context).colorScheme.surface
           : context.watch<SettingsProvider>().themeStyle == ThemeStyle.florid
           ? Theme.of(context).colorScheme.surfaceContainer
@@ -80,12 +208,108 @@ class _FloridAppState extends State<FloridApp> {
                 return icon;
               }
 
+              final homeIcon = buildIcon(
+                Symbols.newsstand_rounded,
+                selected: false,
+              );
+              final homeSelectedIcon = buildIcon(
+                Symbols.newsstand_rounded,
+                selected: true,
+              );
+
+              final searchIcon = buildIcon(Symbols.search, selected: false);
+              final searchSelectedIcon = buildIcon(
+                Symbols.search,
+                selected: true,
+              );
+
+              final deviceIcon = buildIcon(
+                Symbols.mobile_3_rounded,
+                selected: false,
+              );
+              final deviceSelectedIcon = buildIcon(
+                Symbols.mobile_3_rounded,
+                selected: true,
+              );
+
+              final userIcon = buildIcon(
+                Symbols.person_rounded,
+                selected: false,
+              );
+              final userSelectedIcon = buildIcon(
+                Symbols.person_rounded,
+                selected: true,
+              );
+
+              final floridNavItems = [
+                FloridNavBarItem(
+                  icon: homeIcon,
+                  selectedIcon: homeSelectedIcon,
+                  label: localizations.home,
+                ),
+                FloridNavBarItem(
+                  icon: deviceIcon,
+                  selectedIcon: deviceSelectedIcon,
+                  label: localizations.device,
+                ),
+                FloridNavBarItem(
+                  icon: userIcon,
+                  selectedIcon: userSelectedIcon,
+                  label: settings.userName.isNotEmpty
+                      ? (settings.userName.length > 10
+                            ? '${settings.userName.substring(0, 10)}...'
+                            : settings.userName)
+                      : 'User',
+                ),
+              ];
+
+              final navRailDestinations = [
+                NavigationRailDestination(
+                  icon: homeIcon,
+                  selectedIcon: homeSelectedIcon,
+                  label: Text(localizations.home),
+                ),
+                NavigationRailDestination(
+                  icon: deviceIcon,
+                  selectedIcon: deviceSelectedIcon,
+                  label: Text(localizations.device),
+                ),
+                NavigationRailDestination(
+                  icon: userIcon,
+                  selectedIcon: userSelectedIcon,
+                  label: Text(
+                    settings.userName.isNotEmpty
+                        ? (settings.userName.length > 10
+                              ? '${settings.userName.substring(0, 10)}...'
+                              : settings.userName)
+                        : 'User',
+                  ),
+                ),
+              ];
+
+              final floridNavIndex = _currentIndex == 1
+                  ? 1
+                  : _currentIndex == 2
+                  ? 2
+                  : 0;
+
+              final searchFab = FloatingActionButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const SearchScreen(),
+                    ),
+                  );
+                },
+                child: const Icon(Symbols.search),
+              );
+
               return Stack(
                 children: [
                   Row(
                     children: [
-                      if (MediaQuery.sizeOf(context).width >=
-                          Responsive.largeWidth)
+                      if (isWide)
                         NavigationRail(
                           selectedIndex: _currentIndex,
                           onDestinationSelected: (index) {
@@ -94,38 +318,7 @@ class _FloridAppState extends State<FloridApp> {
                             });
                             _tabNotifier.value = index;
                           },
-                          destinations: [
-                            NavigationRailDestination(
-                              icon: buildIcon(
-                                Symbols.newsstand_rounded,
-                                selected: false,
-                              ),
-                              selectedIcon: buildIcon(
-                                Symbols.newsstand_rounded,
-                                selected: true,
-                              ),
-                              label: Text(localizations.home),
-                            ),
-                            NavigationRailDestination(
-                              icon: buildIcon(Symbols.search, selected: false),
-                              selectedIcon: buildIcon(
-                                Symbols.search,
-                                selected: true,
-                              ),
-                              label: Text(localizations.search),
-                            ),
-                            NavigationRailDestination(
-                              icon: buildIcon(
-                                Symbols.mobile_3_rounded,
-                                selected: false,
-                              ),
-                              selectedIcon: buildIcon(
-                                Symbols.mobile_3_rounded,
-                                selected: true,
-                              ),
-                              label: Text(localizations.device),
-                            ),
-                          ],
+                          destinations: navRailDestinations,
                           trailingAtBottom: true,
                           trailing: Column(
                             children: [
@@ -152,86 +345,119 @@ class _FloridAppState extends State<FloridApp> {
                                   ),
                                 ),
                               ),
+                              if (kDebugMode)
+                                TextButton(
+                                  onPressed: () => _showWhatsNew(
+                                    force: true,
+                                    markSeen: false,
+                                  ),
+                                  child: const Text("Show what's new"),
+                                ),
                               const SizedBox(height: 32),
                             ],
                           ),
                         ),
-                      // For small screens
-                      if (MediaQuery.sizeOf(context).width <
-                          Responsive.largeWidth)
+                      if (!isWide)
                         Expanded(
-                          child: IndexedStack(
-                            index: _currentIndex,
-                            children: _screens,
+                          child: AnimatedSwitcher(
+                            duration: const Duration(milliseconds: 250),
+                            switchInCurve: Curves.easeOut,
+                            switchOutCurve: Curves.easeIn,
+                            transitionBuilder: (child, animation) {
+                              final scaleAnimation = Tween<double>(
+                                begin: 0.98,
+                                end: 1.0,
+                              ).animate(animation);
+                              return FadeTransition(
+                                opacity: animation,
+                                child: ScaleTransition(
+                                  scale: scaleAnimation,
+                                  child: child,
+                                ),
+                              );
+                            },
+                            child: KeyedSubtree(
+                              key: ValueKey<int>(_currentIndex),
+                              child: _screens[_currentIndex],
+                            ),
                           ),
                         ),
-                      // For big screens
-                      if (MediaQuery.sizeOf(context).width >=
-                          Responsive.largeWidth)
+                      if (isWide)
                         Expanded(
                           child: SafeArea(
                             child: Material(
                               clipBehavior: Clip.antiAlias,
                               borderRadius: BorderRadius.circular(24),
                               elevation: 1,
-                              child: IndexedStack(
-                                index: _currentIndex,
-                                children: _screens,
+                              child: AnimatedSwitcher(
+                                duration: const Duration(milliseconds: 250),
+                                switchInCurve: Curves.easeOut,
+                                switchOutCurve: Curves.easeIn,
+                                transitionBuilder: (child, animation) {
+                                  final scaleAnimation = Tween<double>(
+                                    begin: 0.98,
+                                    end: 1.0,
+                                  ).animate(animation);
+                                  return FadeTransition(
+                                    opacity: animation,
+                                    child: ScaleTransition(
+                                      scale: scaleAnimation,
+                                      child: child,
+                                    ),
+                                  );
+                                },
+                                child: KeyedSubtree(
+                                  key: ValueKey<int>(_currentIndex),
+                                  child: _screens[_currentIndex],
+                                ),
                               ),
                             ),
                           ),
                         ),
                     ],
                   ),
-                  if (isFlorid &&
-                      MediaQuery.sizeOf(context).width < Responsive.largeWidth)
+                  if (isFlorid && !isWide)
                     Positioned(
                       left: 0,
                       right: 0,
                       bottom: 16,
                       child: SafeArea(
                         child: FNavBar(
-                          currentIndex: _currentIndex,
+                          currentIndex: floridNavIndex,
                           onChanged: (index) {
                             setState(() {
                               _currentIndex = index;
                             });
                             _tabNotifier.value = index;
                           },
-                          items: [
-                            FloridNavBarItem(
-                              icon: buildIcon(
-                                Symbols.newsstand_rounded,
-                                selected: false,
-                              ),
-                              selectedIcon: buildIcon(
-                                Symbols.newsstand_rounded,
-                                selected: true,
-                              ),
-                              label: localizations.home,
-                            ),
-                            FloridNavBarItem(
-                              icon: buildIcon(Symbols.search, selected: false),
-                              selectedIcon: buildIcon(
-                                Symbols.search,
-                                selected: true,
-                              ),
-                              label: localizations.search,
-                            ),
-                            FloridNavBarItem(
-                              icon: buildIcon(
-                                Symbols.mobile_3_rounded,
-                                selected: false,
-                              ),
-                              selectedIcon: buildIcon(
-                                Symbols.mobile_3_rounded,
-                                selected: true,
-                              ),
-                              label: localizations.device,
-                            ),
-                          ],
+                          items: floridNavItems,
+                          fab: searchFab,
                         ),
                       ),
+                    ),
+                  if (isFlorid && isWide)
+                    Positioned.fill(
+                      child: SafeArea(
+                        child: Align(
+                          alignment: Alignment.bottomRight,
+                          child: Padding(
+                            padding: const EdgeInsets.all(24),
+                            child: searchFab,
+                          ),
+                        ),
+                      ),
+                    ),
+                  if (!isFlorid && !isWide)
+                    Positioned(
+                      right: 16,
+                      bottom: 16,
+                      child: SafeArea(child: searchFab),
+                    ),
+                  if (!isFlorid && isWide)
+                    Positioned(
+                      right: 24,
+                      bottom: 24,
+                      child: SafeArea(child: searchFab),
                     ),
                 ],
               );
@@ -263,15 +489,6 @@ class _FloridAppState extends State<FloridApp> {
                     label: localizations.home,
                   ),
                   NavigationDestination(
-                    icon: const Icon(Symbols.search),
-                    selectedIcon: const Icon(
-                      Symbols.search,
-                      fill: 1,
-                      weight: 600,
-                    ),
-                    label: localizations.search,
-                  ),
-                  NavigationDestination(
                     icon: updatableAppsCount > 0
                         ? Badge.count(
                             count: updatableAppsCount,
@@ -293,6 +510,19 @@ class _FloridAppState extends State<FloridApp> {
                             weight: 600,
                           ),
                     label: localizations.device,
+                  ),
+                  NavigationDestination(
+                    icon: Icon(Symbols.person_rounded),
+                    selectedIcon: Icon(
+                      Symbols.person_rounded,
+                      fill: 1,
+                      weight: 600,
+                    ),
+                    label: settings.userName.isNotEmpty
+                        ? (settings.userName.length > 10
+                              ? '${settings.userName.substring(0, 10)}...'
+                              : settings.userName)
+                        : 'User',
                   ),
                 ];
 

@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
-import 'package:florid/l10n/app_localizations.dart';
 import 'package:florid/screens/app_management_screen.dart';
 import 'package:florid/widgets/m_list.dart';
 import 'package:flutter/material.dart';
@@ -181,223 +180,281 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
+  Future<void> _editUserName(
+    BuildContext context,
+    SettingsProvider settingsProvider,
+  ) async {
+    final controller = TextEditingController(text: settingsProvider.userName);
+
+    final result = await showDialog<String>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Your name'),
+        content: TextField(
+          controller: controller,
+          autofocus: true,
+          textInputAction: TextInputAction.done,
+          decoration: const InputDecoration(hintText: 'Enter your name'),
+          onSubmitted: (value) => Navigator.of(dialogContext).pop(value),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(dialogContext).pop(controller.text),
+            child: const Text('Save'),
+          ),
+        ],
+      ),
+    );
+
+    if (result == null) return;
+    await settingsProvider.setUserName(result.trim());
+  }
+
   @override
   Widget build(BuildContext context) {
     return Consumer<SettingsProvider>(
       builder: (context, settings, _) {
         return Scaffold(
-          appBar: AppBar(title: Text(AppLocalizations.of(context)!.settings)),
-          body: SingleChildScrollView(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                spacing: 16,
-                children: [
-                  Column(
-                    spacing: 4,
-                    children: [
-                      MListHeader(
-                        title: 'General Settings',
-                        icon: Symbols.mobile,
-                      ),
-                      MListView(
-                        items: [
-                          MListItemData(
-                            leading: Icon(Symbols.palette),
-                            title: 'Appearance',
-                            subtitle: 'Theme mode and style',
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) =>
-                                      const AppearanceScreen(),
-                                ),
-                              );
-                            },
-                            suffix: Icon(Symbols.chevron_right),
+          body: CustomScrollView(
+            slivers: <Widget>[
+              SliverToBoxAdapter(child: SizedBox(height: 16)),
+              SliverToBoxAdapter(
+                child: Column(
+                  spacing: 4,
+                  children: [
+                    MListHeader(
+                      title: 'General Settings',
+                      icon: Symbols.mobile,
+                    ),
+                    MListView(
+                      items: [
+                        MListItemData(
+                          leading: CircleAvatar(
+                            backgroundColor: Theme.of(
+                              context,
+                            ).colorScheme.primaryContainer,
+                            foregroundColor: Theme.of(
+                              context,
+                            ).colorScheme.onPrimaryContainer,
+                            child: settings.userName.isNotEmpty
+                                ? Text(
+                                    settings.userName
+                                        .trim()
+                                        .substring(0, 1)
+                                        .toUpperCase(),
+                                  )
+                                : Icon(Symbols.person, fill: 1),
                           ),
-                          MListItemData(
-                            leading: Icon(Symbols.language),
-                            title: 'App content language',
-                            onTap: () => _showLanguageDialog(context, settings),
-                            subtitle: SettingsProvider.getLocaleDisplayName(
-                              settings.locale,
-                            ),
-                            suffix: Icon(Symbols.chevron_right),
+                          title: settings.userName.isNotEmpty
+                              ? settings.userName
+                              : 'User',
+                          subtitle: 'Set your name',
+                          onTap: () => _editUserName(context, settings),
+                          suffix: Icon(Symbols.edit),
+                        ),
+                        MListItemData(
+                          leading: Icon(Symbols.palette),
+                          title: 'Appearance',
+                          subtitle: 'Theme mode and style',
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const AppearanceScreen(),
+                              ),
+                            );
+                          },
+                          suffix: Icon(Symbols.chevron_right),
+                        ),
+                        MListItemData(
+                          leading: Icon(Symbols.language),
+                          title: 'App content language',
+                          onTap: () => _showLanguageDialog(context, settings),
+                          subtitle: SettingsProvider.getLocaleDisplayName(
+                            settings.locale,
                           ),
-                        ],
-                      ),
-                    ],
-                  ),
-                  Column(
-                    spacing: 4,
-                    children: [
-                      MListHeader(
-                        title: 'Repositories & Management',
-                        icon: Symbols.settings,
-                      ),
-                      MListView(
-                        items: [
-                          MListItemData(
-                            leading: Icon(Symbols.cloud),
-                            title: 'Manage repositories',
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) =>
-                                      const RepositoriesScreen(),
-                                ),
-                              );
-                            },
-                            subtitle: 'Add or remove F-Droid repositories',
-                            suffix: Icon(Symbols.chevron_right),
-                          ),
-                          MListItemData(
-                            leading: Icon(Symbols.discover_tune),
-                            title: 'App Management',
-                            subtitle:
-                                'Manage settings regarding installs and updates',
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) =>
-                                      const AppManagementScreen(),
-                                ),
-                              );
-                            },
-                            suffix: Icon(Symbols.chevron_right),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                  Column(
-                    spacing: 4.0,
-                    children: [
-                      MListHeader(
-                        title: 'Miscellaneous',
-                        icon: Symbols.more_horiz,
-                      ),
-                      MListView(
-                        items: [
-                          MListItemData(
-                            leading: Icon(Symbols.file_upload),
-                            title: 'Export favourites',
-                            subtitle: 'Save a JSON file to Downloads',
-                            onTap: () => _exportFavorites(context),
-                          ),
-                          MListItemData(
-                            leading: Icon(Symbols.file_download),
-                            title: 'Import favourites',
-                            subtitle: 'Import favourites from a JSON file',
-                            onTap: () => _importFavorites(context),
-                          ),
-                        ],
-                      ),
-                      MListView(
-                        items: [
-                          MListItemData(
-                            leading: Icon(Symbols.build),
-                            title: 'Troubleshooting',
-                            subtitle: 'Storage, cache, and downloads',
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) =>
-                                      const TroubleshootingScreen(),
-                                ),
-                              );
-                            },
-                            suffix: Icon(Symbols.chevron_right),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-
-                  Column(
-                    spacing: 4,
-                    children: [
-                      MListHeader(title: 'About', icon: Symbols.android),
-                      MListView(
-                        items: [
-                          MListItemData(
-                            leading: Icon(Symbols.info),
-                            title: 'Version',
-                            subtitle: _appVersion.isEmpty
-                                ? 'Loading…'
-                                : _appVersion,
-                            onTap: () {},
-                          ),
-                          MListItemData(
-                            leading: Icon(Symbols.code_rounded),
-                            title: 'Source code',
-                            subtitle: 'View the Florid source code on GitHub',
-                            suffix: Icon(Symbols.open_in_new),
-                            onTap: () async {
-                              final url = Uri.parse(
-                                'https://github.com/Nandanrmenon/florid',
-                              );
-                              if (await canLaunchUrl(url)) {
-                                await launchUrl(url);
-                              }
-                            },
-                          ),
-                          MListItemData(
-                            leading: Icon(Symbols.bug_report_rounded),
-                            title: 'Report an issue',
-                            subtitle: 'Found a bug? Let us know!',
-                            suffix: Icon(Symbols.open_in_new),
-                            onTap: () async {
-                              final url = Uri.parse(
-                                'https://github.com/Nandanrmenon/florid/issues/new?template=bug_report.md',
-                              );
-                              if (await canLaunchUrl(url)) {
-                                await launchUrl(url);
-                              }
-                            },
-                          ),
-                          MListItemData(
-                            leading: Icon(Symbols.volunteer_activism),
-                            title: 'Donate',
-                            subtitle: 'Support continued development of Florid',
-                            suffix: Icon(Symbols.open_in_new),
-                            onTap: () async {
-                              final url = Uri.parse(
-                                'https://ko-fi.com/nandanrmenon',
-                              );
-                              if (await canLaunchUrl(url)) {
-                                await launchUrl(url);
-                              }
-                            },
-                          ),
-                          MListItemData(
-                            leading: Icon(Symbols.share),
-                            title: 'Share Florid',
-                            subtitle:
-                                'Let your nerdy friends know about Florid!',
-                            onTap: () {
-                              SharePlus.instance.share(
-                                ShareParams(
-                                  title: 'Check out Florid!',
-                                  text:
-                                      'A modern F-Droid client! https://github.com/Nandanrmenon/florid',
-                                ),
-                              );
-                            },
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ],
+                          suffix: Icon(Symbols.chevron_right),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
-            ),
+              SliverToBoxAdapter(
+                child: Column(
+                  spacing: 4,
+                  children: [
+                    MListHeader(
+                      title: 'Repositories & Management',
+                      icon: Symbols.settings,
+                    ),
+                    MListView(
+                      items: [
+                        MListItemData(
+                          leading: Icon(Symbols.cloud),
+                          title: 'Manage repositories',
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    const RepositoriesScreen(),
+                              ),
+                            );
+                          },
+                          subtitle: 'Add or remove F-Droid repositories',
+                          suffix: Icon(Symbols.chevron_right),
+                        ),
+                        MListItemData(
+                          leading: Icon(Symbols.discover_tune),
+                          title: 'App Management',
+                          subtitle:
+                              'Manage settings regarding installs and updates',
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    const AppManagementScreen(),
+                              ),
+                            );
+                          },
+                          suffix: Icon(Symbols.chevron_right),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              SliverToBoxAdapter(
+                child: Column(
+                  spacing: 4.0,
+                  children: [
+                    MListHeader(
+                      title: 'Miscellaneous',
+                      icon: Symbols.more_horiz,
+                    ),
+                    MListView(
+                      items: [
+                        MListItemData(
+                          leading: Icon(Symbols.file_upload),
+                          title: 'Export favourites',
+                          subtitle: 'Save a JSON file to Downloads',
+                          onTap: () => _exportFavorites(context),
+                        ),
+                        MListItemData(
+                          leading: Icon(Symbols.file_download),
+                          title: 'Import favourites',
+                          subtitle: 'Import favourites from a JSON file',
+                          onTap: () => _importFavorites(context),
+                        ),
+                      ],
+                    ),
+                    MListView(
+                      items: [
+                        MListItemData(
+                          leading: Icon(Symbols.build),
+                          title: 'Troubleshooting',
+                          subtitle: 'Storage, cache, and downloads',
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    const TroubleshootingScreen(),
+                              ),
+                            );
+                          },
+                          suffix: Icon(Symbols.chevron_right),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+
+              SliverToBoxAdapter(
+                child: Column(
+                  spacing: 4,
+                  children: [
+                    MListHeader(title: 'About', icon: Symbols.android),
+                    MListView(
+                      items: [
+                        MListItemData(
+                          leading: Icon(Symbols.info),
+                          title: 'Version',
+                          subtitle: _appVersion.isEmpty
+                              ? 'Loading…'
+                              : _appVersion,
+                          onTap: () {},
+                        ),
+                        MListItemData(
+                          leading: Icon(Symbols.code_rounded),
+                          title: 'Source code',
+                          subtitle: 'View the Florid source code on GitHub',
+                          suffix: Icon(Symbols.open_in_new),
+                          onTap: () async {
+                            final url = Uri.parse(
+                              'https://github.com/Nandanrmenon/florid',
+                            );
+                            if (await canLaunchUrl(url)) {
+                              await launchUrl(url);
+                            }
+                          },
+                        ),
+                        MListItemData(
+                          leading: Icon(Symbols.bug_report_rounded),
+                          title: 'Report an issue',
+                          subtitle: 'Found a bug? Let us know!',
+                          suffix: Icon(Symbols.open_in_new),
+                          onTap: () async {
+                            final url = Uri.parse(
+                              'https://github.com/Nandanrmenon/florid/issues/new?template=bug_report.md',
+                            );
+                            if (await canLaunchUrl(url)) {
+                              await launchUrl(url);
+                            }
+                          },
+                        ),
+                        MListItemData(
+                          leading: Icon(Symbols.volunteer_activism),
+                          title: 'Donate',
+                          subtitle: 'Support continued development of Florid',
+                          suffix: Icon(Symbols.open_in_new),
+                          onTap: () async {
+                            final url = Uri.parse(
+                              'https://ko-fi.com/nandanrmenon',
+                            );
+                            if (await canLaunchUrl(url)) {
+                              await launchUrl(url);
+                            }
+                          },
+                        ),
+                        MListItemData(
+                          leading: Icon(Symbols.share),
+                          title: 'Share Florid',
+                          subtitle: 'Let your nerdy friends know about Florid!',
+                          onTap: () {
+                            SharePlus.instance.share(
+                              ShareParams(
+                                title: 'Check out Florid!',
+                                text:
+                                    'A modern F-Droid client! https://github.com/Nandanrmenon/florid',
+                              ),
+                            );
+                          },
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              SliverToBoxAdapter(child: SizedBox(height: 64)),
+            ],
           ),
         );
       },

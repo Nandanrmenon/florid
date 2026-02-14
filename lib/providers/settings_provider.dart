@@ -21,6 +21,7 @@ class SettingsProvider extends ChangeNotifier {
   static const updateIntervalHoursKey = 'background_update_interval_hours';
   static const updateNetworkPolicyKey = 'background_update_network_policy';
   static const _lastSeenVersionKey = 'last_seen_version';
+  static const _userNameKey = 'user_name';
 
   ThemeMode _themeMode = ThemeMode.system;
   ThemeStyle _themeStyle = ThemeStyle.florid;
@@ -36,6 +37,7 @@ class SettingsProvider extends ChangeNotifier {
   UpdateNetworkPolicy _updateNetworkPolicy = UpdateNetworkPolicy.any;
   bool _loaded = false;
   String _lastSeenVersion = '';
+  String _userName = '';
 
   SettingsProvider() {
     _load();
@@ -55,6 +57,7 @@ class SettingsProvider extends ChangeNotifier {
   int get updateIntervalHours => _updateIntervalHours;
   UpdateNetworkPolicy get updateNetworkPolicy => _updateNetworkPolicy;
   String get lastSeenVersion => _lastSeenVersion;
+  String get userName => _userName;
 
   /// Available locales for F-Droid repository data
   static const List<String> availableLocales = [
@@ -134,6 +137,7 @@ class SettingsProvider extends ChangeNotifier {
       _updateNetworkPolicy = UpdateNetworkPolicy.values[policyIndex];
     }
     _lastSeenVersion = prefs.getString(_lastSeenVersionKey) ?? '';
+    _userName = prefs.getString(_userNameKey) ?? '';
     _loaded = true;
     notifyListeners();
   }
@@ -230,5 +234,12 @@ class SettingsProvider extends ChangeNotifier {
     notifyListeners();
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_lastSeenVersionKey, version);
+  }
+
+  Future<void> setUserName(String name) async {
+    _userName = name;
+    notifyListeners();
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_userNameKey, name);
   }
 }

@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
-import 'package:florid/l10n/app_localizations.dart';
 import 'package:florid/screens/app_management_screen.dart';
 import 'package:florid/widgets/m_list.dart';
 import 'package:flutter/material.dart';
@@ -181,6 +180,40 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
+  Future<void> _editUserName(
+    BuildContext context,
+    SettingsProvider settingsProvider,
+  ) async {
+    final controller = TextEditingController(text: settingsProvider.userName);
+
+    final result = await showDialog<String>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Your name'),
+        content: TextField(
+          controller: controller,
+          autofocus: true,
+          textInputAction: TextInputAction.done,
+          decoration: const InputDecoration(hintText: 'Enter your name'),
+          onSubmitted: (value) => Navigator.of(dialogContext).pop(value),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(dialogContext).pop(controller.text),
+            child: const Text('Save'),
+          ),
+        ],
+      ),
+    );
+
+    if (result == null) return;
+    await settingsProvider.setUserName(result.trim());
+  }
+
   @override
   Widget build(BuildContext context) {
     return Consumer<SettingsProvider>(
@@ -188,9 +221,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
         return Scaffold(
           body: CustomScrollView(
             slivers: <Widget>[
-              SliverAppBar.large(
-                title: Text(AppLocalizations.of(context)!.settings),
-              ),
               SliverToBoxAdapter(child: SizedBox(height: 16)),
               SliverToBoxAdapter(
                 child: Column(
@@ -202,6 +232,30 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     ),
                     MListView(
                       items: [
+                        MListItemData(
+                          leading: CircleAvatar(
+                            backgroundColor: Theme.of(
+                              context,
+                            ).colorScheme.primaryContainer,
+                            foregroundColor: Theme.of(
+                              context,
+                            ).colorScheme.onPrimaryContainer,
+                            child: settings.userName.isNotEmpty
+                                ? Text(
+                                    settings.userName
+                                        .trim()
+                                        .substring(0, 1)
+                                        .toUpperCase(),
+                                  )
+                                : Icon(Symbols.person, fill: 1),
+                          ),
+                          title: settings.userName.isNotEmpty
+                              ? settings.userName
+                              : 'User',
+                          subtitle: 'Set your name',
+                          onTap: () => _editUserName(context, settings),
+                          suffix: Icon(Symbols.edit),
+                        ),
                         MListItemData(
                           leading: Icon(Symbols.palette),
                           title: 'Appearance',

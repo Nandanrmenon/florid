@@ -1,7 +1,6 @@
 import 'package:florid/l10n/app_localizations.dart';
 import 'package:florid/providers/settings_provider.dart';
 import 'package:florid/utils/menu_actions.dart';
-import 'package:florid/utils/responsive.dart';
 import 'package:florid/widgets/changelog_preview.dart';
 import 'package:florid/widgets/f_tabbar.dart';
 import 'package:flutter/material.dart';
@@ -133,52 +132,8 @@ class _UpdatesScreenState extends State<UpdatesScreen>
                   context,
                 ).colorScheme.surfaceContainerLow,
                 title: const Text('Apps'),
-                actions: [
-                  PopupMenuButton<String>(
-                    onSelected: (value) {
-                      switch (value) {
-                        case 'settings':
-                          MenuActions.showSettings(context);
-                          break;
-                        case 'refresh':
-                          _onRefresh();
-                        case 'about':
-                          MenuActions.showAbout(context);
-                          break;
-                      }
-                    },
-                    itemBuilder: (context) => [
-                      if (!context.isLargeScreen)
-                        PopupMenuItem(
-                          value: 'settings',
-                          child: ListTile(
-                            leading: Icon(Symbols.settings),
-                            title: Text(AppLocalizations.of(context)!.settings),
-                            contentPadding: EdgeInsets.zero,
-                          ),
-                        ),
-                      PopupMenuItem(
-                        value: 'refresh',
-                        child: ListTile(
-                          leading: Icon(Symbols.refresh),
-                          title: Text(AppLocalizations.of(context)!.refresh),
-                          contentPadding: EdgeInsets.zero,
-                        ),
-                      ),
-                      PopupMenuItem(
-                        value: 'about',
-                        child: ListTile(
-                          leading: Icon(Symbols.info),
-                          title: Text(AppLocalizations.of(context)!.about),
-                          contentPadding: EdgeInsets.zero,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
                 bottom: FTabBar(
                   controller: _tabController,
-                  isScrollable: true,
                   showBadge: true,
                   items: [
                     FloridTabBarItem(
@@ -190,13 +145,6 @@ class _UpdatesScreenState extends State<UpdatesScreen>
                       icon: Symbols.devices,
                       label: AppLocalizations.of(context)!.on_device,
                       badgeCount: allFDroidApps.length,
-                    ),
-                    FloridTabBarItem(
-                      icon: Symbols.favorite,
-                      label: AppLocalizations.of(context)!.favourites,
-                      badgeCount: favoriteApps.isNotEmpty
-                          ? favoriteApps.length
-                          : 0,
                     ),
                   ],
                   onTabChanged: (index) {
@@ -227,18 +175,6 @@ class _UpdatesScreenState extends State<UpdatesScreen>
                       context.read<SettingsProvider>(),
                       allFDroidApps,
                       updatableApps,
-                    ),
-
-                    // Tab 3: Favorites
-                    _buildFavoritesTab(
-                      context,
-                      appProvider,
-                      context.read<SettingsProvider>(),
-                      favoriteApps,
-                      updatableApps,
-                      repositoryLoaded,
-                      repositoryState,
-                      repositoryError,
                     ),
                   ],
                 ),
@@ -541,171 +477,6 @@ class _UpdatesScreenState extends State<UpdatesScreen>
               AppListItem(
                 app: app,
                 showInstallStatus: true,
-                onUpdate: hasUpdate ? () => _updateApp(context, app) : null,
-                onTap: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (context) => AppDetailsScreen(app: app),
-                    ),
-                  );
-                },
-              ),
-              if (app.latestVersion?.whatsNew != null &&
-                  app.latestVersion!.whatsNew!.isNotEmpty)
-                ChangelogPreview(text: app.latestVersion!.whatsNew),
-            ],
-          ),
-        ).animate().fadeIn(duration: 300.ms, delay: (100 * index).ms);
-      },
-    );
-  }
-
-  Widget _buildFavoritesTab(
-    BuildContext context,
-    AppProvider appProvider,
-    SettingsProvider settingsProvider,
-    List<FDroidApp> favoriteApps,
-    List<FDroidApp> updatableApps,
-    bool repositoryLoaded,
-    LoadingState repositoryState,
-    String? repositoryError,
-  ) {
-    if (repositoryState == LoadingState.loading && !repositoryLoaded) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: const [
-            CircularProgressIndicator(year2023: false),
-            SizedBox(height: 12),
-            Text('Loading repository…'),
-          ],
-        ),
-      );
-    }
-
-    if (!repositoryLoaded && repositoryState == LoadingState.error) {
-      return SingleChildScrollView(
-        physics: const AlwaysScrollableScrollPhysics(),
-        child: Container(
-          height: MediaQuery.of(context).size.height * 0.7,
-          alignment: Alignment.center,
-          padding: const EdgeInsets.symmetric(horizontal: 24),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            spacing: 16,
-            children: [
-              Icon(
-                Symbols.cloud_off,
-                size: 64,
-                color: Theme.of(context).colorScheme.error,
-              ),
-              Text(
-                'Unable to load repository',
-                style: Theme.of(context).textTheme.headlineSmall,
-                textAlign: TextAlign.center,
-              ),
-              if (repositoryError != null)
-                SelectableText(
-                  repositoryError.replaceAll('Exception: ', ''),
-                  textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(context).colorScheme.error,
-                  ),
-                ),
-              Text(
-                'Check your connection or repository settings, then try again.',
-                textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  FilledButton.icon(
-                    onPressed: _loadData,
-                    icon: const Icon(Symbols.refresh),
-                    label: const Text('Retry'),
-                  ),
-                  const SizedBox(width: 12),
-                  OutlinedButton.icon(
-                    onPressed: () => MenuActions.showSettings(context),
-                    icon: const Icon(Symbols.settings),
-                    label: const Text('Settings'),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      );
-    }
-
-    if (favoriteApps.isEmpty) {
-      return SingleChildScrollView(
-        physics: const AlwaysScrollableScrollPhysics(),
-        child: Container(
-          height: MediaQuery.of(context).size.height * 0.7,
-          alignment: Alignment.center,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                Symbols.favorite_rounded,
-                size: 64,
-                fill: 1,
-                color: Colors.pink[600],
-              ).animate().scaleXY(
-                delay: Duration(milliseconds: 100),
-                duration: 500.ms,
-                curve: Curves.elasticInOut,
-              ),
-              const SizedBox(height: 16),
-              Text(
-                    'No favourites yet',
-                    style: Theme.of(context).textTheme.headlineSmall,
-                  )
-                  .animate()
-                  .scaleXY(delay: Duration(milliseconds: 100), duration: 200.ms)
-                  .fade(delay: Duration(milliseconds: 100), duration: 500.ms),
-              const SizedBox(height: 8),
-              Text(
-                    'Tap the star on any app to save it here',
-                    textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
-                  )
-                  .animate()
-                  .scaleXY(delay: Duration(milliseconds: 300), duration: 200.ms)
-                  .fade(delay: Duration(milliseconds: 200), duration: 500.ms),
-            ],
-          ),
-        ),
-      );
-    }
-
-    final bottomPadding = settingsProvider.themeStyle == ThemeStyle.florid
-        ? 96.0
-        : 16.0;
-
-    return ListView.builder(
-      padding: EdgeInsets.fromLTRB(8, 8, 8, bottomPadding),
-      itemCount: favoriteApps.length,
-      itemBuilder: (context, index) {
-        final app = favoriteApps[index];
-        final hasUpdate = updatableApps.any(
-          (updateApp) => updateApp.packageName == app.packageName,
-        );
-        return Card(
-          elevation: 0,
-          child: Column(
-            children: [
-              AppListItem(
-                app: app,
-                showInstallStatus: true,
-                showFavorite: true,
                 onUpdate: hasUpdate ? () => _updateApp(context, app) : null,
                 onTap: () {
                   Navigator.of(context).push(

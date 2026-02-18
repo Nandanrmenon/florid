@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../providers/app_provider.dart';
 import '../providers/repositories_provider.dart';
@@ -264,6 +265,80 @@ class _HomeScreenState extends State<HomeScreen>
                     crossAxisAlignment: CrossAxisAlignment.start,
                     spacing: 24,
                     children: [
+                      if (settingsProvider.showKeepAndroidOpenCard)
+                        Padding(
+                              padding: const EdgeInsets.only(
+                                left: 8.0,
+                                top: 16,
+                                right: 8,
+                              ),
+                              child: Card(
+                                child: Padding(
+                                  padding: const EdgeInsets.all(16.0),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    spacing: 12.0,
+                                    children: [
+                                      Text(
+                                        'Keep Android Open',
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .titleMedium
+                                            ?.copyWith(
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                      ),
+                                      Text(
+                                        'From 2026/2027 onward, Google will require developer verification for all Android apps on certified devices, including those installed outside of the Play Store.',
+                                      ),
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.end,
+                                        spacing: 4.0,
+                                        children: [
+                                          TextButton(
+                                            onPressed: () async {
+                                              await settingsProvider
+                                                  .setShowKeepAndroidOpenCard(
+                                                    false,
+                                                  );
+                                            },
+                                            style: TextButton.styleFrom(
+                                              foregroundColor: Theme.of(
+                                                context,
+                                              ).colorScheme.error,
+                                            ),
+                                            child: Text('Ignore'),
+                                          ),
+                                          FilledButton.tonalIcon(
+                                            onPressed: () {
+                                              canLaunchUrl(
+                                                Uri.parse(
+                                                  'https://keepandroidopen.org/',
+                                                ),
+                                              ).then((canLaunch) {
+                                                if (canLaunch) {
+                                                  launchUrl(
+                                                    Uri.parse(
+                                                      'https://keepandroidopen.org/',
+                                                    ),
+                                                  );
+                                                }
+                                              });
+                                            },
+                                            label: Text('Learn More'),
+                                            icon: Icon(Symbols.open_in_new),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            )
+                            .animate(delay: Duration(milliseconds: 100))
+                            .fadeIn(duration: 300.ms),
                       buildRecentSection(),
                       buildNewReleasesSection(),
                       if (isFlorid) const SizedBox(height: 86),

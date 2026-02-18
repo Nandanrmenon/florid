@@ -22,6 +22,7 @@ class SettingsProvider extends ChangeNotifier {
   static const updateNetworkPolicyKey = 'background_update_network_policy';
   static const _lastSeenVersionKey = 'last_seen_version';
   static const _userNameKey = 'user_name';
+  static const _showKeepAndroidOpenCardKey = 'show_keep_android_open_card';
 
   ThemeMode _themeMode = ThemeMode.system;
   ThemeStyle _themeStyle = ThemeStyle.florid;
@@ -33,6 +34,7 @@ class SettingsProvider extends ChangeNotifier {
   bool _sniBypassEnabled = true;
   bool _dynamicColorEnabled = false;
   bool _backgroundUpdatesEnabled = true;
+  bool _showKeepAndroidOpenCard = true;
   int _updateIntervalHours = 6;
   UpdateNetworkPolicy _updateNetworkPolicy = UpdateNetworkPolicy.any;
   bool _loaded = false;
@@ -56,6 +58,7 @@ class SettingsProvider extends ChangeNotifier {
   bool get backgroundUpdatesEnabled => _backgroundUpdatesEnabled;
   int get updateIntervalHours => _updateIntervalHours;
   UpdateNetworkPolicy get updateNetworkPolicy => _updateNetworkPolicy;
+  bool get showKeepAndroidOpenCard => _showKeepAndroidOpenCard;
   String get lastSeenVersion => _lastSeenVersion;
   String get userName => _userName;
 
@@ -130,6 +133,8 @@ class SettingsProvider extends ChangeNotifier {
     _sniBypassEnabled = prefs.getBool(_sniBypassKey) ?? true;
     _dynamicColorEnabled = prefs.getBool(_dynamicColorKey) ?? false;
     _backgroundUpdatesEnabled = prefs.getBool(backgroundUpdatesKey) ?? true;
+    _showKeepAndroidOpenCard =
+        prefs.getBool(_showKeepAndroidOpenCardKey) ?? true;
     _updateIntervalHours = prefs.getInt(updateIntervalHoursKey) ?? 6;
     final policyIndex =
         prefs.getInt(updateNetworkPolicyKey) ?? UpdateNetworkPolicy.any.index;
@@ -206,6 +211,13 @@ class SettingsProvider extends ChangeNotifier {
     notifyListeners();
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_dynamicColorKey, value);
+  }
+
+  Future<void> setShowKeepAndroidOpenCard(bool value) async {
+    _showKeepAndroidOpenCard = value;
+    notifyListeners();
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_showKeepAndroidOpenCardKey, value);
   }
 
   Future<void> setBackgroundUpdatesEnabled(bool value) async {

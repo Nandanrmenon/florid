@@ -5,6 +5,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:florid/screens/app_management_screen.dart';
 import 'package:florid/widgets/m_list.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path/path.dart' as p;
@@ -223,6 +224,53 @@ class _SettingsScreenState extends State<SettingsScreen> {
             slivers: <Widget>[
               SliverToBoxAdapter(child: SizedBox(height: 16)),
               SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.only(left: 8.0, right: 8),
+                  child: Card(
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        spacing: 12.0,
+                        children: [
+                          Text(
+                            'Keep Android Open',
+                            style: Theme.of(context).textTheme.titleMedium
+                                ?.copyWith(fontWeight: FontWeight.w600),
+                          ),
+                          Text(
+                            'From 2026/2027 onward, Google will require developer verification for all Android apps on certified devices, including those installed outside of the Play Store.',
+                          ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              FilledButton.tonalIcon(
+                                onPressed: () {
+                                  canLaunchUrl(
+                                    Uri.parse('https://keepandroidopen.org/'),
+                                  ).then((canLaunch) {
+                                    if (canLaunch) {
+                                      launchUrl(
+                                        Uri.parse(
+                                          'https://keepandroidopen.org/',
+                                        ),
+                                      );
+                                    }
+                                  });
+                                },
+                                label: Text('Learn More'),
+                                icon: Icon(Symbols.open_in_new),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ).animate(delay: Duration(milliseconds: 100)).fadeIn(duration: 300.ms),
+              ),
+              SliverToBoxAdapter(child: SizedBox(height: 16)),
+              SliverToBoxAdapter(
                 child: Column(
                   spacing: 4,
                   children: [
@@ -284,6 +332,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ],
                 ),
               ),
+              SliverToBoxAdapter(child: SizedBox(height: 16)),
               SliverToBoxAdapter(
                 child: Column(
                   spacing: 4,
@@ -330,6 +379,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ],
                 ),
               ),
+              SliverToBoxAdapter(child: SizedBox(height: 16)),
               SliverToBoxAdapter(
                 child: Column(
                   spacing: 4.0,
@@ -376,7 +426,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ],
                 ),
               ),
-
+              SliverToBoxAdapter(child: SizedBox(height: 16)),
               SliverToBoxAdapter(
                 child: Column(
                   spacing: 4,

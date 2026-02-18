@@ -1,4 +1,6 @@
 import 'package:florid/l10n/app_localizations.dart';
+import 'package:florid/models/fdroid_app.dart';
+import 'package:florid/providers/download_provider.dart';
 import 'package:florid/providers/settings_provider.dart';
 import 'package:florid/utils/responsive.dart';
 import 'package:flutter/material.dart';
@@ -152,7 +154,8 @@ class _CategoryAppsScreenState extends State<CategoryAppsScreen> {
                       final app = apps[index];
                       return AppListItem(
                         app: app,
-                        showInstallStatus: false,
+                        showInstallStatus: true,
+                        onUpdate: () => _updateApp(context, app),
                         onTap: () {
                           Navigator.of(context).push(
                             MaterialPageRoute(
@@ -196,5 +199,47 @@ class _CategoryAppsScreenState extends State<CategoryAppsScreen> {
         },
       ),
     );
+  }
+
+  Future<void> _updateApp(BuildContext context, FDroidApp app) async {
+    final downloadProvider = context.read<DownloadProvider>();
+
+    // Check if already downloading
+    final downloadInfo = downloadProvider.getDownloadInfo(
+      app.packageName,
+      app.latestVersion?.versionName ?? '',
+    );
+    if (downloadInfo?.status == DownloadStatus.downloading) {
+      return; // Already downloading, don't start again
+    }
+
+    try {
+      // Download the app (permission is handled internally by downloadProvider)
+      await downloadProvider.downloadApk(app);
+
+      // The download provider handles installation automatically
+      // Just clean up the APK file after a delay
+      if (context.mounted) {
+        await Future.delayed(const Duration(seconds: 3));
+        final finalDownloadInfo = downloadProvider.getDownloadInfo(
+          app.packageName,
+          app.latestVersion!.versionName,
+        );
+        if (finalDownloadInfo?.filePath != null) {
+          await downloadProvider.deleteDownloadedFile(
+            finalDownloadInfo!.filePath!,
+          );
+        }
+      }
+    } catch (e) {
+      final errorMsg = e.toString();
+      if (!errorMsg.contains('cancelled') && !errorMsg.contains('Cancelled')) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text('Update failed: $errorMsg')));
+        }
+      }
+    }
   }
 }

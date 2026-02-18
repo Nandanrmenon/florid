@@ -34,10 +34,15 @@ class _AppDetailsScreenState extends State<AppDetailsScreen> {
   late Future<IzzyStats> _statsFuture;
   late Future<FDroidApp> _enrichedAppFuture;
   bool _isInstalling = false;
+  bool _isCollapsed = false;
+  late ScrollController _scrollController;
+  final double expandedBarHeight = 300;
+  final double collapsedBarHeight = kMinInteractiveDimension;
 
   @override
   void initState() {
     super.initState();
+    _scrollController = ScrollController();
     // Fetch screenshots in the background
     _screenshotsFuture = context.read<AppProvider>().getScreenshots(
       widget.app.packageName,
@@ -663,386 +668,483 @@ class _AppDetailsScreenState extends State<AppDetailsScreen> {
   }
 
   @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: CustomScrollView(
-        slivers: [
-          SliverAppBar.large(
-            pinned: true,
-            centerTitle: false,
-            title: Row(
-              spacing: 16.0,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                SizedBox(
-                  height: 48,
-                  width: 48,
-                  child: Material(
-                    elevation: 2,
-                    borderRadius: BorderRadius.circular(8),
-                    clipBehavior: Clip.antiAlias,
-                    child: _AppDetailsIcon(app: widget.app),
+    return NotificationListener<ScrollNotification>(
+      onNotification: (notification) {
+        /// 2
+        setState(() {
+          _isCollapsed =
+              _scrollController.hasClients &&
+              _scrollController.offset >
+                  (expandedBarHeight - collapsedBarHeight);
+        });
+        return false;
+      },
+      child: Scaffold(
+        body: CustomScrollView(
+          controller: _scrollController,
+          slivers: [
+            SliverAppBar(
+              pinned: true,
+              centerTitle: false,
+              expandedHeight: expandedBarHeight,
+              backgroundColor: _isCollapsed
+                  ? Theme.of(context).colorScheme.surface
+                  : Colors.transparent,
+              leading: BackButton(
+                style: ButtonStyle(
+                  backgroundColor: WidgetStateProperty.all(
+                    Theme.of(context).colorScheme.surface,
                   ),
                 ),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        widget.app.name,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontVariations: [
-                            FontVariation('wght', 700),
-                            FontVariation('ROND', 100),
-                          ],
-                        ),
-                      ),
-                      Text(
-                        'by ${widget.app.authorName ?? 'Unknown'}',
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontVariations: [FontVariation('ROND', 100)],
-                        ),
-                      ),
-                    ],
+              ),
+              flexibleSpace: FlexibleSpaceBar(
+                collapseMode: CollapseMode.pin,
+                background: Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        Theme.of(context).colorScheme.primaryContainer,
+                        Theme.of(context).colorScheme.surface,
+                      ],
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                    ),
                   ),
+                  child: SafeArea(
+                    child: Column(
+                      // mainAxisSize: MainAxisSize.min,
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      spacing: 16.0,
+                      children: [
+                        SizedBox(
+                          height: 128,
+                          width: 128,
+                          child: Material(
+                            elevation: 1,
+                            borderRadius: BorderRadius.circular(24),
+                            clipBehavior: Clip.antiAlias,
+                            child: _AppDetailsIcon(app: widget.app),
+                          ),
+                        ),
+                        Text(
+                          widget.app.name,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 24,
+                            fontVariations: [
+                              FontVariation('wght', 700),
+                              FontVariation('ROND', 100),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              title: AnimatedOpacity(
+                duration: const Duration(milliseconds: 200),
+                opacity: _isCollapsed ? 1 : 0,
+                child: Row(
+                  spacing: 16.0,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    SizedBox(
+                      height: 32,
+                      width: 32,
+                      child: Material(
+                        elevation: 2,
+                        borderRadius: BorderRadius.circular(8),
+                        clipBehavior: Clip.antiAlias,
+                        child: _AppDetailsIcon(app: widget.app),
+                      ),
+                    ),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            widget.app.name,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontVariations: [
+                                FontVariation('wght', 700),
+                                FontVariation('ROND', 100),
+                              ],
+                            ),
+                          ),
+                          Text(
+                            'by ${widget.app.authorName ?? 'Unknown'}',
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontVariations: [FontVariation('ROND', 100)],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              actions: [
+                Consumer<AppProvider>(
+                  builder: (context, appProvider, _) {
+                    final isFavorite = appProvider.isFavorite(
+                      widget.app.packageName,
+                    );
+                    return IconButton(
+                      tooltip: isFavorite
+                          ? 'Remove from Favourites'
+                          : 'Add to Favourites',
+                      style: ButtonStyle(
+                        backgroundColor: WidgetStateProperty.all(
+                          Theme.of(context).colorScheme.surface,
+                        ),
+                      ),
+                      icon: Icon(
+                        Symbols.favorite_rounded,
+                        fill: isFavorite ? 1 : 0,
+                        color: isFavorite ? Colors.red : null,
+                      ),
+                      onPressed: () {
+                        appProvider.toggleFavorite(widget.app.packageName);
+                      },
+                    );
+                  },
+                ),
+                IconButton(
+                  icon: const Icon(Symbols.share),
+                  style: ButtonStyle(
+                    backgroundColor: WidgetStateProperty.all(
+                      Theme.of(context).colorScheme.surface,
+                    ),
+                  ),
+                  onPressed: () {
+                    SharePlus.instance.share(
+                      ShareParams(
+                        text:
+                            'Check out ${widget.app.name} on F-Droid: https://f-droid.org/packages/${widget.app.packageName}/',
+                      ),
+                    );
+                  },
+                ),
+                PopupMenuButton<String>(
+                  style: ButtonStyle(
+                    backgroundColor: WidgetStateProperty.all(
+                      Theme.of(context).colorScheme.surface,
+                    ),
+                  ),
+                  icon: const Icon(Symbols.more_vert),
+                  onSelected: (value) async {
+                    switch (value) {
+                      case 'website':
+                        if (widget.app.webSite != null) {
+                          await launchUrl(Uri.parse(widget.app.webSite!));
+                        }
+                        break;
+                      case 'source':
+                        if (widget.app.sourceCode != null) {
+                          await launchUrl(Uri.parse(widget.app.sourceCode!));
+                        }
+                        break;
+                      case 'issues':
+                        if (widget.app.issueTracker != null) {
+                          await launchUrl(Uri.parse(widget.app.issueTracker!));
+                        }
+                        break;
+                    }
+                  },
+                  itemBuilder: (context) => [
+                    if (widget.app.webSite != null)
+                      const PopupMenuItem(
+                        value: 'website',
+                        child: ListTile(
+                          leading: Icon(Symbols.public),
+                          title: Text('Website'),
+                          contentPadding: EdgeInsets.zero,
+                        ),
+                      ),
+                    if (widget.app.sourceCode != null)
+                      const PopupMenuItem(
+                        value: 'source',
+                        child: ListTile(
+                          leading: Icon(Symbols.code),
+                          title: Text('Source Code'),
+                          contentPadding: EdgeInsets.zero,
+                        ),
+                      ),
+                    if (widget.app.issueTracker != null)
+                      const PopupMenuItem(
+                        value: 'issues',
+                        child: ListTile(
+                          leading: Icon(Symbols.bug_report),
+                          title: Text('Issue Tracker'),
+                          contentPadding: EdgeInsets.zero,
+                        ),
+                      ),
+                  ],
                 ),
               ],
             ),
-            actions: [
-              Consumer<AppProvider>(
-                builder: (context, appProvider, _) {
-                  final isFavorite = appProvider.isFavorite(
-                    widget.app.packageName,
-                  );
-                  return IconButton(
-                    tooltip: isFavorite
-                        ? 'Remove from Favourites'
-                        : 'Add to Favourites',
-                    icon: Icon(
-                      Symbols.favorite_rounded,
-                      fill: isFavorite ? 1 : 0,
-                      color: isFavorite ? Colors.red : null,
+            SliverToBoxAdapter(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                spacing: 16,
+                children: [
+                  // What's New preview from version.whatsNew
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 4,
+                      horizontal: 16,
                     ),
-                    onPressed: () {
-                      appProvider.toggleFavorite(widget.app.packageName);
-                    },
-                  );
-                },
-              ),
-              IconButton(
-                icon: const Icon(Symbols.share),
-                onPressed: () {
-                  SharePlus.instance.share(
-                    ShareParams(
-                      text:
-                          'Check out ${widget.app.name} on F-Droid: https://f-droid.org/packages/${widget.app.packageName}/',
-                    ),
-                  );
-                },
-              ),
-              PopupMenuButton<String>(
-                onSelected: (value) async {
-                  switch (value) {
-                    case 'website':
-                      if (widget.app.webSite != null) {
-                        await launchUrl(Uri.parse(widget.app.webSite!));
-                      }
-                      break;
-                    case 'source':
-                      if (widget.app.sourceCode != null) {
-                        await launchUrl(Uri.parse(widget.app.sourceCode!));
-                      }
-                      break;
-                    case 'issues':
-                      if (widget.app.issueTracker != null) {
-                        await launchUrl(Uri.parse(widget.app.issueTracker!));
-                      }
-                      break;
-                  }
-                },
-                itemBuilder: (context) => [
-                  if (widget.app.webSite != null)
-                    const PopupMenuItem(
-                      value: 'website',
-                      child: ListTile(
-                        leading: Icon(Symbols.public),
-                        title: Text('Website'),
-                        contentPadding: EdgeInsets.zero,
-                      ),
-                    ),
-                  if (widget.app.sourceCode != null)
-                    const PopupMenuItem(
-                      value: 'source',
-                      child: ListTile(
-                        leading: Icon(Symbols.code),
-                        title: Text('Source Code'),
-                        contentPadding: EdgeInsets.zero,
-                      ),
-                    ),
-                  if (widget.app.issueTracker != null)
-                    const PopupMenuItem(
-                      value: 'issues',
-                      child: ListTile(
-                        leading: Icon(Symbols.bug_report),
-                        title: Text('Issue Tracker'),
-                        contentPadding: EdgeInsets.zero,
-                      ),
-                    ),
-                ],
-              ),
-            ],
-          ),
-          SliverToBoxAdapter(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              spacing: 16,
-              children: [
-                // What's New preview from version.whatsNew
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                    vertical: 4,
-                    horizontal: 16,
-                  ),
-                  child: Consumer<AppProvider>(
-                    builder: (context, appProvider, _) {
-                      final isInstalled = appProvider.isAppInstalled(
-                        widget.app.packageName,
-                      );
-                      final installedApp = appProvider.getInstalledApp(
-                        widget.app.packageName,
-                      );
+                    child: Consumer<AppProvider>(
+                      builder: (context, appProvider, _) {
+                        final isInstalled = appProvider.isAppInstalled(
+                          widget.app.packageName,
+                        );
+                        final installedApp = appProvider.getInstalledApp(
+                          widget.app.packageName,
+                        );
 
-                      return Column(
-                        spacing: 16,
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                        return Column(
+                          spacing: 16,
+                          crossAxisAlignment: CrossAxisAlignment.start,
 
-                        children: [
-                          // Progress indicator
-                          FutureBuilder<IzzyStats>(
-                            future: _statsFuture,
-                            builder: (context, snapshot) {
-                              if (snapshot.connectionState ==
-                                  ConnectionState.waiting) {
-                                return const SizedBox.shrink();
-                              }
-                              if (snapshot.hasError || snapshot.data == null) {
-                                return const SizedBox.shrink();
-                              }
-                              final stats = snapshot.data!;
-                              return _DownloadSection(
-                                app: widget.app,
-                                stats: stats,
-                              );
-                            },
-                          ).animate().fadeIn(
-                            delay: Duration(milliseconds: 300),
-                            duration: Duration(milliseconds: 300),
-                          ),
-
-                          // Install/Update button
-                          _InstallActionsSection(
-                            app: widget.app,
-                            enrichedAppFuture: _enrichedAppFuture,
-                            buildInstallButton: _buildInstallButton,
-                          ).animate().fadeIn(
-                            delay: Duration(milliseconds: 300),
-                            duration: Duration(milliseconds: 300),
-                          ),
-
-                          // Short Info
-                          Consumer2<DownloadProvider, AppProvider>(
-                            builder:
-                                (
-                                  context,
-                                  downloadProvider,
-                                  appProvider,
-                                  child,
-                                ) {
-                                  return FutureBuilder<FDroidVersion?>(
-                                    future: appProvider.getLatestVersion(
-                                      widget.app,
-                                    ),
-                                    builder: (context, snapshot) {
-                                      final version = snapshot.data;
-                                      if (version == null) {
-                                        return const SizedBox.shrink();
-                                      }
-                                      return Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        spacing: 16.0,
-                                        children: [
-                                          _ShortInfoRow(
-                                            app: widget.app,
-                                            version: version,
-                                            statsFuture: _statsFuture,
-                                          ),
-                                        ],
-                                      );
-                                    },
-                                  );
-                                },
-                          ).animate().fadeIn(
-                            delay: Duration(milliseconds: 300),
-                            duration: Duration(milliseconds: 300),
-                          ),
-
-                          // Changelog preview
-                          FutureBuilder<FDroidVersion?>(
-                            future: appProvider.getLatestVersion(widget.app),
-                            builder: (context, snapshot) {
-                              final latestVersion = snapshot.data;
-                              if (latestVersion?.whatsNew != null &&
-                                  latestVersion!.whatsNew!.isNotEmpty) {
-                                return ChangelogPreview(
-                                  text: latestVersion.whatsNew,
-                                ).animate().fadeIn(
-                                  delay: Duration(milliseconds: 300),
-                                  duration: Duration(milliseconds: 300),
+                          children: [
+                            // Progress indicator
+                            FutureBuilder<IzzyStats>(
+                              future: _statsFuture,
+                              builder: (context, snapshot) {
+                                if (snapshot.connectionState ==
+                                    ConnectionState.waiting) {
+                                  return const SizedBox.shrink();
+                                }
+                                if (snapshot.hasError ||
+                                    snapshot.data == null) {
+                                  return const SizedBox.shrink();
+                                }
+                                final stats = snapshot.data!;
+                                return _DownloadSection(
+                                  app: widget.app,
+                                  stats: stats,
                                 );
-                              }
-                              return const SizedBox.shrink();
-                            },
-                          ),
-                          if (isInstalled)
-                            Chip(
-                              visualDensity: VisualDensity.compact,
-                              avatar: Icon(Symbols.check_circle, fill: 1),
-                              label: Text(
-                                'Installed${installedApp?.versionName != null ? ' (${installedApp!.versionName})' : ''}',
-                              ),
+                              },
                             ).animate().fadeIn(
                               delay: Duration(milliseconds: 300),
                               duration: Duration(milliseconds: 300),
                             ),
-                        ],
+
+                            // Install/Update button
+                            _InstallActionsSection(
+                              app: widget.app,
+                              enrichedAppFuture: _enrichedAppFuture,
+                              buildInstallButton: _buildInstallButton,
+                            ).animate().fadeIn(
+                              delay: Duration(milliseconds: 300),
+                              duration: Duration(milliseconds: 300),
+                            ),
+
+                            // Short Info
+                            Consumer2<DownloadProvider, AppProvider>(
+                              builder:
+                                  (
+                                    context,
+                                    downloadProvider,
+                                    appProvider,
+                                    child,
+                                  ) {
+                                    return FutureBuilder<FDroidVersion?>(
+                                      future: appProvider.getLatestVersion(
+                                        widget.app,
+                                      ),
+                                      builder: (context, snapshot) {
+                                        final version = snapshot.data;
+                                        if (version == null) {
+                                          return const SizedBox.shrink();
+                                        }
+                                        return Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          spacing: 16.0,
+                                          children: [
+                                            _ShortInfoRow(
+                                              app: widget.app,
+                                              version: version,
+                                              statsFuture: _statsFuture,
+                                            ),
+                                          ],
+                                        );
+                                      },
+                                    );
+                                  },
+                            ).animate().fadeIn(
+                              delay: Duration(milliseconds: 300),
+                              duration: Duration(milliseconds: 300),
+                            ),
+
+                            // Changelog preview
+                            FutureBuilder<FDroidVersion?>(
+                              future: appProvider.getLatestVersion(widget.app),
+                              builder: (context, snapshot) {
+                                final latestVersion = snapshot.data;
+                                if (latestVersion?.whatsNew != null &&
+                                    latestVersion!.whatsNew!.isNotEmpty) {
+                                  return ChangelogPreview(
+                                    text: latestVersion.whatsNew,
+                                  ).animate().fadeIn(
+                                    delay: Duration(milliseconds: 300),
+                                    duration: Duration(milliseconds: 300),
+                                  );
+                                }
+                                return const SizedBox.shrink();
+                              },
+                            ),
+                            if (isInstalled)
+                              Chip(
+                                visualDensity: VisualDensity.compact,
+                                avatar: Icon(Symbols.check_circle, fill: 1),
+                                label: Text(
+                                  'Installed${installedApp?.versionName != null ? ' (${installedApp!.versionName})' : ''}',
+                                ),
+                              ).animate().fadeIn(
+                                delay: Duration(milliseconds: 300),
+                                duration: Duration(milliseconds: 300),
+                              ),
+                          ],
+                        );
+                      },
+                    ),
+                  ),
+
+                  // Screenshots section
+                  FutureBuilder<List<String>>(
+                    future: _screenshotsFuture,
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const SizedBox.shrink();
+                      }
+
+                      final screenshots = snapshot.data ?? [];
+                      if (screenshots.isEmpty) {
+                        return const SizedBox.shrink();
+                      }
+
+                      return _ScreenshotsSection(
+                        app: widget.app,
+                        screenshots: screenshots,
                       );
                     },
-                  ),
-                ),
-
-                // Screenshots section
-                FutureBuilder<List<String>>(
-                  future: _screenshotsFuture,
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return const SizedBox.shrink();
-                    }
-
-                    final screenshots = snapshot.data ?? [];
-                    if (screenshots.isEmpty) {
-                      return const SizedBox.shrink();
-                    }
-
-                    return _ScreenshotsSection(
-                      app: widget.app,
-                      screenshots: screenshots,
-                    );
-                  },
-                ).animate().fadeIn(
-                  delay: Duration(milliseconds: 300),
-                  duration: Duration(milliseconds: 300),
-                ),
-
-                if (widget.app.categories?.isNotEmpty == true) ...[
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                    child: Chip(
-                      visualDensity: VisualDensity.compact,
-                      label: Text(widget.app.categories!.first),
-                    ),
                   ).animate().fadeIn(
                     delay: Duration(milliseconds: 300),
                     duration: Duration(milliseconds: 300),
                   ),
-                ],
-                // Description
-                _DescriptionSection(app: widget.app).animate().fadeIn(
-                  delay: Duration(milliseconds: 300),
-                  duration: Duration(milliseconds: 300),
-                ),
 
-                // Include unstable versions toggle (only show if unstable versions exist)
-                IncludeUnstableSection(app: widget.app).animate().fadeIn(
-                  delay: Duration(milliseconds: 300),
-                  duration: Duration(milliseconds: 300),
-                ),
-
-                // App details
-                _AppInfoSection(app: widget.app).animate().fadeIn(
-                  delay: Duration(milliseconds: 300),
-                  duration: Duration(milliseconds: 300),
-                ),
-
-                FutureBuilder<IzzyStats>(
-                  future: _statsFuture,
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return const _IzzyStatsLoadingCard();
-                    }
-                    if (snapshot.hasError) {
-                      return const _IzzyStatsInfoCard(
-                        message:
-                            'Unable to load IzzyOnDroid download stats right now.',
-                      );
-                    }
-
-                    final stats = snapshot.data;
-                    if (stats == null || !stats.hasAny) {
-                      return const SizedBox.shrink();
-                    }
-
-                    return _IzzyStatsSection(
-                      packageName: widget.app.packageName,
-                      stats: stats,
-                    );
-                  },
-                ).animate().fadeIn(
-                  delay: Duration(milliseconds: 300),
-                  duration: Duration(milliseconds: 300),
-                ),
-
-                // Version info
-                FutureBuilder<FDroidVersion?>(
-                  future: context.read<AppProvider>().getLatestVersion(
-                    widget.app,
-                  ),
-                  builder: (context, snapshot) {
-                    final latestVersion = snapshot.data;
-                    if (latestVersion != null) {
-                      return _VersionInfoSection(
-                        version: latestVersion,
-                      ).animate().fadeIn(
-                        delay: Duration(milliseconds: 300),
-                        duration: Duration(milliseconds: 300),
-                      );
-                    } else {
-                      return const _NoVersionInfoSection().animate().fadeIn(
-                        delay: Duration(milliseconds: 300),
-                        duration: Duration(milliseconds: 300),
-                      );
-                    }
-                  },
-                ),
-                // All versions history
-                if (widget.app.packages != null &&
-                    widget.app.packages!.isNotEmpty)
-                  _AllVersionsSection(app: widget.app).animate().fadeIn(
+                  if (widget.app.categories?.isNotEmpty == true) ...[
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                      child: Chip(
+                        visualDensity: VisualDensity.compact,
+                        label: Text(widget.app.categories!.first),
+                      ),
+                    ).animate().fadeIn(
+                      delay: Duration(milliseconds: 300),
+                      duration: Duration(milliseconds: 300),
+                    ),
+                  ],
+                  // Description
+                  _DescriptionSection(app: widget.app).animate().fadeIn(
                     delay: Duration(milliseconds: 300),
                     duration: Duration(milliseconds: 300),
-                  )
-                else
-                  const SizedBox.shrink(),
-                // Permissions
-                SizedBox(height: 32),
-              ],
+                  ),
+
+                  // Include unstable versions toggle (only show if unstable versions exist)
+                  IncludeUnstableSection(app: widget.app).animate().fadeIn(
+                    delay: Duration(milliseconds: 300),
+                    duration: Duration(milliseconds: 300),
+                  ),
+
+                  // App details
+                  _AppInfoSection(app: widget.app).animate().fadeIn(
+                    delay: Duration(milliseconds: 300),
+                    duration: Duration(milliseconds: 300),
+                  ),
+
+                  FutureBuilder<IzzyStats>(
+                    future: _statsFuture,
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const _IzzyStatsLoadingCard();
+                      }
+                      if (snapshot.hasError) {
+                        return const _IzzyStatsInfoCard(
+                          message:
+                              'Unable to load IzzyOnDroid download stats right now.',
+                        );
+                      }
+
+                      final stats = snapshot.data;
+                      if (stats == null || !stats.hasAny) {
+                        return const SizedBox.shrink();
+                      }
+
+                      return _IzzyStatsSection(
+                        packageName: widget.app.packageName,
+                        stats: stats,
+                      );
+                    },
+                  ).animate().fadeIn(
+                    delay: Duration(milliseconds: 300),
+                    duration: Duration(milliseconds: 300),
+                  ),
+
+                  // Version info
+                  FutureBuilder<FDroidVersion?>(
+                    future: context.read<AppProvider>().getLatestVersion(
+                      widget.app,
+                    ),
+                    builder: (context, snapshot) {
+                      final latestVersion = snapshot.data;
+                      if (latestVersion != null) {
+                        return _VersionInfoSection(
+                          version: latestVersion,
+                        ).animate().fadeIn(
+                          delay: Duration(milliseconds: 300),
+                          duration: Duration(milliseconds: 300),
+                        );
+                      } else {
+                        return const _NoVersionInfoSection().animate().fadeIn(
+                          delay: Duration(milliseconds: 300),
+                          duration: Duration(milliseconds: 300),
+                        );
+                      }
+                    },
+                  ),
+                  // All versions history
+                  if (widget.app.packages != null &&
+                      widget.app.packages!.isNotEmpty)
+                    _AllVersionsSection(app: widget.app).animate().fadeIn(
+                      delay: Duration(milliseconds: 300),
+                      duration: Duration(milliseconds: 300),
+                    )
+                  else
+                    const SizedBox.shrink(),
+                  // Permissions
+                  SizedBox(height: 32),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

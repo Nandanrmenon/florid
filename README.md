@@ -16,6 +16,10 @@ Browse, search, and install open‑source Android apps from the F‑Droid reposi
 
 </div>
 
+> [!CAUTION]
+> ## Keep Android Open
+> Android FOSS is under threat. From 2026/2027 onward, Google will require developer verification for all Android apps on certified devices, including those installed outside of the Play Store. If you care about the freedom to control your devices and care about the privacy of you data, please contact your representative and make your voice heard. To know about it more go to https://keepandroidopen.org/
+
 ## Download
 
 <a href="https://apt.izzysoft.de/packages/com.nahnah.florid">

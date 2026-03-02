@@ -186,6 +186,7 @@ class _UserScreenState extends State<UserScreen>
         );
         return Card(
           elevation: 0,
+          key: Key(app.packageName),
           child: Column(
             children: [
               AppListItem(

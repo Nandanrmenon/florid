@@ -1,4 +1,5 @@
 import 'package:florid/l10n/app_localizations.dart';
+import 'package:florid/providers/download_provider.dart';
 import 'package:florid/providers/settings_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -43,6 +44,7 @@ class _HomeScreenState extends State<HomeScreen>
     appProvider.fetchRecentlyUpdatedApps(
       repositoriesProvider: repositoriesProvider,
     );
+    appProvider.fetchTopApps(repositoriesProvider: repositoriesProvider);
   }
 
   Future<void> _onRefresh() async {
@@ -53,6 +55,7 @@ class _HomeScreenState extends State<HomeScreen>
       appProvider.fetchRecentlyUpdatedApps(
         repositoriesProvider: repositoriesProvider,
       ),
+      appProvider.fetchTopApps(repositoriesProvider: repositoriesProvider),
     ]);
   }
 
@@ -68,6 +71,21 @@ class _HomeScreenState extends State<HomeScreen>
       context,
       MaterialPageRoute(builder: (context) => const RecentlyUpdatedScreen()),
     );
+  }
+
+  bool _isIzzyOnDroidEnabled(RepositoriesProvider repositoriesProvider) {
+    return repositoriesProvider.repositories.any(
+      (repo) => repo.name == 'IzzyOnDroid' && repo.isEnabled,
+    );
+  }
+
+  String _formatDownloads(int downloads) {
+    if (downloads >= 1000000) {
+      return '${(downloads / 1000000).toStringAsFixed(1)}M';
+    } else if (downloads >= 1000) {
+      return '${(downloads / 1000).toStringAsFixed(1)}K';
+    }
+    return downloads.toString();
   }
 
   @override
@@ -86,6 +104,8 @@ class _HomeScreenState extends State<HomeScreen>
         final isFlorid = settingsProvider.themeStyle == ThemeStyle.florid;
         final isDarkKnight =
             settingsProvider.themeStyle == ThemeStyle.darkKnight;
+
+        final repositoriesProvider = context.read<RepositoriesProvider>();
 
         Widget buildRecentSection() {
           return LayoutBuilder(
@@ -249,6 +269,220 @@ class _HomeScreenState extends State<HomeScreen>
           );
         }
 
+        Widget buildTopAppsSection() {
+          final topApps = appProvider.topApps.take(_previewLimit).toList();
+          final isTopAppsLoading =
+              appProvider.topAppsState == LoadingState.loading;
+
+          return Column(
+            spacing: 16.0,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Top Apps',
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    Text(
+                      'from IzzyOnDroid',
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              if (isTopAppsLoading && topApps.isEmpty)
+                const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 32.0),
+                  child: Center(
+                    child: CircularProgressIndicator(year2023: false),
+                  ),
+                )
+              else if (topApps.isEmpty)
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                  child: Center(
+                    child: Column(
+                      children: [
+                        Icon(Symbols.apps, size: 48, color: Colors.grey[400]),
+                        const SizedBox(height: 8),
+                        Text(
+                          'No apps from IzzyOnDroid',
+                          style: Theme.of(context).textTheme.bodyMedium,
+                        ),
+                      ],
+                    ),
+                  ),
+                )
+              else
+                SizedBox(
+                  height: 200,
+                  child: CarouselView(
+                    itemExtent: 350,
+                    itemSnapping: true,
+                    shrinkExtent: 350,
+                    onTap: (index) => Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            AppDetailsScreen(app: topApps[index]),
+                      ),
+                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                    children: topApps.asMap().entries.map((entry) {
+                      final app = entry.value;
+                      return Material(
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.surfaceContainerLow,
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8.0,
+                            vertical: 24,
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              Consumer2<AppProvider, DownloadProvider>(
+                                builder: (context, appProvider, downloadProvider, _) {
+                                  final version = app.latestVersion;
+                                  final isDownloading = version != null
+                                      ? downloadProvider.isDownloading(
+                                          app.packageName,
+                                          version.versionName,
+                                        )
+                                      : false;
+                                  final progress = version != null
+                                      ? downloadProvider.getProgress(
+                                          app.packageName,
+                                          version.versionName,
+                                        )
+                                      : 0.0;
+                                  return SizedBox(
+                                    width: 72,
+                                    height: 72,
+                                    child: Stack(
+                                      alignment: Alignment.center,
+                                      children: [
+                                        AnimatedOpacity(
+                                          opacity: isDownloading ? 1.0 : 0.0,
+                                          duration: const Duration(
+                                            milliseconds: 300,
+                                          ),
+                                          child: SizedBox(
+                                            width: 86,
+                                            height: 86,
+                                            child: Center(
+                                              child: CircularProgressIndicator(
+                                                value: isDownloading
+                                                    ? progress
+                                                    : null,
+                                                strokeWidth: 2,
+                                                backgroundColor:
+                                                    Theme.of(context)
+                                                        .colorScheme
+                                                        .surfaceContainerHighest,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                        AnimatedContainer(
+                                          duration: const Duration(
+                                            milliseconds: 300,
+                                          ),
+                                          curve: Curves.easeInOut,
+                                          width: isDownloading ? 24 : 48,
+                                          height: isDownloading ? 24 : 48,
+                                          clipBehavior: Clip.antiAlias,
+                                          decoration: BoxDecoration(
+                                            borderRadius: BorderRadius.circular(
+                                              12,
+                                            ),
+                                            color: Theme.of(context)
+                                                .colorScheme
+                                                .surfaceContainerHighest,
+                                          ),
+                                          child: MultiIcon(app: app),
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                },
+                              ),
+
+                              Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 16.0,
+                                ),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      app.name,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: TextStyle(
+                                        fontVariations: [
+                                          FontVariation('wght', 700),
+                                          FontVariation('ROND', 100),
+                                        ],
+                                        fontSize: 18,
+                                      ),
+                                    ),
+                                    if (appProvider.topAppsDownloads
+                                        .containsKey(app.packageName))
+                                      Text(
+                                        '${_formatDownloads(appProvider.topAppsDownloads[app.packageName]!)} downloads',
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          fontVariations: [
+                                            FontVariation('wght', 400),
+                                            FontVariation('ROND', 0),
+                                          ],
+                                          color: Theme.of(
+                                            context,
+                                          ).colorScheme.onSurfaceVariant,
+                                        ),
+                                      ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        // child:
+                        //     AppListItem(
+                        //       app: app,
+                        //       showInstallStatus: false,
+                        //       onTap: () {
+                        //         Navigator.of(context).push(
+                        //           MaterialPageRoute(
+                        //             builder: (context) =>
+                        //                 AppDetailsScreen(app: app),
+                        //           ),
+                        //         );
+                        //       },
+                        //     ).animate().fadeIn(
+                        //       duration: 300.ms,
+                        //       delay: (50 * index).ms,
+                        //     ),
+                      );
+                    }).toList(),
+                  ),
+                ),
+            ],
+          );
+        }
+
         return RefreshIndicator(
           onRefresh: _onRefresh,
           child: SingleChildScrollView(
@@ -266,11 +500,11 @@ class _HomeScreenState extends State<HomeScreen>
                     crossAxisAlignment: CrossAxisAlignment.start,
                     spacing: 24,
                     children: [
+                      SizedBox(height: 4),
                       if (settingsProvider.showKeepAndroidOpenCard)
                         Padding(
                               padding: const EdgeInsets.only(
                                 left: 8.0,
-                                top: 16,
                                 right: 8,
                               ),
                               child: Card(
@@ -340,8 +574,11 @@ class _HomeScreenState extends State<HomeScreen>
                             )
                             .animate(delay: Duration(milliseconds: 100))
                             .fadeIn(duration: 300.ms),
+                      if (_isIzzyOnDroidEnabled(repositoriesProvider))
+                        buildTopAppsSection(),
                       buildRecentSection(),
                       buildNewReleasesSection(),
+
                       if (isFlorid || isDarkKnight) const SizedBox(height: 86),
                     ],
                   ); // Phone layout

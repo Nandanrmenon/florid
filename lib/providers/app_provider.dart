@@ -6,8 +6,10 @@ import 'package:installed_apps/app_info.dart' as installed;
 import 'package:installed_apps/installed_apps.dart';
 
 import '../models/fdroid_app.dart';
+import '../models/repository.dart';
 import '../services/app_preferences_service.dart';
 import '../services/fdroid_api_service.dart';
+import '../services/izzy_stats_service.dart';
 import 'repositories_provider.dart';
 import 'settings_provider.dart';
 
@@ -30,6 +32,7 @@ class AppInfo {
 
 class AppProvider extends ChangeNotifier {
   final FDroidApiService _apiService;
+  final IzzyStatsService _izzyStatsService = IzzyStatsService();
   SettingsProvider? _settingsProvider;
   final AppPreferencesService _preferencesService = AppPreferencesService();
 
@@ -51,6 +54,12 @@ class AppProvider extends ChangeNotifier {
   List<FDroidApp> _recentlyUpdatedApps = [];
   LoadingState _recentlyUpdatedAppsState = LoadingState.idle;
   String? _recentlyUpdatedAppsError;
+
+  // Top apps state (from IzzyOnDroid)
+  List<FDroidApp> _topApps = [];
+  LoadingState _topAppsState = LoadingState.idle;
+  String? _topAppsError;
+  Map<String, int> _topAppsDownloads = {};
 
   // Categories state
   List<String> _categories = [];
@@ -91,6 +100,11 @@ class AppProvider extends ChangeNotifier {
   List<FDroidApp> get recentlyUpdatedApps => _recentlyUpdatedApps;
   LoadingState get recentlyUpdatedAppsState => _recentlyUpdatedAppsState;
   String? get recentlyUpdatedAppsError => _recentlyUpdatedAppsError;
+
+  List<FDroidApp> get topApps => _topApps;
+  LoadingState get topAppsState => _topAppsState;
+  String? get topAppsError => _topAppsError;
+  Map<String, int> get topAppsDownloads => _topAppsDownloads;
 
   List<String> get categories => _categories;
   LoadingState get categoriesState => _categoriesState;
@@ -461,6 +475,94 @@ class AppProvider extends ChangeNotifier {
     } catch (e) {
       _recentlyUpdatedAppsError = e.toString();
       _recentlyUpdatedAppsState = LoadingState.error;
+    }
+    notifyListeners();
+  }
+
+  /// Fetches top downloaded apps from IzzyOnDroid repository
+  Future<void> fetchTopApps({
+    RepositoriesProvider? repositoriesProvider,
+    int limit = 50,
+  }) async {
+    _topAppsState = LoadingState.loading;
+    _topAppsError = null;
+    notifyListeners();
+
+    try {
+      // First ensure custom repo models are loaded locally
+      if (repositoriesProvider != null &&
+          repositoriesProvider.repositories.isEmpty &&
+          !repositoriesProvider.isLoading) {
+        await repositoriesProvider.loadRepositories();
+      }
+
+      // Find IzzyOnDroid repository
+      Repository? izzyRepo;
+      if (repositoriesProvider != null) {
+        try {
+          izzyRepo = repositoriesProvider.repositories.firstWhere(
+            (r) => r.name == 'IzzyOnDroid' && r.isEnabled,
+          );
+        } catch (e) {
+          izzyRepo = null;
+        }
+      }
+
+      if (izzyRepo == null) {
+        _topApps = [];
+        _topAppsState = LoadingState.success;
+        notifyListeners();
+        return;
+      }
+
+      // Fetch all apps from IzzyOnDroid repository
+      final allApps = await _apiService.fetchApps(limit: limit * 4);
+      final izzyApps = allApps
+          .where((app) => app.repositoryUrl == izzyRepo!.url)
+          .toList();
+
+      if (izzyApps.isEmpty) {
+        _topApps = [];
+        _topAppsState = LoadingState.success;
+        notifyListeners();
+        return;
+      }
+
+      // Create a map to store download counts with apps
+      final appStats = <FDroidApp, int>{};
+
+      // Fetch download stats for each app
+      for (final app in izzyApps) {
+        try {
+          final stats = await _izzyStatsService.fetchStatsForPackage(
+            app.packageName,
+          );
+          // Use last 30 days downloads, fallback to last 365 days
+          final downloads = stats.last30Days ?? stats.last365Days ?? 0;
+          appStats[app] = downloads;
+        } catch (e) {
+          // If we fail to get stats, use 0
+          debugPrint('Error fetching stats for ${app.packageName}: $e');
+          appStats[app] = 0;
+        }
+      }
+
+      // Sort apps by download count (highest first)
+      final sortedApps = appStats.entries.toList();
+      sortedApps.sort((a, b) => b.value.compareTo(a.value));
+
+      _topApps = sortedApps.take(limit).map((e) => e.key).toList();
+
+      // Store download counts for UI display
+      _topAppsDownloads = {};
+      for (final entry in sortedApps.take(limit)) {
+        _topAppsDownloads[entry.key.packageName] = entry.value;
+      }
+
+      _topAppsState = LoadingState.success;
+    } catch (e) {
+      _topAppsError = e.toString();
+      _topAppsState = LoadingState.error;
     }
     notifyListeners();
   }

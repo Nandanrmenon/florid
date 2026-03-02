@@ -80,7 +80,7 @@ class AppListItem extends StatelessWidget {
                     borderRadius: BorderRadius.circular(12),
                     color: theme.colorScheme.surfaceContainerHighest,
                   ),
-                  child: _MultiIcon(app: app),
+                  child: MultiIcon(app: app),
                 ),
               ],
             ),
@@ -172,15 +172,15 @@ class AppListItem extends StatelessWidget {
   }
 }
 
-class _MultiIcon extends StatefulWidget {
+class MultiIcon extends StatefulWidget {
   final FDroidApp app;
-  const _MultiIcon({required this.app});
+  const MultiIcon({super.key, required this.app});
 
   @override
-  State<_MultiIcon> createState() => _MultiIconState();
+  State<MultiIcon> createState() => _MultiIconState();
 }
 
-class _MultiIconState extends State<_MultiIcon> {
+class _MultiIconState extends State<MultiIcon> {
   late List<String> _candidates;
   int _index = 0;
 
@@ -325,7 +325,7 @@ class _QuickViewModal extends StatelessWidget {
                               borderRadius: BorderRadius.circular(12),
                               color: theme.colorScheme.surfaceContainerHighest,
                             ),
-                            child: _MultiIcon(app: app),
+                            child: MultiIcon(app: app),
                           ),
                         ],
                       ),

@@ -63,11 +63,10 @@ class MainApp extends StatelessWidget {
         >(
           create: (context) => AppProvider(
             Provider.of<FDroidApiService>(context, listen: false),
-            Provider.of<SettingsProvider>(context, listen: false),
           ),
           update: (context, apiService, settings, previous) {
             if (previous == null) {
-              return AppProvider(apiService, settings);
+              return AppProvider(apiService);
             }
             previous.updateSettings(settings);
             return previous;

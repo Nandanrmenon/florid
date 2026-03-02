@@ -333,15 +333,18 @@ class _UserScreenState extends State<UserScreen>
         body: TabBarView(
           controller: _tabController,
           children: [
-            FutureBuilder<List<FDroidApp>>(
+            FutureBuilder<List<List<FDroidApp>>>(
               future: repositoryLoaded
-                  ? appProvider.getUpdatableApps()
-                  : Future.value(<FDroidApp>[]),
+                  ? Future.wait([
+                      appProvider.getUpdatableApps(),
+                      appProvider.getFavoriteApps(),
+                    ])
+                  : Future.value([<FDroidApp>[], <FDroidApp>[]]),
               builder: (context, snapshot) {
-                final updatableApps = snapshot.data ?? <FDroidApp>[];
-                final favoriteApps = repositoryLoaded
-                    ? appProvider.getFavoriteApps()
-                    : <FDroidApp>[];
+                final results = snapshot.data ?? [<FDroidApp>[], <FDroidApp>[]];
+                final updatableApps = results[0];
+                final favoriteApps = results[1];
+
                 return _buildFavoritesTab(
                   context,
                   appProvider,

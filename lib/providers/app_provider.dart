@@ -30,15 +30,13 @@ class AppInfo {
 
 class AppProvider extends ChangeNotifier {
   final FDroidApiService _apiService;
-  SettingsProvider? _settingsProvider;
   final AppPreferencesService _preferencesService = AppPreferencesService();
 
-  AppProvider(this._apiService, [this._settingsProvider]) {
+  AppProvider(this._apiService) {
     _loadFavorites();
   }
 
   void updateSettings(SettingsProvider settings) {
-    _settingsProvider = settings;
     notifyListeners();
   }
 
@@ -116,15 +114,15 @@ class AppProvider extends ChangeNotifier {
   bool isFavorite(String packageName) =>
       _favoritePackages.contains(packageName);
 
-  List<FDroidApp> getFavoriteApps() {
-    if (_repository == null || _favoritePackages.isEmpty) {
+  Future<List<FDroidApp>> getFavoriteApps() async {
+    if (_favoritePackages.isEmpty) {
       return <FDroidApp>[];
     }
 
-    final favorites = _favoritePackages
-        .map((packageName) => _repository!.apps[packageName])
-        .whereType<FDroidApp>()
-        .toList();
+    final favorites = await _apiService.getAppsByPackageNames(
+      _favoritePackages.toList(),
+    );
+
     favorites.sort(
       (a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()),
     );
@@ -365,7 +363,7 @@ class AppProvider extends ChangeNotifier {
     }
   }
 
-  /// Fetches latest apps from F-Droid and custom repositories
+  /// Fetches latest apps from database
   Future<void> fetchLatestApps({
     RepositoriesProvider? repositoriesProvider,
     int limit = 50,
@@ -375,39 +373,11 @@ class AppProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      List<FDroidApp> apps = [];
-
-      // Try to fetch from custom repositories if available
-      if (repositoriesProvider != null) {
-        // Ensure repositories are loaded before checking enabled ones
-        if (repositoriesProvider.repositories.isEmpty &&
-            !repositoriesProvider.isLoading) {
-          await repositoriesProvider.loadRepositories();
-        }
-
-        final customRepos = repositoriesProvider.enabledRepositories;
-        if (customRepos.isNotEmpty) {
-          final customUrls = customRepos.map((r) => r.url).toList();
-          final mergedRepo = await fetchRepositoriesFromUrls(customUrls);
-          if (mergedRepo != null) {
-            // Get latest apps from merged repository
-            final latestApps = mergedRepo.apps.values.toList();
-            latestApps.sort((a, b) {
-              final aAdded = a.added?.millisecondsSinceEpoch ?? 0;
-              final bAdded = b.added?.millisecondsSinceEpoch ?? 0;
-              return bAdded.compareTo(aAdded); // Latest first
-            });
-            apps = latestApps.take(limit).toList();
-            _latestApps = apps;
-            _latestAppsState = LoadingState.success;
-            notifyListeners();
-            return;
-          }
-        }
-      }
-
-      // Fall back to official F-Droid
-      _latestApps = await _apiService.fetchLatestApps(limit: limit);
+      // Use the database-first paginated query
+      _latestApps = await _apiService.getAppsPaged(
+        limit: limit,
+        orderBy: 'a.added DESC',
+      );
       _latestAppsState = LoadingState.success;
     } catch (e) {
       _latestAppsError = e.toString();
@@ -416,7 +386,7 @@ class AppProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Fetches recently updated apps from F-Droid and custom repositories
+  /// Fetches recently updated apps from database
   Future<void> fetchRecentlyUpdatedApps({
     RepositoriesProvider? repositoriesProvider,
     int limit = 50,
@@ -426,45 +396,11 @@ class AppProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      List<FDroidApp> apps = [];
-
-      // Try to fetch from custom repositories if available
-      if (repositoriesProvider != null) {
-        // Ensure repositories are loaded before checking enabled ones
-        if (repositoriesProvider.repositories.isEmpty &&
-            !repositoriesProvider.isLoading) {
-          await repositoriesProvider.loadRepositories();
-        }
-
-        final customRepos = repositoriesProvider.enabledRepositories;
-        if (customRepos.isNotEmpty) {
-          final customUrls = customRepos.map((r) => r.url).toList();
-          final mergedRepo = await fetchRepositoriesFromUrls(customUrls);
-          if (mergedRepo != null) {
-            // Get recently updated apps from merged repository
-            final recentlyUpdatedApps = mergedRepo.apps.values.toList();
-            recentlyUpdatedApps.sort((a, b) {
-              final aUpdated = a.lastUpdated?.millisecondsSinceEpoch ?? 0;
-              final bUpdated = b.lastUpdated?.millisecondsSinceEpoch ?? 0;
-              return bUpdated.compareTo(aUpdated); // Most recent first
-            });
-            apps = recentlyUpdatedApps.take(limit).toList();
-            _recentlyUpdatedApps = apps;
-            _recentlyUpdatedAppsState = LoadingState.success;
-            notifyListeners();
-            return;
-          }
-        }
-      }
-
-      // Fall back to official F-Droid
-      final allApps = await _apiService.fetchApps(limit: limit * 2);
-      allApps.sort((a, b) {
-        final aUpdated = a.lastUpdated?.millisecondsSinceEpoch ?? 0;
-        final bUpdated = b.lastUpdated?.millisecondsSinceEpoch ?? 0;
-        return bUpdated.compareTo(aUpdated);
-      });
-      _recentlyUpdatedApps = allApps.take(limit).toList();
+      // Use the database-first paginated query
+      _recentlyUpdatedApps = await _apiService.getAppsPaged(
+        limit: limit,
+        orderBy: 'a.last_updated DESC',
+      );
       _recentlyUpdatedAppsState = LoadingState.success;
     } catch (e) {
       _recentlyUpdatedAppsError = e.toString();
@@ -491,14 +427,17 @@ class AppProvider extends ChangeNotifier {
 
   /// Fetches apps by category
   Future<void> fetchAppsByCategory(String category) async {
-    if (_categoryApps.containsKey(category)) return; // Use cached version
+    if (_categoryApps.containsKey(category)) return;
 
     _categoryAppsState = LoadingState.loading;
     _categoryAppsError = null;
     notifyListeners();
 
     try {
-      final apps = await _apiService.fetchAppsByCategory(category);
+      final apps = await _apiService.getAppsPaged(
+        category: category,
+        limit: 100, // Reasonable initial limit
+      );
       _categoryApps[category] = apps;
       _categoryAppsState = LoadingState.success;
     } catch (e) {
@@ -551,7 +490,7 @@ class AppProvider extends ChangeNotifier {
           return true;
         }
 
-        final repoUrl = app.repositoryUrl ?? '';
+        final repoUrl = app.repositoryUrl;
         if (repoUrl == 'https://f-droid.org/repo') {
           return true;
         }
@@ -613,15 +552,19 @@ class AppProvider extends ChangeNotifier {
 
   /// Gets apps that have updates available
   Future<List<FDroidApp>> getUpdatableApps() async {
-    if (_repository == null || _installedApps.isEmpty) {
+    if (_installedApps.isEmpty) {
       return [];
     }
+
+    final packageNames = _installedApps.map((a) => a.packageName).toList();
+    final fdroidApps = await _apiService.getAppsByPackageNames(packageNames);
+    final fdroidAppsMap = {for (final app in fdroidApps) app.packageName: app};
 
     final updatableApps = <FDroidApp>[];
 
     for (final installedApp in _installedApps) {
       // Check if the app exists in F-Droid repository
-      final fdroidApp = _repository!.apps[installedApp.packageName];
+      final fdroidApp = fdroidAppsMap[installedApp.packageName];
       if (fdroidApp == null) continue;
 
       // Get the latest version based on per-app unstable preference
@@ -672,6 +615,15 @@ class AppProvider extends ChangeNotifier {
     return _selectBestVersionForDevice(app, includeUnstable: includeUnstable);
   }
 
+  /// Gets FDroid app objects for a list of installed apps
+  Future<List<FDroidApp>> getFDroidAppsFromInstalled(
+    List<AppInfo> installedApps,
+  ) async {
+    if (installedApps.isEmpty) return [];
+    final packageNames = installedApps.map((a) => a.packageName).toList();
+    return await _apiService.getAppsByPackageNames(packageNames);
+  }
+
   /// Gets whether unstable versions should be included for a specific app
   Future<bool> getIncludeUnstable(String packageName) async {
     return await _preferencesService.getIncludeUnstable(packageName);
@@ -694,12 +646,7 @@ class AppProvider extends ChangeNotifier {
 
     try {
       final info = await DeviceInfoPlugin().androidInfo;
-      final rawAbis =
-          info.supportedAbis ??
-          info.supported64BitAbis ??
-          info.supported32BitAbis ??
-          const <String>[];
-      final abis = rawAbis.where((abi) => abi.isNotEmpty).toList();
+      final abis = info.supportedAbis;
       if (abis.isNotEmpty) {
         _supportedAbis = abis;
         return abis;

@@ -394,10 +394,160 @@ class DatabaseService {
     await batch.commit(noResult: true);
   }
 
+  /// Gets a paginated list of apps
+  /// [limit] and [offset] for pagination
+  /// [category] optional category filter
+  /// [orderBy] optional order by clause
+  Future<List<FDroidApp>> getAppsPaged({
+    int limit = 50,
+    int offset = 0,
+    String? category,
+    String orderBy = 'a.name ASC',
+  }) async {
+    final db = await database;
+
+    String query;
+    List<dynamic> args = [];
+
+    if (category != null) {
+      query =
+          '''
+        SELECT a.*, r.url as repository_url FROM $_appsTable a
+        LEFT JOIN $_repositoriesTable r ON a.repository_id = r.id
+        INNER JOIN $_appCategoriesTable ac ON a.package_name = ac.package_name
+        WHERE ac.category = ?
+        ORDER BY $orderBy
+        LIMIT ? OFFSET ?
+      ''';
+      args = [category, limit, offset];
+    } else {
+      query =
+          '''
+        SELECT a.*, r.url as repository_url FROM $_appsTable a
+        LEFT JOIN $_repositoriesTable r ON a.repository_id = r.id
+        ORDER BY $orderBy
+        LIMIT ? OFFSET ?
+      ''';
+      args = [limit, offset];
+    }
+
+    final appMaps = await db.rawQuery(query, args);
+
+    if (appMaps.isEmpty) return [];
+
+    final packageNames = appMaps
+        .map((m) => m['package_name'] as String)
+        .toList();
+
+    // Batch load categories for these apps
+    final categoriesResults = await db.query(
+      _appCategoriesTable,
+      where:
+          'package_name IN (${List.filled(packageNames.length, '?').join(',')})',
+      whereArgs: packageNames,
+    );
+
+    // Batch load ONLY the latest version for each app to save memory
+    // Use a subquery to get the max version_code for each package
+    final versionsResults = await db.rawQuery('''
+      SELECT v.* FROM $_versionsTable v
+      INNER JOIN (
+        SELECT package_name, MAX(version_code) as max_version_code
+        FROM $_versionsTable
+        WHERE package_name IN (${List.filled(packageNames.length, '?').join(',')})
+        GROUP BY package_name
+      ) v2 ON v.package_name = v2.package_name AND v.version_code = v2.max_version_code
+    ''', packageNames);
+
+    // Group by package name
+    final categoriesByPackage = <String, List<String>>{};
+    for (final catRow in categoriesResults) {
+      final pkg = catRow['package_name'] as String;
+      final cat = catRow['category'] as String;
+      categoriesByPackage.putIfAbsent(pkg, () => []).add(cat);
+    }
+
+    final versionsByPackage = <String, List<Map<String, dynamic>>>{};
+    for (final verRow in versionsResults) {
+      final pkg = verRow['package_name'] as String;
+      versionsByPackage.putIfAbsent(pkg, () => []).add(verRow);
+    }
+
+    final apps = <FDroidApp>[];
+    for (final appMap in appMaps) {
+      final packageName = appMap['package_name'] as String;
+      final app = _mapToAppWithData(
+        appMap,
+        categoriesByPackage[packageName] ?? [],
+        versionsByPackage[packageName] ?? [],
+        repositoryUrl: appMap['repository_url'] as String?,
+      );
+      apps.add(app);
+    }
+
+    return apps;
+  }
+
+  /// Gets full details for a single app including all versions
+  Future<FDroidApp?> getAppByPackageName(String packageName) async {
+    final db = await database;
+    final appMaps = await db.rawQuery(
+      '''
+      SELECT a.*, r.url as repository_url FROM $_appsTable a
+      LEFT JOIN $_repositoriesTable r ON a.repository_id = r.id
+      WHERE a.package_name = ?
+    ''',
+      [packageName],
+    );
+
+    if (appMaps.isEmpty) return null;
+
+    final categoriesResults = await db.query(
+      _appCategoriesTable,
+      where: 'package_name = ?',
+      whereArgs: [packageName],
+    );
+
+    final versionsResults = await db.query(
+      _versionsTable,
+      where: 'package_name = ?',
+      whereArgs: [packageName],
+      orderBy: 'version_code DESC',
+    );
+
+    final categories = categoriesResults
+        .map((c) => c['category'] as String)
+        .toList();
+    final versionMaps = versionsResults.toList();
+
+    return _mapToAppWithData(
+      appMaps.first,
+      categories,
+      versionMaps,
+      repositoryUrl: appMaps.first['repository_url'] as String?,
+    );
+  }
+
   /// Gets all apps from the database
   /// Uses optimized batch loading to avoid N+1 query problem
+  /// WARNING: Use getAppsPaged instead for large lists to avoid CursorWindow issues
   Future<List<FDroidApp>> getAllApps() async {
     final db = await database;
+    final appsCountResult = await db.rawQuery(
+      'SELECT COUNT(*) as count FROM $_appsTable',
+    );
+    final count = Sqflite.firstIntValue(appsCountResult) ?? 0;
+
+    // If there are many apps, load them in chunks even in getAllApps to avoid CursorWindow issues
+    if (count > 500) {
+      final allApps = <FDroidApp>[];
+      for (int i = 0; i < count; i += 500) {
+        final chunk = await getAppsPaged(limit: 500, offset: i);
+        allApps.addAll(chunk);
+      }
+      return allApps;
+    }
+
     final appMaps = await db.rawQuery('''
       SELECT a.*, r.url as repository_url FROM $_appsTable a
       LEFT JOIN $_repositoriesTable r ON a.repository_id = r.id
@@ -405,12 +555,38 @@ class DatabaseService {
 
     if (appMaps.isEmpty) return [];
 
-    // Batch load all categories and versions for all apps at once
+    // For getAllApps, we'll still load all versions but in chunks if needed
+    // Actually, for memory safety, let's load versions app-by-app or in small batches
+    // But for now, let's just use the paged approach for everything large.
+
+    // Batch load all categories
     final allCategories = await db.query(_appCategoriesTable);
-    final allVersions = await db.query(
-      _versionsTable,
-      orderBy: 'version_code DESC',
+
+    // Batch load only the latest version for each app to save memory
+    // If they want ALL versions, they should use getAppByPackageName
+    // Or we should modify this to be more targeted.
+    final versionsCountResult = await db.rawQuery(
+      'SELECT COUNT(*) as count FROM $_versionsTable',
     );
+    final versionsCount = Sqflite.firstIntValue(versionsCountResult) ?? 0;
+
+    List<Map<String, dynamic>> allVersions;
+    if (versionsCount > 1000) {
+      // Only get latest versions if it's too big
+      allVersions = await db.rawQuery('''
+        SELECT v.* FROM $_versionsTable v
+        INNER JOIN (
+          SELECT package_name, MAX(version_code) as max_version_code
+          FROM $_versionsTable
+          GROUP BY package_name
+        ) v2 ON v.package_name = v2.package_name AND v.version_code = v2.max_version_code
+      ''');
+    } else {
+      allVersions = await db.query(
+        _versionsTable,
+        orderBy: 'version_code DESC',
+      );
+    }
 
     // Group by package name for efficient lookup
     final categoriesByPackage = <String, List<String>>{};
@@ -582,6 +758,75 @@ class DatabaseService {
     return apps;
   }
 
+  /// Gets a list of apps by package names
+  Future<List<FDroidApp>> getAppsByPackageNames(
+    List<String> packageNames,
+  ) async {
+    if (packageNames.isEmpty) return [];
+
+    final db = await database;
+
+    // Split into chunks of 50 to avoid SQLite argument limits and CursorWindow issues
+    final apps = <FDroidApp>[];
+    for (var i = 0; i < packageNames.length; i += 50) {
+      final end = (i + 50 < packageNames.length) ? i + 50 : packageNames.length;
+      final chunk = packageNames.sublist(i, end);
+
+      final appMaps = await db.rawQuery('''
+        SELECT a.*, r.url as repository_url FROM $_appsTable a
+        LEFT JOIN $_repositoriesTable r ON a.repository_id = r.id
+        WHERE a.package_name IN (${List.filled(chunk.length, '?').join(',')})
+        ''', chunk);
+
+      if (appMaps.isEmpty) continue;
+
+      // Batch load categories for this chunk
+      final categoriesResults = await db.query(
+        _appCategoriesTable,
+        where: 'package_name IN (${List.filled(chunk.length, '?').join(',')})',
+        whereArgs: chunk,
+      );
+
+      // Batch load ONLY the latest version for each app in this chunk
+      final versionsResults = await db.rawQuery('''
+        SELECT v.* FROM $_versionsTable v
+        INNER JOIN (
+          SELECT package_name, MAX(version_code) as max_version_code
+          FROM $_versionsTable
+          WHERE package_name IN (${List.filled(chunk.length, '?').join(',')})
+          GROUP BY package_name
+        ) v2 ON v.package_name = v2.package_name AND v.version_code = v2.max_version_code
+      ''', chunk);
+
+      // Group by package name
+      final categoriesByPackage = <String, List<String>>{};
+      for (final catRow in categoriesResults) {
+        final pkg = catRow['package_name'] as String;
+        final cat = catRow['category'] as String;
+        categoriesByPackage.putIfAbsent(pkg, () => []).add(cat);
+      }
+
+      final versionsByPackage = <String, List<Map<String, dynamic>>>{};
+      for (final verRow in versionsResults) {
+        final pkg = verRow['package_name'] as String;
+        versionsByPackage.putIfAbsent(pkg, () => []).add(verRow);
+      }
+
+      for (final appMap in appMaps) {
+        final packageName = appMap['package_name'] as String;
+        final app = _mapToAppWithData(
+          appMap,
+          categoriesByPackage[packageName] ?? [],
+          versionsByPackage[packageName] ?? [],
+          repositoryUrl: appMap['repository_url'] as String?,
+        );
+        apps.add(app);
+      }
+    }
+
+    return apps;
+  }
+
   /// Searches apps by repository URL
   Future<List<FDroidApp>> searchAppsByRepository(
     String query,
@@ -622,8 +867,8 @@ class DatabaseService {
           WHEN LOWER(a.description) LIKE ? THEN 50
           WHEN REPLACE(LOWER(a.description), '-', '') LIKE ? THEN 40
           WHEN EXISTS (
-            SELECT 1 FROM $_appCategoriesTable ac 
-            WHERE ac.package_name = a.package_name 
+            SELECT 1 FROM $_appCategoriesTable ac
+            WHERE ac.package_name = a.package_name
             AND LOWER(ac.category) LIKE ?
           ) THEN 25
           WHEN LOWER(a.package_name) LIKE ? THEN 10
@@ -634,9 +879,9 @@ class DatabaseService {
       LEFT JOIN $_repositoriesTable r ON a.repository_id = r.id
       LEFT JOIN $_appCategoriesTable ac ON a.package_name = ac.package_name
       WHERE a.repository_id = ?
-        AND (LOWER(a.name) LIKE ? 
+        AND (LOWER(a.name) LIKE ?
          OR REPLACE(LOWER(a.name), '-', '') LIKE ?
-         OR LOWER(a.summary) LIKE ? 
+         OR LOWER(a.summary) LIKE ?
          OR REPLACE(LOWER(a.summary), '-', '') LIKE ?
          OR LOWER(a.description) LIKE ?
          OR REPLACE(LOWER(a.description), '-', '') LIKE ?
@@ -745,8 +990,8 @@ class DatabaseService {
           WHEN LOWER(a.description) LIKE ? THEN 50
           WHEN REPLACE(LOWER(a.description), '-', '') LIKE ? THEN 40
           WHEN EXISTS (
-            SELECT 1 FROM $_appCategoriesTable ac 
-            WHERE ac.package_name = a.package_name 
+            SELECT 1 FROM $_appCategoriesTable ac
+            WHERE ac.package_name = a.package_name
             AND LOWER(ac.category) LIKE ?
           ) THEN 25
           WHEN LOWER(a.package_name) LIKE ? THEN 10
@@ -756,9 +1001,9 @@ class DatabaseService {
       FROM $_appsTable a
       LEFT JOIN $_repositoriesTable r ON a.repository_id = r.id
       LEFT JOIN $_appCategoriesTable ac ON a.package_name = ac.package_name
-      WHERE LOWER(a.name) LIKE ? 
+      WHERE LOWER(a.name) LIKE ?
          OR REPLACE(LOWER(a.name), '-', '') LIKE ?
-         OR LOWER(a.summary) LIKE ? 
+         OR LOWER(a.summary) LIKE ?
          OR REPLACE(LOWER(a.summary), '-', '') LIKE ?
          OR LOWER(a.description) LIKE ?
          OR REPLACE(LOWER(a.description), '-', '') LIKE ?
@@ -798,7 +1043,7 @@ class DatabaseService {
         .map((m) => m['package_name'] as String)
         .toList();
 
-    // Batch load all categories and versions for these apps
+    // Batch load categories for these apps
     final categoriesResults = await db.query(
       _appCategoriesTable,
       where:
@@ -806,13 +1051,16 @@ class DatabaseService {
       whereArgs: packageNames,
     );
 
-    final versionsResults = await db.query(
-      _versionsTable,
-      where:
-          'package_name IN (${List.filled(packageNames.length, '?').join(',')})',
-      whereArgs: packageNames,
-      orderBy: 'version_code DESC',
-    );
+    // Batch load ONLY the latest version for each matching app to save memory
+    final versionsResults = await db.rawQuery('''
+      SELECT v.* FROM $_versionsTable v
+      INNER JOIN (
+        SELECT package_name, MAX(version_code) as max_version_code
+        FROM $_versionsTable
+        WHERE package_name IN (${List.filled(packageNames.length, '?').join(',')})
+        GROUP BY package_name
+      ) v2 ON v.package_name = v2.package_name AND v.version_code = v2.max_version_code
+    ''', packageNames);
 
     // Group by package name
     final categoriesByPackage = <String, List<String>>{};

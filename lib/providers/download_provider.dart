@@ -184,12 +184,7 @@ class DownloadProvider extends ChangeNotifier {
 
     try {
       final info = await DeviceInfoPlugin().androidInfo;
-      final rawAbis =
-          info.supportedAbis ??
-          info.supported64BitAbis ??
-          info.supported32BitAbis ??
-          const <String>[];
-      final abis = rawAbis.where((abi) => abi.isNotEmpty).toList();
+      final abis = info.supportedAbis;
       if (abis.isNotEmpty) {
         _supportedAbis = abis;
         return abis;

@@ -323,37 +323,16 @@ class FDroidApiService {
     }
   }
 
-  /// Loads repository data from the database
+  /// Loads repository metadata from the database without loading all apps
   Future<FDroidRepository> _loadRepositoryFromDatabase() async {
-    final apps = await _databaseService.getAllApps();
     final repoName =
         await _databaseService.getMetadata('repo_name') ?? 'F-Droid';
     final repoDescription =
         await _databaseService.getMetadata('repo_description') ?? '';
 
-    // Try to load the cached JSON for screenshot extraction (ignore age check)
-    if (_cachedRawJson == null) {
-      try {
-        final file = await _cacheFile();
-        if (await file.exists()) {
-          final contents = await file.readAsString();
-          final jsonData = json.decode(contents);
-          if (jsonData is Map<String, dynamic>) {
-            _cachedRawJson = jsonData;
-            debugPrint('Loaded cached JSON for screenshots (database mode)');
-          }
-        }
-      } catch (e) {
-        debugPrint('Could not load JSON cache for screenshots: $e');
-      }
-    }
-
-    // Create a map of apps keyed by package name
-    final appsMap = <String, FDroidApp>{};
-    for (final app in apps) {
-      appsMap[app.packageName] = app;
-    }
-
+    // Return a lightweight repository object with empty apps map.
+    // The application logic has been updated to query the database directly
+    // instead of relying on this in-memory map.
     return FDroidRepository(
       name: repoName,
       description: repoDescription,
@@ -361,7 +340,7 @@ class FDroidApiService {
       timestamp: '',
       version: '',
       maxage: 0,
-      apps: appsMap,
+      apps: {}, // Empty map to save memory
     );
   }
 
@@ -658,6 +637,33 @@ class FDroidApiService {
     } catch (e) {
       throw Exception('Error fetching apps by category: $e');
     }
+  }
+
+  /// Gets apps by package names from database
+  Future<List<FDroidApp>> getAppsByPackageNames(
+    List<String> packageNames,
+  ) async {
+    return await _databaseService.getAppsByPackageNames(packageNames);
+  }
+
+  /// Gets paginated apps from database
+  Future<List<FDroidApp>> getAppsPaged({
+    int limit = 50,
+    int offset = 0,
+    String? category,
+    String orderBy = 'a.name ASC',
+  }) async {
+    return await _databaseService.getAppsPaged(
+      limit: limit,
+      offset: offset,
+      category: category,
+      orderBy: orderBy,
+    );
+  }
+
+  /// Gets a single app by package name from database
+  Future<FDroidApp?> getAppByPackageName(String packageName) async {
+    return await _databaseService.getAppByPackageName(packageName);
   }
 
   /// Searches for apps

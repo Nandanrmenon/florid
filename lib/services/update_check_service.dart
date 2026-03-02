@@ -12,7 +12,6 @@ import '../models/fdroid_app.dart';
 import '../providers/settings_provider.dart';
 import '../services/app_preferences_service.dart';
 import '../services/database_service.dart';
-import '../services/fdroid_api_service.dart';
 
 const String _updateCheckTask = 'florid_update_check';
 const String _updateCheckTaskName = 'updateCheckTask';
@@ -105,7 +104,6 @@ class UpdateCheckService {
       case UpdateNetworkPolicy.wifiAndCharging:
         return NetworkType.unmetered;
       case UpdateNetworkPolicy.any:
-      default:
         return NetworkType.connected;
     }
   }
@@ -138,47 +136,19 @@ Future<void> _runUpdateCheck({bool debug = false}) async {
   if (!enabled && !debug) return;
 
   final db = DatabaseService();
-  final repoMaps = await db.getAllRepositories();
-  final enabledRepos = repoMaps
-      .where((repo) => (repo['is_enabled'] as int? ?? 1) == 1)
-      .toList();
-
-  final repoUrls = enabledRepos.isNotEmpty
-      ? enabledRepos.map((repo) => repo['url'] as String).toList()
-      : <String>['https://f-droid.org/repo'];
-
-  final api = FDroidApiService();
-  final repositories = <FDroidRepository>[];
-  for (final url in repoUrls) {
-    try {
-      repositories.add(await api.fetchRepositoryFromUrl(url));
-    } catch (e) {
-      debugPrint('Background repo fetch failed for $url: $e');
-    }
-  }
-
-  if (repositories.isEmpty) {
-    final cachedRepo = await _loadRepositoryFromDatabase(db);
-    if (cachedRepo != null) {
-      repositories.add(cachedRepo);
-      if (debug) {
-        await _showDebugNotification('Using cached repository data');
-      }
-    } else {
-      if (debug) {
-        await _showDebugNotification('No cached repository data');
-      }
-      return;
-    }
-  }
-
-  final merged = _mergeRepositories(repositories);
   final installedApps = await InstalledApps.getInstalledApps();
+  if (installedApps.isEmpty) return;
+
   final appPrefs = AppPreferencesService();
+  final packageNames = installedApps.map((a) => a.packageName).toList();
+
+  // Directly query the database for all installed FDroid apps
+  final fdroidApps = await db.getAppsByPackageNames(packageNames);
+  final fdroidAppsMap = {for (final app in fdroidApps) app.packageName: app};
 
   final updates = <FDroidApp>[];
   for (final installed in installedApps) {
-    final fdroidApp = merged.apps[installed.packageName];
+    final fdroidApp = fdroidAppsMap[installed.packageName];
     if (fdroidApp == null) continue;
 
     final includeUnstable = await appPrefs.getIncludeUnstable(
@@ -187,9 +157,7 @@ Future<void> _runUpdateCheck({bool debug = false}) async {
     final latest = fdroidApp.getLatestVersion(includeUnstable: includeUnstable);
     if (latest == null) continue;
 
-    final installedVersionCode = installed.versionCode;
-
-    if (latest.versionCode > installedVersionCode) {
+    if (latest.versionCode > installed.versionCode) {
       updates.add(fdroidApp);
     }
   }
@@ -241,75 +209,6 @@ Future<void> _showDebugNotification(String message) async {
     details,
     payload: jsonEncode({'type': 'debug_update_check', 'message': message}),
   );
-}
-
-FDroidRepository _mergeRepositories(List<FDroidRepository> repos) {
-  final mergedApps = <String, FDroidApp>{};
-
-  for (final repo in repos) {
-    for (final entry in repo.apps.entries) {
-      final packageName = entry.key;
-      final app = entry.value;
-
-      if (mergedApps.containsKey(packageName)) {
-        final existing = mergedApps[packageName]!;
-        final repoSource = RepositorySource(
-          name: repo.name,
-          url: app.repositoryUrl,
-        );
-        final availableRepos = existing.availableRepositories ?? [];
-        if (!availableRepos.contains(repoSource)) {
-          final updatedRepos = [...availableRepos, repoSource];
-          mergedApps[packageName] = existing.copyWith(
-            availableRepositories: updatedRepos,
-          );
-        }
-      } else {
-        mergedApps[packageName] = app.copyWith(
-          availableRepositories: [
-            RepositorySource(name: repo.name, url: app.repositoryUrl),
-          ],
-        );
-      }
-    }
-  }
-
-  return FDroidRepository(
-    name: 'Merged Repositories',
-    description: 'Merged from ${repos.length} repositories',
-    icon: repos.first.icon,
-    timestamp: repos.first.timestamp,
-    version: repos.first.version,
-    maxage: repos.first.maxage,
-    apps: mergedApps,
-  );
-}
-
-Future<FDroidRepository?> _loadRepositoryFromDatabase(
-  DatabaseService db,
-) async {
-  try {
-    final apps = await db.getAllApps();
-    if (apps.isEmpty) return null;
-    final repoName = await db.getMetadata('repo_name') ?? 'F-Droid';
-    final repoDescription = await db.getMetadata('repo_description') ?? '';
-    final appsMap = <String, FDroidApp>{};
-    for (final app in apps) {
-      appsMap[app.packageName] = app;
-    }
-    return FDroidRepository(
-      name: repoName,
-      description: repoDescription,
-      icon: '',
-      timestamp: '',
-      version: '',
-      maxage: 0,
-      apps: appsMap,
-    );
-  } catch (e) {
-    debugPrint('Failed to load cached repository: $e');
-    return null;
-  }
 }
 
 Future<void> _showUpdateNotification(List<FDroidApp> apps) async {

@@ -100,28 +100,19 @@ class _UpdatesScreenState extends State<UpdatesScreen>
           );
         }
 
-        return FutureBuilder<List<FDroidApp>>(
+        return FutureBuilder<List<List<FDroidApp>>>(
           future: repositoryLoaded
-              ? appProvider.getUpdatableApps()
-              : Future.value(<FDroidApp>[]),
+              ? Future.wait([
+                  appProvider.getUpdatableApps(),
+                  appProvider.getFavoriteApps(),
+                  appProvider.getFDroidAppsFromInstalled(installedApps),
+                ])
+              : Future.value([<FDroidApp>[], <FDroidApp>[], <FDroidApp>[]]),
           builder: (context, snapshot) {
-            final updatableApps = snapshot.data ?? <FDroidApp>[];
-            final favoriteApps = repositoryLoaded
-                ? appProvider.getFavoriteApps()
-                : <FDroidApp>[];
-
-            // Get all F-Droid apps installed on device
-            final allFDroidApps = installedApps
-                .where(
-                  (installedApp) =>
-                      appProvider.repository?.apps[installedApp.packageName] !=
-                      null,
-                )
-                .map(
-                  (installedApp) =>
-                      appProvider.repository!.apps[installedApp.packageName]!,
-                )
-                .toList();
+            final results =
+                snapshot.data ?? [<FDroidApp>[], <FDroidApp>[], <FDroidApp>[]];
+            final updatableApps = results[0];
+            final allFDroidApps = results[2];
 
             return Scaffold(
               appBar: AppBar(
@@ -464,7 +455,6 @@ class _UpdatesScreenState extends State<UpdatesScreen>
       itemCount: allFDroidApps.length,
       itemBuilder: (context, index) {
         final app = allFDroidApps[index];
-        final installedApp = appProvider.getInstalledApp(app.packageName);
         final hasUpdate = updatableApps.any(
           (updateApp) => updateApp.packageName == app.packageName,
         );

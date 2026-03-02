@@ -189,9 +189,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         if (customUrls.isNotEmpty) {
           await appProvider.fetchRepositoriesFromUrls(customUrls);
         }
-
-        // Wait for custom repo imports to complete
-        await Future.delayed(const Duration(seconds: 3));
       }
 
       // Step 6: Fetch initial data

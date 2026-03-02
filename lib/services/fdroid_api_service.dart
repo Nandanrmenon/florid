@@ -291,20 +291,27 @@ class FDroidApiService {
 
       if (response.statusCode == 200) {
         final body = response.body;
-        final jsonData = json.decode(body);
+
+        // Offload JSON decoding and object mapping to a background isolate
+        final result = await compute(_parseRepositoryDataHelper, {
+          'body': body,
+          'repositoryUrl': null,
+        });
+
+        final jsonData = result['json'] as Map<String, dynamic>;
+        final repo = result['repo'] as FDroidRepository;
 
         // Cache the raw JSON for screenshot extraction
-        _cachedRawJson = jsonData as Map<String, dynamic>;
+        _cachedRawJson = jsonData;
         debugPrint(
           'Cached raw JSON, size: ${_cachedRawJson?.length ?? 0} keys',
         );
 
         // Parse repository
-        final repo = FDroidRepository.fromJson(jsonData);
 
         // Store in database on a background isolate to avoid blocking UI
         try {
-          _importRepositoryInBackground(repo); // Fire and forget
+          importRepositoryInBackground(repo); // Fire and forget
         } catch (e) {
           debugPrint('Error scheduling database import: $e');
         }
@@ -408,11 +415,11 @@ class FDroidApiService {
         );
         _workingSniBypassSettings[indexUrl] = primarySetting;
 
-        final jsonData = json.decode(response.body);
-        final repo = FDroidRepository.fromJson(
-          jsonData,
-          repositoryUrl: repoBase,
-        );
+        final result = await compute(_parseRepositoryDataHelper, {
+          'body': response.body,
+          'repositoryUrl': repoBase,
+        });
+        final repo = result['repo'] as FDroidRepository;
         debugPrint('Successfully fetched repository from $url');
         return repo;
       } catch (primaryError) {
@@ -432,11 +439,11 @@ class FDroidApiService {
           _workingSniBypassSettings[indexUrl] = fallbackSetting;
           debugPrint('Successfully fetched with SNI bypass=$fallbackSetting');
 
-          final jsonData = json.decode(response.body);
-          final repo = FDroidRepository.fromJson(
-            jsonData,
-            repositoryUrl: repoBase,
-          );
+          final result = await compute(_parseRepositoryDataHelper, {
+            'body': response.body,
+            'repositoryUrl': repoBase,
+          });
+          final repo = result['repo'] as FDroidRepository;
           return repo;
         } catch (fallbackError) {
           debugPrint('Fallback attempt also failed: $fallbackError');
@@ -480,7 +487,7 @@ class FDroidApiService {
   }
 
   /// Imports repository asynchronously to avoid blocking UI
-  void _importRepositoryInBackground(
+  void importRepositoryInBackground(
     FDroidRepository repo, {
     int? repositoryId,
   }) {
@@ -1290,4 +1297,18 @@ class SNIBypassHttpClient extends http.BaseClient {
 
 extension on http.StreamedResponse {
   bool get isOk => statusCode >= 200 && statusCode < 300;
+}
+
+/// Helper function to parse repository data in a background isolate
+Map<String, dynamic> _parseRepositoryDataHelper(Map<String, dynamic> args) {
+  final body = args['body'] as String;
+  final repositoryUrl = args['repositoryUrl'] as String?;
+
+  final jsonData = json.decode(body) as Map<String, dynamic>;
+  final repo = FDroidRepository.fromJson(
+    jsonData,
+    repositoryUrl: repositoryUrl,
+  );
+
+  return {'repo': repo, 'json': jsonData};
 }

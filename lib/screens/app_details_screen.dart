@@ -739,16 +739,20 @@ class _AppDetailsScreenState extends State<AppDetailsScreen> {
                             child: _AppDetailsIcon(app: widget.app),
                           ),
                         ),
-                        Text(
-                          widget.app.name,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            fontSize: 24,
-                            fontVariations: [
-                              FontVariation('wght', 700),
-                              FontVariation('ROND', 100),
-                            ],
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 32.0),
+                          child: Text(
+                            widget.app.name,
+                            maxLines: 2,
+                            textAlign: TextAlign.center,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontSize: 24,
+                              fontVariations: [
+                                FontVariation('wght', 700),
+                                FontVariation('ROND', 100),
+                              ],
+                            ),
                           ),
                         ),
                       ],

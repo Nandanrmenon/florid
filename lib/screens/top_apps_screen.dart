@@ -63,9 +63,18 @@ class _TopAppsScreenState extends State<TopAppsScreen>
     return Scaffold(
       appBar: AppBar(
         title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Text('Monthly Top Apps'),
+            Text(
+              'Monthly Top Apps',
+              style: TextStyle(
+                fontVariations: [
+                  FontVariation('wght', 700),
+                  FontVariation('ROND', 100),
+                ],
+                fontSize: 16,
+              ),
+            ),
             Text(
               'from IzzyOnDroid',
               style: Theme.of(context).textTheme.labelSmall?.copyWith(

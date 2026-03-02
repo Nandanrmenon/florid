@@ -279,7 +279,14 @@ class AppThemes {
         }),
         side: BorderSide(color: scheme.onSurfaceVariant, width: 1.5),
       ),
-      progressIndicatorTheme: ProgressIndicatorThemeData(year2023: false),
+      progressIndicatorTheme: ProgressIndicatorThemeData(
+        year2023: false,
+        linearMinHeight: 10,
+        borderRadius: BorderRadius.circular(99),
+      ),
+      chipTheme: ChipThemeData(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(99)),
+      ),
     );
   }
 
@@ -337,7 +344,7 @@ class AppThemes {
         ),
       ),
       chipTheme: ChipThemeData(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(99)),
       ),
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(
@@ -458,42 +465,15 @@ class AppThemes {
         }),
         side: BorderSide(color: scheme.onSurfaceVariant, width: 1.5),
       ),
-      progressIndicatorTheme: ProgressIndicatorThemeData(year2023: false),
-    );
-  }
-
-  // Dark Knight Theme (custom dark-focused style)
-  static ThemeData darkKnightLightTheme({ColorScheme? colorScheme}) {
-    final ColorScheme scheme = colorScheme != null
-        ? ColorScheme.fromSeed(
-            seedColor: colorScheme.primary,
-            brightness: Brightness.light,
-          )
-        : ColorScheme.fromSeed(
-            seedColor: kAppColor,
-            brightness: Brightness.light,
-          );
-
-    return ThemeData(
-      useMaterial3: true,
-      colorScheme: scheme,
-      appBarTheme: AppBarTheme(
-        centerTitle: true,
-        backgroundColor: scheme.surface,
-        elevation: 0,
-      ),
-      scaffoldBackgroundColor: scheme.surface,
-      inputDecorationTheme: InputDecorationTheme(filled: true),
-      navigationBarTheme: NavigationBarThemeData(
-        backgroundColor: scheme.surface,
-      ),
-      navigationRailTheme: NavigationRailThemeData(
-        backgroundColor: scheme.surface,
+      progressIndicatorTheme: ProgressIndicatorThemeData(
+        year2023: false,
+        linearMinHeight: 10,
+        borderRadius: BorderRadius.circular(99),
       ),
     );
   }
 
-  static ThemeData darkKnightDarkTheme({ColorScheme? colorScheme}) {
+  static ThemeData darkKnightTheme({ColorScheme? colorScheme}) {
     final ColorScheme scheme = colorScheme != null
         ? ColorScheme.fromSeed(
             seedColor: colorScheme.primary,
@@ -530,7 +510,7 @@ class AppThemes {
       cardTheme: CardThemeData(
         color: scheme.surface,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(8),
           side: BorderSide(
             color: scheme.onSurfaceVariant.withValues(alpha: .25),
           ),
@@ -552,6 +532,64 @@ class AppThemes {
         backgroundColor: scheme.surfaceContainer,
         selectedIconTheme: IconThemeData(color: scheme.primary),
         unselectedIconTheme: IconThemeData(color: scheme.onSurface),
+      ),
+      progressIndicatorTheme: ProgressIndicatorThemeData(
+        year2023: false,
+        linearMinHeight: 10,
+        borderRadius: BorderRadius.circular(8),
+        // trackGap: ,
+      ),
+      checkboxTheme: CheckboxThemeData(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        checkColor: WidgetStateProperty.resolveWith<Color?>((
+          Set<WidgetState> states,
+        ) {
+          if (states.contains(WidgetState.selected)) {
+            return scheme.primary;
+          }
+          return null; // Use the default check color
+        }),
+        fillColor: WidgetStateProperty.resolveWith<Color?>((
+          Set<WidgetState> states,
+        ) {
+          if (states.contains(WidgetState.selected)) {
+            return scheme.primary;
+          }
+          return null; // Use the default fill color
+        }),
+      ),
+      popupMenuTheme: PopupMenuThemeData(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+          side: BorderSide(
+            color: scheme.onSurfaceVariant.withValues(alpha: .25),
+            width: 1.5,
+          ),
+        ),
+      ),
+      filledButtonTheme: FilledButtonThemeData(
+        style: FilledButton.styleFrom(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        ),
+      ),
+      textButtonTheme: TextButtonThemeData(
+        style: TextButton.styleFrom(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        ),
+      ),
+      iconButtonTheme: IconButtonThemeData(
+        style: IconButton.styleFrom(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        ),
+      ),
+      floatingActionButtonTheme: FloatingActionButtonThemeData(
+        backgroundColor: scheme.primary,
+        foregroundColor: scheme.onPrimary,
+        elevation: 0,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      ),
+      chipTheme: ChipThemeData(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       ),
     );
   }

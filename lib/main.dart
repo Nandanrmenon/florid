@@ -108,11 +108,8 @@ class MainApp extends StatelessWidget {
                   case ThemeStyle.florid:
                     return AppThemes.floridLightTheme(colorScheme: lightScheme);
                   case ThemeStyle.darkKnight:
-                    return AppThemes.darkKnightLightTheme(
-                      colorScheme: lightScheme,
-                    );
+                    return AppThemes.darkKnightTheme(colorScheme: lightScheme);
                   case ThemeStyle.material:
-                  default:
                     return AppThemes.materialLightTheme(
                       colorScheme: lightScheme,
                     );
@@ -124,11 +121,8 @@ class MainApp extends StatelessWidget {
                   case ThemeStyle.florid:
                     return AppThemes.floridDarkTheme(colorScheme: darkScheme);
                   case ThemeStyle.darkKnight:
-                    return AppThemes.darkKnightDarkTheme(
-                      colorScheme: darkScheme,
-                    );
+                    return AppThemes.darkKnightTheme(colorScheme: darkScheme);
                   case ThemeStyle.material:
-                  default:
                     return AppThemes.materialDarkTheme(colorScheme: darkScheme);
                 }
               }();

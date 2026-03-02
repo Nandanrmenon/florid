@@ -18,6 +18,11 @@ const String _updateCheckTask = 'florid_update_check';
 const String _updateCheckTaskName = 'updateCheckTask';
 const String _updateCheckDebugTask = 'florid_update_check_debug';
 const String _updateCheckDebugTaskName = 'updateCheckDebugTask';
+const String _updateNotificationSignatureKey =
+    'background_update_notification_signature';
+const String _updateNotificationTimestampKey =
+    'background_update_notification_timestamp';
+const Duration _updateNotificationMinInterval = Duration(hours: 24);
 
 class UpdateCheckService {
   static const String updatesChannelId = 'com.florid.updates';
@@ -60,7 +65,7 @@ class UpdateCheckService {
     await Workmanager().registerPeriodicTask(
       _updateCheckTask,
       _updateCheckTaskName,
-      existingWorkPolicy: ExistingWorkPolicy.replace,
+      existingWorkPolicy: ExistingPeriodicWorkPolicy.replace,
       frequency: Duration(hours: safeIntervalHours),
       constraints: constraints,
     );
@@ -177,6 +182,7 @@ Future<void> _runUpdateCheck({bool debug = false}) async {
   final appPrefs = AppPreferencesService();
 
   final updates = <FDroidApp>[];
+  final updateVersions = <String, int>{};
   for (final installed in installedApps) {
     final fdroidApp = merged.apps[installed.packageName];
     if (fdroidApp == null) continue;
@@ -191,6 +197,7 @@ Future<void> _runUpdateCheck({bool debug = false}) async {
 
     if (latest.versionCode > installedVersionCode) {
       updates.add(fdroidApp);
+      updateVersions[fdroidApp.packageName] = latest.versionCode;
     }
   }
 
@@ -201,11 +208,58 @@ Future<void> _runUpdateCheck({bool debug = false}) async {
     return;
   }
 
+  final signature = _buildUpdateSignature(updateVersions);
+  final shouldNotify = await _shouldNotifyUpdates(signature, debug: debug);
+  if (!shouldNotify) {
+    return;
+  }
+
   await _showUpdateNotification(updates);
+  await _recordUpdateNotification(signature);
 
   if (debug) {
     await _showDebugNotification('Found ${updates.length} update(s)');
   }
+}
+
+String _buildUpdateSignature(Map<String, int> versions) {
+  final entries = versions.entries.toList()
+    ..sort((a, b) => a.key.compareTo(b.key));
+  return entries.map((entry) => '${entry.key}:${entry.value}').join('|');
+}
+
+Future<bool> _shouldNotifyUpdates(
+  String signature, {
+  bool debug = false,
+}) async {
+  final prefs = await SharedPreferences.getInstance();
+  final lastSignature = prefs.getString(_updateNotificationSignatureKey);
+  final lastTimestamp = prefs.getInt(_updateNotificationTimestampKey);
+  if (lastSignature != signature) {
+    return true;
+  }
+
+  if (lastTimestamp == null) {
+    return true;
+  }
+
+  final lastTime = DateTime.fromMillisecondsSinceEpoch(lastTimestamp);
+  final tooSoon =
+      DateTime.now().difference(lastTime) < _updateNotificationMinInterval;
+  if (tooSoon && debug) {
+    await _showDebugNotification('Updates unchanged; notification suppressed');
+  }
+
+  return !tooSoon;
+}
+
+Future<void> _recordUpdateNotification(String signature) async {
+  final prefs = await SharedPreferences.getInstance();
+  await prefs.setString(_updateNotificationSignatureKey, signature);
+  await prefs.setInt(
+    _updateNotificationTimestampKey,
+    DateTime.now().millisecondsSinceEpoch,
+  );
 }
 
 Future<void> _showDebugNotification(String message) async {
@@ -235,10 +289,10 @@ Future<void> _showDebugNotification(String message) async {
   );
 
   await plugin.show(
-    2002,
-    'Debug update check',
-    message,
-    details,
+    id: 2002,
+    title: 'Debug update check',
+    body: message,
+    notificationDetails: details,
     payload: jsonEncode({'type': 'debug_update_check', 'message': message}),
   );
 }
@@ -344,10 +398,10 @@ Future<void> _showUpdateNotification(List<FDroidApp> apps) async {
   );
 
   await plugin.show(
-    2001,
-    'Updates available ($count)',
-    summary,
-    details,
+    id: 2001,
+    title: 'Updates available ($count)',
+    body: summary,
+    notificationDetails: details,
     payload: jsonEncode({'type': 'updates', 'count': count}),
   );
 }
@@ -364,13 +418,13 @@ Future<FlutterLocalNotificationsPlugin> _initNotifications() async {
   );
 
   try {
-    await plugin.initialize(initSettings);
+    await plugin.initialize(settings: initSettings);
   } on PlatformException catch (e) {
     if (e.code == 'invalid_icon') {
       debugPrint(
         'UpdateCheckService: ic_notification missing, using launcher icon',
       );
-      await plugin.initialize(fallbackSettings);
+      await plugin.initialize(settings: fallbackSettings);
     } else {
       rethrow;
     }

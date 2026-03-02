@@ -33,7 +33,7 @@ class NotificationService {
 
     try {
       await _flutterLocalNotificationsPlugin.initialize(
-        customIconSettings,
+        settings: customIconSettings,
         onDidReceiveNotificationResponse: _onNotificationTapped,
       );
     } on PlatformException catch (e) {
@@ -42,7 +42,7 @@ class NotificationService {
           'Notification icon ic_notification missing, falling back to launcher icon: $e',
         );
         await _flutterLocalNotificationsPlugin.initialize(
-          fallbackIconSettings,
+          settings: fallbackIconSettings,
           onDidReceiveNotificationResponse: _onNotificationTapped,
         );
       } else {
@@ -134,10 +134,10 @@ class NotificationService {
     );
 
     await _flutterLocalNotificationsPlugin.show(
-      downloadNotificationId,
-      title,
-      '$percent% - Downloading $packageName',
-      platformChannelSpecifics,
+      id: downloadNotificationId,
+      title: title,
+      body: '$percent% - Downloading $packageName',
+      notificationDetails: platformChannelSpecifics,
       payload: packageName,
     );
   }
@@ -175,10 +175,10 @@ class NotificationService {
     );
 
     await _flutterLocalNotificationsPlugin.show(
-      downloadNotificationId,
-      title,
-      'Download complete - $packageName',
-      platformChannelSpecifics,
+      id: downloadNotificationId,
+      title: title,
+      body: 'Download complete - $packageName',
+      notificationDetails: platformChannelSpecifics,
       payload: packageName,
     );
   }
@@ -217,16 +217,16 @@ class NotificationService {
     );
 
     await _flutterLocalNotificationsPlugin.show(
-      downloadNotificationId,
-      title,
-      'Download failed: $error',
-      platformChannelSpecifics,
+      id: downloadNotificationId,
+      title: title,
+      body: 'Download failed: $error',
+      notificationDetails: platformChannelSpecifics,
       payload: packageName,
     );
   }
 
   Future<void> cancelDownloadNotification() async {
-    await _flutterLocalNotificationsPlugin.cancel(downloadNotificationId);
+    await _flutterLocalNotificationsPlugin.cancel(id: downloadNotificationId);
   }
 
   void _onNotificationTapped(NotificationResponse response) {

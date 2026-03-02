@@ -188,18 +188,17 @@ class AppProvider extends ChangeNotifier {
 
       final repositories = <FDroidRepository>[];
 
-      // Fetch all repositories, handling errors per URL
-      for (final url in urls) {
+      // Fetch all repositories concurrently, handling errors per URL
+      final futures = urls.map((url) async {
         try {
           final repo = await _apiService.fetchRepositoryFromUrl(url);
-          repositories.add(repo);
 
           // Also import to database for future searches
           // Get the repository ID from the repositories table by URL
           try {
             final repoId = await _apiService.getRepositoryIdByUrl(url);
             if (repoId != null) {
-              await _apiService.importRepositoryToDatabase(
+              _apiService.importRepositoryInBackground(
                 repo,
                 repositoryId: repoId,
               );
@@ -210,11 +209,16 @@ class AppProvider extends ChangeNotifier {
           }
 
           debugPrint('Successfully fetched repository from $url');
+          return repo;
         } catch (e) {
           debugPrint('Failed to fetch repository from $url: $e');
           // Continue with other URLs if one fails
+          return null;
         }
-      }
+      });
+
+      final results = await Future.wait(futures);
+      repositories.addAll(results.whereType<FDroidRepository>());
 
       if (repositories.isEmpty) {
         throw Exception('Failed to fetch from any repository');
@@ -375,39 +379,34 @@ class AppProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      List<FDroidApp> apps = [];
-
-      // Try to fetch from custom repositories if available
-      if (repositoriesProvider != null) {
-        // Ensure repositories are loaded before checking enabled ones
-        if (repositoriesProvider.repositories.isEmpty &&
-            !repositoriesProvider.isLoading) {
-          await repositoriesProvider.loadRepositories();
-        }
-
-        final customRepos = repositoriesProvider.enabledRepositories;
-        if (customRepos.isNotEmpty) {
-          final customUrls = customRepos.map((r) => r.url).toList();
-          final mergedRepo = await fetchRepositoriesFromUrls(customUrls);
-          if (mergedRepo != null) {
-            // Get latest apps from merged repository
-            final latestApps = mergedRepo.apps.values.toList();
-            latestApps.sort((a, b) {
-              final aAdded = a.added?.millisecondsSinceEpoch ?? 0;
-              final bAdded = b.added?.millisecondsSinceEpoch ?? 0;
-              return bAdded.compareTo(aAdded); // Latest first
-            });
-            apps = latestApps.take(limit).toList();
-            _latestApps = apps;
-            _latestAppsState = LoadingState.success;
-            notifyListeners();
-            return;
-          }
-        }
+      // First ensure custom repo models are loaded locally
+      if (repositoriesProvider != null &&
+          repositoriesProvider.repositories.isEmpty &&
+          !repositoriesProvider.isLoading) {
+        await repositoriesProvider.loadRepositories();
       }
 
-      // Fall back to official F-Droid
-      _latestApps = await _apiService.fetchLatestApps(limit: limit);
+      // Fetch all apps from the robust database service, which caches them centrally
+      final allLatestApps = await _apiService.fetchLatestApps(limit: limit * 2);
+
+      if (repositoriesProvider != null) {
+        final customRepos = repositoriesProvider.enabledRepositories;
+        final enabledUrls = customRepos.map((r) => r.url).toSet();
+
+        // If they have standard repo vs not standard etc.
+        // We only retain apps coming from the valid, enabled URLs or the main official repo
+        // which defaults to "https://f-droid.org/repo"
+        enabledUrls.add('https://f-droid.org/repo');
+
+        final filteredApps = allLatestApps.where((app) {
+          return enabledUrls.contains(app.repositoryUrl);
+        }).toList();
+
+        _latestApps = filteredApps.take(limit).toList();
+      } else {
+        _latestApps = allLatestApps.take(limit).toList();
+      }
+
       _latestAppsState = LoadingState.success;
     } catch (e) {
       _latestAppsError = e.toString();
@@ -426,45 +425,38 @@ class AppProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      List<FDroidApp> apps = [];
-
-      // Try to fetch from custom repositories if available
-      if (repositoriesProvider != null) {
-        // Ensure repositories are loaded before checking enabled ones
-        if (repositoriesProvider.repositories.isEmpty &&
-            !repositoriesProvider.isLoading) {
-          await repositoriesProvider.loadRepositories();
-        }
-
-        final customRepos = repositoriesProvider.enabledRepositories;
-        if (customRepos.isNotEmpty) {
-          final customUrls = customRepos.map((r) => r.url).toList();
-          final mergedRepo = await fetchRepositoriesFromUrls(customUrls);
-          if (mergedRepo != null) {
-            // Get recently updated apps from merged repository
-            final recentlyUpdatedApps = mergedRepo.apps.values.toList();
-            recentlyUpdatedApps.sort((a, b) {
-              final aUpdated = a.lastUpdated?.millisecondsSinceEpoch ?? 0;
-              final bUpdated = b.lastUpdated?.millisecondsSinceEpoch ?? 0;
-              return bUpdated.compareTo(aUpdated); // Most recent first
-            });
-            apps = recentlyUpdatedApps.take(limit).toList();
-            _recentlyUpdatedApps = apps;
-            _recentlyUpdatedAppsState = LoadingState.success;
-            notifyListeners();
-            return;
-          }
-        }
+      // First ensure custom repo models are loaded locally
+      if (repositoriesProvider != null &&
+          repositoriesProvider.repositories.isEmpty &&
+          !repositoriesProvider.isLoading) {
+        await repositoriesProvider.loadRepositories();
       }
 
-      // Fall back to official F-Droid
-      final allApps = await _apiService.fetchApps(limit: limit * 2);
+      // Fetch all apps from the robust database service, which caches them centrally
+      // Increase limit slightly since we'll filter out disabled ones
+      final allApps = await _apiService.fetchApps(limit: limit * 4);
       allApps.sort((a, b) {
         final aUpdated = a.lastUpdated?.millisecondsSinceEpoch ?? 0;
         final bUpdated = b.lastUpdated?.millisecondsSinceEpoch ?? 0;
         return bUpdated.compareTo(aUpdated);
       });
-      _recentlyUpdatedApps = allApps.take(limit).toList();
+
+      if (repositoriesProvider != null) {
+        final customRepos = repositoriesProvider.enabledRepositories;
+        final enabledUrls = customRepos.map((r) => r.url).toSet();
+
+        // Valid fallback original URL
+        enabledUrls.add('https://f-droid.org/repo');
+
+        final filteredApps = allApps.where((app) {
+          return enabledUrls.contains(app.repositoryUrl);
+        }).toList();
+
+        _recentlyUpdatedApps = filteredApps.take(limit).toList();
+      } else {
+        _recentlyUpdatedApps = allApps.take(limit).toList();
+      }
+
       _recentlyUpdatedAppsState = LoadingState.success;
     } catch (e) {
       _recentlyUpdatedAppsError = e.toString();

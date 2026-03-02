@@ -47,7 +47,7 @@ class _HomeScreenState extends State<HomeScreen>
     );
     appProvider.fetchTopApps(
       repositoriesProvider: repositoriesProvider,
-      limit: 10,
+      limit: 100,
     );
   }
 
@@ -61,7 +61,7 @@ class _HomeScreenState extends State<HomeScreen>
       ),
       appProvider.fetchTopApps(
         repositoriesProvider: repositoriesProvider,
-        limit: 10,
+        limit: 100,
       ),
     ]);
   }

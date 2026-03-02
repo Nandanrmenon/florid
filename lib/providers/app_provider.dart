@@ -490,10 +490,16 @@ class AppProvider extends ChangeNotifier {
 
     try {
       // First ensure custom repo models are loaded locally
-      if (repositoriesProvider != null &&
-          repositoriesProvider.repositories.isEmpty &&
-          !repositoriesProvider.isLoading) {
-        await repositoriesProvider.loadRepositories();
+      if (repositoriesProvider != null) {
+        // If repositories are currently loading, wait for them
+        if (repositoriesProvider.isLoading) {
+          // Wait a bit for loading to complete
+          await Future.delayed(Duration(milliseconds: 100));
+        }
+        // If still empty after waiting, load them
+        if (repositoriesProvider.repositories.isEmpty) {
+          await repositoriesProvider.loadRepositories();
+        }
       }
 
       // Find IzzyOnDroid repository

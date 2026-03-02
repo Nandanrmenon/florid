@@ -62,6 +62,7 @@ class _TopAppsScreenState extends State<TopAppsScreen>
 
     return Scaffold(
       appBar: AppBar(
+        centerTitle: true,
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [

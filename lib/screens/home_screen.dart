@@ -365,136 +365,165 @@ class _HomeScreenState extends State<HomeScreen>
                   child: CarouselView(
                     itemExtent: 350,
                     itemSnapping: true,
-                    shrinkExtent: 350,
+                    shrinkExtent: 100,
                     onTap: (index) => Navigator.of(context).push(
                       MaterialPageRoute(
                         builder: (context) =>
                             AppDetailsScreen(app: carouselApps[index]),
                       ),
                     ),
-                    padding: const EdgeInsets.symmetric(horizontal: 8),
                     children: carouselApps.asMap().entries.map((entry) {
                       final app = entry.value;
                       return Material(
-                        color: Theme.of(
-                          context,
-                        ).colorScheme.surfaceContainerLow,
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8.0,
-                            vertical: 24,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: [
+                                isDarkKnight
+                                    ? Theme.of(
+                                        context,
+                                      ).colorScheme.surfaceContainerLow
+                                    : Theme.of(context).colorScheme.tertiary
+                                          .withValues(alpha: 0.5),
+                                // Theme.of(context).colorScheme.tertiary,
+                                isDarkKnight
+                                    ? Theme.of(
+                                        context,
+                                      ).colorScheme.surfaceContainerLowest
+                                    : Theme.of(context).colorScheme.tertiary,
+                              ],
+                              begin: Alignment.topRight,
+                              end: Alignment.bottomLeft,
+                            ),
                           ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            children: [
-                              Consumer2<AppProvider, DownloadProvider>(
-                                builder: (context, appProvider, downloadProvider, _) {
-                                  final version = app.latestVersion;
-                                  final isDownloading = version != null
-                                      ? downloadProvider.isDownloading(
-                                          app.packageName,
-                                          version.versionName,
-                                        )
-                                      : false;
-                                  final progress = version != null
-                                      ? downloadProvider.getProgress(
-                                          app.packageName,
-                                          version.versionName,
-                                        )
-                                      : 0.0;
-                                  return SizedBox(
-                                    width: 72,
-                                    height: 72,
-                                    child: Stack(
-                                      alignment: Alignment.center,
-                                      children: [
-                                        AnimatedOpacity(
-                                          opacity: isDownloading ? 1.0 : 0.0,
-                                          duration: const Duration(
-                                            milliseconds: 300,
-                                          ),
-                                          child: SizedBox(
-                                            width: 86,
-                                            height: 86,
-                                            child: Center(
-                                              child: CircularProgressIndicator(
-                                                value: isDownloading
-                                                    ? progress
-                                                    : null,
-                                                strokeWidth: 2,
-                                                backgroundColor:
-                                                    Theme.of(context)
-                                                        .colorScheme
-                                                        .surfaceContainerHighest,
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8.0,
+                              vertical: 24,
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: [
+                                Consumer2<AppProvider, DownloadProvider>(
+                                  builder: (context, appProvider, downloadProvider, _) {
+                                    final version = app.latestVersion;
+                                    final isDownloading = version != null
+                                        ? downloadProvider.isDownloading(
+                                            app.packageName,
+                                            version.versionName,
+                                          )
+                                        : false;
+                                    final progress = version != null
+                                        ? downloadProvider.getProgress(
+                                            app.packageName,
+                                            version.versionName,
+                                          )
+                                        : 0.0;
+                                    return SizedBox(
+                                      width: 72,
+                                      height: 72,
+                                      child: Stack(
+                                        alignment: Alignment.center,
+                                        children: [
+                                          AnimatedOpacity(
+                                            opacity: isDownloading ? 1.0 : 0.0,
+                                            duration: const Duration(
+                                              milliseconds: 300,
+                                            ),
+                                            child: SizedBox(
+                                              width: 86,
+                                              height: 86,
+                                              child: Center(
+                                                child: CircularProgressIndicator(
+                                                  value: isDownloading
+                                                      ? progress
+                                                      : null,
+                                                  strokeWidth: 2,
+                                                  backgroundColor:
+                                                      Theme.of(context)
+                                                          .colorScheme
+                                                          .surfaceContainerHighest,
+                                                ),
                                               ),
                                             ),
                                           ),
-                                        ),
-                                        AnimatedContainer(
-                                          duration: const Duration(
-                                            milliseconds: 300,
-                                          ),
-                                          curve: Curves.easeInOut,
-                                          width: isDownloading ? 24 : 48,
-                                          height: isDownloading ? 24 : 48,
-                                          clipBehavior: Clip.antiAlias,
-                                          decoration: BoxDecoration(
-                                            borderRadius: BorderRadius.circular(
-                                              12,
+                                          AnimatedContainer(
+                                            duration: const Duration(
+                                              milliseconds: 300,
                                             ),
-                                            color: Theme.of(context)
-                                                .colorScheme
-                                                .surfaceContainerHighest,
+                                            curve: Curves.easeInOut,
+                                            width: isDownloading ? 24 : 48,
+                                            height: isDownloading ? 24 : 48,
+                                            clipBehavior: Clip.antiAlias,
+                                            decoration: BoxDecoration(
+                                              borderRadius:
+                                                  BorderRadius.circular(12),
+                                              color: Theme.of(context)
+                                                  .colorScheme
+                                                  .surfaceContainerHighest,
+                                            ),
+                                            child: MultiIcon(app: app),
                                           ),
-                                          child: MultiIcon(app: app),
-                                        ),
-                                      ],
-                                    ),
-                                  );
-                                },
-                              ),
-
-                              Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 16.0,
-                                ),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      app.name,
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: TextStyle(
-                                        fontVariations: [
-                                          FontVariation('wght', 700),
-                                          FontVariation('ROND', 100),
                                         ],
-                                        fontSize: 18,
                                       ),
-                                    ),
-                                    if (appProvider.topAppsDownloads
-                                        .containsKey(app.packageName))
+                                    );
+                                  },
+                                ),
+
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 16.0,
+                                  ),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
                                       Text(
-                                        '${_formatDownloads(appProvider.topAppsDownloads[app.packageName]!)} downloads',
+                                        app.name,
                                         maxLines: 1,
                                         overflow: TextOverflow.ellipsis,
                                         style: TextStyle(
-                                          fontSize: 12,
                                           fontVariations: [
-                                            FontVariation('wght', 400),
-                                            FontVariation('ROND', 0),
+                                            FontVariation('wght', 700),
+                                            FontVariation('ROND', 100),
                                           ],
-                                          color: Theme.of(
-                                            context,
-                                          ).colorScheme.onSurfaceVariant,
+                                          fontSize: 18,
+                                          color: isDarkKnight
+                                              ? Theme.of(
+                                                  context,
+                                                ).colorScheme.onSurface
+                                              : Theme.of(
+                                                  context,
+                                                ).colorScheme.onPrimary,
                                         ),
                                       ),
-                                  ],
+                                      if (appProvider.topAppsDownloads
+                                          .containsKey(app.packageName))
+                                        Text(
+                                          '${_formatDownloads(appProvider.topAppsDownloads[app.packageName]!)} downloads',
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: TextStyle(
+                                            fontSize: 12,
+                                            fontVariations: [
+                                              FontVariation('wght', 400),
+                                              FontVariation('ROND', 0),
+                                            ],
+                                            color: isDarkKnight
+                                                ? Theme.of(
+                                                    context,
+                                                  ).colorScheme.onSurface
+                                                : Theme.of(
+                                                    context,
+                                                  ).colorScheme.onPrimary,
+                                          ),
+                                        ),
+                                    ],
+                                  ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
                         ),
                       );

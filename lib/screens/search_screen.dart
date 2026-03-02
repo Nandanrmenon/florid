@@ -1,4 +1,5 @@
 import 'package:florid/l10n/app_localizations.dart';
+import 'package:florid/models/search_filters.dart';
 import 'package:florid/providers/settings_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -20,6 +21,7 @@ class SearchScreen extends StatefulWidget {
 class _SearchScreenState extends State<SearchScreen> {
   final TextEditingController _searchController = TextEditingController();
   final FocusNode _searchFocus = FocusNode();
+  SearchFilters _filters = const SearchFilters();
 
   @override
   void initState() {
@@ -54,13 +56,36 @@ class _SearchScreenState extends State<SearchScreen> {
   void _performSearch(String query) {
     final appProvider = context.read<AppProvider>();
     final repositoriesProvider = context.read<RepositoriesProvider>();
-    appProvider.searchApps(query, repositoriesProvider: repositoriesProvider);
+    appProvider.searchApps(
+      query,
+      repositoriesProvider: repositoriesProvider,
+      filters: _filters,
+    );
   }
 
   void _clearSearch() {
     _searchController.clear();
     final appProvider = context.read<AppProvider>();
     appProvider.clearSearch();
+  }
+
+  void _openFilters() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      showDragHandle: true,
+      builder: (context) => _FilterBottomSheet(
+        currentFilters: _filters,
+        onApply: (newFilters) {
+          setState(() {
+            _filters = newFilters;
+          });
+          if (_searchController.text.trim().isNotEmpty) {
+            _performSearch(_searchController.text.trim());
+          }
+        },
+      ),
+    );
   }
 
   @override
@@ -113,9 +138,31 @@ class _SearchScreenState extends State<SearchScreen> {
           ),
         ),
         appBar: AppBar(
-          // scrolledUnderElevation: 0,
-          // elevation: 0,
-          // backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
+          title: Consumer<AppProvider>(
+            builder: (context, appProvider, _) {
+              final results = appProvider.searchResults;
+              final query = appProvider.searchQuery;
+
+              if (query.isNotEmpty && results.isNotEmpty) {
+                return Text(
+                  '${results.length} results for "$query"',
+                  style: Theme.of(context).textTheme.titleMedium,
+                );
+              }
+              return const SizedBox.shrink();
+            },
+          ),
+          actions: [
+            Badge(
+              isLabelVisible: _filters.hasActiveFilters,
+              label: Text(_filters.activeFilterCount.toString()),
+              child: TextButton.icon(
+                onPressed: _openFilters,
+                icon: const Icon(Symbols.filter_list),
+                label: const Text('Filters'),
+              ),
+            ),
+          ],
         ),
         body: Consumer<AppProvider>(
           builder: (context, appProvider, child) {
@@ -239,21 +286,6 @@ class _SearchScreenState extends State<SearchScreen> {
             // Show results
             return Column(
               children: [
-                // Results header
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.surfaceContainer,
-                  ),
-                  child: Text(
-                    '${results.length} results for "$query"',
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                ),
-
                 // Results list
                 Expanded(
                   child: ListView.builder(
@@ -339,6 +371,286 @@ class _SearchSuggestions extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+class _FilterBottomSheet extends StatefulWidget {
+  final SearchFilters currentFilters;
+  final Function(SearchFilters) onApply;
+
+  const _FilterBottomSheet({
+    required this.currentFilters,
+    required this.onApply,
+  });
+
+  @override
+  State<_FilterBottomSheet> createState() => _FilterBottomSheetState();
+}
+
+class _FilterBottomSheetState extends State<_FilterBottomSheet> {
+  late Set<String> _selectedCategories;
+  late Set<String> _selectedRepositories;
+  late SortOption _selectedSort;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedCategories = Set.from(widget.currentFilters.categories);
+    _selectedRepositories = Set.from(widget.currentFilters.repositories);
+    _selectedSort = widget.currentFilters.sortBy;
+
+    // Load categories if not already loaded
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final appProvider = context.read<AppProvider>();
+      if (appProvider.categories.isEmpty &&
+          appProvider.categoriesState != LoadingState.loading) {
+        appProvider.fetchCategories();
+      }
+    });
+  }
+
+  void _applyFilters() {
+    final newFilters = SearchFilters(
+      categories: _selectedCategories,
+      repositories: _selectedRepositories,
+      sortBy: _selectedSort,
+    );
+    widget.onApply(newFilters);
+    Navigator.pop(context);
+  }
+
+  void _clearAllFilters() {
+    setState(() {
+      _selectedCategories.clear();
+      _selectedRepositories.clear();
+      _selectedSort = SortOption.relevance;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return DraggableScrollableSheet(
+      initialChildSize: 0.7,
+      minChildSize: 0.5,
+      maxChildSize: 0.95,
+      expand: false,
+      builder: (context, scrollController) {
+        return Consumer2<AppProvider, RepositoriesProvider>(
+          builder: (context, appProvider, repoProvider, child) {
+            final categories = appProvider.categories;
+            final repositories = repoProvider.enabledRepositories;
+
+            // Extract categories available in search results
+            final searchResults = appProvider.searchResults;
+            final availableCategories = <String>{};
+            for (final app in searchResults) {
+              if (app.categories != null) {
+                availableCategories.addAll(app.categories!);
+              }
+            }
+
+            // Filter categories to only show those in search results
+            final filteredCategories = categories
+                .where((cat) => availableCategories.contains(cat))
+                .toList();
+
+            return Column(
+              children: [
+                // Header
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Filters',
+                        style: Theme.of(context).textTheme.titleLarge,
+                      ),
+                      TextButton(
+                        onPressed: _clearAllFilters,
+                        child: const Text('Clear all'),
+                      ),
+                    ],
+                  ),
+                ),
+                const Divider(height: 1),
+
+                // Filter options
+                Expanded(
+                  child: ListView(
+                    controller: scrollController,
+                    padding: const EdgeInsets.all(16),
+                    children: [
+                      // Sort by section
+                      Text(
+                        'Sort by',
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                      const SizedBox(height: 8),
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        children: [
+                          _SortChip(
+                            label: 'Relevance',
+                            selected: _selectedSort == SortOption.relevance,
+                            onSelected: () => setState(
+                              () => _selectedSort = SortOption.relevance,
+                            ),
+                          ),
+                          _SortChip(
+                            label: 'Name (A-Z)',
+                            selected: _selectedSort == SortOption.nameAsc,
+                            onSelected: () => setState(
+                              () => _selectedSort = SortOption.nameAsc,
+                            ),
+                          ),
+                          _SortChip(
+                            label: 'Name (Z-A)',
+                            selected: _selectedSort == SortOption.nameDesc,
+                            onSelected: () => setState(
+                              () => _selectedSort = SortOption.nameDesc,
+                            ),
+                          ),
+                          _SortChip(
+                            label: 'Recently Added',
+                            selected: _selectedSort == SortOption.dateAddedDesc,
+                            onSelected: () => setState(
+                              () => _selectedSort = SortOption.dateAddedDesc,
+                            ),
+                          ),
+                          _SortChip(
+                            label: 'Recently Updated',
+                            selected:
+                                _selectedSort == SortOption.dateUpdatedDesc,
+                            onSelected: () => setState(
+                              () => _selectedSort = SortOption.dateUpdatedDesc,
+                            ),
+                          ),
+                        ],
+                      ),
+
+                      const SizedBox(height: 24),
+
+                      // Categories section
+                      Text(
+                        'Categories',
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                      const SizedBox(height: 8),
+                      if (appProvider.categoriesState == LoadingState.loading)
+                        const Center(
+                          child: Padding(
+                            padding: EdgeInsets.all(16.0),
+                            child: CircularProgressIndicator(),
+                          ),
+                        )
+                      else if (filteredCategories.isEmpty)
+                        Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Text(
+                            'No categories available',
+                            style: Theme.of(context).textTheme.bodyMedium,
+                          ),
+                        )
+                      else
+                        Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: filteredCategories.map((category) {
+                            return FilterChip(
+                              label: Text(category),
+                              selected: _selectedCategories.contains(category),
+                              onSelected: (selected) {
+                                setState(() {
+                                  if (selected) {
+                                    _selectedCategories.add(category);
+                                  } else {
+                                    _selectedCategories.remove(category);
+                                  }
+                                });
+                              },
+                            );
+                          }).toList(),
+                        ),
+
+                      const SizedBox(height: 24),
+
+                      // Repositories section
+                      if (repositories.length > 1) ...[
+                        Text(
+                          'Repositories',
+                          style: Theme.of(context).textTheme.titleMedium,
+                        ),
+                        const SizedBox(height: 8),
+                        Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: repositories.map((repo) {
+                            return FilterChip(
+                              label: Text(repo.name),
+                              selected: _selectedRepositories.contains(
+                                repo.url,
+                              ),
+                              onSelected: (selected) {
+                                setState(() {
+                                  if (selected) {
+                                    _selectedRepositories.add(repo.url);
+                                  } else {
+                                    _selectedRepositories.remove(repo.url);
+                                  }
+                                });
+                              },
+                            );
+                          }).toList(),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+
+                // Apply button
+                SafeArea(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: SizedBox(
+                      width: double.infinity,
+                      child: FilledButton.icon(
+                        onPressed: _applyFilters,
+                        icon: const Icon(Symbols.check),
+                        label: const Text('Apply Filters'),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+}
+
+class _SortChip extends StatelessWidget {
+  final String label;
+  final bool selected;
+  final VoidCallback onSelected;
+
+  const _SortChip({
+    required this.label,
+    required this.selected,
+    required this.onSelected,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return FilterChip(
+      label: Text(label),
+      selected: selected,
+      onSelected: (_) => onSelected(),
+      showCheckmark: true,
     );
   }
 }

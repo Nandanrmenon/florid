@@ -7,6 +7,7 @@ import 'package:installed_apps/installed_apps.dart';
 
 import '../models/fdroid_app.dart';
 import '../models/repository.dart';
+import '../models/search_filters.dart';
 import '../services/app_preferences_service.dart';
 import '../services/fdroid_api_service.dart';
 import '../services/izzy_stats_service.dart';
@@ -612,6 +613,7 @@ class AppProvider extends ChangeNotifier {
   Future<void> searchApps(
     String query, {
     RepositoriesProvider? repositoriesProvider,
+    SearchFilters filters = const SearchFilters(),
   }) async {
     final trimmedQuery = query.trim();
     if (trimmedQuery.isEmpty) {
@@ -646,7 +648,8 @@ class AppProvider extends ChangeNotifier {
 
       final dbResults = await _apiService.searchAppsDatabaseOnly(trimmedQuery);
 
-      final filteredResults = dbResults.where((app) {
+      var filteredResults = dbResults.where((app) {
+        // Filter by repository
         if (enabledRepoUrls.isEmpty) {
           return true;
         }
@@ -658,6 +661,50 @@ class AppProvider extends ChangeNotifier {
 
         return enabledRepoUrls.contains(repoUrl);
       }).toList();
+
+      // Apply category filter
+      if (filters.categories.isNotEmpty) {
+        filteredResults = filteredResults.where((app) {
+          final appCategories = app.categories;
+          if (appCategories == null || appCategories.isEmpty) return false;
+          return appCategories.any((cat) => filters.categories.contains(cat));
+        }).toList();
+      }
+
+      // Apply repository filter
+      if (filters.repositories.isNotEmpty) {
+        filteredResults = filteredResults.where((app) {
+          final repoUrl = app.repositoryUrl ?? '';
+          return filters.repositories.contains(repoUrl);
+        }).toList();
+      }
+
+      // Apply sorting
+      switch (filters.sortBy) {
+        case SortOption.nameAsc:
+          filteredResults.sort((a, b) => a.name.compareTo(b.name));
+          break;
+        case SortOption.nameDesc:
+          filteredResults.sort((a, b) => b.name.compareTo(a.name));
+          break;
+        case SortOption.dateAddedDesc:
+          filteredResults.sort((a, b) {
+            final dateA = a.added ?? DateTime(1970);
+            final dateB = b.added ?? DateTime(1970);
+            return dateB.compareTo(dateA);
+          });
+          break;
+        case SortOption.dateUpdatedDesc:
+          filteredResults.sort((a, b) {
+            final dateA = a.lastUpdated ?? DateTime(1970);
+            final dateB = b.lastUpdated ?? DateTime(1970);
+            return dateB.compareTo(dateA);
+          });
+          break;
+        case SortOption.relevance:
+          // Keep search relevance order (default from API)
+          break;
+      }
 
       _searchResults = filteredResults;
       _searchState = LoadingState.success;

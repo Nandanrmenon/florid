@@ -2,7 +2,9 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
+import 'package:florid/providers/app_update_provider.dart';
 import 'package:florid/screens/app_management_screen.dart';
+import 'package:florid/screens/app_updater.dart';
 import 'package:florid/widgets/m_list.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -45,6 +47,46 @@ class _SettingsScreenState extends State<SettingsScreen> {
     setState(() {
       _appVersion = '${info.version}+${info.buildNumber}';
     });
+  }
+
+  Future<void> _showUpdateDialog(BuildContext context) async {
+    final updateProvider = context.read<AppUpdateProvider>();
+
+    // Show loading dialog while checking
+    if (!mounted) return;
+    showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        title: const Text('Checking for updates'),
+        content: const SizedBox(
+          height: 60,
+          child: Center(child: CircularProgressIndicator()),
+        ),
+      ),
+    );
+
+    // Check for updates
+    await updateProvider.checkForUpdates();
+
+    if (!mounted) return;
+    Navigator.pop(context); // Close loading dialog
+
+    // Show result
+    if (updateProvider.hasUpdate) {
+      if (!mounted) return;
+      await Navigator.of(
+        context,
+      ).push(MaterialPageRoute(builder: (context) => const AppUpdatePage()));
+    } else {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Florid is up to date!'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+    }
   }
 
   Future<void> _exportFavorites(BuildContext context) async {
@@ -441,6 +483,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               ? 'Loading…'
                               : _appVersion,
                           onTap: () {},
+                        ),
+                        MListItemData(
+                          leading: Icon(Symbols.system_update),
+                          title: 'Check for updates',
+                          subtitle: 'Manually check for new Florid versions',
+                          suffix: Icon(Symbols.chevron_right),
+                          onTap: () => _showUpdateDialog(context),
                         ),
                         MListItemData(
                           leading: Icon(Symbols.code_rounded),

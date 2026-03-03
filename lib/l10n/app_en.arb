@@ -104,5 +104,13 @@
   "favourites": "Favourites",
   "loading_repository": "Loading repository…",
   "unable_to_load_repository": "Unable to load repository",
-  "repository_loading_error_descrption": "Check your connection or repository settings, then try again."
+  "repository_loading_error_descrption": "Check your connection or repository settings, then try again.",
+  "appUpdateAvailable": "Update Available",
+  "releaseNotes": "Release Notes",
+  "dismiss": "Dismiss",
+  "viewOnGithub": "View on GitHub",
+  "update": "Update",
+  "downloading": "Downloading...",
+  "installing": "Installing...",
+  "downloadFailed": "Failed to download APK"
 }

@@ -294,4 +294,25 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get repository_loading_error_descrption =>
       'Check your connection or repository settings, then try again.';
+
+  @override
+  String get appUpdateAvailable => 'Update Available';
+
+  @override
+  String get releaseNotes => 'Release Notes';
+
+  @override
+  String get dismiss => 'Dismiss';
+
+  @override
+  String get viewOnGithub => 'View on GitHub';
+
+  @override
+  String get update => 'Update';
+
+  @override
+  String get installing => 'Installing...';
+
+  @override
+  String get downloadFailed => 'Failed to download APK';
 }

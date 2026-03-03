@@ -657,6 +657,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Check your connection or repository settings, then try again.'**
   String get repository_loading_error_descrption;
+
+  /// No description provided for @appUpdateAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Update Available'**
+  String get appUpdateAvailable;
+
+  /// No description provided for @releaseNotes.
+  ///
+  /// In en, this message translates to:
+  /// **'Release Notes'**
+  String get releaseNotes;
+
+  /// No description provided for @dismiss.
+  ///
+  /// In en, this message translates to:
+  /// **'Dismiss'**
+  String get dismiss;
+
+  /// No description provided for @viewOnGithub.
+  ///
+  /// In en, this message translates to:
+  /// **'View on GitHub'**
+  String get viewOnGithub;
+
+  /// No description provided for @update.
+  ///
+  /// In en, this message translates to:
+  /// **'Update'**
+  String get update;
+
+  /// No description provided for @installing.
+  ///
+  /// In en, this message translates to:
+  /// **'Installing...'**
+  String get installing;
+
+  /// No description provided for @downloadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to download APK'**
+  String get downloadFailed;
 }
 
 class _AppLocalizationsDelegate

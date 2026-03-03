@@ -1,10 +1,12 @@
 import 'package:florid/l10n/app_localizations.dart';
 import 'package:florid/models/fdroid_app.dart';
+import 'package:florid/providers/app_update_provider.dart';
 import 'package:florid/screens/library_screen.dart';
 import 'package:florid/screens/settings_screen.dart';
 import 'package:florid/screens/user_screen.dart';
 import 'package:florid/utils/responsive.dart';
 import 'package:florid/utils/whats_new.dart';
+import 'package:florid/screens/app_updater.dart';
 import 'package:florid/widgets/f_navbar.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -52,6 +54,7 @@ class _FloridAppState extends State<FloridApp> {
         _autoSyncRepositoriesIfNeeded();
       });
       _maybeShowWhatsNewDialog();
+      _checkForAppUpdates();
     });
   }
 
@@ -93,6 +96,24 @@ class _FloridAppState extends State<FloridApp> {
     if (_hasCheckedWhatsNew) return;
     _hasCheckedWhatsNew = true;
     await _showWhatsNew(force: false, markSeen: true);
+  }
+
+  Future<void> _checkForAppUpdates() async {
+    try {
+      final updateProvider = context.read<AppUpdateProvider>();
+      await updateProvider.checkForUpdates();
+
+      if (updateProvider.hasUpdate && mounted) {
+        // Navigate to the update page
+        if (!mounted) return;
+        await Navigator.of(
+          context,
+        ).push(MaterialPageRoute(builder: (context) => const AppUpdatePage()));
+      }
+    } catch (e) {
+      debugPrint('Error checking for app updates: $e');
+      // Don't block the app if update check fails
+    }
   }
 
   Future<void> _showWhatsNew({

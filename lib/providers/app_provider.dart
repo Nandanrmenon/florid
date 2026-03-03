@@ -495,10 +495,11 @@ class AppProvider extends ChangeNotifier {
         // If repositories are currently loading, wait for them
         if (repositoriesProvider.isLoading) {
           // Wait a bit for loading to complete
-          await Future.delayed(Duration(milliseconds: 100));
+          await Future.delayed(Duration(milliseconds: 200));
         }
         // If still empty after waiting, load them
         if (repositoriesProvider.repositories.isEmpty) {
+          debugPrint('🔄 Fetching top apps: repositories empty, loading...');
           await repositoriesProvider.loadRepositories();
         }
       }
@@ -506,16 +507,27 @@ class AppProvider extends ChangeNotifier {
       // Find IzzyOnDroid repository
       Repository? izzyRepo;
       if (repositoriesProvider != null) {
+        debugPrint(
+          '🔍 Looking for IzzyOnDroid in ${repositoriesProvider.repositories.length} repositories',
+        );
+        for (final repo in repositoriesProvider.repositories) {
+          debugPrint(
+            '   - ${repo.name}: ${repo.url} (enabled: ${repo.isEnabled})',
+          );
+        }
         try {
           izzyRepo = repositoriesProvider.repositories.firstWhere(
             (r) => r.name == 'IzzyOnDroid' && r.isEnabled,
           );
+          debugPrint('✅ Found IzzyOnDroid: ${izzyRepo.url}');
         } catch (e) {
+          debugPrint('❌ IzzyOnDroid not found: $e');
           izzyRepo = null;
         }
       }
 
       if (izzyRepo == null) {
+        debugPrint('⚠️ Top apps: IzzyOnDroid repository not available');
         _topApps = [];
         _topAppsState = LoadingState.success;
         notifyListeners();
@@ -523,20 +535,18 @@ class AppProvider extends ChangeNotifier {
       }
 
       // Fetch all apps from IzzyOnDroid repository
-      final allApps = await _apiService.fetchApps(limit: limit * 4);
+      debugPrint('🔗 Fetching from IzzyOnDroid URL directly: ${izzyRepo.url}');
+      final izzyRepository = await _apiService.fetchRepositoryFromUrl(
+        izzyRepo.url,
+      );
+      final izzyApps = izzyRepository.apps.values.toList();
 
-      // Check what repository URLs we have
-      final repoUrlCounts = <String, int>{};
-      for (final app in allApps) {
-        repoUrlCounts[app.repositoryUrl] =
-            (repoUrlCounts[app.repositoryUrl] ?? 0) + 1;
-      }
-
-      final izzyApps = allApps
-          .where((app) => app.repositoryUrl == izzyRepo!.url)
-          .toList();
+      debugPrint(
+        '🔍 Got ${izzyApps.length} apps directly from IzzyOnDroid (${izzyRepo.url})',
+      );
 
       if (izzyApps.isEmpty) {
+        debugPrint('⚠️ No apps found from IzzyOnDroid, returning empty list');
         _topApps = [];
         _topAppsState = LoadingState.success;
         notifyListeners();
@@ -547,17 +557,26 @@ class AppProvider extends ChangeNotifier {
       final appStats = <FDroidApp, int>{};
 
       // Fetch download stats for each app
+      debugPrint('📊 Fetching download stats for ${izzyApps.length} apps...');
       for (final app in izzyApps) {
         try {
           final stats = await _izzyStatsService.fetchStatsForPackage(
             app.packageName,
           );
-          // Use last 30 days downloads, fallback to last 365 days
-          final downloads = stats.last30Days ?? stats.last365Days ?? 0;
-          appStats[app] = downloads;
+          // Use last 30 days downloads only (monthly)
+          final downloads = stats.last30Days ?? 0;
+          if (downloads > 0) {
+            appStats[app] = downloads;
+          }
+          // Only Log apps with significant downloads
+          if (downloads > 100) {
+            debugPrint(
+              '  📥 ${app.packageName}: $downloads downloads (30 days)',
+            );
+          }
         } catch (e) {
-          // If we fail to get stats, use 0
-          appStats[app] = 0;
+          // If we fail to get stats, skip this app (don't use it)
+          debugPrint('  ⚠️ ${app.packageName}: Failed to get stats: $e');
         }
       }
 
@@ -566,6 +585,9 @@ class AppProvider extends ChangeNotifier {
       sortedApps.sort((a, b) => b.value.compareTo(a.value));
 
       _topApps = sortedApps.take(limit).map((e) => e.key).toList();
+      debugPrint(
+        '✅ Processed ${appStats.length} apps, returning top ${_topApps.length}',
+      );
 
       // Store download counts for UI display
       _topAppsDownloads = {};
@@ -575,6 +597,7 @@ class AppProvider extends ChangeNotifier {
 
       _topAppsState = LoadingState.success;
     } catch (e) {
+      debugPrint('❌ Error in fetchTopApps: $e');
       _topAppsError = e.toString();
       _topAppsState = LoadingState.error;
     }
@@ -955,6 +978,8 @@ class AppProvider extends ChangeNotifier {
     _repositoryState = LoadingState.idle;
     _repositoryError = null;
     _categoryApps.clear();
+    _topApps = [];
+    _topAppsDownloads = {};
 
     // If we have enabled repositories, fetch from all of them
     if (repositoriesProvider != null) {
@@ -974,12 +999,28 @@ class AppProvider extends ChangeNotifier {
       await fetchRepository();
     }
 
-    // Reload other data
+    // Must reload repositories provider FIRST to ensure it's up-to-date
+    // before fetchTopApps tries to find IzzyOnDroid
+    if (repositoriesProvider != null) {
+      debugPrint('📚 Reloading repositories provider...');
+      await repositoriesProvider.loadRepositories();
+      debugPrint(
+        '📚 Repositories reloaded: ${repositoriesProvider.repositories.length} total',
+      );
+    }
+
+    // NOW reload other data - topApps can safely lookup repositories now
+    debugPrint(
+      '🔄 Refreshing app data (latest, recently updated, top apps, categories, installed)',
+    );
     await Future.wait([
       fetchLatestApps(repositoriesProvider: repositoriesProvider),
+      fetchRecentlyUpdatedApps(repositoriesProvider: repositoriesProvider),
+      fetchTopApps(repositoriesProvider: repositoriesProvider),
       fetchCategories(),
       fetchInstalledApps(),
     ]);
+    debugPrint('✅ All app data refreshed');
   }
 
   /// Gets screenshots for an app package

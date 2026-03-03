@@ -220,7 +220,7 @@ class _HomeScreenState extends State<HomeScreen>
             children: [
               // New Releases Section
               MListHeader(
-                title: 'New Releases',
+                title: AppLocalizations.of(context)!.latest_apps,
                 onTap: _openLatestScreen,
                 trailing: Icon(Symbols.arrow_forward),
               ),

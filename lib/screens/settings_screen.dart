@@ -503,7 +503,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ],
                 ),
               ),
-              SliverToBoxAdapter(child: SizedBox(height: 64)),
+              SliverToBoxAdapter(child: SafeArea(child: SizedBox(height: 64))),
             ],
           ),
         );

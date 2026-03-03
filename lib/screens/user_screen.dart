@@ -262,6 +262,7 @@ class _UserScreenState extends State<UserScreen>
     final isDarkKnight = settingsProvider.themeStyle == ThemeStyle.darkKnight;
 
     return Scaffold(
+      extendBody: true,
       body: NestedScrollView(
         headerSliverBuilder: (context, innerBoxIsScrolled) => [
           SliverAppBar.medium(
@@ -367,15 +368,7 @@ class _UserScreenState extends State<UserScreen>
               },
             ),
             Padding(
-              padding: EdgeInsets.fromLTRB(
-                0,
-                16,
-                0,
-                settingsProvider.themeStyle == ThemeStyle.florid ||
-                        settingsProvider.themeStyle == ThemeStyle.darkKnight
-                    ? 32
-                    : 0,
-              ),
+              padding: EdgeInsets.fromLTRB(0, 16, 0, 0),
               child: SettingsScreen(),
             ),
           ],

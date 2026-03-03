@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 
@@ -7,7 +8,7 @@ import '../models/fdroid_app.dart';
 
 class DatabaseService {
   static const String _databaseName = 'fdroid_repository.db';
-  static const int _databaseVersion = 6;
+  static const int _databaseVersion = 7;
 
   // Table names
   static const String _appsTable = 'apps';
@@ -57,6 +58,7 @@ class DatabaseService {
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT NOT NULL,
         url TEXT NOT NULL UNIQUE,
+        fingerprint TEXT,
         is_enabled INTEGER NOT NULL DEFAULT 1,
         added_at INTEGER,
         last_synced_at INTEGER
@@ -191,6 +193,18 @@ class DatabaseService {
       await db.execute(
         'ALTER TABLE $_repositoriesTable ADD COLUMN fingerprint TEXT',
       );
+    }
+    if (oldVersion < 7) {
+      // Add fingerprint column to repositories table for v6 to v7 upgrade
+      // This handles databases created at v6 that missed the fingerprint column
+      try {
+        await db.execute(
+          'ALTER TABLE $_repositoriesTable ADD COLUMN fingerprint TEXT',
+        );
+      } catch (e) {
+        // Column already exists (from v5->v6 upgrade), ignore the error
+        debugPrint('Fingerprint column already exists: $e');
+      }
     }
   }
 

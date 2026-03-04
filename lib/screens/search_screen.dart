@@ -138,180 +138,198 @@ class _SearchScreenState extends State<SearchScreen> {
             ),
           ),
         ),
-        appBar: AppBar(
-          title: Consumer<AppProvider>(
-            builder: (context, appProvider, _) {
-              final results = appProvider.searchResults;
-              final query = appProvider.searchQuery;
+        body: CustomScrollView(
+          slivers: [
+            SliverAppBar(
+              floating: true,
+              title: Consumer<AppProvider>(
+                builder: (context, appProvider, _) {
+                  final results = appProvider.searchResults;
+                  final query = appProvider.searchQuery;
 
-              if (query.isNotEmpty && results.isNotEmpty) {
-                return Text(
-                  localizations.search_results_for_query(results.length, query),
-                  style: Theme.of(context).textTheme.titleMedium,
-                );
-              }
-              return const SizedBox.shrink();
-            },
-          ),
-          actions: [
-            Badge(
-              isLabelVisible: _filters.hasActiveFilters,
-              label: Text(_filters.activeFilterCount.toString()),
-              child: IconButton.filledTonal(
-                onPressed: _openFilters,
-                icon: const Icon(Symbols.filter_list),
-                tooltip: localizations.filters,
+                  if (query.isNotEmpty && results.isNotEmpty) {
+                    return Text(
+                      localizations.search_results_for_query(
+                        results.length,
+                        query,
+                      ),
+                      style: Theme.of(context).textTheme.titleMedium,
+                    );
+                  }
+                  return const SizedBox.shrink();
+                },
               ),
-            ),
-            SizedBox(width: 8),
-          ],
-        ),
-        body: Consumer<AppProvider>(
-          builder: (context, appProvider, child) {
-            final state = appProvider.searchState;
-            final results = appProvider.searchResults;
-            final error = appProvider.searchError;
-            final query = appProvider.searchQuery;
-            final settingsProvider = context.read<SettingsProvider>();
-
-            final bottomPadding =
-                settingsProvider.themeStyle == ThemeStyle.florid ? 96.0 : 16.0;
-
-            // Show initial state
-            if (query.isEmpty) {
-              return SingleChildScrollView(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    SizedBox(height: 64),
-                    Icon(
-                      Symbols.search,
-                      size: 64,
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      localizations.search_apps,
-                      style: Theme.of(context).textTheme.headlineSmall,
-                    ),
-                    const SizedBox(height: 32),
-                    _SearchSuggestions(
-                      onSuggestionTap: (suggestion) {
-                        setState(() {
-                          _searchController.text = suggestion;
-                        });
-                        _performSearch(suggestion);
-                      },
-                    ),
-                  ],
-                ),
-              );
-            }
-
-            // Show loading
-            if (state == LoadingState.loading) {
-              return Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    CircularProgressIndicator(),
-                    SizedBox(height: 16),
-                    Text(AppLocalizations.of(context)!.searching),
-                  ],
-                ),
-              );
-            }
-
-            // Show error
-            if (state == LoadingState.error) {
-              return Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      Symbols.error,
-                      size: 64,
-                      color: Theme.of(context).colorScheme.error,
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      localizations.search_failed,
-                      style: Theme.of(context).textTheme.headlineSmall,
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      error ?? localizations.unknown_error_occurred,
-                      textAlign: TextAlign.center,
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-                    ElevatedButton.icon(
-                      onPressed: () => _performSearch(query),
-                      icon: const Icon(Symbols.refresh),
-                      label: Text(AppLocalizations.of(context)!.retry),
-                    ),
-                  ],
-                ),
-              );
-            }
-
-            // Show no results
-            if (results.isEmpty) {
-              return Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      Symbols.search_off,
-                      size: 64,
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      localizations.no_apps_found,
-                      style: Theme.of(context).textTheme.headlineSmall,
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      localizations.try_different_keywords,
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                  ],
-                ),
-              );
-            }
-
-            // Show results
-            return Column(
-              children: [
-                // Results list
-                Expanded(
-                  child: ListView.builder(
-                    padding: EdgeInsets.fromLTRB(8, 8, 8, bottomPadding),
-                    itemCount: results.length,
-                    itemBuilder: (context, index) {
-                      final app = results[index];
-                      return AppListItem(
-                        app: app,
-                        showInstallStatus: false,
-                        onTap: () {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (context) => AppDetailsScreen(app: app),
-                            ),
-                          );
-                        },
-                      );
-                    },
+              actions: [
+                Badge(
+                  isLabelVisible: _filters.hasActiveFilters,
+                  label: Text(_filters.activeFilterCount.toString()),
+                  child: IconButton.filledTonal(
+                    onPressed: _openFilters,
+                    icon: const Icon(Symbols.filter_list),
+                    tooltip: localizations.filters,
                   ),
                 ),
+                SizedBox(width: 8),
               ],
-            );
-          },
+            ),
+            SliverToBoxAdapter(
+              child: Consumer<AppProvider>(
+                builder: (context, appProvider, child) {
+                  final state = appProvider.searchState;
+                  final results = appProvider.searchResults;
+                  final error = appProvider.searchError;
+                  final query = appProvider.searchQuery;
+                  final settingsProvider = context.read<SettingsProvider>();
+
+                  final bottomPadding =
+                      settingsProvider.themeStyle == ThemeStyle.florid
+                      ? 96.0
+                      : 16.0;
+
+                  // Show initial state
+                  if (query.isEmpty) {
+                    return Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Symbols.search,
+                          size: 64,
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          localizations.search_apps,
+                          style: Theme.of(context).textTheme.headlineSmall,
+                        ),
+                        const SizedBox(height: 32),
+                        Card(
+                          // margin: const EdgeInsets.symmetric(horizontal: 16),
+                          child: _SearchSuggestions(
+                            onSuggestionTap: (suggestion) {
+                              setState(() {
+                                _searchController.text = suggestion;
+                              });
+                              _performSearch(suggestion);
+                            },
+                          ),
+                        ),
+                      ],
+                    );
+                  }
+
+                  // Show loading
+                  if (state == LoadingState.loading) {
+                    return Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          CircularProgressIndicator(),
+                          SizedBox(height: 16),
+                          Text(AppLocalizations.of(context)!.searching),
+                        ],
+                      ),
+                    );
+                  }
+
+                  // Show error
+                  if (state == LoadingState.error) {
+                    return Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Symbols.error,
+                            size: 64,
+                            color: Theme.of(context).colorScheme.error,
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            localizations.search_failed,
+                            style: Theme.of(context).textTheme.headlineSmall,
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            error ?? localizations.unknown_error_occurred,
+                            textAlign: TextAlign.center,
+                            style: Theme.of(context).textTheme.bodyMedium
+                                ?.copyWith(
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.onSurfaceVariant,
+                                ),
+                          ),
+                          const SizedBox(height: 24),
+                          ElevatedButton.icon(
+                            onPressed: () => _performSearch(query),
+                            icon: const Icon(Symbols.refresh),
+                            label: Text(AppLocalizations.of(context)!.retry),
+                          ),
+                        ],
+                      ),
+                    );
+                  }
+
+                  // Show no results
+                  if (results.isEmpty) {
+                    return Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Symbols.search_off,
+                            size: 64,
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.onSurfaceVariant,
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            localizations.no_apps_found,
+                            style: Theme.of(context).textTheme.headlineSmall,
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            localizations.try_different_keywords,
+                            style: Theme.of(context).textTheme.bodyMedium
+                                ?.copyWith(
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.onSurfaceVariant,
+                                ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }
+
+                  // Show results
+                  return Card(
+                    child: ListView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      padding: EdgeInsets.fromLTRB(8, 8, 8, bottomPadding),
+                      itemCount: results.length,
+                      itemBuilder: (context, index) {
+                        final app = results[index];
+                        return AppListItem(
+                          app: app,
+                          showInstallStatus: false,
+                          onTap: () {
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    AppDetailsScreen(app: app),
+                              ),
+                            );
+                          },
+                        );
+                      },
+                    ),
+                  );
+                },
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -342,36 +360,33 @@ class _SearchSuggestions extends StatelessWidget {
   Widget build(BuildContext context) {
     final localizations = AppLocalizations.of(context)!;
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24),
+          padding: const EdgeInsets.symmetric(vertical: 16.0),
           child: Text(
             localizations.popular_searches,
             style: Theme.of(context).textTheme.labelLarge?.copyWith(
               color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
+            textAlign: TextAlign.center,
           ),
         ),
         const SizedBox(height: 12),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 4.0),
-          child: Wrap(
-            spacing: 8,
-            runSpacing: 8,
-
-            alignment: WrapAlignment.center,
-            children: _suggestions.map((suggestion) {
-              return ActionChip(
-                label: Text(suggestion),
-                onPressed: () => onSuggestionTap(suggestion),
-                backgroundColor: Theme.of(
-                  context,
-                ).colorScheme.surfaceContainerHighest,
-                side: BorderSide.none,
-              );
-            }).toList(),
-          ),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          alignment: WrapAlignment.center,
+          children: _suggestions.map((suggestion) {
+            return ActionChip(
+              label: Text(suggestion),
+              onPressed: () => onSuggestionTap(suggestion),
+              backgroundColor: Theme.of(
+                context,
+              ).colorScheme.surfaceContainerHighest,
+              side: BorderSide.none,
+            );
+          }).toList(),
         ),
       ],
     );

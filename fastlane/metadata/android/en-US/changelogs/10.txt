@@ -1,0 +1,14 @@
+Florid is maturing and I am glad that you are enjoying the app. I have been working hard to bring new features and improvements to the app. I hope you like them! Thank you for the support and love ❤️. Oh yes, I am skipping v1.0.9 because this is major update with a lot of new features and improvements. I am sure there are still some bugs and edge cases that I haven't tested but I will try to fix them as soon as possible. If you encounter any issues, please report them to me.
+
+### New Features
+- You can now view tops apps from IzzyOnDroid. This feature only works if you have enabled IzzyOnDroid repository. You can see tops apps from the last 30 days.
+- Search filters! You can now filter search results by repository, and category. This will help you find the app you are looking for more easily.
+- You can now add a repository by scanning its QR code. This will save you the trouble of typing the repository URL manually. You can find this option in the "Add Repository" screen.
+- Added In-App florid updater. You can now check for updates and update the app from within the app itself. You can find this option in the settings screen.
+
+### Improvements
+- Hide dynamic color option for unsupported devices.
+- Fix language issues
+- UI Improvements
+- Fix repetitive notifications for updates and repositories.
+- Performance improvements and bug fixes.

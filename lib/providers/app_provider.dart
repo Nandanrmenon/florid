@@ -93,6 +93,9 @@ class AppProvider extends ChangeNotifier {
   // Cached device ABI list
   List<String>? _supportedAbis;
 
+  // Prevent duplicate ABI debug logs on repeated rebuild-driven calls.
+  final Map<String, String> _lastAbiSelectionLogByPackage = {};
+
   // Getters
   List<FDroidApp> get latestApps => _latestApps;
   LoadingState get latestAppsState => _latestAppsState;
@@ -925,9 +928,17 @@ class AppProvider extends ChangeNotifier {
     });
 
     final chosen = candidates.first;
-    debugPrint(
-      '[AppProvider] ABI selection for ${app.packageName}: chosen ${chosen.versionName} (${chosen.apkName}), deviceAbis=$abis, native=${chosen.nativecode}',
-    );
+    if (kDebugMode) {
+      final native = chosen.nativecode?.join(',') ?? 'universal';
+      final signature =
+          '${chosen.versionCode}|${chosen.versionName}|${chosen.apkName}|$native|${abis.join(',')}';
+      if (_lastAbiSelectionLogByPackage[app.packageName] != signature) {
+        _lastAbiSelectionLogByPackage[app.packageName] = signature;
+        debugPrint(
+          '[AppProvider] ABI selection for ${app.packageName}: chosen ${chosen.versionName} (${chosen.apkName}), deviceAbis=$abis, native=${chosen.nativecode}',
+        );
+      }
+    }
     return chosen;
   }
 

@@ -5,8 +5,6 @@ import 'package:app_installer/app_installer.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:package_info_plus/package_info_plus.dart';
-import 'package:path/path.dart' as p;
-import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shizuku_api/shizuku_api.dart';
 
@@ -637,18 +635,9 @@ class DownloadProvider extends ChangeNotifier {
   }
 
   Future<String> _prepareShizukuSource(String filePath) async {
-    final tempDir = await getTemporaryDirectory();
-    final fileName = Uri.file(filePath).pathSegments.last;
-    final stagedPath = p.join(tempDir.path, fileName);
-    if (filePath == stagedPath) {
-      return stagedPath;
-    }
-
-    final sourceFile = File(filePath);
-    final stagedFile = File(stagedPath);
-    await stagedFile.parent.create(recursive: true);
-    await sourceFile.copy(stagedPath);
-    return stagedPath;
+    // Don't copy to cache - Shizuku can read from external storage directly
+    // but cannot access app's private cache directory
+    return filePath;
   }
 
   String _buildShizukuCopyCommand({
@@ -656,13 +645,8 @@ class DownloadProvider extends ChangeNotifier {
     required String sourcePath,
     required String destPath,
   }) {
-    final isInternal =
-        sourcePath.startsWith('/data/user/0/$packageName/') ||
-        sourcePath.startsWith('/data/data/$packageName/');
-    if (isInternal) {
-      return 'sh -c "run-as $packageName cat \\"$sourcePath\\" > \\"$destPath\\""';
-    }
-    return 'cp "$sourcePath" "$destPath"';
+    // Shizuku runs with system-level permissions, use simple cp
+    return 'cp -f "$sourcePath" "$destPath"';
   }
 
   Future<String> _getAndroidPackageName() async {

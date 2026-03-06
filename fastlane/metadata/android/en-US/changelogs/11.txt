@@ -1,0 +1,5 @@
+### Improvements
+
+- Improved top apps carousel indicators. They are now more visible and have a better animation.
+- Shizuku support is now more stable and works better. I have fixed some bugs and edge cases that were causing issues for some users.
+- Performance improvements and bug fixes.

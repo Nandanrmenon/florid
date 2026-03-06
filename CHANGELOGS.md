@@ -1,5 +1,13 @@
 # Changelogs
 
+## v1.1.1+11
+
+### Improvements
+
+- Improved top apps carousel indicators. They are now more visible and have a better animation.
+- Shizuku support is now more stable and works better. I have fixed some bugs and edge cases that were causing issues for some users.
+- Performance improvements and bug fixes.
+
 ## v1.1.0+10
 
 Florid is maturing and I am glad that you are enjoying the app. I have been working hard to bring new features and improvements to the app. I hope you like them! Thank you for the support and love ❤️. Oh yes, I am skipping v1.0.9 because this is major update with a lot of new features and improvements. I am sure there are still some bugs and edge cases that I haven't tested but I will try to fix them as soon as possible. If you encounter any issues, please report them to me.

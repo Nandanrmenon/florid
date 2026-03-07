@@ -73,9 +73,18 @@ jobs:
           build-cmd: flutter build apk --release --split-per-abi
           working-directory: ./
 
+      - name: Build Signed APK (Universal)
+        uses: cedvdb/action-flutter-build-android@v1
+        with:
+          keystore-base64: ${{ secrets.ANDROID_RELEASE_KEY }}
+          keystore-password: "${{ secrets.ANDROID_RELEASE_KEY_PASSWORD }}"
+          build-cmd: flutter build apk --release
+          working-directory: ./
+
       - name: Rename APK files
         run: |
           cd build/app/outputs/flutter-apk
+          mv app-release.apk florid-${{ steps.changelog.outputs.version }}-universal.apk
           mv app-arm64-v8a-release.apk florid-${{ steps.changelog.outputs.version }}-arm64-v8a.apk
           mv app-armeabi-v7a-release.apk florid-${{ steps.changelog.outputs.version }}-armeabi-v7a.apk
           mv app-x86_64-release.apk florid-${{ steps.changelog.outputs.version }}-x86_64.apk
@@ -91,6 +100,7 @@ jobs:
           prerelease: ${{ inputs.prerelease }}
           generate_release_notes: true
           files: |
+            build/app/outputs/flutter-apk/florid-${{ steps.changelog.outputs.version }}-universal.apk
             build/app/outputs/flutter-apk/florid-${{ steps.changelog.outputs.version }}-arm64-v8a.apk
             build/app/outputs/flutter-apk/florid-${{ steps.changelog.outputs.version }}-armeabi-v7a.apk
             build/app/outputs/flutter-apk/florid-${{ steps.changelog.outputs.version }}-x86_64.apk

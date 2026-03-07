@@ -73,12 +73,10 @@ jobs:
           build-cmd: flutter build apk --release --split-per-abi
           working-directory: ./
 
-      - name: Build Signed APK (Universal)
+      - name: Build APK (Universal)
         uses: cedvdb/action-flutter-build-android@v1
         with:
-          keystore-base64: ${{ secrets.ANDROID_RELEASE_KEY }}
-          keystore-password: "${{ secrets.ANDROID_RELEASE_KEY_PASSWORD }}"
-          build-cmd: flutter build apk --release
+          build-cmd: flutter build apk
           working-directory: ./
 
       - name: Rename APK files

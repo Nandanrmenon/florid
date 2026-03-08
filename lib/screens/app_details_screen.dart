@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:florid/l10n/app_localizations.dart';
+import 'package:florid/screens/developer_apps_screen.dart';
 import 'package:florid/screens/permissions_screen.dart';
 import 'package:florid/widgets/changelog_preview.dart';
 import 'package:florid/widgets/m_list.dart';
@@ -782,24 +783,70 @@ class _AppDetailsScreenState extends State<AppDetailsScreen> {
                             elevation: 1,
                             borderRadius: BorderRadius.circular(24),
                             clipBehavior: Clip.antiAlias,
-                            child: _AppDetailsIcon(app: widget.app),
+                            child: AppDetailsIcon(app: widget.app),
                           ),
                         ),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 32.0),
-                          child: Text(
-                            widget.app.name,
-                            maxLines: 2,
-                            textAlign: TextAlign.center,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              fontSize: 24,
-                              fontVariations: [
-                                FontVariation('wght', 700),
-                                FontVariation('ROND', 100),
-                              ],
+                        Column(
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 32.0,
+                              ),
+                              child: Text(
+                                widget.app.name,
+                                maxLines: 2,
+                                textAlign: TextAlign.center,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  fontSize: 24,
+                                  fontVariations: [
+                                    FontVariation('wght', 700),
+                                    FontVariation('ROND', 100),
+                                  ],
+                                ),
+                              ),
                             ),
-                          ),
+                            Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 32.0,
+                              ),
+                              child: InkWell(
+                                onTap: widget.app.authorName != null
+                                    ? () {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) =>
+                                                DeveloperAppsScreen(
+                                                  developerName:
+                                                      widget.app.authorName!,
+                                                ),
+                                          ),
+                                        );
+                                      }
+                                    : null,
+                                borderRadius: BorderRadius.circular(12),
+                                child: Text(
+                                  widget.app.authorName ??
+                                      AppLocalizations.of(context)!.unknown,
+                                  maxLines: 2,
+                                  textAlign: TextAlign.center,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    fontVariations: [
+                                      FontVariation('wght', 700),
+                                      FontVariation('ROND', 100),
+                                    ],
+                                    decoration: widget.app.authorName != null
+                                        ? TextDecoration.underline
+                                        : null,
+                                    decorationStyle: TextDecorationStyle.dotted,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),
@@ -820,7 +867,7 @@ class _AppDetailsScreenState extends State<AppDetailsScreen> {
                         elevation: 2,
                         borderRadius: BorderRadius.circular(8),
                         clipBehavior: Clip.antiAlias,
-                        child: _AppDetailsIcon(app: widget.app),
+                        child: AppDetailsIcon(app: widget.app),
                       ),
                     ),
                     Expanded(
@@ -2568,15 +2615,15 @@ class _NoVersionInfoSection extends StatelessWidget {
   }
 }
 
-class _AppDetailsIcon extends StatefulWidget {
+class AppDetailsIcon extends StatefulWidget {
   final FDroidApp app;
-  const _AppDetailsIcon({required this.app});
+  const AppDetailsIcon({super.key, required this.app});
 
   @override
-  State<_AppDetailsIcon> createState() => _AppDetailsIconState();
+  State<AppDetailsIcon> createState() => _AppDetailsIconState();
 }
 
-class _AppDetailsIconState extends State<_AppDetailsIcon> {
+class _AppDetailsIconState extends State<AppDetailsIcon> {
   late List<String> _candidates;
   int _index = 0;
   bool _showFallback = false;

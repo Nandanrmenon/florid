@@ -577,6 +577,46 @@ class DatabaseService {
     return apps;
   }
 
+  /// Gets apps by author name
+  Future<List<FDroidApp>> getAppsByAuthor(String authorName) async {
+    final db = await database;
+    final appMaps = await db.rawQuery(
+      '''
+      SELECT a.*, r.url as repository_url FROM $_appsTable a
+      LEFT JOIN $_repositoriesTable r ON a.repository_id = r.id
+      WHERE LOWER(a.author_name) = ?
+      ORDER BY a.name ASC
+    ''',
+      [authorName.toLowerCase()],
+    );
+
+    if (appMaps.isEmpty) return [];
+
+    // Get package names from the result set
+    final packageNames = appMaps
+        .map((m) => m['package_name'] as String)
+        .toList();
+
+    // Batch load all categories and versions for these apps
+    final data = await _batchLoadCategoriesAndVersions(packageNames);
+    final categoriesByPackage = data.categoriesByPackage;
+    final versionsByPackage = data.versionsByPackage;
+
+    final apps = <FDroidApp>[];
+    for (final appMap in appMaps) {
+      final packageName = appMap['package_name'] as String;
+      final app = _mapToAppWithData(
+        appMap,
+        categoriesByPackage[packageName] ?? [],
+        versionsByPackage[packageName] ?? [],
+        repositoryUrl: appMap['repository_url'] as String?,
+      );
+      apps.add(app);
+    }
+
+    return apps;
+  }
+
   /// Searches apps by repository URL
   Future<List<FDroidApp>> searchAppsByRepository(
     String query,

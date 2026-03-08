@@ -689,6 +689,29 @@ class FDroidApiService {
     }
   }
 
+  /// Fetches apps by author name
+  Future<List<FDroidApp>> fetchAppsByAuthor(String authorName) async {
+    try {
+      final isPopulated = await _databaseService.isPopulated();
+
+      if (isPopulated) {
+        return await _databaseService.getAppsByAuthor(authorName);
+      } else {
+        final repository = await fetchRepository();
+        // Filter apps by author from the repository
+        return repository.apps.values
+            .where(
+              (app) =>
+                  app.authorName != null &&
+                  app.authorName!.toLowerCase() == authorName.toLowerCase(),
+            )
+            .toList();
+      }
+    } catch (e) {
+      throw Exception('Error fetching apps by author: $e');
+    }
+  }
+
   /// Searches for apps
   Future<List<FDroidApp>> searchApps(String query) async {
     try {

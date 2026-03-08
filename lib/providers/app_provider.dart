@@ -631,6 +631,15 @@ class AppProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Fetches apps by author name
+  Future<List<FDroidApp>> fetchAppsByAuthor(String authorName) async {
+    try {
+      return await _apiService.fetchAppsByAuthor(authorName);
+    } catch (e) {
+      throw Exception('Error fetching apps by author: $e');
+    }
+  }
+
   /// Searches for apps
   Future<void> searchApps(
     String query, {

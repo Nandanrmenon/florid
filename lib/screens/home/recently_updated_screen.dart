@@ -4,20 +4,20 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:provider/provider.dart';
 
-import '../models/fdroid_app.dart';
-import '../providers/app_provider.dart';
-import '../providers/repositories_provider.dart';
-import '../widgets/app_list_item.dart';
-import 'app_details_screen.dart';
+import '../../models/fdroid_app.dart';
+import '../../providers/app_provider.dart';
+import '../../providers/repositories_provider.dart';
+import '../../widgets/app_list_item.dart';
+import '../app_details/app_details_screen.dart';
 
-class LatestScreen extends StatefulWidget {
-  const LatestScreen({super.key});
+class RecentlyUpdatedScreen extends StatefulWidget {
+  const RecentlyUpdatedScreen({super.key});
 
   @override
-  State<LatestScreen> createState() => _LatestScreenState();
+  State<RecentlyUpdatedScreen> createState() => _RecentlyUpdatedScreenState();
 }
 
-class _LatestScreenState extends State<LatestScreen>
+class _RecentlyUpdatedScreenState extends State<RecentlyUpdatedScreen>
     with AutomaticKeepAliveClientMixin {
   @override
   bool get wantKeepAlive => true;
@@ -33,13 +33,15 @@ class _LatestScreenState extends State<LatestScreen>
   void _loadData() {
     final appProvider = context.read<AppProvider>();
     final repositoriesProvider = context.read<RepositoriesProvider>();
-    appProvider.fetchLatestApps(repositoriesProvider: repositoriesProvider);
+    appProvider.fetchRecentlyUpdatedApps(
+      repositoriesProvider: repositoriesProvider,
+    );
   }
 
   Future<void> _onRefresh() async {
     final appProvider = context.read<AppProvider>();
     final repositoriesProvider = context.read<RepositoriesProvider>();
-    await appProvider.fetchLatestApps(
+    await appProvider.fetchRecentlyUpdatedApps(
       repositoriesProvider: repositoriesProvider,
     );
   }
@@ -50,9 +52,9 @@ class _LatestScreenState extends State<LatestScreen>
 
     return Consumer<AppProvider>(
       builder: (context, appProvider, child) {
-        final state = appProvider.latestAppsState;
-        final apps = appProvider.latestApps;
-        final error = appProvider.latestAppsError;
+        final state = appProvider.recentlyUpdatedAppsState;
+        final apps = appProvider.recentlyUpdatedApps;
+        final error = appProvider.recentlyUpdatedAppsError;
         return _buildBody(state, apps, error);
       },
     );
@@ -66,7 +68,7 @@ class _LatestScreenState extends State<LatestScreen>
           children: [
             CircularProgressIndicator(year2023: false),
             SizedBox(height: 16),
-            Text(AppLocalizations.of(context)!.loading_latest_apps),
+            Text(AppLocalizations.of(context)!.loading_recently_updated_apps),
           ],
         ),
       );
@@ -84,7 +86,7 @@ class _LatestScreenState extends State<LatestScreen>
             ),
             const SizedBox(height: 16),
             Text(
-              'Failed to load apps',
+              AppLocalizations.of(context)!.failed_to_load_apps,
               style: Theme.of(context).textTheme.headlineSmall,
             ),
             const SizedBox(height: 8),
@@ -107,24 +109,26 @@ class _LatestScreenState extends State<LatestScreen>
     }
 
     if (apps.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(Symbols.apps, size: 64, color: Colors.grey),
-            const SizedBox(height: 16),
-            Text(AppLocalizations.of(context)!.no_apps_found),
-          ],
+      return Scaffold(
+        appBar: AppBar(),
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Symbols.update, size: 64, color: Colors.grey),
+              const SizedBox(height: 16),
+              Text(
+                'No recently updated apps',
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+            ],
+          ),
         ),
       );
     }
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(AppLocalizations.of(context)!.latest_apps),
-        backgroundColor: Theme.of(context).colorScheme.surfaceContainerLow,
-        surfaceTintColor: Theme.of(context).colorScheme.surfaceContainerLow,
-      ),
+      appBar: AppBar(title: Text(AppLocalizations.of(context)!.recently_updated)),
       body: RefreshIndicator(
         onRefresh: _onRefresh,
         child: ListView.builder(

@@ -806,8 +806,16 @@ class FDroidRepository {
   }
 
   List<FDroidApp> getAppsByCategory(String category) {
+    final normalizedCategory = category.toLowerCase();
     return appsList
-        .where((app) => app.categories?.contains(category) ?? false)
+        .where(
+          (app) =>
+              app.categories?.any(
+                (appCategory) =>
+                    appCategory.toLowerCase() == normalizedCategory,
+              ) ??
+              false,
+        )
         .toList();
   }
 

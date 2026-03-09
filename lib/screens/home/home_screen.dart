@@ -1,7 +1,7 @@
 import 'package:florid/l10n/app_localizations.dart';
 import 'package:florid/providers/download_provider.dart';
 import 'package:florid/providers/settings_provider.dart';
-import 'package:florid/screens/repositories_screen.dart';
+import 'package:florid/screens/settings/repositories_screen.dart';
 import 'package:florid/widgets/m_list.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -9,14 +9,14 @@ import 'package:material_symbols_icons/symbols.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../providers/app_provider.dart';
-import '../providers/repositories_provider.dart';
-import '../utils/responsive.dart';
-import '../widgets/app_list_item.dart';
-import 'app_details_screen.dart';
+import '../../providers/app_provider.dart';
+import '../../providers/repositories_provider.dart';
+import '../../utils/responsive.dart';
+import '../../widgets/app_list_item.dart';
+import '../app_details/app_details_screen.dart';
 import 'latest_screen.dart';
 import 'recently_updated_screen.dart';
-import 'top_apps_screen.dart';
+import '../top_apps/monthly_top_apps_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});

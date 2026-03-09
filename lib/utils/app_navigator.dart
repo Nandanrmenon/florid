@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../screens/updates_screen.dart';
+import '../screens/device/updates_screen.dart';
 
 final GlobalKey<NavigatorState> appNavigatorKey = GlobalKey<NavigatorState>();
 

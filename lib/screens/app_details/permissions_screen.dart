@@ -2,7 +2,7 @@ import 'package:florid/widgets/m_list.dart';
 import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/symbols.dart';
 
-import '../constants.dart';
+import '../../constants.dart';
 
 class PermissionsScreen extends StatefulWidget {
   final List<String> permissions;

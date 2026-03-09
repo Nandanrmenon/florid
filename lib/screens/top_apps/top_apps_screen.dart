@@ -1,23 +1,22 @@
 import 'package:florid/l10n/app_localizations.dart';
+import 'package:florid/models/fdroid_app.dart';
+import 'package:florid/providers/app_provider.dart';
+import 'package:florid/providers/repositories_provider.dart';
+import 'package:florid/screens/app_details/app_details_screen.dart';
+import 'package:florid/widgets/app_list_item.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:provider/provider.dart';
 
-import '../models/fdroid_app.dart';
-import '../providers/app_provider.dart';
-import '../providers/repositories_provider.dart';
-import '../widgets/app_list_item.dart';
-import 'app_details_screen.dart';
-
-class TopAppsScreen extends StatefulWidget {
-  const TopAppsScreen({super.key});
+class TopAppsAllTimeScreen extends StatefulWidget {
+  const TopAppsAllTimeScreen({super.key});
 
   @override
-  State<TopAppsScreen> createState() => _TopAppsScreenState();
+  State<TopAppsAllTimeScreen> createState() => _TopAppsAllTimeScreenState();
 }
 
-class _TopAppsScreenState extends State<TopAppsScreen>
+class _TopAppsAllTimeScreenState extends State<TopAppsAllTimeScreen>
     with AutomaticKeepAliveClientMixin {
   @override
   bool get wantKeepAlive => true;
@@ -33,7 +32,7 @@ class _TopAppsScreenState extends State<TopAppsScreen>
   void _loadData() {
     final appProvider = context.read<AppProvider>();
     final repositoriesProvider = context.read<RepositoriesProvider>();
-    appProvider.fetchTopApps(
+    appProvider.fetchTopAppsAllTime(
       repositoriesProvider: repositoriesProvider,
       limit: 100,
     );
@@ -42,7 +41,7 @@ class _TopAppsScreenState extends State<TopAppsScreen>
   Future<void> _onRefresh() async {
     final appProvider = context.read<AppProvider>();
     final repositoriesProvider = context.read<RepositoriesProvider>();
-    await appProvider.fetchTopApps(
+    await appProvider.fetchTopAppsAllTime(
       repositoriesProvider: repositoriesProvider,
       limit: 100,
     );
@@ -51,7 +50,8 @@ class _TopAppsScreenState extends State<TopAppsScreen>
   String _formatDownloads(int downloads) {
     if (downloads >= 1000000) {
       return '${(downloads / 1000000).toStringAsFixed(1)}M';
-    } else if (downloads >= 1000) {
+    }
+    if (downloads >= 1000) {
       return '${(downloads / 1000).toStringAsFixed(1)}K';
     }
     return downloads.toString();
@@ -60,41 +60,13 @@ class _TopAppsScreenState extends State<TopAppsScreen>
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    final localizations = AppLocalizations.of(context)!;
-
-    return Scaffold(
-      appBar: AppBar(
-        centerTitle: true,
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Text(
-              localizations.monthly_top_apps,
-              style: TextStyle(
-                fontVariations: [
-                  FontVariation('wght', 700),
-                  FontVariation('ROND', 100),
-                ],
-                fontSize: 16,
-              ),
-            ),
-            Text(
-              localizations.from_izzyondroid,
-              style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
-            ),
-          ],
-        ),
-      ),
-      body: Consumer<AppProvider>(
-        builder: (context, appProvider, child) {
-          final state = appProvider.topAppsState;
-          final apps = appProvider.topApps;
-          final error = appProvider.topAppsError;
-          return _buildBody(state, apps, error, appProvider);
-        },
-      ),
+    return Consumer<AppProvider>(
+      builder: (context, appProvider, child) {
+        final state = appProvider.topAppsAllTimeState;
+        final apps = appProvider.topAppsAllTime;
+        final error = appProvider.topAppsAllTimeError;
+        return _buildBody(state, apps, error, appProvider);
+      },
     );
   }
 
@@ -104,14 +76,15 @@ class _TopAppsScreenState extends State<TopAppsScreen>
     String? error,
     AppProvider appProvider,
   ) {
+    final localizations = AppLocalizations.of(context)!;
+
     if (state == LoadingState.loading && apps.isEmpty) {
-      final localizations = AppLocalizations.of(context)!;
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            CircularProgressIndicator(year2023: false),
-            SizedBox(height: 16),
+            const CircularProgressIndicator(year2023: false),
+            const SizedBox(height: 16),
             Text(localizations.loading_top_apps),
           ],
         ),
@@ -119,7 +92,6 @@ class _TopAppsScreenState extends State<TopAppsScreen>
     }
 
     if (state == LoadingState.error && apps.isEmpty) {
-      final localizations = AppLocalizations.of(context)!;
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -145,7 +117,7 @@ class _TopAppsScreenState extends State<TopAppsScreen>
             const SizedBox(height: 24),
             ElevatedButton.icon(
               onPressed: _loadData,
-              icon: Icon(Symbols.refresh),
+              icon: const Icon(Symbols.refresh),
               label: Text(localizations.try_again),
             ),
           ],
@@ -154,13 +126,12 @@ class _TopAppsScreenState extends State<TopAppsScreen>
     }
 
     if (apps.isEmpty) {
-      final localizations = AppLocalizations.of(context)!;
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(
-              Symbols.apps,
+              Symbols.emoji_events,
               size: 64,
               color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
@@ -181,24 +152,56 @@ class _TopAppsScreenState extends State<TopAppsScreen>
         itemCount: apps.length,
         itemBuilder: (context, index) {
           final app = apps[index];
+          final downloads =
+              appProvider.topAppsAllTimeDownloads[app.packageName] ?? 0;
 
           return Row(
             children: [
-              SizedBox(width: 8),
-              Text('$index', style: Theme.of(context).textTheme.bodyMedium),
-              SizedBox(width: 8),
+              SizedBox(
+                width: 36,
+                child: Text(
+                  '${index + 1}',
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
+              ),
               Expanded(
-                child: AppListItem(
-                  app: app,
-                  showInstallStatus: true,
-                  onTap: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (context) => AppDetailsScreen(app: app),
+                child: Stack(
+                  children: [
+                    AppListItem(
+                      app: app,
+                      showInstallStatus: true,
+                      onTap: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => AppDetailsScreen(app: app),
+                          ),
+                        );
+                      },
+                    ).animate().fadeIn(
+                      duration: 300.ms,
+                      delay: (20 * index).ms,
+                    ),
+                    Positioned(
+                      right: 12,
+                      top: 8,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 2,
+                        ),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(999),
+                          color: Theme.of(context).colorScheme.surfaceContainer,
+                        ),
+                        child: Text(
+                          _formatDownloads(downloads),
+                          style: Theme.of(context).textTheme.labelSmall,
+                        ),
                       ),
-                    );
-                  },
-                ).animate().fadeIn(duration: 300.ms, delay: (20 * index).ms),
+                    ),
+                  ],
+                ),
               ),
             ],
           );

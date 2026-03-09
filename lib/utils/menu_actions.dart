@@ -1,5 +1,5 @@
 import 'package:florid/constants.dart';
-import 'package:florid/screens/settings_screen.dart';
+import 'package:florid/screens/settings/settings_screen.dart';
 import 'package:flutter/material.dart';
 
 class MenuActions {

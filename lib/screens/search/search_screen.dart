@@ -6,10 +6,10 @@ import 'package:flutter/services.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:provider/provider.dart';
 
-import '../providers/app_provider.dart';
-import '../providers/repositories_provider.dart';
-import '../widgets/app_list_item.dart';
-import 'app_details_screen.dart';
+import '../../providers/app_provider.dart';
+import '../../providers/repositories_provider.dart';
+import '../../widgets/app_list_item.dart';
+import '../app_details/app_details_screen.dart';
 
 class SearchScreen extends StatefulWidget {
   const SearchScreen({super.key});

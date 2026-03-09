@@ -1,16 +1,16 @@
 import 'dart:convert';
 
 import 'package:florid/l10n/app_localizations.dart';
-import 'package:florid/screens/repository_qr_scanner.dart';
+import 'package:florid/screens/settings/repository_qr_scanner.dart';
 import 'package:florid/widgets/m_list.dart';
 import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:provider/provider.dart';
 
-import '../models/repository.dart';
-import '../providers/app_provider.dart';
-import '../providers/repositories_provider.dart';
-import '../services/fdroid_api_service.dart';
+import '../../models/repository.dart';
+import '../../providers/app_provider.dart';
+import '../../providers/repositories_provider.dart';
+import '../../services/fdroid_api_service.dart';
 
 class RepositoriesScreen extends StatefulWidget {
   const RepositoriesScreen({super.key});

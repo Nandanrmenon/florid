@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:provider/provider.dart';
 
-import '../providers/app_provider.dart';
+import '../../providers/app_provider.dart';
 import 'app_details_screen.dart';
 
 class DeveloperAppsScreen extends StatefulWidget {

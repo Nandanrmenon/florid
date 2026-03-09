@@ -1,8 +1,8 @@
 import 'dart:io';
 
 import 'package:florid/l10n/app_localizations.dart';
-import 'package:florid/screens/developer_apps_screen.dart';
-import 'package:florid/screens/permissions_screen.dart';
+import 'package:florid/screens/app_details/developer_apps_screen.dart';
+import 'package:florid/screens/app_details/permissions_screen.dart';
 import 'package:florid/widgets/changelog_preview.dart';
 import 'package:florid/widgets/m_list.dart';
 import 'package:flutter/material.dart';
@@ -14,13 +14,13 @@ import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../constants.dart';
-import '../models/fdroid_app.dart';
-import '../providers/app_provider.dart';
-import '../providers/download_provider.dart';
-import '../providers/repositories_provider.dart';
-import '../providers/settings_provider.dart';
-import '../services/izzy_stats_service.dart';
+import '../../constants.dart';
+import '../../models/fdroid_app.dart';
+import '../../providers/app_provider.dart';
+import '../../providers/download_provider.dart';
+import '../../providers/repositories_provider.dart';
+import '../../providers/settings_provider.dart';
+import '../../services/izzy_stats_service.dart';
 
 class AppDetailsScreen extends StatefulWidget {
   final FDroidApp app;

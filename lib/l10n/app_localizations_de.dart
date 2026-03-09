@@ -834,4 +834,10 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get enter_your_name => 'Enter your name';
+
+  @override
+  String get top_apps => 'Top Apps';
+
+  @override
+  String get games => 'Games';
 }

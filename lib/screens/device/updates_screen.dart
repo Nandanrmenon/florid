@@ -8,11 +8,11 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:provider/provider.dart';
 
-import '../models/fdroid_app.dart';
-import '../providers/app_provider.dart';
-import '../providers/download_provider.dart';
-import '../widgets/app_list_item.dart';
-import 'app_details_screen.dart';
+import '../../models/fdroid_app.dart';
+import '../../providers/app_provider.dart';
+import '../../providers/download_provider.dart';
+import '../../widgets/app_list_item.dart';
+import '../app_details/app_details_screen.dart';
 
 class UpdatesScreen extends StatefulWidget {
   const UpdatesScreen({super.key});

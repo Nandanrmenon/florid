@@ -6,7 +6,7 @@ import 'package:material_symbols_icons/symbols.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../widgets/m_list.dart';
+import '../../widgets/m_list.dart';
 
 class AppearanceScreen extends StatelessWidget {
   const AppearanceScreen({super.key});

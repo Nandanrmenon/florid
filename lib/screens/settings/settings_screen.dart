@@ -4,8 +4,8 @@ import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:florid/l10n/app_localizations.dart';
 import 'package:florid/providers/app_update_provider.dart';
-import 'package:florid/screens/app_management_screen.dart';
-import 'package:florid/screens/app_updater.dart';
+import 'package:florid/screens/settings/app_management_screen.dart';
+import 'package:florid/screens/settings/app_updater.dart';
 import 'package:florid/widgets/m_list.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -17,13 +17,13 @@ import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../providers/app_provider.dart';
-import '../providers/repositories_provider.dart';
-import '../providers/settings_provider.dart';
-import '../screens/appearance_screen.dart';
-import '../screens/repositories_screen.dart';
-import '../screens/troubleshooting_screen.dart';
-import '../services/fdroid_api_service.dart';
+import '../../providers/app_provider.dart';
+import '../../providers/repositories_provider.dart';
+import '../../providers/settings_provider.dart';
+import 'appearance_screen.dart';
+import 'repositories_screen.dart';
+import 'troubleshooting_screen.dart';
+import '../../services/fdroid_api_service.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});

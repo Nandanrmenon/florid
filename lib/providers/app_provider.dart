@@ -62,6 +62,12 @@ class AppProvider extends ChangeNotifier {
   String? _topAppsError;
   Map<String, int> _topAppsDownloads = {};
 
+  // Top apps all-time state (from IzzyOnDroid)
+  List<FDroidApp> _topAppsAllTime = [];
+  LoadingState _topAppsAllTimeState = LoadingState.idle;
+  String? _topAppsAllTimeError;
+  Map<String, int> _topAppsAllTimeDownloads = {};
+
   // Categories state
   List<String> _categories = [];
   LoadingState _categoriesState = LoadingState.idle;
@@ -109,6 +115,11 @@ class AppProvider extends ChangeNotifier {
   LoadingState get topAppsState => _topAppsState;
   String? get topAppsError => _topAppsError;
   Map<String, int> get topAppsDownloads => _topAppsDownloads;
+
+  List<FDroidApp> get topAppsAllTime => _topAppsAllTime;
+  LoadingState get topAppsAllTimeState => _topAppsAllTimeState;
+  String? get topAppsAllTimeError => _topAppsAllTimeError;
+  Map<String, int> get topAppsAllTimeDownloads => _topAppsAllTimeDownloads;
 
   List<String> get categories => _categories;
   LoadingState get categoriesState => _categoriesState;
@@ -594,6 +605,89 @@ class AppProvider extends ChangeNotifier {
       debugPrint('❌ Error in fetchTopApps: $e');
       _topAppsError = e.toString();
       _topAppsState = LoadingState.error;
+    }
+    notifyListeners();
+  }
+
+  /// Fetches top apps using yearly stats (all-time proxy) from IzzyOnDroid.
+  Future<void> fetchTopAppsAllTime({
+    RepositoriesProvider? repositoriesProvider,
+    int limit = 50,
+  }) async {
+    _topAppsAllTimeState = LoadingState.loading;
+    _topAppsAllTimeError = null;
+    notifyListeners();
+
+    try {
+      if (repositoriesProvider != null) {
+        if (repositoriesProvider.isLoading) {
+          await Future.delayed(Duration(milliseconds: 200));
+        }
+        if (repositoriesProvider.repositories.isEmpty) {
+          debugPrint(
+            '🔄 Fetching all-time top apps: repositories empty, loading...',
+          );
+          await repositoriesProvider.loadRepositories();
+        }
+      }
+
+      Repository? izzyRepo;
+      if (repositoriesProvider != null) {
+        try {
+          izzyRepo = repositoriesProvider.repositories.firstWhere(
+            (r) => r.name == 'IzzyOnDroid' && r.isEnabled,
+          );
+        } catch (_) {
+          izzyRepo = null;
+        }
+      }
+
+      if (izzyRepo == null) {
+        _topAppsAllTime = [];
+        _topAppsAllTimeState = LoadingState.success;
+        notifyListeners();
+        return;
+      }
+
+      final izzyRepository = await _apiService.fetchRepositoryFromUrl(
+        izzyRepo.url,
+      );
+      final izzyApps = izzyRepository.apps.values.toList();
+
+      if (izzyApps.isEmpty) {
+        _topAppsAllTime = [];
+        _topAppsAllTimeState = LoadingState.success;
+        notifyListeners();
+        return;
+      }
+
+      final appStats = <FDroidApp, int>{};
+
+      for (final app in izzyApps) {
+        try {
+          final stats = await _izzyStatsService.fetchStatsForPackage(
+            app.packageName,
+          );
+          final downloads = stats.last365Days ?? 0;
+          if (downloads > 0) {
+            appStats[app] = downloads;
+          }
+        } catch (_) {}
+      }
+
+      final sortedApps = appStats.entries.toList();
+      sortedApps.sort((a, b) => b.value.compareTo(a.value));
+
+      _topAppsAllTime = sortedApps.take(limit).map((e) => e.key).toList();
+      _topAppsAllTimeDownloads = {};
+      for (final entry in sortedApps.take(limit)) {
+        _topAppsAllTimeDownloads[entry.key.packageName] = entry.value;
+      }
+
+      _topAppsAllTimeState = LoadingState.success;
+    } catch (e) {
+      _topAppsAllTimeError = e.toString();
+      _topAppsAllTimeState = LoadingState.error;
     }
     notifyListeners();
   }

@@ -1638,6 +1638,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Enter your name'**
   String get enter_your_name;
+
+  /// No description provided for @top_apps.
+  ///
+  /// In en, this message translates to:
+  /// **'Top Apps'**
+  String get top_apps;
+
+  /// No description provided for @games.
+  ///
+  /// In en, this message translates to:
+  /// **'Games'**
+  String get games;
 }
 
 class _AppLocalizationsDelegate

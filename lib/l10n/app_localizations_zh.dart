@@ -811,6 +811,12 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get enter_your_name => '输入你的昵称';
+
+  @override
+  String get top_apps => 'Top Apps';
+
+  @override
+  String get games => 'Games';
 }
 
 /// The translations for Chinese, as used in China (`zh_CN`).

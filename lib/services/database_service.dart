@@ -544,7 +544,7 @@ class DatabaseService {
       SELECT a.*, r.url as repository_url FROM $_appsTable a
       LEFT JOIN $_repositoriesTable r ON a.repository_id = r.id
       INNER JOIN $_appCategoriesTable ac ON a.package_name = ac.package_name
-      WHERE ac.category = ?
+      WHERE LOWER(ac.category) = LOWER(?)
       ORDER BY a.name ASC
     ''',
       [category],

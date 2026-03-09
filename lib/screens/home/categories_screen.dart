@@ -5,7 +5,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:provider/provider.dart';
 
-import '../providers/app_provider.dart';
+import '../../providers/app_provider.dart';
 import 'category_apps_screen.dart';
 
 class CategoriesScreen extends StatefulWidget {

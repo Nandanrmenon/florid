@@ -115,12 +115,12 @@ class _DeveloperAppsScreenState extends State<DeveloperAppsScreen> {
             ),
             const SizedBox(height: 16),
             Text(
-              'Failed to load apps',
+              AppLocalizations.of(context)!.failed_to_load_apps,
               style: Theme.of(context).textTheme.headlineSmall,
             ),
             const SizedBox(height: 8),
             Text(
-              _error ?? 'Unknown error occurred',
+              _error ?? AppLocalizations.of(context)!.unknown_error_occurred,
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 color: Theme.of(context).colorScheme.onSurfaceVariant,
@@ -145,7 +145,7 @@ class _DeveloperAppsScreenState extends State<DeveloperAppsScreen> {
             const Icon(Symbols.apps, size: 64, color: Colors.grey),
             const SizedBox(height: 16),
             Text(
-              'No apps found from ${widget.developerName}',
+              AppLocalizations.of(context)!.no_apps_found,
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.bodyMedium,
             ),

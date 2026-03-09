@@ -496,12 +496,13 @@ class AppThemes {
         backgroundColor: scheme.surface,
         elevation: 0,
         titleTextStyle: TextStyle(
-          fontFamily: 'Google Sans Flex',
+          fontFamily: 'Fraunces',
           fontSize: 24,
+          fontWeight: FontWeight.w700,
           fontVariations: [
-            FontVariation('wght', 300),
-            FontVariation('ROND', 0),
-            FontVariation('wdth', 95),
+            // FontVariation('wght', 300),
+            // FontVariation('ROND', 0),
+            // FontVariation('wdth', 95),
           ],
         ),
       ),

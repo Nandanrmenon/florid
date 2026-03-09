@@ -143,6 +143,9 @@ flutter:
     - family: Google Sans Flex
       fonts:
         - asset: assets/fonts/GoogleSansFlex-VariableFont.ttf
+    - family: Fraunces
+      fonts:
+        - asset: assets/fonts/Fraunces-VariableFont.ttf
   #       - asset: fonts/Schyler-Italic.ttf
   #         style: italic
   #   - family: Trajan Pro

@@ -11,6 +11,9 @@
     
     <!-- Permission to install APKs -->
     <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
+
+    <!-- Permission required for biometric/device-credential authentication -->
+    <uses-permission android:name="android.permission.USE_BIOMETRIC" />
     
     <!-- Permission to query installed packages -->
     <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" />

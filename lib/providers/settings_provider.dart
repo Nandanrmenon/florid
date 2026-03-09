@@ -7,6 +7,8 @@ enum UpdateNetworkPolicy { any, wifiOnly, wifiAndCharging }
 
 enum InstallMethod { system, shizuku }
 
+enum InstallAuthPolicy { all, antiFeatures }
+
 class SettingsProvider extends ChangeNotifier {
   static const String systemLocale = 'system';
   static const _themeModeKey = 'theme_mode';
@@ -25,6 +27,8 @@ class SettingsProvider extends ChangeNotifier {
   static const _userNameKey = 'user_name';
   static const _showKeepAndroidOpenCardKey = 'show_keep_android_open_card';
   static const _showWhatsNewKey = 'show_whats_new';
+  static const _installAuthEnabledKey = 'install_auth_enabled';
+  static const _installAuthPolicyKey = 'install_auth_policy';
 
   ThemeMode _themeMode = ThemeMode.system;
   ThemeStyle _themeStyle = ThemeStyle.florid;
@@ -37,6 +41,8 @@ class SettingsProvider extends ChangeNotifier {
   bool _dynamicColorEnabled = false;
   bool _backgroundUpdatesEnabled = true;
   bool _showKeepAndroidOpenCard = true;
+  bool _installAuthEnabled = false;
+  InstallAuthPolicy _installAuthPolicy = InstallAuthPolicy.antiFeatures;
   int _updateIntervalHours = 6;
   UpdateNetworkPolicy _updateNetworkPolicy = UpdateNetworkPolicy.any;
   bool _loaded = false;
@@ -62,6 +68,8 @@ class SettingsProvider extends ChangeNotifier {
   int get updateIntervalHours => _updateIntervalHours;
   UpdateNetworkPolicy get updateNetworkPolicy => _updateNetworkPolicy;
   bool get showKeepAndroidOpenCard => _showKeepAndroidOpenCard;
+  bool get installAuthEnabled => _installAuthEnabled;
+  InstallAuthPolicy get installAuthPolicy => _installAuthPolicy;
   String get lastSeenVersion => _lastSeenVersion;
   String get userName => _userName;
   bool get showWhatsNew => _showWhatsNew;
@@ -142,6 +150,13 @@ class SettingsProvider extends ChangeNotifier {
     _backgroundUpdatesEnabled = prefs.getBool(backgroundUpdatesKey) ?? true;
     _showKeepAndroidOpenCard =
         prefs.getBool(_showKeepAndroidOpenCardKey) ?? true;
+    _installAuthEnabled = prefs.getBool(_installAuthEnabledKey) ?? false;
+    final authPolicyIndex = prefs.getInt(_installAuthPolicyKey);
+    if (authPolicyIndex != null &&
+        authPolicyIndex >= 0 &&
+        authPolicyIndex < InstallAuthPolicy.values.length) {
+      _installAuthPolicy = InstallAuthPolicy.values[authPolicyIndex];
+    }
     _updateIntervalHours = prefs.getInt(updateIntervalHoursKey) ?? 6;
     final policyIndex =
         prefs.getInt(updateNetworkPolicyKey) ?? UpdateNetworkPolicy.any.index;
@@ -269,6 +284,20 @@ class SettingsProvider extends ChangeNotifier {
     notifyListeners();
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_showKeepAndroidOpenCardKey, value);
+  }
+
+  Future<void> setInstallAuthEnabled(bool value) async {
+    _installAuthEnabled = value;
+    notifyListeners();
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_installAuthEnabledKey, value);
+  }
+
+  Future<void> setInstallAuthPolicy(InstallAuthPolicy policy) async {
+    _installAuthPolicy = policy;
+    notifyListeners();
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt(_installAuthPolicyKey, policy.index);
   }
 
   Future<void> setBackgroundUpdatesEnabled(bool value) async {

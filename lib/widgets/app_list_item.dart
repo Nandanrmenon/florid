@@ -480,6 +480,8 @@ class _QuickViewModal extends StatelessWidget {
                                           downloadInfo!.filePath!,
                                           app.packageName,
                                           version.versionName,
+                                          app.name,
+                                          antiFeatures: app.antiFeatures,
                                         );
                                         if (context.mounted) {
                                           Navigator.pop(context);

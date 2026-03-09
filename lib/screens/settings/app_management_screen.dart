@@ -8,6 +8,7 @@ import 'package:florid/widgets/m_list.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:provider/provider.dart';
@@ -294,9 +295,89 @@ class _AppManagementScreenState extends State<AppManagementScreen> {
                               await settings.setInstallMethod(value);
                             },
                           ),
+                          if (Platform.isAndroid)
+                            Column(
+                              children: [
+                                MListHeader(
+                                  title: 'Authentication for Installation',
+                                ),
+                                SizedBox(height: 4),
+                                MListView(
+                                  items: [
+                                    MListItemData(
+                                      leading: Icon(Symbols.fingerprint),
+                                      title: 'Biometric Authentication',
+                                      subtitle:
+                                          'Require authentication before installation',
+                                      onTap: () {
+                                        settings.setInstallAuthEnabled(
+                                          !settings.installAuthEnabled,
+                                        );
+                                      },
+                                      suffix: Switch(
+                                        value: settings.installAuthEnabled,
+                                        onChanged: (value) {
+                                          settings.setInstallAuthEnabled(value);
+                                        },
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                if (settings.installAuthEnabled)
+                                  MRadioListView<InstallAuthPolicy>(
+                                        items: [
+                                          MRadioListItemData<InstallAuthPolicy>(
+                                            leading: Icon(Symbols.apps),
+                                            title: localizations.auth_all_apps,
+                                            subtitle: '',
+                                            value: InstallAuthPolicy.all,
+                                            suffix: IconButton(
+                                              onPressed: () {
+                                                showInstallAuthPolicyInfoDialog(
+                                                  context,
+                                                  localizations.auth_all_apps,
+                                                  localizations
+                                                      .auth_all_apps_desc,
+                                                );
+                                              },
+                                              icon: Icon(Symbols.info),
+                                            ),
+                                          ),
+                                          MRadioListItemData<InstallAuthPolicy>(
+                                            leading: Icon(Symbols.warning),
+                                            title: localizations
+                                                .auth_all_apps_w_anti_feat,
+                                            subtitle: '',
+                                            value:
+                                                InstallAuthPolicy.antiFeatures,
+                                            suffix: IconButton(
+                                              onPressed: () {
+                                                showInstallAuthPolicyInfoDialog(
+                                                  context,
+                                                  localizations
+                                                      .auth_all_apps_w_anti_feat,
+                                                  localizations
+                                                      .auth_all_apps_w_anti_feat_desc,
+                                                );
+                                              },
+                                              icon: Icon(Symbols.info),
+                                            ),
+                                          ),
+                                        ],
+                                        groupValue: settings.installAuthPolicy,
+                                        onChanged: (value) async {
+                                          await settings.setInstallAuthPolicy(
+                                            value,
+                                          );
+                                        },
+                                      )
+                                      .animate()
+                                      .fadeIn(duration: 300.ms)
+                                      .slideY(begin: -0.1, duration: 300.ms),
+                              ],
+                            ),
                         ],
                       ),
-
                       Column(
                         spacing: 4,
                         children: [
@@ -325,8 +406,8 @@ class _AppManagementScreenState extends State<AppManagementScreen> {
                               MListItemData(
                                 title: localizations.delete_apk_after_install,
                                 onTap: () {
-                                  settings.setAutoInstallApk(
-                                    !settings.autoInstallApk,
+                                  settings.setAutoDeleteApk(
+                                    !settings.autoDeleteApk,
                                   );
                                 },
                                 subtitle: localizations
@@ -456,6 +537,44 @@ class _AppManagementScreenState extends State<AppManagementScreen> {
           ),
         );
       },
+    );
+  }
+
+  void showInstallAuthPolicyInfoDialog(
+    BuildContext context,
+    String title,
+    String description,
+  ) {
+    final localizations = AppLocalizations.of(context)!;
+    showModalBottomSheet(
+      context: context,
+      builder: (context) => Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 24.0),
+        child: SafeArea(
+          child: Column(
+            spacing: 16,
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(title, style: Theme.of(context).textTheme.headlineSmall),
+              Text(
+                description,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+              ),
+              SizedBox(
+                child: FilledButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  child: Text(localizations.close),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

@@ -93,6 +93,7 @@ dependencies:
   intl: any
   flutter_svg: ^2.2.3
   qr_code_scanner_plus: ^2.1.1
+  local_auth: ^2.3.0
 
 dev_dependencies:
   flutter_test:

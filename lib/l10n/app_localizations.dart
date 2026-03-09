@@ -1650,6 +1650,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Games'**
   String get games;
+
+  /// No description provided for @auth_all_apps.
+  ///
+  /// In en, this message translates to:
+  /// **'All Apps'**
+  String get auth_all_apps;
+
+  /// No description provided for @auth_all_apps_desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Require authentication for all installations'**
+  String get auth_all_apps_desc;
+
+  /// No description provided for @auth_all_apps_w_anti_feat.
+  ///
+  /// In en, this message translates to:
+  /// **'Apps with Anti-Features'**
+  String get auth_all_apps_w_anti_feat;
+
+  /// No description provided for @auth_all_apps_w_anti_feat_desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Require authentication only for apps that have anti-features.'**
+  String get auth_all_apps_w_anti_feat_desc;
 }
 
 class _AppLocalizationsDelegate

@@ -245,6 +245,8 @@ class _AppDetailsScreenState extends State<AppDetailsScreen> {
               downloadInfo!.filePath!,
               widget.app.packageName,
               downloadInfo.versionName,
+              widget.app.name,
+              antiFeatures: widget.app.antiFeatures,
             );
             await appProvider.waitForInstalled(widget.app.packageName);
             if (context.mounted) {
@@ -385,6 +387,8 @@ class _AppDetailsScreenState extends State<AppDetailsScreen> {
                         downloadInfo.filePath!,
                         widget.app.packageName,
                         downloadInfo.versionName,
+                        widget.app.name,
+                        antiFeatures: widget.app.antiFeatures,
                       );
                       await Future.delayed(const Duration(seconds: 1));
                       await appProvider.fetchInstalledApps();
@@ -420,6 +424,8 @@ class _AppDetailsScreenState extends State<AppDetailsScreen> {
                         downloadInfo.filePath!,
                         widget.app.packageName,
                         downloadInfo.versionName,
+                        widget.app.name,
+                        antiFeatures: widget.app.antiFeatures,
                       )
                       .then((_) async {
                         debugPrint('[AppDetails] Auto-install completed');
@@ -3096,6 +3102,8 @@ class _VersionDownloadButton extends StatelessWidget {
                             downloadInfo.filePath!,
                             app.packageName,
                             version.versionName,
+                            app.name,
+                            antiFeatures: app.antiFeatures,
                           );
                         } catch (e) {
                           if (context.mounted) {

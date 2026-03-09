@@ -837,4 +837,18 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get games => 'Games';
+
+  @override
+  String get auth_all_apps => 'All Apps';
+
+  @override
+  String get auth_all_apps_desc =>
+      'Require authentication for all installations';
+
+  @override
+  String get auth_all_apps_w_anti_feat => 'Apps with Anti-Features';
+
+  @override
+  String get auth_all_apps_w_anti_feat_desc =>
+      'Require authentication only for apps that have anti-features.';
 }

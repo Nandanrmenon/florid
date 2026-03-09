@@ -4,6 +4,8 @@ import 'package:android_intent_plus/android_intent.dart';
 import 'package:app_installer/app_installer.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
+import 'package:local_auth/local_auth.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shizuku_api/shizuku_api.dart';
@@ -94,6 +96,7 @@ class DownloadProvider extends ChangeNotifier {
       InstallationTrackingService();
   final AppPreferencesService _preferencesService = AppPreferencesService();
   final ShizukuApi _shizukuApi = ShizukuApi();
+  final LocalAuthentication _localAuth = LocalAuthentication();
   String? _androidPackageName;
   List<String>? _supportedAbis;
 
@@ -397,6 +400,8 @@ class DownloadProvider extends ChangeNotifier {
                   filePath,
                   app.packageName,
                   version.versionName,
+                  app.name,
+                  antiFeatures: app.antiFeatures,
                 );
                 debugPrint('[DownloadProvider] Auto-install (shizuku) done');
               } catch (e) {
@@ -405,7 +410,13 @@ class DownloadProvider extends ChangeNotifier {
             });
           } else {
             debugPrint('[DownloadProvider] Auto-install (system) start');
-            await installApk(filePath, app.packageName, version.versionName);
+            await installApk(
+              filePath,
+              app.packageName,
+              version.versionName,
+              app.name,
+              antiFeatures: app.antiFeatures,
+            );
             debugPrint('[DownloadProvider] Auto-install (system) done');
           }
         } catch (e) {
@@ -505,7 +516,9 @@ class DownloadProvider extends ChangeNotifier {
     String filePath,
     String packageName,
     String versionName,
-  ) async {
+    String appName, {
+    List<String>? antiFeatures,
+  }) async {
     debugPrint('[DownloadProvider] installApk entry: $filePath');
     final key = '${packageName}_$versionName';
 
@@ -519,6 +532,19 @@ class DownloadProvider extends ChangeNotifier {
 
       if (!exists || size <= 0) {
         throw Exception('APK file missing or empty');
+      }
+
+      // Check if authentication is required based on policy
+      final needsAuth = _needsAuthentication(
+        _settingsProvider.installAuthPolicy,
+        antiFeatures,
+      );
+
+      if (needsAuth) {
+        final authenticated = await _authenticateForInstall(appName);
+        if (!authenticated) {
+          throw Exception('Authentication failed. Installation cancelled.');
+        }
       }
 
       // Update status to installing
@@ -569,6 +595,48 @@ class DownloadProvider extends ChangeNotifier {
         notifyListeners();
       }
       throw Exception('Failed to install APK: $e');
+    }
+  }
+
+  bool _needsAuthentication(
+    InstallAuthPolicy policy,
+    List<String>? antiFeatures,
+  ) {
+    // First check if authentication is enabled at all
+    if (!_settingsProvider.installAuthEnabled) {
+      return false;
+    }
+
+    switch (policy) {
+      case InstallAuthPolicy.all:
+        return true;
+      case InstallAuthPolicy.antiFeatures:
+        return antiFeatures != null && antiFeatures.isNotEmpty;
+    }
+  }
+
+  Future<bool> _authenticateForInstall(String appName) async {
+    if (!Platform.isAndroid && !Platform.isIOS) {
+      return true;
+    }
+
+    try {
+      final supported = await _localAuth.isDeviceSupported();
+      if (!supported) {
+        // If auth isn't supported on this device, don't block installation.
+        return true;
+      }
+
+      return await _localAuth.authenticate(
+        localizedReason: 'Authenticate to install $appName',
+        options: const AuthenticationOptions(
+          biometricOnly: false,
+          stickyAuth: true,
+        ),
+      );
+    } on PlatformException catch (e) {
+      debugPrint('[DownloadProvider] Install authentication failed: $e');
+      return false;
     }
   }
 

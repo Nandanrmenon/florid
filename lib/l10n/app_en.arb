@@ -348,5 +348,9 @@
   "your_name":"Your name",
   "enter_your_name":"Enter your name",
   "top_apps":"Top Apps",
-  "games":"Games"
+  "games":"Games",
+  "auth_all_apps": "All Apps",
+  "auth_all_apps_desc": "Require authentication for all installations",
+  "auth_all_apps_w_anti_feat": "Apps with Anti-Features",
+  "auth_all_apps_w_anti_feat_desc": "Require authentication only for apps that have anti-features."
 }

@@ -112,7 +112,7 @@ class MainApp extends StatelessWidget {
                   case ThemeStyle.florid:
                     return AppThemes.floridLightTheme(colorScheme: lightScheme);
                   case ThemeStyle.darkKnight:
-                    return AppThemes.darkKnightTheme(colorScheme: lightScheme);
+                    return AppThemes.lightKnightTheme(colorScheme: lightScheme);
                   case ThemeStyle.material:
                     return AppThemes.materialLightTheme(
                       colorScheme: lightScheme,

@@ -277,12 +277,12 @@ class _ThemeStyleScreenState extends State<ThemeStyleScreen> {
                                 themeData:
                                     Theme.of(context).brightness ==
                                         Brightness.light
-                                    ? AppThemes.darkKnightTheme(
+                                    ? AppThemes.lightKnightTheme(
                                         colorScheme: useDynamic
                                             ? lightDynamic
                                             : null,
                                       )
-                                    : AppThemes.darkKnightTheme(
+                                    : AppThemes.lightKnightTheme(
                                         colorScheme: useDynamic
                                             ? darkDynamic
                                             : null,

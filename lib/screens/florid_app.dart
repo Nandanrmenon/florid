@@ -481,7 +481,7 @@ class _FloridAppState extends State<FloridApp> {
                         ),
                     ],
                   ),
-                  if ((isFlorid || isDarkKnight) && !isWide)
+                  if (isFlorid && !isWide)
                     Positioned(
                       left: 0,
                       right: 0,
@@ -512,7 +512,7 @@ class _FloridAppState extends State<FloridApp> {
                         ),
                       ),
                     ),
-                  if (!(isFlorid || isDarkKnight) && !isWide)
+                  if (!isFlorid && !isWide)
                     Positioned(
                       right: 16,
                       bottom: 16,
@@ -532,8 +532,10 @@ class _FloridAppState extends State<FloridApp> {
       ),
       bottomNavigationBar: Visibility(
         visible:
-            Provider.of<SettingsProvider>(context).themeStyle ==
-                ThemeStyle.material &&
+            (Provider.of<SettingsProvider>(context).themeStyle ==
+                    ThemeStyle.material ||
+                Provider.of<SettingsProvider>(context).themeStyle ==
+                    ThemeStyle.darkKnight) &&
             MediaQuery.sizeOf(context).width < Responsive.largeWidth,
         child: Consumer2<AppProvider, SettingsProvider>(
           builder: (context, appProvider, settings, child) {

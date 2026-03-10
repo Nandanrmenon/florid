@@ -48,25 +48,42 @@ class _UserScreenState extends State<UserScreen> {
 
     final result = await showDialog<String>(
       context: context,
-      builder: (dialogContext) => AlertDialog(
+
+      builder: (dialogContext) => SimpleDialog(
+        contentPadding: EdgeInsets.all(24),
         title: Text(AppLocalizations.of(context)!.your_name),
-        content: TextField(
-          controller: controller,
-          autofocus: true,
-          textInputAction: TextInputAction.done,
-          decoration: InputDecoration(
-            hintText: AppLocalizations.of(context)!.enter_your_name,
+
+        children: [
+          TextField(
+            controller: controller,
+            autofocus: true,
+            textInputAction: TextInputAction.done,
+            decoration: InputDecoration(
+              hintText: AppLocalizations.of(context)!.enter_your_name,
+            ),
+            onSubmitted: (value) => Navigator.of(dialogContext).pop(value),
           ),
-          onSubmitted: (value) => Navigator.of(dialogContext).pop(value),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(),
-            child: Text(AppLocalizations.of(context)!.close),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.of(dialogContext).pop(controller.text),
-            child: Text(AppLocalizations.of(context)!.save),
+          const SizedBox(height: 16),
+          Column(
+            spacing: 8.0,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              SizedBox(
+                height: 48,
+                child: FilledButton(
+                  onPressed: () =>
+                      Navigator.of(dialogContext).pop(controller.text),
+                  child: Text(AppLocalizations.of(context)!.save),
+                ),
+              ),
+              SizedBox(
+                height: 48,
+                child: TextButton(
+                  onPressed: () => Navigator.of(dialogContext).pop(),
+                  child: Text(AppLocalizations.of(context)!.close),
+                ),
+              ),
+            ],
           ),
         ],
       ),

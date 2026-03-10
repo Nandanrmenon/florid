@@ -473,24 +473,24 @@ class AppThemes {
     );
   }
 
-  static ThemeData darkKnightTheme({ColorScheme? colorScheme}) {
+  static ThemeData lightKnightTheme({ColorScheme? colorScheme}) {
     final ColorScheme scheme = colorScheme != null
         ? ColorScheme.fromSeed(
             seedColor: colorScheme.primary,
-            brightness: Brightness.dark,
+            brightness: Brightness.light,
             dynamicSchemeVariant: DynamicSchemeVariant.monochrome,
-            surface: Colors.black,
+            surface: const Color.fromARGB(255, 231, 231, 231),
           )
         : ColorScheme.fromSeed(
             seedColor: Colors.black,
-            brightness: Brightness.dark,
+            brightness: Brightness.light,
             dynamicSchemeVariant: DynamicSchemeVariant.monochrome,
-            surface: Colors.black,
+            surface: const Color.fromARGB(255, 231, 231, 231),
           );
 
     return ThemeData(
       colorScheme: scheme,
-      brightness: Brightness.dark,
+      brightness: Brightness.light,
       appBarTheme: AppBarTheme(
         // centerTitle: true,
         backgroundColor: scheme.surface,
@@ -498,6 +498,7 @@ class AppThemes {
         titleTextStyle: TextStyle(
           fontFamily: 'Fraunces',
           fontSize: 24,
+          color: scheme.onSurface,
           fontWeight: FontWeight.w700,
           fontVariations: [
             // FontVariation('wght', 300),
@@ -506,7 +507,6 @@ class AppThemes {
           ],
         ),
       ),
-      fontFamily: 'Google Sans Flex',
       scaffoldBackgroundColor: scheme.surface,
       cardTheme: CardThemeData(
         color: scheme.surface,
@@ -521,12 +521,19 @@ class AppThemes {
 
       inputDecorationTheme: InputDecorationTheme(filled: true),
       navigationBarTheme: NavigationBarThemeData(
-        backgroundColor: scheme.surface,
+        backgroundColor: scheme.surfaceContainerLow,
+        indicatorColor: Colors.transparent,
         iconTheme: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.selected)) {
-            return IconThemeData(color: scheme.primary);
+            return IconThemeData(color: scheme.onSurface);
           }
-          return IconThemeData(color: scheme.onSurface);
+          return IconThemeData(color: scheme.onSurfaceVariant);
+        }),
+        labelTextStyle: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return TextStyle(color: scheme.onSurface);
+          }
+          return TextStyle(color: scheme.onSurfaceVariant);
         }),
       ),
       navigationRailTheme: NavigationRailThemeData(
@@ -587,7 +594,129 @@ class AppThemes {
         backgroundColor: scheme.primary,
         foregroundColor: scheme.onPrimary,
         elevation: 0,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(999)),
+      ),
+      chipTheme: ChipThemeData(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      ),
+    );
+  }
+
+  static ThemeData darkKnightTheme({ColorScheme? colorScheme}) {
+    final ColorScheme scheme = colorScheme != null
+        ? ColorScheme.fromSeed(
+            seedColor: colorScheme.primary,
+            brightness: Brightness.dark,
+            dynamicSchemeVariant: DynamicSchemeVariant.monochrome,
+            surface: Colors.black,
+          )
+        : ColorScheme.fromSeed(
+            seedColor: Colors.black,
+            brightness: Brightness.dark,
+            dynamicSchemeVariant: DynamicSchemeVariant.monochrome,
+            surface: Colors.black,
+          );
+
+    return ThemeData(
+      colorScheme: scheme,
+      brightness: Brightness.dark,
+      appBarTheme: AppBarTheme(
+        backgroundColor: scheme.surface,
+        elevation: 0,
+        titleTextStyle: TextStyle(
+          fontFamily: 'Fraunces',
+          fontSize: 24,
+          fontWeight: FontWeight.w700,
+        ),
+      ),
+      scaffoldBackgroundColor: scheme.surface,
+      cardTheme: CardThemeData(
+        color: scheme.surface,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+          side: BorderSide(
+            color: scheme.onSurfaceVariant.withValues(alpha: .25),
+          ),
+        ),
+        elevation: 0,
+      ),
+
+      inputDecorationTheme: InputDecorationTheme(filled: true),
+      navigationBarTheme: NavigationBarThemeData(
+        backgroundColor: scheme.surfaceContainerLow,
+        indicatorColor: Colors.transparent,
+        iconTheme: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return IconThemeData(color: scheme.onSurface);
+          }
+          return IconThemeData(color: scheme.onSurfaceVariant);
+        }),
+        labelTextStyle: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return TextStyle(color: scheme.onSurface);
+          }
+          return TextStyle(color: scheme.onSurfaceVariant);
+        }),
+      ),
+      navigationRailTheme: NavigationRailThemeData(
+        backgroundColor: scheme.surfaceContainer,
+        selectedIconTheme: IconThemeData(color: scheme.primary),
+        unselectedIconTheme: IconThemeData(color: scheme.onSurface),
+      ),
+      progressIndicatorTheme: ProgressIndicatorThemeData(
+        year2023: false,
+        linearMinHeight: 10,
+        borderRadius: BorderRadius.circular(8),
+        // trackGap: ,
+      ),
+      checkboxTheme: CheckboxThemeData(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        checkColor: WidgetStateProperty.resolveWith<Color?>((
+          Set<WidgetState> states,
+        ) {
+          if (states.contains(WidgetState.selected)) {
+            return scheme.primary;
+          }
+          return null; // Use the default check color
+        }),
+        fillColor: WidgetStateProperty.resolveWith<Color?>((
+          Set<WidgetState> states,
+        ) {
+          if (states.contains(WidgetState.selected)) {
+            return scheme.primary;
+          }
+          return null; // Use the default fill color
+        }),
+      ),
+      popupMenuTheme: PopupMenuThemeData(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+          side: BorderSide(
+            color: scheme.onSurfaceVariant.withValues(alpha: .25),
+            width: 1.5,
+          ),
+        ),
+      ),
+      filledButtonTheme: FilledButtonThemeData(
+        style: FilledButton.styleFrom(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        ),
+      ),
+      textButtonTheme: TextButtonThemeData(
+        style: TextButton.styleFrom(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        ),
+      ),
+      iconButtonTheme: IconButtonThemeData(
+        style: IconButton.styleFrom(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        ),
+      ),
+      floatingActionButtonTheme: FloatingActionButtonThemeData(
+        backgroundColor: scheme.primary,
+        foregroundColor: scheme.onPrimary,
+        elevation: 0,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(999)),
       ),
       chipTheme: ChipThemeData(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),

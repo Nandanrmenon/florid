@@ -775,102 +775,154 @@ class _AppDetailsScreenState extends State<AppDetailsScreen> {
               ),
               flexibleSpace: FlexibleSpaceBar(
                 collapseMode: CollapseMode.pin,
-                background: Container(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        isDarkKnight
-                            ? Theme.of(context).colorScheme.surfaceContainerLow
-                            : Theme.of(context).colorScheme.primaryContainer,
-                        Theme.of(context).colorScheme.surface,
-                      ],
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                    ),
-                  ),
-                  child: SafeArea(
-                    child: Column(
-                      // mainAxisSize: MainAxisSize.min,
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      spacing: 16.0,
-                      children: [
-                        SizedBox(
-                          height: 128,
-                          width: 128,
-                          child: Material(
-                            elevation: 1,
-                            borderRadius: BorderRadius.circular(24),
-                            clipBehavior: Clip.antiAlias,
-                            child: AppDetailsIcon(app: widget.app),
+                background: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    // Feature graphic background if available
+                    if (widget.app.featureGraphic != null &&
+                        widget.app.featureGraphic!.isNotEmpty)
+                      Positioned.fill(
+                        child: Image.network(
+                          widget.app.featureGraphic!,
+                          fit: BoxFit.fitHeight,
+                          errorBuilder: (context, error, stackTrace) {
+                            return Container();
+                          },
+                        ),
+                      ),
+                    // Gradient overlay
+                    if (widget.app.featureGraphic != null &&
+                        widget.app.featureGraphic!.isNotEmpty)
+                      Container(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [
+                              // isDarkKnight
+                              //     ? Theme.of(context)
+                              //           .colorScheme
+                              //           .surfaceContainerLow
+                              //           .withAlpha((0.85 * 255).toInt())
+                              //     : Theme.of(context)
+                              //           .colorScheme
+                              //           .primaryContainer
+                              //           .withAlpha((0.85 * 255).toInt()),
+                              // Theme.of(context).colorScheme.surface.withAlpha(
+                              //   (0.9 * 255).toInt(),
+                              // ),
+                              Colors.transparent,
+                              Theme.of(context).colorScheme.surface,
+                            ],
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
                           ),
                         ),
-                        Column(
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 32.0,
-                              ),
-                              child: Text(
-                                widget.app.name,
-                                maxLines: 2,
-                                textAlign: TextAlign.center,
-                                overflow: TextOverflow.ellipsis,
-                                style: TextStyle(
-                                  fontSize: 24,
-                                  fontVariations: [
-                                    FontVariation('wght', 700),
-                                    FontVariation('ROND', 100),
-                                  ],
-                                ),
-                              ),
+                      ),
+                    if (widget.app.featureGraphic == null ||
+                        widget.app.featureGraphic!.isEmpty)
+                      Container(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [
+                              isDarkKnight
+                                  ? Theme.of(
+                                      context,
+                                    ).colorScheme.surfaceContainerLow
+                                  : Theme.of(
+                                      context,
+                                    ).colorScheme.primaryContainer,
+                              Theme.of(context).colorScheme.surface,
+                            ],
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                          ),
+                        ),
+                      ),
+                    // Content
+                    SafeArea(
+                      child: Column(
+                        // mainAxisSize: MainAxisSize.min,
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        spacing: 16.0,
+                        children: [
+                          SizedBox(
+                            height: 128,
+                            width: 128,
+                            child: Material(
+                              elevation: 1,
+                              borderRadius: BorderRadius.circular(24),
+                              clipBehavior: Clip.antiAlias,
+                              child: AppDetailsIcon(app: widget.app),
                             ),
-                            Padding(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 32.0,
-                              ),
-                              child: InkWell(
-                                onTap: widget.app.authorName != null
-                                    ? () {
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (context) =>
-                                                DeveloperAppsScreen(
-                                                  developerName:
-                                                      widget.app.authorName!,
-                                                ),
-                                          ),
-                                        );
-                                      }
-                                    : null,
-                                borderRadius: BorderRadius.circular(12),
+                          ),
+                          Column(
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 32.0,
+                                ),
                                 child: Text(
-                                  AppLocalizations.of(context)!.by_author(
-                                    widget.app.authorName ??
-                                        AppLocalizations.of(context)!.unknown,
-                                  ),
+                                  widget.app.name,
                                   maxLines: 2,
                                   textAlign: TextAlign.center,
                                   overflow: TextOverflow.ellipsis,
                                   style: TextStyle(
-                                    fontSize: 14,
+                                    fontSize: 24,
                                     fontVariations: [
                                       FontVariation('wght', 700),
                                       FontVariation('ROND', 100),
                                     ],
-                                    decoration: widget.app.authorName != null
-                                        ? TextDecoration.underline
-                                        : null,
-                                    decorationStyle: TextDecorationStyle.dotted,
                                   ),
                                 ),
                               ),
-                            ),
-                          ],
-                        ),
-                      ],
+                              Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 32.0,
+                                ),
+                                child: InkWell(
+                                  onTap: widget.app.authorName != null
+                                      ? () {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) =>
+                                                  DeveloperAppsScreen(
+                                                    developerName:
+                                                        widget.app.authorName!,
+                                                  ),
+                                            ),
+                                          );
+                                        }
+                                      : null,
+                                  borderRadius: BorderRadius.circular(12),
+                                  child: Text(
+                                    AppLocalizations.of(context)!.by_author(
+                                      widget.app.authorName ??
+                                          AppLocalizations.of(context)!.unknown,
+                                    ),
+                                    maxLines: 2,
+                                    textAlign: TextAlign.center,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      fontVariations: [
+                                        FontVariation('wght', 700),
+                                        FontVariation('ROND', 100),
+                                      ],
+                                      decoration: widget.app.authorName != null
+                                          ? TextDecoration.underline
+                                          : null,
+                                      decorationStyle:
+                                          TextDecorationStyle.dotted,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
+                  ],
                 ),
               ),
               title: AnimatedOpacity(

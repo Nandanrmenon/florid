@@ -46,6 +46,7 @@ class FDroidApp {
   final int? suggestedVersionCode;
   final DateTime? added;
   final DateTime? lastUpdated;
+  final String? featureGraphic;
   @JsonKey(ignore: true)
   final String repositoryUrl;
   @JsonKey(ignore: true)
@@ -75,6 +76,7 @@ class FDroidApp {
     this.suggestedVersionCode,
     this.added,
     this.lastUpdated,
+    this.featureGraphic,
     this.repositoryUrl = 'https://f-droid.org/repo',
     this.availableRepositories,
   });
@@ -180,6 +182,7 @@ class FDroidApp {
       suggestedVersionCode: suggestedVersionCode,
       added: added,
       lastUpdated: lastUpdated,
+      featureGraphic: featureGraphic,
       repositoryUrl: repositoryUrl,
       availableRepositories: availableRepositories,
     );
@@ -209,6 +212,7 @@ class FDroidApp {
     int? suggestedVersionCode,
     DateTime? added,
     DateTime? lastUpdated,
+    String? featureGraphic,
     String? repositoryUrl,
     List<RepositorySource>? availableRepositories,
   }) {
@@ -236,6 +240,7 @@ class FDroidApp {
       suggestedVersionCode: suggestedVersionCode ?? this.suggestedVersionCode,
       added: added ?? this.added,
       lastUpdated: lastUpdated ?? this.lastUpdated,
+      featureGraphic: featureGraphic ?? this.featureGraphic,
       repositoryUrl: repositoryUrl ?? this.repositoryUrl,
       availableRepositories:
           availableRepositories ?? this.availableRepositories,
@@ -329,6 +334,51 @@ class FDroidCategory {
       _$FDroidCategoryFromJson(json);
 
   Map<String, dynamic> toJson() => _$FDroidCategoryToJson(this);
+}
+
+/// Extracts a graphic URL (featureGraphic, promoGraphic, etc.) from the
+/// F-Droid index-v2 structure where the value looks like:
+/// { "en-US": { "name": "/pkg/en-US/featureGraphic_hash.jpg", "sha256": "...", "size": 123 } }
+String? _extractGraphicUrl(dynamic raw, String repoBaseUrl, String? locale) {
+  if (raw == null) return null;
+  if (raw is! Map) return null;
+
+  // Locale preference order
+  final prefs = <String>[];
+  if (locale != null && locale.isNotEmpty) {
+    prefs.add(locale);
+    prefs.add(locale.replaceAll('-', '_'));
+    final lang = locale.split('-').first;
+    if (lang.isNotEmpty) prefs.add(lang);
+  }
+  const englishPrefs = ['en-US', 'en', 'en_GB'];
+  prefs.addAll(englishPrefs);
+
+  String? extractName(dynamic entry) {
+    if (entry is Map && entry['name'] is String) {
+      return entry['name'] as String;
+    }
+    if (entry is String) return entry;
+    return null;
+  }
+
+  // Try preferred locales first
+  for (final key in prefs) {
+    final name = extractName(raw[key]);
+    if (name != null && name.isNotEmpty) {
+      return repoBaseUrl + name;
+    }
+  }
+
+  // Fallback: any locale
+  for (final v in raw.values) {
+    final name = extractName(v);
+    if (name != null && name.isNotEmpty) {
+      return repoBaseUrl + name;
+    }
+  }
+
+  return null;
 }
 
 class FDroidRepository {
@@ -755,6 +805,11 @@ class FDroidRepository {
                 ),
           added: added,
           lastUpdated: lastUpdated,
+          featureGraphic: _extractGraphicUrl(
+            metadata['featureGraphic'],
+            baseUrl,
+            normalizedLocale,
+          ),
           repositoryUrl: baseUrl,
         );
 

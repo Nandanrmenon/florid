@@ -38,6 +38,7 @@ FDroidApp _$FDroidAppFromJson(Map<String, dynamic> json) => FDroidApp(
   lastUpdated: json['lastUpdated'] == null
       ? null
       : DateTime.parse(json['lastUpdated'] as String),
+  featureGraphic: json['featureGraphic'] as String?,
 );
 
 Map<String, dynamic> _$FDroidAppToJson(FDroidApp instance) => <String, dynamic>{
@@ -64,6 +65,7 @@ Map<String, dynamic> _$FDroidAppToJson(FDroidApp instance) => <String, dynamic>{
   'suggestedVersionCode': instance.suggestedVersionCode,
   'added': instance.added?.toIso8601String(),
   'lastUpdated': instance.lastUpdated?.toIso8601String(),
+  'featureGraphic': instance.featureGraphic,
 };
 
 FDroidVersion _$FDroidVersionFromJson(Map<String, dynamic> json) =>
@@ -128,28 +130,4 @@ Map<String, dynamic> _$FDroidCategoryToJson(FDroidCategory instance) =>
       'name': instance.name,
       'description': instance.description,
       'appCount': instance.appCount,
-    };
-
-FDroidRepository _$FDroidRepositoryFromJson(Map<String, dynamic> json) =>
-    FDroidRepository(
-      name: json['name'] as String,
-      description: json['description'] as String,
-      icon: json['icon'] as String,
-      timestamp: json['timestamp'] as String,
-      version: json['version'] as String,
-      maxage: (json['maxage'] as num).toInt(),
-      apps: (json['apps'] as Map<String, dynamic>).map(
-        (k, e) => MapEntry(k, FDroidApp.fromJson(e as Map<String, dynamic>)),
-      ),
-    );
-
-Map<String, dynamic> _$FDroidRepositoryToJson(FDroidRepository instance) =>
-    <String, dynamic>{
-      'name': instance.name,
-      'description': instance.description,
-      'icon': instance.icon,
-      'timestamp': instance.timestamp,
-      'version': instance.version,
-      'maxage': instance.maxage,
-      'apps': instance.apps,
     };

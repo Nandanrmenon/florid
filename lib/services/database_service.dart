@@ -8,7 +8,7 @@ import '../models/fdroid_app.dart';
 
 class DatabaseService {
   static const String _databaseName = 'fdroid_repository.db';
-  static const int _databaseVersion = 7;
+  static const int _databaseVersion = 8;
 
   // Table names
   static const String _appsTable = 'apps';
@@ -88,7 +88,8 @@ class DatabaseService {
         suggested_version_name TEXT,
         suggested_version_code INTEGER,
         added INTEGER,
-        last_updated INTEGER
+        last_updated INTEGER,
+        feature_graphic TEXT
       )
     ''');
 
@@ -205,6 +206,18 @@ class DatabaseService {
         // Column already exists (from v5->v6 upgrade), ignore the error
         debugPrint('Fingerprint column already exists: $e');
       }
+    }
+    if (oldVersion < 8) {
+      // Add feature_graphic column to apps table for v7 to v8 upgrade
+      await db.execute(
+        'ALTER TABLE $_appsTable ADD COLUMN feature_graphic TEXT',
+      );
+      // Force re-sync so new field is populated from repository
+      await db.delete(
+        _metadataTable,
+        where: 'key = ?',
+        whereArgs: ['last_sync'],
+      );
     }
   }
 
@@ -349,6 +362,7 @@ class DatabaseService {
         'suggested_version_code': app.suggestedVersionCode,
         'added': app.added?.millisecondsSinceEpoch,
         'last_updated': app.lastUpdated?.millisecondsSinceEpoch,
+        'feature_graphic': app.featureGraphic,
       }, conflictAlgorithm: ConflictAlgorithm.replace);
 
       // Batch insert versions
@@ -1025,6 +1039,7 @@ class DatabaseService {
       lastUpdated: appMap['last_updated'] != null
           ? DateTime.fromMillisecondsSinceEpoch(appMap['last_updated'] as int)
           : null,
+      featureGraphic: appMap['feature_graphic'] as String?,
       repositoryUrl: repositoryUrl ?? 'https://f-droid.org/repo',
     );
   }

@@ -2346,42 +2346,36 @@ class _DescriptionSectionState extends State<_DescriptionSection>
             color: Theme.of(context).colorScheme.primary,
           ),
         ),
-        Card(
-          margin: EdgeInsets.symmetric(horizontal: 16.0),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 16.0,
-              vertical: 12.0,
-            ),
-            child: AnimatedSize(
-              duration: const Duration(milliseconds: 300),
-              curve: Curves.easeInOut,
-              child: Html(
-                data: description,
-                shrinkWrap: true,
-                style: {
-                  "body": Style(
-                    margin: Margins.zero,
-                    padding: HtmlPaddings.zero,
-                    fontSize: FontSize(
-                      Theme.of(context).textTheme.bodyMedium?.fontSize ?? 14,
-                    ),
-                    color: Theme.of(context).textTheme.bodyMedium?.color,
-                    maxLines: _isExpanded ? null : 3,
-                    textOverflow: _isExpanded ? null : TextOverflow.ellipsis,
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24.0),
+          child: AnimatedSize(
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeInOut,
+            child: Html(
+              data: description,
+              shrinkWrap: true,
+              style: {
+                "body": Style(
+                  margin: Margins.zero,
+                  padding: HtmlPaddings.zero,
+                  fontSize: FontSize(
+                    Theme.of(context).textTheme.bodyMedium?.fontSize ?? 14,
                   ),
-                  "p": Style(margin: Margins.only(bottom: 8)),
-                  "a": Style(
-                    color: Theme.of(context).colorScheme.primary,
-                    textDecoration: TextDecoration.underline,
-                  ),
-                },
-                onLinkTap: (url, attributes, element) {
-                  if (url != null) {
-                    launchUrl(Uri.parse(url));
-                  }
-                },
-              ),
+                  color: Theme.of(context).textTheme.bodyMedium?.color,
+                  maxLines: _isExpanded ? null : 3,
+                  textOverflow: _isExpanded ? null : TextOverflow.ellipsis,
+                ),
+                "p": Style(margin: Margins.only(bottom: 8)),
+                "a": Style(
+                  color: Theme.of(context).colorScheme.primary,
+                  textDecoration: TextDecoration.underline,
+                ),
+              },
+              onLinkTap: (url, attributes, element) {
+                if (url != null) {
+                  launchUrl(Uri.parse(url));
+                }
+              },
             ),
           ),
         ),

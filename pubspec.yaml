@@ -88,6 +88,7 @@ dependencies:
 
   # HTML rendering
   flutter_html: ^3.0.0-beta.2
+  markdown: ^7.3.0
   flutter_localizations:
     sdk: flutter
   intl: any

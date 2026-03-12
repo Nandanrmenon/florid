@@ -1,6 +1,7 @@
 import 'package:app_installer/app_installer.dart';
 import 'package:florid/l10n/app_localizations.dart';
 import 'package:florid/providers/app_update_provider.dart';
+import 'package:florid/widgets/markup_content.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:material_symbols_icons/symbols.dart';
@@ -210,7 +211,7 @@ class _AppUpdatePageState extends State<AppUpdatePage> {
                       color: Theme.of(context).colorScheme.surfaceContainer,
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: Html(
+                    child: MarkupContent(
                       data: update.releaseNotes,
                       style: {
                         "body": Style(
@@ -222,16 +223,28 @@ class _AppUpdatePageState extends State<AppUpdatePage> {
                           ),
                           color: Theme.of(context).textTheme.bodyMedium?.color,
                         ),
-                        "p": Style(margin: Margins.only(bottom: 8)),
+                        "p": Style(
+                          margin: Margins.only(bottom: 8),
+                          color: Theme.of(context).textTheme.bodyMedium?.color,
+                        ),
+                        "ul": Style(
+                          margin: Margins.only(bottom: 8),
+                          padding: HtmlPaddings.only(left: 20),
+                          color: Theme.of(context).textTheme.bodyMedium?.color,
+                        ),
+                        "ol": Style(
+                          margin: Margins.only(bottom: 8),
+                          padding: HtmlPaddings.only(left: 20),
+                          color: Theme.of(context).textTheme.bodyMedium?.color,
+                        ),
+                        "li": Style(
+                          margin: Margins.only(bottom: 4),
+                          color: Theme.of(context).textTheme.bodyMedium?.color,
+                        ),
                         "a": Style(
                           color: Theme.of(context).colorScheme.primary,
                           textDecoration: TextDecoration.underline,
                         ),
-                      },
-                      onLinkTap: (url, attributes, element) {
-                        if (url != null) {
-                          launchUrl(Uri.parse(url));
-                        }
                       },
                     ),
                   ),

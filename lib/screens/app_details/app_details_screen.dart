@@ -5,6 +5,7 @@ import 'package:florid/screens/app_details/developer_apps_screen.dart';
 import 'package:florid/screens/app_details/permissions_screen.dart';
 import 'package:florid/widgets/changelog_preview.dart';
 import 'package:florid/widgets/m_list.dart';
+import 'package:florid/widgets/markup_content.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_html/flutter_html.dart';
@@ -2351,31 +2352,53 @@ class _DescriptionSectionState extends State<_DescriptionSection>
           child: AnimatedSize(
             duration: const Duration(milliseconds: 300),
             curve: Curves.easeInOut,
-            child: Html(
-              data: description,
-              shrinkWrap: true,
-              style: {
-                "body": Style(
-                  margin: Margins.zero,
-                  padding: HtmlPaddings.zero,
-                  fontSize: FontSize(
-                    Theme.of(context).textTheme.bodyMedium?.fontSize ?? 14,
+            child: ShaderMask(
+              shaderCallback: (bounds) {
+                return LinearGradient(
+                  colors: [Colors.black, Colors.transparent],
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                ).createShader(bounds);
+              },
+              blendMode: BlendMode.dstIn,
+              child: MarkupContent(
+                data: description,
+                shrinkWrap: true,
+                style: {
+                  "body": Style(
+                    margin: Margins.zero,
+                    padding: HtmlPaddings.zero,
+                    fontSize: FontSize(
+                      Theme.of(context).textTheme.bodyMedium?.fontSize ?? 14,
+                    ),
+                    color: Theme.of(context).textTheme.bodyMedium?.color,
+                    maxLines: _isExpanded ? null : 3,
+                    textOverflow: _isExpanded ? null : TextOverflow.ellipsis,
                   ),
-                  color: Theme.of(context).textTheme.bodyMedium?.color,
-                  maxLines: _isExpanded ? null : 3,
-                  textOverflow: _isExpanded ? null : TextOverflow.ellipsis,
-                ),
-                "p": Style(margin: Margins.only(bottom: 8)),
-                "a": Style(
-                  color: Theme.of(context).colorScheme.primary,
-                  textDecoration: TextDecoration.underline,
-                ),
-              },
-              onLinkTap: (url, attributes, element) {
-                if (url != null) {
-                  launchUrl(Uri.parse(url));
-                }
-              },
+                  "p": Style(
+                    margin: Margins.only(bottom: 8),
+                    color: Theme.of(context).textTheme.bodyMedium?.color,
+                  ),
+                  "ul": Style(
+                    margin: Margins.only(bottom: 8),
+                    padding: HtmlPaddings.only(left: 20),
+                    color: Theme.of(context).textTheme.bodyMedium?.color,
+                  ),
+                  "ol": Style(
+                    margin: Margins.only(bottom: 8),
+                    padding: HtmlPaddings.only(left: 20),
+                    color: Theme.of(context).textTheme.bodyMedium?.color,
+                  ),
+                  "li": Style(
+                    margin: Margins.only(bottom: 4),
+                    color: Theme.of(context).textTheme.bodyMedium?.color,
+                  ),
+                  "a": Style(
+                    color: Theme.of(context).colorScheme.primary,
+                    textDecoration: TextDecoration.underline,
+                  ),
+                },
+              ),
             ),
           ),
         ),
@@ -3175,7 +3198,7 @@ class _VersionDownloadButton extends StatelessWidget {
   }
 }
 
-enum _ShizukuAction { openApp, switchToSystem, cancel }
+enum _ShizukuAction { switchToSystem, cancel }
 
 Future<void> _handleShizukuUnavailable(
   BuildContext context,

@@ -376,6 +376,7 @@ class AppProvider extends ChangeNotifier {
             final results = await _apiService.searchAppsFromRepositoryUrl(
               app.packageName, // Use exact package name for lookup
               repo.url,
+              allowNetworkFallback: false,
             );
 
             // If found in this repository, return the source

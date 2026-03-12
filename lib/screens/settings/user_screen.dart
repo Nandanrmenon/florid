@@ -801,7 +801,31 @@ class _FavoriteAppsScreenState extends State<_FavoriteAppsScreen> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      context.read<AppProvider>().fetchRepository();
+      () async {
+        final appProvider = context.read<AppProvider>();
+        // Use cached/database repository first to avoid unnecessary network fetches.
+        await appProvider.fetchRepository();
+
+        // If favorites are unresolved locally, fall back to fetching enabled repos.
+        final unresolvedFavorites =
+            appProvider.favoritePackages.isNotEmpty &&
+            appProvider.getFavoriteApps().isEmpty;
+
+        if (unresolvedFavorites) {
+          final repositoriesProvider = context.read<RepositoriesProvider>();
+          if (repositoriesProvider.repositories.isEmpty &&
+              !repositoriesProvider.isLoading) {
+            await repositoriesProvider.loadRepositories();
+          }
+
+          final enabledUrls = repositoriesProvider.enabledRepositories
+              .map((repo) => repo.url)
+              .toList();
+          if (enabledUrls.isNotEmpty) {
+            await appProvider.fetchRepositoriesFromUrls(enabledUrls);
+          }
+        }
+      }();
     });
   }
 
@@ -926,6 +950,7 @@ class _FavoriteAppsScreenState extends State<_FavoriteAppsScreen> {
                     itemBuilder: (context, index) {
                       final app = favoriteApps[index];
                       return Card(
+                        key: Key(app.packageName),
                         elevation: 0,
                         child: AppListItem(
                           app: app,

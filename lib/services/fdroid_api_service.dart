@@ -744,8 +744,9 @@ class FDroidApiService {
   /// Searches for apps from a specific custom repository using database
   Future<List<FDroidApp>> searchAppsFromRepositoryUrl(
     String query,
-    String repositoryUrl,
-  ) async {
+    String repositoryUrl, {
+    bool allowNetworkFallback = true,
+  }) async {
     try {
       // Try to search from database if repository data is cached there
       final results = await _databaseService.searchAppsByRepository(
@@ -753,6 +754,12 @@ class FDroidApiService {
         repositoryUrl,
       );
       if (results.isNotEmpty) {
+        return results;
+      }
+
+      // If fallback is disabled (e.g. for cross-repo presence checks),
+      // do not trigger network calls when no DB result is found.
+      if (!allowNetworkFallback) {
         return results;
       }
 

@@ -27,6 +27,7 @@ class SettingsProvider extends ChangeNotifier {
   static const _userNameKey = 'user_name';
   static const _showKeepAndroidOpenCardKey = 'show_keep_android_open_card';
   static const _showWhatsNewKey = 'show_whats_new';
+  static const _showMonthlyTopAppsKey = 'show_monthly_top_apps';
   static const _installAuthEnabledKey = 'install_auth_enabled';
   static const _installAuthPolicyKey = 'install_auth_policy';
 
@@ -41,6 +42,7 @@ class SettingsProvider extends ChangeNotifier {
   bool _dynamicColorEnabled = false;
   bool _backgroundUpdatesEnabled = true;
   bool _showKeepAndroidOpenCard = true;
+  bool _showMonthlyTopApps = true;
   bool _installAuthEnabled = false;
   InstallAuthPolicy _installAuthPolicy = InstallAuthPolicy.antiFeatures;
   int _updateIntervalHours = 6;
@@ -68,6 +70,7 @@ class SettingsProvider extends ChangeNotifier {
   int get updateIntervalHours => _updateIntervalHours;
   UpdateNetworkPolicy get updateNetworkPolicy => _updateNetworkPolicy;
   bool get showKeepAndroidOpenCard => _showKeepAndroidOpenCard;
+  bool get showMonthlyTopApps => _showMonthlyTopApps;
   bool get installAuthEnabled => _installAuthEnabled;
   InstallAuthPolicy get installAuthPolicy => _installAuthPolicy;
   String get lastSeenVersion => _lastSeenVersion;
@@ -150,6 +153,7 @@ class SettingsProvider extends ChangeNotifier {
     _backgroundUpdatesEnabled = prefs.getBool(backgroundUpdatesKey) ?? true;
     _showKeepAndroidOpenCard =
         prefs.getBool(_showKeepAndroidOpenCardKey) ?? true;
+    _showMonthlyTopApps = prefs.getBool(_showMonthlyTopAppsKey) ?? true;
     _installAuthEnabled = prefs.getBool(_installAuthEnabledKey) ?? false;
     final authPolicyIndex = prefs.getInt(_installAuthPolicyKey);
     if (authPolicyIndex != null &&
@@ -340,5 +344,12 @@ class SettingsProvider extends ChangeNotifier {
     notifyListeners();
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_showWhatsNewKey, value);
+  }
+
+  Future<void> setShowMonthlyTopApps(bool value) async {
+    _showMonthlyTopApps = value;
+    notifyListeners();
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_showMonthlyTopAppsKey, value);
   }
 }

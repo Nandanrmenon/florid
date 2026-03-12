@@ -461,6 +461,11 @@ class FDroidApiService {
           'locale': _currentLocale,
         });
         final repo = result['repo'] as FDroidRepository;
+
+        // Cache the raw JSON for future feature graphic extractions
+        final parsedIndex = await compute(_decodeJsonMapHelper, response.body);
+        _repositoryIndexCache[indexUrl] = parsedIndex;
+
         debugPrint('Successfully fetched repository from $url');
         return repo;
       } catch (primaryError) {
@@ -486,6 +491,14 @@ class FDroidApiService {
             'locale': _currentLocale,
           });
           final repo = result['repo'] as FDroidRepository;
+
+          // Cache the raw JSON for future feature graphic extractions
+          final parsedIndex = await compute(
+            _decodeJsonMapHelper,
+            response.body,
+          );
+          _repositoryIndexCache[indexUrl] = parsedIndex;
+
           return repo;
         } catch (fallbackError) {
           debugPrint('Fallback attempt also failed: $fallbackError');
@@ -1220,6 +1233,164 @@ class FDroidApiService {
       return [];
     } catch (e) {
       return [];
+    }
+  }
+
+  /// Gets the feature graphic (branding image) for an app from the specified repository
+  /// Uses cached repository index to avoid repeated Network requests
+  Future<String?> getFeatureGraphic(
+    String packageName, {
+    required String repositoryUrl,
+  }) async {
+    try {
+      Map<String, dynamic>? jsonData;
+
+      // Ensure URL doesn't end with /repo/index-v2.json
+      var cleanUrl = repositoryUrl.endsWith('/')
+          ? repositoryUrl.substring(0, repositoryUrl.length - 1)
+          : repositoryUrl;
+
+      // Handle various URL formats
+      if (cleanUrl.endsWith('/index-v2.json')) {
+        cleanUrl = cleanUrl.substring(
+          0,
+          cleanUrl.length - '/index-v2.json'.length,
+        );
+      }
+
+      final indexUrl = cleanUrl.endsWith('/repo')
+          ? '$cleanUrl/index-v2.json'
+          : '$cleanUrl/repo/index-v2.json';
+
+      // Check if we have this repository cached
+      if (_repositoryIndexCache.containsKey(indexUrl)) {
+        jsonData = _repositoryIndexCache[indexUrl];
+      } else {
+        // No cached index available - cannot extract feature graphics
+        return null;
+      }
+
+      if (jsonData == null) {
+        return null;
+      }
+
+      final packages = (jsonData['packages'] as Map?)?.cast<String, dynamic>();
+      if (packages == null) {
+        return null;
+      }
+
+      final pkgData = packages[packageName] as Map?;
+      if (pkgData == null) {
+        return null;
+      }
+
+      // Get featureGraphic from metadata
+      final metadata = (pkgData['metadata'] as Map?)?.cast<String, dynamic>();
+      if (metadata != null) {
+        if (metadata['featureGraphic'] != null) {
+          final featureGraphic = metadata['featureGraphic'];
+
+          // featureGraphic is organized by language: featureGraphic[language]
+          if (featureGraphic is Map) {
+            // Try to get en-US first, then fall back to any available language
+            if (featureGraphic['en-US'] is String &&
+                (featureGraphic['en-US'] as String).isNotEmpty) {
+              return featureGraphic['en-US'] as String;
+            }
+
+            // Fall back to first available language
+            for (final langValue in featureGraphic.values) {
+              if (langValue is String && langValue.isNotEmpty) {
+                return langValue;
+              }
+            }
+          } else if (featureGraphic is String && featureGraphic.isNotEmpty) {
+            return featureGraphic;
+          }
+        }
+      }
+
+      return null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  /// Fetches and caches the repository index without parsing the full FDroidRepository
+  /// This is useful for feature graphic extraction when apps are loaded from cache
+  Future<void> cacheRepositoryIndexFromUrl(String repositoryUrl) async {
+    try {
+      // Ensure URL doesn't end with /repo/index-v2.json
+      var cleanUrl = repositoryUrl.endsWith('/')
+          ? repositoryUrl.substring(0, repositoryUrl.length - 1)
+          : repositoryUrl;
+
+      if (cleanUrl.endsWith('/index-v2.json')) {
+        cleanUrl = cleanUrl.substring(
+          0,
+          cleanUrl.length - '/index-v2.json'.length,
+        );
+      }
+
+      final indexUrl = cleanUrl.endsWith('/repo')
+          ? '$cleanUrl/index-v2.json'
+          : '$cleanUrl/repo/index-v2.json';
+
+      // Skip if already cached
+      if (_repositoryIndexCache.containsKey(indexUrl)) {
+        debugPrint('💾 Index already cached for $repositoryUrl');
+        return;
+      }
+
+      debugPrint('📥 Caching index from: $indexUrl');
+
+      // Fetch the index with SNI bypass handling
+      final cachedSetting = _workingSniBypassSettings[indexUrl];
+      final primarySetting = cachedSetting ?? _sniBypassEnabled;
+      final fallbackSetting = !primarySetting;
+
+      try {
+        final response = await _fetchCustomRepoWithSNISetting(
+          indexUrl,
+          primarySetting,
+        );
+
+        if (response.statusCode == 200) {
+          final parsedIndex = await compute(
+            _decodeJsonMapHelper,
+            response.body,
+          );
+          _repositoryIndexCache[indexUrl] = parsedIndex;
+          _workingSniBypassSettings[indexUrl] = primarySetting;
+          debugPrint('✅ Successfully cached index for $repositoryUrl');
+        }
+      } catch (primaryError) {
+        // Try fallback setting
+        try {
+          final response = await _fetchCustomRepoWithSNISetting(
+            indexUrl,
+            fallbackSetting,
+          );
+
+          if (response.statusCode == 200) {
+            final parsedIndex = await compute(
+              _decodeJsonMapHelper,
+              response.body,
+            );
+            _repositoryIndexCache[indexUrl] = parsedIndex;
+            _workingSniBypassSettings[indexUrl] = fallbackSetting;
+            debugPrint(
+              '✅ Successfully cached index for $repositoryUrl (fallback SNI)',
+            );
+          }
+        } catch (fallbackError) {
+          debugPrint(
+            '⚠️ Could not cache index for $repositoryUrl: $primaryError / $fallbackError',
+          );
+        }
+      }
+    } catch (e) {
+      debugPrint('💥 Error caching repository index: $e');
     }
   }
 

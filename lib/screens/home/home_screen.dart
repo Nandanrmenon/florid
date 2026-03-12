@@ -14,9 +14,9 @@ import '../../providers/repositories_provider.dart';
 import '../../utils/responsive.dart';
 import '../../widgets/app_list_item.dart';
 import '../app_details/app_details_screen.dart';
+import '../top_apps/monthly_top_apps_screen.dart';
 import 'latest_screen.dart';
 import 'recently_updated_screen.dart';
-import '../top_apps/monthly_top_apps_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -746,10 +746,17 @@ class _HomeScreenState extends State<HomeScreen>
                             )
                             .animate(delay: Duration(milliseconds: 100))
                             .fadeIn(duration: 300.ms),
-                      if (_isIzzyOnDroidEnabled(repositoriesProvider))
-                        buildTopAppsSection(),
-                      buildRecentSection(),
-                      buildNewReleasesSection(),
+                      if (_isIzzyOnDroidEnabled(repositoriesProvider) &&
+                          settingsProvider.showMonthlyTopApps)
+                        buildTopAppsSection()
+                            .animate(delay: Duration(milliseconds: 100))
+                            .fadeIn(duration: 300.ms),
+                      buildRecentSection()
+                          .animate(delay: Duration(milliseconds: 100))
+                          .fadeIn(duration: 300.ms),
+                      buildNewReleasesSection()
+                          .animate(delay: Duration(milliseconds: 100))
+                          .fadeIn(duration: 300.ms),
 
                       if (isFlorid || isDarkKnight) const SizedBox(height: 86),
                     ],

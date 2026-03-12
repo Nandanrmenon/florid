@@ -399,6 +399,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get show_whats_new => '查看最新内容';
 
   @override
+  String get show_monthly_top_apps => 'Show Monthly Top Apps';
+
+  @override
   String get feedback_on_florid_theme => '反馈Florid主题';
 
   @override

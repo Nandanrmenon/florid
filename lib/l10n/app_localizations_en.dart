@@ -402,6 +402,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get show_whats_new => 'Show What\'s New';
 
   @override
+  String get show_monthly_top_apps => 'Show Monthly Top Apps';
+
+  @override
   String get feedback_on_florid_theme => 'Feedback on Florid theme';
 
   @override

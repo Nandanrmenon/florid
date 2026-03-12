@@ -1269,4 +1269,15 @@ class AppProvider extends ChangeNotifier {
       repositoryUrl: repositoryUrl,
     );
   }
+
+  /// Gets the feature graphic for an app
+  Future<String?> getFeatureGraphic(
+    String packageName, {
+    required String repositoryUrl,
+  }) async {
+    return await _apiService.getFeatureGraphic(
+      packageName,
+      repositoryUrl: repositoryUrl,
+    );
+  }
 }

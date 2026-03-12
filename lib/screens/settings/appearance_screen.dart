@@ -105,6 +105,23 @@ class AppearanceScreen extends StatelessWidget {
                                           },
                                         ),
                                       ),
+                                      MListItemData(
+                                        title:
+                                            localizations.show_monthly_top_apps,
+                                        onTap: () {
+                                          settings.setShowMonthlyTopApps(
+                                            !settings.showMonthlyTopApps,
+                                          );
+                                        },
+                                        suffix: Switch(
+                                          value: settings.showMonthlyTopApps,
+                                          onChanged: (value) {
+                                            settings.setShowMonthlyTopApps(
+                                              value,
+                                            );
+                                          },
+                                        ),
+                                      ),
                                     ],
                                   ),
                                 ],

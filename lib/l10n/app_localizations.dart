@@ -859,6 +859,12 @@ abstract class AppLocalizations {
   /// **'Show What\'s New'**
   String get show_whats_new;
 
+  /// No description provided for @show_monthly_top_apps.
+  ///
+  /// In en, this message translates to:
+  /// **'Show Monthly Top Apps'**
+  String get show_monthly_top_apps;
+
   /// No description provided for @feedback_on_florid_theme.
   ///
   /// In en, this message translates to:

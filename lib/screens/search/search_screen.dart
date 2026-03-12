@@ -222,6 +222,7 @@ class _SearchScreenState extends State<SearchScreen> {
                           // margin: const EdgeInsets.symmetric(horizontal: 16),
                           child: _SearchSuggestions(
                             onSuggestionTap: (suggestion) {
+                              FocusScope.of(context).unfocus();
                               setState(() {
                                 _searchController.text = suggestion;
                               });

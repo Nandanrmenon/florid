@@ -1,7 +1,6 @@
 import 'package:florid/l10n/app_localizations.dart';
 import 'package:florid/models/fdroid_app.dart';
 import 'package:florid/providers/download_provider.dart';
-import 'package:florid/providers/settings_provider.dart';
 import 'package:florid/utils/responsive.dart';
 import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/symbols.dart';
@@ -123,12 +122,8 @@ class _CategoryAppsScreenState extends State<CategoryAppsScreen> {
                   floating: true,
                   title: Consumer<AppProvider>(
                     builder: (context, appProvider, child) {
-                      final settings = context.watch<SettingsProvider>();
                       return Column(
-                        crossAxisAlignment:
-                            settings.themeStyle == ThemeStyle.florid
-                            ? CrossAxisAlignment.center
-                            : CrossAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
                             widget.category,

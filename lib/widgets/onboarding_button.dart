@@ -6,14 +6,14 @@ class OnboardingPrimaryButton extends StatelessWidget {
     super.key,
     required this.currentPage,
     required this.isFinishing,
-    required this.canProceedFromRepos,
+    required this.canProceed,
     required this.onNext,
     required this.onStartSetup,
   });
 
   final int currentPage;
   final bool isFinishing;
-  final bool canProceedFromRepos;
+  final bool canProceed;
   final VoidCallback onNext;
   final VoidCallback onStartSetup;
 
@@ -21,7 +21,7 @@ class OnboardingPrimaryButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final localizations = AppLocalizations.of(context)!;
     final isRepoStep = currentPage == 2;
-    final isEnabled = !isFinishing && (!isRepoStep || canProceedFromRepos);
+    final isEnabled = !isFinishing && canProceed;
 
     final onPressed = !isEnabled
         ? null

@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:florid/l10n/app_localizations.dart';
+import 'package:florid/widgets/list_icon.dart';
 import 'package:florid/widgets/onboarding_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -81,6 +82,20 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   }
 
   void _startSetup() {
+    if (!_installPermissionGranted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('App installation permission is required to continue.'),
+        ),
+      );
+      _pageController.animateToPage(
+        1,
+        duration: const Duration(milliseconds: 250),
+        curve: Curves.easeOut,
+      );
+      return;
+    }
+
     // Navigate to progress screen
     _pageController.nextPage(
       duration: const Duration(milliseconds: 500),
@@ -311,9 +326,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   child: OnboardingPrimaryButton(
                     currentPage: _currentPage,
                     isFinishing: _isFinishing,
-                    canProceedFromRepos: _selectedRepos.values.any(
-                      (selected) => selected,
-                    ),
+                    canProceed: _currentPage == 1
+                        ? _installPermissionGranted
+                        : _currentPage == 2
+                        ? _selectedRepos.values.any((selected) => selected)
+                        : true,
                     onNext: () {
                       _pageController.nextPage(
                         duration: const Duration(milliseconds: 250),
@@ -533,43 +550,93 @@ class _PermissionsStep extends StatelessWidget {
 
     return SingleChildScrollView(
       child: Padding(
-        padding: const EdgeInsets.all(24),
+        padding: const EdgeInsets.symmetric(vertical: 24),
         child: Column(
-          spacing: 24.0,
+          spacing: 16.0,
           children: [
-            Row(
-              spacing: 8,
-              children: [
-                CircleAvatar(child: Icon(Symbols.notifications_active)),
-                Text(
-                  localizations.request_permissions,
-                  style: Theme.of(context).textTheme.headlineSmall,
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: Column(
+                spacing: 16.0,
+                children: [
+                  Row(
+                    spacing: 8,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      CircleAvatar(child: Icon(Symbols.notifications_active)),
+                      Text(
+                        localizations.request_permissions,
+                        style: Theme.of(context).textTheme.headlineSmall,
+                      ),
+                    ],
+                  ).animate().fadeIn(duration: 500.ms),
+                  Text(
+                    localizations.permissions_step_description,
+                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                      color: colorScheme.onSurfaceVariant,
+                    ),
+                  ).animate().fadeIn(duration: 500.ms, delay: 200.ms),
+                ],
+              ),
+            ),
+            // Column(
+            //   spacing: 12,
+            //   children: [
+            //     _PermissionCard(
+            //       icon: Symbols.notifications,
+            //       title: localizations.notifications,
+            //       description: localizations.get_notified_updates,
+            //       isGranted: notificationsGranted,
+            //       onRequest: onRequestNotifications,
+            //     ).animate().fadeIn(duration: 500.ms, delay: 400.ms),
+            //     _PermissionCard(
+            //       icon: Symbols.install_mobile,
+            //       title: localizations.app_installation,
+            //       description: localizations.allow_florid_install_apps,
+            //       isGranted: installPermissionGranted,
+            //       onRequest: onRequestInstallPermission,
+            //     ).animate().fadeIn(duration: 500.ms, delay: 600.ms),
+            //   ],
+            // ),
+            MListView(
+              items: [
+                MListItemData(
+                  title: localizations.app_installation,
+                  subtitle: localizations.allow_florid_install_apps,
+                  leading: ListIcon(
+                    iconData: Symbols.install_mobile,
+                    // color: colorScheme.primary,
+                  ),
+                  onTap: () {},
+                  selected: installPermissionGranted,
+                  suffix: FilledButton.tonal(
+                    onPressed: onRequestInstallPermission,
+                    child: Text(AppLocalizations.of(context)!.allow),
+                  ),
                 ),
               ],
-            ).animate().fadeIn(duration: 500.ms),
-            Text(
-              localizations.permissions_step_description,
-              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                color: colorScheme.onSurfaceVariant,
-              ),
-            ).animate().fadeIn(duration: 500.ms, delay: 200.ms),
+            ),
             Column(
-              spacing: 12,
               children: [
-                _PermissionCard(
-                  icon: Symbols.notifications,
-                  title: localizations.notifications,
-                  description: localizations.get_notified_updates,
-                  isGranted: notificationsGranted,
-                  onRequest: onRequestNotifications,
-                ).animate().fadeIn(duration: 500.ms, delay: 400.ms),
-                _PermissionCard(
-                  icon: Symbols.install_mobile,
-                  title: localizations.app_installation,
-                  description: localizations.allow_florid_install_apps,
-                  isGranted: installPermissionGranted,
-                  onRequest: onRequestInstallPermission,
-                ).animate().fadeIn(duration: 500.ms, delay: 600.ms),
+                MListHeader(title: 'Optional'),
+                MListView(
+                  items: [
+                    MListItemData(
+                      title: localizations.notifications,
+                      subtitle: localizations.get_notified_updates,
+                      leading: ListIcon(
+                        iconData: Symbols.notifications,
+                        // color: colorScheme.primary,
+                      ),
+                      onTap: () {},
+                      selected: notificationsGranted,
+                      suffix: FilledButton.tonal(
+                        onPressed: onRequestNotifications,
+                        child: Text(AppLocalizations.of(context)!.allow),
+                      ),
+                    ),
+                  ],
+                ),
               ],
             ),
             Text(

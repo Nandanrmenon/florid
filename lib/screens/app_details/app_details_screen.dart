@@ -2360,7 +2360,7 @@ class _DescriptionSectionState extends State<_DescriptionSection>
                   end: Alignment.bottomCenter,
                 ).createShader(bounds);
               },
-              blendMode: BlendMode.dstIn,
+              blendMode: _isExpanded ? BlendMode.dst : BlendMode.dstIn,
               child: MarkupContent(
                 data: description,
                 shrinkWrap: true,

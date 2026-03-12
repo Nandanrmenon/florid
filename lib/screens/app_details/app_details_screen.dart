@@ -2833,417 +2833,114 @@ class _AllVersionsSection extends StatelessWidget {
               spacing: 8.0,
               children: [
                 MListHeader(title: 'All Versions'),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                  child: Column(
-                    children: [
-                      ...versions.map((version) {
-                        final isLatest = version == versions.first;
-                        final compatibleAbi = supportsDevice(version);
-
-                        return Container(
-                          padding: const EdgeInsets.all(12),
-                          margin: const EdgeInsets.only(bottom: 4),
-                          decoration: BoxDecoration(
-                            color: isLatest
-                                ? Theme.of(context).colorScheme.primaryContainer
-                                : Theme.of(
-                                    context,
-                                  ).colorScheme.surfaceContainer,
-                            borderRadius: BorderRadius.circular(16),
-                            border: isLatest
-                                ? Border.all(
-                                    color: Theme.of(
-                                      context,
-                                    ).colorScheme.primary,
-                                    width: 1,
-                                  )
-                                : null,
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          version.versionName,
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .bodyMedium
-                                              ?.copyWith(
-                                                fontWeight: FontWeight.w600,
+                MListViewBuilder(
+                  itemCount: versions.length,
+                  itemBuilder: (index) {
+                    final version = versions[index];
+                    final isLatest = version == versions.first;
+                    final compatibleAbi = supportsDevice(version);
+                    final installedApp = appProvider.getInstalledApp(
+                      app.packageName,
+                    );
+                    final isInstalledVersion =
+                        appProvider.isAppInstalled(app.packageName) &&
+                        installedApp != null &&
+                        (installedApp.versionCode != null
+                            ? installedApp.versionCode == version.versionCode
+                            : installedApp.versionName == version.versionName);
+                    return MListItemData(
+                      title: version.versionName,
+                      subtitle: version.sizeString,
+                      suffix: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          if (isInstalledVersion)
+                            IconButton.filledTonal(
+                              style: FilledButton.styleFrom(
+                                foregroundColor: Theme.of(
+                                  context,
+                                ).colorScheme.onErrorContainer,
+                                backgroundColor: Theme.of(
+                                  context,
+                                ).colorScheme.errorContainer,
+                              ),
+                              onPressed: () async {
+                                try {
+                                  await context
+                                      .read<DownloadProvider>()
+                                      .uninstallApp(app.packageName);
+                                  await Future.delayed(
+                                    const Duration(milliseconds: 100),
+                                  );
+                                  await appProvider.fetchInstalledApps();
+                                } catch (e) {
+                                  if (context.mounted) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text('Uninstall failed: $e'),
+                                      ),
+                                    );
+                                  }
+                                }
+                              },
+                              icon: const Icon(Symbols.delete_rounded, fill: 1),
+                            )
+                          else ...[
+                            IconButton(
+                              onPressed: compatibleAbi
+                                  ? () async {
+                                      final url = version.downloadUrl(
+                                        app.repositoryUrl,
+                                      );
+                                      await launchUrl(Uri.parse(url));
+                                    }
+                                  : null,
+                              icon: const Icon(Symbols.open_in_new_rounded),
+                            ),
+                            IconButton.filledTonal(
+                              onPressed: compatibleAbi
+                                  ? () async {
+                                      try {
+                                        final appWithVersion = app
+                                            .copyWithVersion(version);
+                                        await context
+                                            .read<DownloadProvider>()
+                                            .downloadApk(appWithVersion);
+                                      } catch (e) {
+                                        if (context.mounted) {
+                                          ScaffoldMessenger.of(
+                                            context,
+                                          ).showSnackBar(
+                                            SnackBar(
+                                              content: Text(
+                                                'Download failed: $e',
                                               ),
-                                        ),
-                                        Text(
-                                          'Code: ${version.versionCode}',
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .bodySmall
-                                              ?.copyWith(
-                                                color: Theme.of(
-                                                  context,
-                                                ).colorScheme.onSurfaceVariant,
-                                              ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  Column(
-                                    crossAxisAlignment: CrossAxisAlignment.end,
-                                    children: [
-                                      if (isLatest)
-                                        Container(
-                                          padding: const EdgeInsets.symmetric(
-                                            horizontal: 8,
-                                            vertical: 4,
-                                          ),
-                                          decoration: BoxDecoration(
-                                            color: Theme.of(
-                                              context,
-                                            ).colorScheme.primary,
-                                            borderRadius: BorderRadius.circular(
-                                              4,
                                             ),
-                                          ),
-                                          child: Text(
-                                            'Latest',
-                                            style: Theme.of(context)
-                                                .textTheme
-                                                .labelSmall
-                                                ?.copyWith(
-                                                  color: Theme.of(
-                                                    context,
-                                                  ).colorScheme.onPrimary,
-                                                ),
-                                          ),
-                                        ),
-                                      if (!compatibleAbi)
-                                        Padding(
-                                          padding: const EdgeInsets.only(
-                                            top: 4.0,
-                                          ),
-                                          child: Text(
-                                            'Incompatible ABI',
-                                            style: Theme.of(context)
-                                                .textTheme
-                                                .labelSmall
-                                                ?.copyWith(
-                                                  color: Theme.of(
-                                                    context,
-                                                  ).colorScheme.error,
-                                                  fontWeight: FontWeight.w600,
-                                                ),
-                                          ),
-                                        ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 8),
-                              Row(
-                                children: [
-                                  Text(
-                                    'Size: ${version.sizeString}',
-                                    style: Theme.of(
-                                      context,
-                                    ).textTheme.bodySmall,
-                                  ),
-                                  const SizedBox(width: 16),
-                                  Text(
-                                    'Released: ${_formatDate(version.added)}',
-                                    style: Theme.of(
-                                      context,
-                                    ).textTheme.bodySmall,
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 12),
-                              _VersionDownloadButton(
-                                app: app,
-                                version: version,
-                              ),
-                            ],
-                          ),
-                        );
-                      }),
-                    ],
-                  ),
-                ),
-              ],
-            );
-          },
-        );
-      },
-    );
-  }
-
-  String _formatDate(DateTime date) {
-    return '${date.day}/${date.month}/${date.year}';
-  }
-}
-
-class _VersionDownloadButton extends StatelessWidget {
-  final FDroidApp app;
-  final FDroidVersion version;
-
-  const _VersionDownloadButton({required this.app, required this.version});
-
-  @override
-  Widget build(BuildContext context) {
-    return Consumer2<DownloadProvider, AppProvider>(
-      builder: (context, downloadProvider, appProvider, child) {
-        final isInstalled = appProvider.isAppInstalled(app.packageName);
-        final installedApp = appProvider.getInstalledApp(app.packageName);
-        final downloadInfo = downloadProvider.getDownloadInfo(
-          app.packageName,
-          version.versionName,
-        );
-        final isDownloading =
-            downloadInfo?.status == DownloadStatus.downloading;
-        final isInstalling = downloadInfo?.status == DownloadStatus.installing;
-        final isCancelled = downloadInfo?.status == DownloadStatus.cancelled;
-        final fileExists = downloadInfo?.filePath != null
-            ? File(downloadInfo!.filePath!).existsSync()
-            : false;
-        final isDownloaded =
-            downloadInfo?.status == DownloadStatus.completed &&
-            downloadInfo?.filePath != null &&
-            !isCancelled &&
-            fileExists;
-        final progress = downloadProvider.getProgress(
-          app.packageName,
-          version.versionName,
-        );
-
-        final supportedAbisFuture = appProvider.getSupportedAbis();
-
-        final isInstalledVersion = isInstalled && installedApp != null
-            ? (installedApp.versionCode != null
-                  ? installedApp.versionCode == version.versionCode
-                  : installedApp.versionName == version.versionName)
-            : false;
-
-        if (isInstalledVersion) {
-          return Row(
-            spacing: 8,
-            children: [
-              Expanded(
-                child: FilledButton.tonalIcon(
-                  onPressed: () async {
-                    try {
-                      await downloadProvider.uninstallApp(app.packageName);
-                      await Future.delayed(const Duration(milliseconds: 100));
-                      await appProvider.fetchInstalledApps();
-                    } catch (e) {
-                      if (context.mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('Uninstall failed: $e')),
-                        );
-                      }
-                    }
-                  },
-                  icon: const Icon(Symbols.delete_rounded, fill: 1, size: 18),
-                  label: Text(AppLocalizations.of(context)!.uninstall),
-                  style: FilledButton.styleFrom(
-                    foregroundColor: Theme.of(context).colorScheme.onError,
-                    backgroundColor: Theme.of(context).colorScheme.error,
-                  ),
-                ),
-              ),
-              Expanded(
-                child: FilledButton.icon(
-                  onPressed: () async {
-                    try {
-                      final appWithVersion = app.copyWithVersion(version);
-                      await downloadProvider.downloadApk(appWithVersion);
-                      if (context.mounted) {
+                                          );
+                                        }
+                                      }
+                                    }
+                                  : null,
+                              icon: const Icon(Symbols.download),
+                            ),
+                          ],
+                        ],
+                      ),
+                      selected: isLatest,
+                      onTap: () {
+                        // Scroll to the tapped version's section
+                        // This requires a more complex setup with GlobalKeys or a scroll controller
+                        // For simplicity, we'll just show a snackbar here
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
                             content: Text(
-                              'Downloading ${version.versionName}...',
+                              'Tapped on version ${version.versionName}',
                             ),
                           ),
                         );
-                      }
-                    } catch (e) {
-                      if (context.mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('Download failed: $e')),
-                        );
-                      }
-                    }
-                  },
-                  icon: const Icon(Symbols.download, size: 18),
-                  label: Text(AppLocalizations.of(context)!.download),
-                ),
-              ),
-            ],
-          );
-        }
-
-        return FutureBuilder<List<String>>(
-          future: supportedAbisFuture,
-          builder: (context, snapshot) {
-            final supportedAbis = snapshot.data ?? const <String>[];
-            final native = version.nativecode ?? const <String>[];
-            final isUniversal = native.isEmpty;
-            final isAbiCompatible =
-                isUniversal ||
-                supportedAbis.isEmpty ||
-                native.any((abi) => supportedAbis.contains(abi));
-
-            if (!isAbiCompatible) {
-              return OutlinedButton.icon(
-                onPressed: null,
-                icon: const Icon(Symbols.block, size: 18),
-                label: Text(
-                  native.isEmpty
-                      ? 'Incompatible APK'
-                      : 'Incompatible (${native.join(', ')})',
-                ),
-              );
-            }
-
-            if (isDownloading) {
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        'Downloading... ${(progress * 100).toInt()}%',
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        ),
-                      ),
-                      OutlinedButton.icon(
-                        onPressed: () {
-                          downloadProvider.cancelDownload(
-                            app.packageName,
-                            version.versionName,
-                          );
-                        },
-                        icon: const Icon(Symbols.close, size: 18),
-                        label: Text(AppLocalizations.of(context)!.cancel),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  LinearProgressIndicator(value: progress),
-                ],
-              );
-            }
-
-            if (isInstalling) {
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Installing...',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  const LinearProgressIndicator(),
-                ],
-              );
-            }
-
-            if (isDownloaded) {
-              return Row(
-                spacing: 8,
-                children: [
-                  Expanded(
-                    child: FilledButton.icon(
-                      onPressed: () async {
-                        try {
-                          await downloadProvider.installApk(
-                            downloadInfo.filePath!,
-                            app.packageName,
-                            version.versionName,
-                            app.name,
-                            antiFeatures: app.antiFeatures,
-                          );
-                        } catch (e) {
-                          if (context.mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text('Install failed: $e')),
-                            );
-                          }
-                        }
                       },
-                      icon: const Icon(
-                        Symbols.install_mobile_rounded,
-                        size: 18,
-                      ),
-                      label: Text(AppLocalizations.of(context)!.install),
-                    ),
-                  ),
-                  OutlinedButton.icon(
-                    onPressed: () async {
-                      try {
-                        await downloadProvider.deleteDownloadedFile(
-                          downloadInfo.filePath!,
-                        );
-                        downloadProvider.removeDownload(
-                          app.packageName,
-                          version.versionName,
-                        );
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('APK deleted')),
-                        );
-                      } catch (e) {
-                        if (context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('Delete failed: $e')),
-                          );
-                        }
-                      }
-                    },
-                    icon: const Icon(Symbols.delete_rounded, size: 18),
-                    label: Text(AppLocalizations.of(context)!.delete),
-                  ),
-                ],
-              );
-            }
-
-            return Row(
-              spacing: 8,
-              children: [
-                Expanded(
-                  child: FilledButton.icon(
-                    onPressed: () async {
-                      try {
-                        final appWithVersion = app.copyWithVersion(version);
-                        await downloadProvider.downloadApk(appWithVersion);
-                      } catch (e) {
-                        if (context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('Download failed: $e')),
-                          );
-                        }
-                      }
-                    },
-                    icon: const Icon(Symbols.download_rounded, size: 18),
-                    label: Text(AppLocalizations.of(context)!.download),
-                  ),
-                ),
-                FilledButton.tonalIcon(
-                  onPressed: () {
-                    final url = version.downloadUrl(app.repositoryUrl);
-                    launchUrl(Uri.parse(url));
+                    );
                   },
-                  icon: const Icon(Symbols.open_in_new_rounded, size: 18),
-                  label: Text(AppLocalizations.of(context)!.open_link),
                 ),
               ],
             );

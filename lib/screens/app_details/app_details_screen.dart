@@ -5,6 +5,7 @@ import 'package:florid/l10n/app_localizations.dart';
 import 'package:florid/screens/app_details/developer_apps_screen.dart';
 import 'package:florid/screens/app_details/permissions_screen.dart';
 import 'package:florid/widgets/changelog_preview.dart';
+import 'package:florid/widgets/list_icon.dart';
 import 'package:florid/widgets/m_list.dart';
 import 'package:florid/widgets/markup_content.dart';
 import 'package:flutter/material.dart';
@@ -1247,8 +1248,7 @@ class _AppDetailsScreenState extends State<AppDetailsScreen> {
                     duration: Duration(milliseconds: 300),
                   ),
 
-                  // App details
-                  _AppInfoSection(app: widget.app).animate().fadeIn(
+                  _DetailsSheetsSection(app: widget.app).animate().fadeIn(
                     delay: Duration(milliseconds: 300),
                     duration: Duration(milliseconds: 300),
                   ),
@@ -1281,37 +1281,6 @@ class _AppDetailsScreenState extends State<AppDetailsScreen> {
                     duration: Duration(milliseconds: 300),
                   ),
 
-                  // Version info
-                  FutureBuilder<FDroidVersion?>(
-                    future: context.read<AppProvider>().getLatestVersion(
-                      widget.app,
-                    ),
-                    builder: (context, snapshot) {
-                      final latestVersion = snapshot.data;
-                      if (latestVersion != null) {
-                        return _VersionInfoSection(
-                          version: latestVersion,
-                        ).animate().fadeIn(
-                          delay: Duration(milliseconds: 300),
-                          duration: Duration(milliseconds: 300),
-                        );
-                      } else {
-                        return const _NoVersionInfoSection().animate().fadeIn(
-                          delay: Duration(milliseconds: 300),
-                          duration: Duration(milliseconds: 300),
-                        );
-                      }
-                    },
-                  ),
-                  // All versions history
-                  if (widget.app.packages != null &&
-                      widget.app.packages!.isNotEmpty)
-                    _AllVersionsSection(app: widget.app).animate().fadeIn(
-                      delay: Duration(milliseconds: 300),
-                      duration: Duration(milliseconds: 300),
-                    )
-                  else
-                    const SizedBox.shrink(),
                   // Permissions
                   SizedBox(height: 32),
                 ],
@@ -1332,6 +1301,150 @@ class _DownloadSection extends StatefulWidget {
 
   @override
   State<_DownloadSection> createState() => _DownloadSectionState();
+}
+
+class _DetailsSheetsSection extends StatelessWidget {
+  final FDroidApp app;
+
+  const _DetailsSheetsSection({required this.app});
+
+  void _showAppInfoSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (context) => DraggableScrollableSheet(
+        expand: false,
+        initialChildSize: 0.7,
+        minChildSize: 0.4,
+        maxChildSize: 0.95,
+        builder: (context, scrollController) => SafeArea(
+          child: SingleChildScrollView(
+            controller: scrollController,
+            padding: const EdgeInsets.symmetric(vertical: 16.0),
+            child: _AppInfoSection(app: app),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showVersionInfoSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (context) => DraggableScrollableSheet(
+        expand: false,
+        initialChildSize: 0.6,
+        minChildSize: 0.35,
+        maxChildSize: 0.9,
+        builder: (context, scrollController) => SafeArea(
+          child: SingleChildScrollView(
+            controller: scrollController,
+            padding: const EdgeInsets.symmetric(vertical: 16.0),
+            child: FutureBuilder<FDroidVersion?>(
+              future: context.read<AppProvider>().getLatestVersion(app),
+              builder: (context, snapshot) {
+                final version = snapshot.data;
+                if (version == null) {
+                  return const _NoVersionInfoSection();
+                }
+
+                return Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    MListHeader(
+                      title: AppLocalizations.of(context)!.version_information,
+                    ),
+                    MListView(
+                      items: [
+                        MListItemData(
+                          title: AppLocalizations.of(context)!.version_name,
+                          subtitle: version.versionName,
+                          onTap: () {},
+                        ),
+                        MListItemData(
+                          title: AppLocalizations.of(context)!.version_code,
+                          subtitle: version.versionCode.toString(),
+                          onTap: () {},
+                        ),
+                        MListItemData(
+                          title: AppLocalizations.of(context)!.size,
+                          subtitle: version.sizeString,
+                          onTap: () {},
+                        ),
+                        if (version.minSdkVersion != null)
+                          MListItemData(
+                            title: AppLocalizations.of(context)!.min_sdk,
+                            subtitle: version.minSdkVersion!,
+                            onTap: () {},
+                          ),
+                        if (version.targetSdkVersion != null)
+                          MListItemData(
+                            title: AppLocalizations.of(context)!.target_sdk,
+                            subtitle: version.targetSdkVersion!,
+                            onTap: () {},
+                          ),
+                      ],
+                    ),
+                  ],
+                );
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showAllVersionsSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (context) => DraggableScrollableSheet(
+        expand: false,
+        initialChildSize: 0.75,
+        minChildSize: 0.4,
+        maxChildSize: 0.95,
+        builder: (context, scrollController) => SafeArea(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(vertical: 16.0),
+            controller: scrollController,
+            child: _AllVersionsSection(app: app),
+          ),
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return MListView(
+      items: [
+        MListItemData(
+          title: AppLocalizations.of(context)!.app_information,
+          subtitle: '',
+          leading: const ListIcon(iconData: Symbols.info),
+          suffix: const Icon(Symbols.arrow_forward),
+          onTap: () => _showAppInfoSheet(context),
+        ),
+        MListItemData(
+          title: AppLocalizations.of(context)!.version_information,
+          subtitle: '',
+          leading: const ListIcon(iconData: Symbols.license),
+          suffix: const Icon(Symbols.arrow_forward),
+          onTap: () => _showVersionInfoSheet(context),
+        ),
+        MListItemData(
+          title: AppLocalizations.of(context)!.all_versions,
+          subtitle: '',
+          leading: const ListIcon(iconData: Symbols.history),
+          suffix: const Icon(Symbols.arrow_forward),
+          onTap: () => _showAllVersionsSheet(context),
+        ),
+      ],
+    );
+  }
 }
 
 class _DownloadSectionState extends State<_DownloadSection> {
@@ -2221,17 +2334,16 @@ class _AppInfoSection extends StatelessWidget {
 
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
               spacing: 16,
               children: [
                 if (app.antiFeatures != null)
                   Column(
                     spacing: 4,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       MListHeader(title: 'Anti-features'),
                       Card(
-                        color: Theme.of(
-                          context,
-                        ).colorScheme.tertiary.withValues(alpha: 0.2),
                         margin: const EdgeInsets.symmetric(horizontal: 16.0),
                         child: Padding(
                           padding: const EdgeInsets.all(12.0),
@@ -2267,54 +2379,41 @@ class _AppInfoSection extends StatelessWidget {
                 Column(
                   spacing: 4,
                   children: [
-                    MListHeader(title: 'App Information'),
+                    MListHeader(
+                      title: AppLocalizations.of(context)!.app_information,
+                    ),
                     MListView(
                       items: [
                         MListItemData(
-                          leading: Icon(
-                            Symbols.package_rounded,
-                            color: Theme.of(context).colorScheme.primary,
-                          ),
-                          title: 'Package Name',
+                          leading: ListIcon(iconData: Symbols.package_rounded),
+                          title: AppLocalizations.of(context)!.package_name,
                           subtitle: app.packageName,
                           onTap: () {},
                         ),
                         MListItemData(
-                          leading: Icon(
-                            Symbols.license_rounded,
-                            color: Theme.of(context).colorScheme.primary,
-                          ),
-                          title: 'License',
+                          leading: ListIcon(iconData: Symbols.license_rounded),
+                          title: AppLocalizations.of(context)!.license,
                           subtitle: app.license,
                           onTap: () {},
                         ),
                         if (app.added != null)
                           MListItemData(
-                            leading: Icon(
-                              Symbols.add,
-                              color: Theme.of(context).colorScheme.primary,
-                            ),
-                            title: 'Added',
+                            leading: ListIcon(iconData: Symbols.add),
+                            title: AppLocalizations.of(context)!.added,
                             subtitle: _formatDate(app.added!),
                             onTap: () {},
                           ),
                         if (app.added != null)
                           MListItemData(
-                            leading: Icon(
-                              Symbols.update,
-                              color: Theme.of(context).colorScheme.primary,
-                            ),
-                            title: 'Last Updated',
+                            leading: ListIcon(iconData: Symbols.update),
+                            title: AppLocalizations.of(context)!.last_updated,
                             subtitle: _formatDate(app.lastUpdated!),
                             onTap: () {},
                           ),
                         if (latestVersion?.permissions?.isNotEmpty == true)
                           MListItemData(
-                            leading: Icon(
-                              Symbols.security,
-                              color: Theme.of(context).colorScheme.primary,
-                            ),
-                            title: 'Permissions ',
+                            leading: ListIcon(iconData: Symbols.security),
+                            title: AppLocalizations.of(context)!.permissions,
                             subtitle: '(${latestVersion!.permissions!.length})',
                             suffix: Icon(Symbols.arrow_forward),
                             onTap: () {
@@ -2577,53 +2676,86 @@ class _VersionInfoSectionState extends State<_VersionInfoSection> {
   Widget build(BuildContext context) {
     final version = widget.version;
 
+    buildVersionInfoModel() {
+      showModalBottomSheet(
+        context: context,
+        isScrollControlled: true,
+        builder: (context) {
+          return Padding(
+            padding: const EdgeInsets.symmetric(vertical: 16.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                MListHeader(title: 'Version Information'),
+                MListView(
+                  items: [
+                    MListItemData(
+                      title: 'Version Name',
+                      subtitle: version.versionName,
+                      onTap: () {},
+                    ),
+                    MListItemData(
+                      title: 'Version Code',
+                      subtitle: version.versionCode.toString(),
+                      onTap: () {},
+                    ),
+                    MListItemData(
+                      title: 'Size',
+                      subtitle: version.sizeString,
+                      onTap: () {},
+                    ),
+                    if (version.minSdkVersion != null)
+                      MListItemData(
+                        title: _showMinAndroid
+                            ? 'Minimum Android Version'
+                            : 'Min SDK',
+                        subtitle: _showMinAndroid
+                            ? _androidVersionLabel(version.minSdkVersion!)
+                            : version.minSdkVersion!,
+                        onTap: () {
+                          setState(() {
+                            _showMinAndroid = !_showMinAndroid;
+                          });
+                        },
+                      ),
+                    if (version.targetSdkVersion != null)
+                      MListItemData(
+                        title: _showTargetAndroid
+                            ? 'Target Android Version'
+                            : 'Target SDK',
+                        subtitle: _showTargetAndroid
+                            ? _androidVersionLabel(version.targetSdkVersion!)
+                            : version.targetSdkVersion!,
+                        onTap: () {
+                          setState(() {
+                            _showTargetAndroid = !_showTargetAndroid;
+                          });
+                        },
+                      ),
+                  ],
+                ),
+              ],
+            ),
+          );
+        },
+      );
+    }
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        MListHeader(title: 'Version Information'),
         MListView(
           items: [
             MListItemData(
-              title: 'Version Name',
-              subtitle: version.versionName,
-              onTap: () {},
+              title: AppLocalizations.of(context)!.version_information,
+              subtitle: '',
+              leading: Icon(Symbols.info),
+              onTap: () {
+                buildVersionInfoModel();
+              },
+              suffix: Icon(Symbols.arrow_forward),
             ),
-            MListItemData(
-              title: 'Version Code',
-              subtitle: version.versionCode.toString(),
-              onTap: () {},
-            ),
-            MListItemData(
-              title: 'Size',
-              subtitle: version.sizeString,
-              onTap: () {},
-            ),
-            if (version.minSdkVersion != null)
-              MListItemData(
-                title: _showMinAndroid ? 'Minimum Android Version' : 'Min SDK',
-                subtitle: _showMinAndroid
-                    ? _androidVersionLabel(version.minSdkVersion!)
-                    : version.minSdkVersion!,
-                onTap: () {
-                  setState(() {
-                    _showMinAndroid = !_showMinAndroid;
-                  });
-                },
-              ),
-            if (version.targetSdkVersion != null)
-              MListItemData(
-                title: _showTargetAndroid
-                    ? 'Target Android Version'
-                    : 'Target SDK',
-                subtitle: _showTargetAndroid
-                    ? _androidVersionLabel(version.targetSdkVersion!)
-                    : version.targetSdkVersion!,
-                onTap: () {
-                  setState(() {
-                    _showTargetAndroid = !_showTargetAndroid;
-                  });
-                },
-              ),
           ],
         ),
       ],

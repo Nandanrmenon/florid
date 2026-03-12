@@ -120,30 +120,42 @@ class _LatestScreenState extends State<LatestScreen>
     }
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(AppLocalizations.of(context)!.latest_apps),
-        backgroundColor: Theme.of(context).colorScheme.surfaceContainerLow,
-        surfaceTintColor: Theme.of(context).colorScheme.surfaceContainerLow,
-      ),
       body: RefreshIndicator(
         onRefresh: _onRefresh,
-        child: ListView.builder(
-          padding: const EdgeInsets.all(8),
-          itemCount: apps.length,
-          itemBuilder: (context, index) {
-            final app = apps[index];
-            return AppListItem(
-              app: app,
-              showInstallStatus: false,
-              onTap: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (context) => AppDetailsScreen(app: app),
-                  ),
-                );
-              },
-            ).animate().fadeIn(duration: 300.ms, delay: (10 * index).ms);
-          },
+        child: CustomScrollView(
+          slivers: [
+            SliverAppBar(
+              title: Text(AppLocalizations.of(context)!.latest_apps),
+              titleTextStyle: TextStyle(
+                fontFamily: 'Google Sans Flex',
+                fontSize: 18,
+                fontVariations: [
+                  FontVariation('wght', 700),
+                  FontVariation('ROND', 100),
+                ],
+              ),
+              floating: true,
+            ),
+            SliverPadding(
+              padding: const EdgeInsets.all(8),
+              sliver: SliverList(
+                delegate: SliverChildBuilderDelegate((context, index) {
+                  final app = apps[index];
+                  return AppListItem(
+                    app: app,
+                    showInstallStatus: false,
+                    onTap: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => AppDetailsScreen(app: app),
+                        ),
+                      );
+                    },
+                  ).animate().fadeIn(duration: 300.ms, delay: (10 * index).ms);
+                }, childCount: apps.length),
+              ),
+            ),
+          ],
         ),
       ),
     );

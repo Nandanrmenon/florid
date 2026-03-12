@@ -45,33 +45,6 @@ class _CategoryAppsScreenState extends State<CategoryAppsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Consumer<AppProvider>(
-          builder: (context, appProvider, child) {
-            final settings = context.watch<SettingsProvider>();
-            return Column(
-              crossAxisAlignment: settings.themeStyle == ThemeStyle.florid
-                  ? CrossAxisAlignment.center
-                  : CrossAxisAlignment.start,
-              children: [
-                Text(
-                  widget.category,
-                  style: Theme.of(
-                    context,
-                  ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
-                ),
-                Text(
-                  '${appProvider.categoryApps[widget.category]?.length ?? 0} apps',
-                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                    fontSize: 12,
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
-                ),
-              ],
-            );
-          },
-        ),
-      ),
       body: Consumer<AppProvider>(
         builder: (context, appProvider, child) {
           final state = appProvider.categoryAppsState;
@@ -144,56 +117,100 @@ class _CategoryAppsScreenState extends State<CategoryAppsScreen> {
 
           return RefreshIndicator(
             onRefresh: _onRefresh,
-            child: LayoutBuilder(
-              builder: (context, constraints) {
-                if (MediaQuery.sizeOf(context).width < Responsive.largeWidth) {
-                  return ListView.builder(
-                    padding: const EdgeInsets.symmetric(horizontal: 8),
-                    itemCount: apps.length,
-                    itemBuilder: (context, index) {
-                      final app = apps[index];
-                      return AppListItem(
-                        app: app,
-                        showInstallStatus: true,
-                        onUpdate: () => _updateApp(context, app),
-                        onTap: () {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (context) => AppDetailsScreen(app: app),
+            child: CustomScrollView(
+              slivers: [
+                SliverAppBar(
+                  floating: true,
+                  title: Consumer<AppProvider>(
+                    builder: (context, appProvider, child) {
+                      final settings = context.watch<SettingsProvider>();
+                      return Column(
+                        crossAxisAlignment:
+                            settings.themeStyle == ThemeStyle.florid
+                            ? CrossAxisAlignment.center
+                            : CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            widget.category,
+                            style: Theme.of(context).textTheme.bodyMedium
+                                ?.copyWith(fontWeight: FontWeight.w600),
+                          ),
+                          Text(
+                            '${appProvider.categoryApps[widget.category]?.length ?? 0} apps',
+                            style: Theme.of(context).textTheme.labelSmall
+                                ?.copyWith(
+                                  fontSize: 12,
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.onSurfaceVariant,
+                                ),
+                          ),
+                        ],
+                      );
+                    },
+                  ),
+                ),
+                SliverToBoxAdapter(
+                  child: LayoutBuilder(
+                    builder: (context, constraints) {
+                      if (MediaQuery.sizeOf(context).width <
+                          Responsive.largeWidth) {
+                        return ListView.builder(
+                          padding: const EdgeInsets.symmetric(horizontal: 8),
+                          itemCount: apps.length,
+                          physics: NeverScrollableScrollPhysics(),
+                          shrinkWrap: true,
+                          itemBuilder: (context, index) {
+                            final app = apps[index];
+                            return AppListItem(
+                              app: app,
+                              showInstallStatus: true,
+                              onUpdate: () => _updateApp(context, app),
+                              onTap: () {
+                                Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        AppDetailsScreen(app: app),
+                                  ),
+                                );
+                              },
+                            );
+                          },
+                        );
+                      }
+                      return GridView.builder(
+                        padding: const EdgeInsets.all(16),
+                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 2,
+                          crossAxisSpacing: 4,
+                          mainAxisSpacing: 4,
+                          childAspectRatio: 4.4,
+                        ),
+                        itemCount: apps.length,
+                        physics: NeverScrollableScrollPhysics(),
+                        shrinkWrap: true,
+                        itemBuilder: (context, index) {
+                          final app = apps[index];
+                          return Card(
+                            child: AppListItem(
+                              app: app,
+                              showInstallStatus: false,
+                              onTap: () {
+                                Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        AppDetailsScreen(app: app),
+                                  ),
+                                );
+                              },
                             ),
                           );
                         },
                       );
                     },
-                  );
-                }
-                return GridView.builder(
-                  padding: const EdgeInsets.all(16),
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    crossAxisSpacing: 4,
-                    mainAxisSpacing: 4,
-                    childAspectRatio: 4.4,
                   ),
-                  itemCount: apps.length,
-                  itemBuilder: (context, index) {
-                    final app = apps[index];
-                    return Card(
-                      child: AppListItem(
-                        app: app,
-                        showInstallStatus: false,
-                        onTap: () {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (context) => AppDetailsScreen(app: app),
-                            ),
-                          );
-                        },
-                      ),
-                    );
-                  },
-                );
-              },
+                ),
+              ],
             ),
           );
         },

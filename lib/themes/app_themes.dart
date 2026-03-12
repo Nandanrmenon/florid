@@ -127,14 +127,12 @@ class AppThemes {
       colorScheme: scheme,
       fontFamily: 'Google Sans Flex',
       appBarTheme: AppBarTheme(
-        centerTitle: true,
         titleTextStyle: TextStyle(
           fontFamily: 'Google Sans Flex',
           fontSize: 24,
           fontVariations: [
             FontVariation('wght', 900),
             FontVariation('ROND', 100),
-            FontVariation('wdth', 125),
           ],
           color: scheme.onSurface,
         ),
@@ -309,14 +307,12 @@ class AppThemes {
       colorScheme: scheme,
       fontFamily: 'Google Sans Flex',
       appBarTheme: AppBarThemeData(
-        centerTitle: true,
         titleTextStyle: TextStyle(
           fontFamily: 'Google Sans Flex',
           fontSize: 24,
           fontVariations: [
             FontVariation('wght', 900),
             FontVariation('ROND', 100),
-            FontVariation('wdth', 125),
           ],
           color: scheme.onSurface,
         ),

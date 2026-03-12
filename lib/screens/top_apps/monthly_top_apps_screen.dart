@@ -54,36 +54,12 @@ class _TopAppsScreenState extends State<TopAppsScreen>
     final localizations = AppLocalizations.of(context)!;
 
     return Scaffold(
-      appBar: AppBar(
-        centerTitle: true,
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Text(
-              localizations.monthly_top_apps,
-              style: TextStyle(
-                fontVariations: [
-                  FontVariation('wght', 700),
-                  FontVariation('ROND', 100),
-                ],
-                fontSize: 16,
-              ),
-            ),
-            Text(
-              localizations.from_izzyondroid,
-              style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
-            ),
-          ],
-        ),
-      ),
       body: Consumer<AppProvider>(
         builder: (context, appProvider, child) {
           final state = appProvider.topAppsState;
           final apps = appProvider.topApps;
           final error = appProvider.topAppsError;
-          return _buildBody(state, apps, error, appProvider);
+          return _buildBody(state, apps, error, appProvider, localizations);
         },
       ),
     );
@@ -94,9 +70,9 @@ class _TopAppsScreenState extends State<TopAppsScreen>
     List<FDroidApp> apps,
     String? error,
     AppProvider appProvider,
+    AppLocalizations localizations,
   ) {
     if (state == LoadingState.loading && apps.isEmpty) {
-      final localizations = AppLocalizations.of(context)!;
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -110,7 +86,6 @@ class _TopAppsScreenState extends State<TopAppsScreen>
     }
 
     if (state == LoadingState.error && apps.isEmpty) {
-      final localizations = AppLocalizations.of(context)!;
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -145,7 +120,6 @@ class _TopAppsScreenState extends State<TopAppsScreen>
     }
 
     if (apps.isEmpty) {
-      final localizations = AppLocalizations.of(context)!;
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -167,33 +141,69 @@ class _TopAppsScreenState extends State<TopAppsScreen>
 
     return RefreshIndicator(
       onRefresh: _onRefresh,
-      child: ListView.builder(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-        itemCount: apps.length,
-        itemBuilder: (context, index) {
-          final app = apps[index];
-
-          return Row(
-            children: [
-              SizedBox(width: 8),
-              Text('$index', style: Theme.of(context).textTheme.bodyMedium),
-              SizedBox(width: 8),
-              Expanded(
-                child: AppListItem(
-                  app: app,
-                  showInstallStatus: true,
-                  onTap: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (context) => AppDetailsScreen(app: app),
-                      ),
-                    );
-                  },
-                ).animate().fadeIn(duration: 300.ms, delay: (20 * index).ms),
-              ),
-            ],
-          );
-        },
+      child: CustomScrollView(
+        slivers: [
+          SliverAppBar(
+            floating: true,
+            title: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  localizations.monthly_top_apps,
+                  style: TextStyle(
+                    fontVariations: [
+                      FontVariation('wght', 700),
+                      FontVariation('ROND', 100),
+                    ],
+                    fontSize: 16,
+                  ),
+                ),
+                Text(
+                  localizations.from_izzyondroid,
+                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          SliverPadding(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+            sliver: SliverList(
+              delegate: SliverChildBuilderDelegate((context, index) {
+                final app = apps[index];
+                return Row(
+                  children: [
+                    SizedBox(width: 8),
+                    Text(
+                      '${index + 1}',
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    ),
+                    SizedBox(width: 8),
+                    Expanded(
+                      child:
+                          AppListItem(
+                            app: app,
+                            showInstallStatus: true,
+                            onTap: () {
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      AppDetailsScreen(app: app),
+                                ),
+                              );
+                            },
+                          ).animate().fadeIn(
+                            duration: 300.ms,
+                            delay: (20 * index).ms,
+                          ),
+                    ),
+                  ],
+                );
+              }, childCount: apps.length),
+            ),
+          ),
+        ],
       ),
     );
   }

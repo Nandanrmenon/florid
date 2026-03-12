@@ -557,15 +557,10 @@ class AppProvider extends ChangeNotifier {
         return;
       }
 
-      // Fetch all apps from IzzyOnDroid repository
-      debugPrint('🔗 Fetching from IzzyOnDroid URL directly: ${izzyRepo.url}');
-      final izzyRepository = await _apiService.fetchRepositoryFromUrl(
-        izzyRepo.url,
-      );
-      final izzyApps = izzyRepository.apps.values.toList();
+      final izzyApps = await _getIzzyAppsDbFirst(izzyRepo);
 
       debugPrint(
-        '🔍 Got ${izzyApps.length} apps directly from IzzyOnDroid (${izzyRepo.url})',
+        '🔍 Got ${izzyApps.length} IzzyOnDroid apps for monthly ranking',
       );
 
       if (izzyApps.isEmpty) {
@@ -578,20 +573,13 @@ class AppProvider extends ChangeNotifier {
 
       // Create a map to store download counts with apps
       final appStats = <FDroidApp, int>{};
+      final monthlyStats = await _izzyStatsService.fetchMonthlyStats();
 
-      // Fetch download stats for each app
+      // Resolve stats from an in-memory map to avoid repeated lookups.
       for (final app in izzyApps) {
-        try {
-          final stats = await _izzyStatsService.fetchStatsForPackage(
-            app.packageName,
-          );
-          // Use last 30 days downloads only (monthly)
-          final downloads = stats.last30Days ?? 0;
-          if (downloads > 0) {
-            appStats[app] = downloads;
-          }
-        } catch (e) {
-          // If we fail to get stats, skip this app (don't use it)
+        final downloads = monthlyStats[app.packageName] ?? 0;
+        if (downloads > 0) {
+          appStats[app] = downloads;
         }
       }
 
@@ -656,10 +644,7 @@ class AppProvider extends ChangeNotifier {
         return;
       }
 
-      final izzyRepository = await _apiService.fetchRepositoryFromUrl(
-        izzyRepo.url,
-      );
-      final izzyApps = izzyRepository.apps.values.toList();
+      final izzyApps = await _getIzzyAppsDbFirst(izzyRepo);
 
       if (izzyApps.isEmpty) {
         _topAppsAllTime = [];
@@ -669,17 +654,13 @@ class AppProvider extends ChangeNotifier {
       }
 
       final appStats = <FDroidApp, int>{};
+      final yearlyStats = await _izzyStatsService.fetchYearlyStats();
 
       for (final app in izzyApps) {
-        try {
-          final stats = await _izzyStatsService.fetchStatsForPackage(
-            app.packageName,
-          );
-          final downloads = stats.last365Days ?? 0;
-          if (downloads > 0) {
-            appStats[app] = downloads;
-          }
-        } catch (_) {}
+        final downloads = yearlyStats[app.packageName] ?? 0;
+        if (downloads > 0) {
+          appStats[app] = downloads;
+        }
       }
 
       final sortedApps = appStats.entries.toList();
@@ -697,6 +678,37 @@ class AppProvider extends ChangeNotifier {
       _topAppsAllTimeState = LoadingState.error;
     }
     notifyListeners();
+  }
+
+  Future<List<FDroidApp>> _getIzzyAppsDbFirst(Repository izzyRepo) async {
+    // Fast path: use locally cached DB rows for this repository.
+    final cachedApps = await _apiService.searchAppsFromRepositoryUrl(
+      '',
+      izzyRepo.url,
+      allowNetworkFallback: false,
+    );
+    if (cachedApps.isNotEmpty) {
+      debugPrint('📦 Using ${cachedApps.length} cached IzzyOnDroid apps');
+      return cachedApps;
+    }
+
+    // Fallback path: fetch index once from network, then persist for next runs.
+    debugPrint(
+      '🔗 IzzyOnDroid cache miss, fetching from network: ${izzyRepo.url}',
+    );
+    final izzyRepository = await _apiService.fetchRepositoryFromUrl(
+      izzyRepo.url,
+    );
+
+    final izzyRepoId = await _apiService.getRepositoryIdByUrl(izzyRepo.url);
+    if (izzyRepoId != null) {
+      await _apiService.importRepositoryToDatabase(
+        izzyRepository,
+        repositoryId: izzyRepoId,
+      );
+    }
+
+    return izzyRepository.apps.values.toList();
   }
 
   /// Fetches categories from F-Droid
@@ -788,7 +800,7 @@ class AppProvider extends ChangeNotifier {
           return true;
         }
 
-        final repoUrl = app.repositoryUrl ?? '';
+        final repoUrl = app.repositoryUrl;
         if (repoUrl == 'https://f-droid.org/repo') {
           return true;
         }
@@ -808,7 +820,7 @@ class AppProvider extends ChangeNotifier {
       // Apply repository filter
       if (filters.repositories.isNotEmpty) {
         filteredResults = filteredResults.where((app) {
-          final repoUrl = app.repositoryUrl ?? '';
+          final repoUrl = app.repositoryUrl;
           return filters.repositories.contains(repoUrl);
         }).toList();
       }
@@ -1024,11 +1036,7 @@ class AppProvider extends ChangeNotifier {
 
     try {
       final info = await DeviceInfoPlugin().androidInfo;
-      final rawAbis =
-          info.supportedAbis ??
-          info.supported64BitAbis ??
-          info.supported32BitAbis ??
-          const <String>[];
+      final rawAbis = info.supportedAbis;
       final abis = rawAbis.where((abi) => abi.isNotEmpty).toList();
       if (abis.isNotEmpty) {
         _supportedAbis = abis;

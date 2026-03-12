@@ -48,15 +48,6 @@ class _TopAppsScreenState extends State<TopAppsScreen>
     );
   }
 
-  String _formatDownloads(int downloads) {
-    if (downloads >= 1000000) {
-      return '${(downloads / 1000000).toStringAsFixed(1)}M';
-    } else if (downloads >= 1000) {
-      return '${(downloads / 1000).toStringAsFixed(1)}K';
-    }
-    return downloads.toString();
-  }
-
   @override
   Widget build(BuildContext context) {
     super.build(context);

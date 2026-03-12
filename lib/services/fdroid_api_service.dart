@@ -35,6 +35,7 @@ class FDroidApiService {
 
   /// Cache for fetched repository indices by repository URL
   final Map<String, Map<String, dynamic>> _repositoryIndexCache = {};
+  bool _backgroundRepositoryRefreshInProgress = false;
 
   FDroidApiService({
     http.Client? client,
@@ -195,11 +196,27 @@ class FDroidApiService {
 
     debugPrint('Database populated: $isPopulated, needs update: $needsUpdate');
 
-    // If database is fresh, load from it
-    if (isPopulated && !needsUpdate) {
+    // If database has data, return it immediately for fast startup.
+    if (isPopulated) {
       try {
-        debugPrint('Loading from database (fresh)...');
-        return await _loadRepositoryFromDatabase();
+        debugPrint('Loading from database...');
+        final cachedRepository = await _loadRepositoryFromDatabase();
+
+        // Refresh stale data in background without blocking UI.
+        if (needsUpdate && !_backgroundRepositoryRefreshInProgress) {
+          _backgroundRepositoryRefreshInProgress = true;
+          Future(() async {
+            try {
+              await _fetchRepositoryWithAutoFallback(repoIndexUrl!);
+            } catch (e) {
+              debugPrint('Background repository refresh failed: $e');
+            } finally {
+              _backgroundRepositoryRefreshInProgress = false;
+            }
+          });
+        }
+
+        return cachedRepository;
       } catch (e) {
         // If database read fails, try network
         debugPrint('Error loading from database: $e');

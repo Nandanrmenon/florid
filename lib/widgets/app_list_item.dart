@@ -187,6 +187,9 @@ class MultiIcon extends StatefulWidget {
 }
 
 class _MultiIconState extends State<MultiIcon> {
+  static final Map<String, String> _resolvedIconUrlByPackage =
+      <String, String>{};
+
   late List<String> _candidates;
   int _index = 0;
 
@@ -194,6 +197,15 @@ class _MultiIconState extends State<MultiIcon> {
   void initState() {
     super.initState();
     _candidates = widget.app.iconUrls;
+
+    // Start from the last known-good URL for this package when possible.
+    final resolvedUrl = _resolvedIconUrlByPackage[widget.app.packageName];
+    if (resolvedUrl != null) {
+      final resolvedIndex = _candidates.indexOf(resolvedUrl);
+      if (resolvedIndex != -1) {
+        _index = resolvedIndex;
+      }
+    }
   }
 
   void _tryNext() {
@@ -202,6 +214,8 @@ class _MultiIconState extends State<MultiIcon> {
       setState(() {
         _index++;
       });
+    } else {
+      _resolvedIconUrlByPackage.remove(widget.app.packageName);
     }
   }
 
@@ -221,7 +235,11 @@ class _MultiIconState extends State<MultiIcon> {
 
     return CachedNetworkImage(
       imageUrl: url,
-      fit: BoxFit.cover,
+      cacheKey: '${widget.app.packageName}:$url',
+      imageBuilder: (context, imageProvider) {
+        _resolvedIconUrlByPackage[widget.app.packageName] = url;
+        return Image(image: imageProvider, fit: BoxFit.cover);
+      },
       placeholder: (context, url) => Container(
         color: theme.colorScheme.surfaceContainerHighest,
         alignment: Alignment.center,

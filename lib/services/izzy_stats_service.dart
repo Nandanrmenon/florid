@@ -23,6 +23,16 @@ class IzzyStatsService {
 
   IzzyStatsService({http.Client? client}) : _client = client ?? http.Client();
 
+  /// Returns monthly rolling download counts keyed by package name.
+  Future<Map<String, int>> fetchMonthlyStats() async {
+    return await _loadStats('basic/monthly/rolling.json');
+  }
+
+  /// Returns yearly rolling download counts keyed by package name.
+  Future<Map<String, int>> fetchYearlyStats() async {
+    return await _loadStats('basic/yearly/rolling.json');
+  }
+
   /// Fetches download stats for a package from the IzzyOnDroid mirrors.
   /// Uses three rolling windows: last day, last 30 days, last 365 days.
   Future<IzzyStats> fetchStatsForPackage(String packageName) async {

@@ -135,9 +135,6 @@ class _UpdatesScreenState extends State<UpdatesScreen>
               : Future.value(<FDroidApp>[]),
           builder: (context, snapshot) {
             final updatableApps = snapshot.data ?? <FDroidApp>[];
-            final favoriteApps = repositoryLoaded
-                ? appProvider.getFavoriteApps()
-                : <FDroidApp>[];
 
             // Get all F-Droid apps installed on device
             final allFDroidApps = installedApps
@@ -163,7 +160,7 @@ class _UpdatesScreenState extends State<UpdatesScreen>
                     surfaceTintColor: isDarkKnight
                         ? null
                         : Theme.of(context).colorScheme.surfaceContainerLow,
-                    title:  Text(AppLocalizations.of(context)!.apps),
+                    title: Text(AppLocalizations.of(context)!.apps),
                     scrolledUnderElevation: isDarkKnight ? 0 : null,
                     // pinned: false,
                     actions: [
@@ -234,6 +231,9 @@ class _UpdatesScreenState extends State<UpdatesScreen>
                         context.read<SettingsProvider>(),
                         allFDroidApps,
                         updatableApps,
+                        repositoryLoaded,
+                        repositoryState,
+                        repositoryError,
                       ),
                     ],
                   ),
@@ -260,7 +260,7 @@ class _UpdatesScreenState extends State<UpdatesScreen>
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
-          children:  [
+          children: [
             CircularProgressIndicator(year2023: false),
             SizedBox(height: 12),
             Text(AppLocalizations.of(context)!.loading_repository),
@@ -493,7 +493,52 @@ class _UpdatesScreenState extends State<UpdatesScreen>
     SettingsProvider settingsProvider,
     List<FDroidApp> allFDroidApps,
     List<FDroidApp> updatableApps,
+    bool repositoryLoaded,
+    LoadingState repositoryState,
+    String? repositoryError,
   ) {
+    if (!repositoryLoaded &&
+        (repositoryState == LoadingState.loading ||
+            repositoryState == LoadingState.idle)) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (!repositoryLoaded && repositoryState == LoadingState.error) {
+      return SingleChildScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        child: Container(
+          height: MediaQuery.of(context).size.height * 0.7,
+          alignment: Alignment.center,
+          padding: const EdgeInsets.symmetric(horizontal: 24),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            spacing: 12,
+            children: [
+              Icon(
+                Symbols.cloud_off,
+                size: 48,
+                color: Theme.of(context).colorScheme.error,
+              ),
+              Text(
+                'Unable to load app metadata',
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+              if (repositoryError != null)
+                Text(
+                  repositoryError.replaceAll('Exception: ', ''),
+                  textAlign: TextAlign.center,
+                ),
+              FilledButton.icon(
+                onPressed: _loadData,
+                icon: const Icon(Symbols.refresh),
+                label: Text(AppLocalizations.of(context)!.retry),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
     if (allFDroidApps.isEmpty) {
       return SingleChildScrollView(
         physics: const AlwaysScrollableScrollPhysics(),
@@ -534,7 +579,6 @@ class _UpdatesScreenState extends State<UpdatesScreen>
       itemCount: allFDroidApps.length,
       itemBuilder: (context, index) {
         final app = allFDroidApps[index];
-        final installedApp = appProvider.getInstalledApp(app.packageName);
         final hasUpdate = updatableApps.any(
           (updateApp) => updateApp.packageName == app.packageName,
         );

@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
+import 'package:florid/constants.dart';
 import 'package:florid/l10n/app_localizations.dart';
 import 'package:florid/models/fdroid_app.dart';
 import 'package:florid/providers/app_provider.dart';
@@ -20,6 +21,7 @@ import 'package:florid/widgets/list_icon.dart';
 import 'package:florid/widgets/m_list.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path/path.dart' as p;
@@ -325,55 +327,7 @@ class _UserSettingsContentState extends State<_UserSettingsContent> {
         return Column(
           children: <Widget>[
             const SizedBox(height: 16),
-            Padding(
-                  padding: const EdgeInsets.only(left: 8.0, right: 8),
-                  child: Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        spacing: 12.0,
-                        children: [
-                          Text(
-                            'Keep Android Open',
-                            style: Theme.of(context).textTheme.titleMedium
-                                ?.copyWith(fontWeight: FontWeight.w600),
-                          ),
-                          const Text(
-                            'From 2026/2027 onward, Google will require developer verification for all Android apps on certified devices, including those installed outside of the Play Store.',
-                          ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            children: [
-                              FilledButton.tonalIcon(
-                                onPressed: () {
-                                  canLaunchUrl(
-                                    Uri.parse('https://keepandroidopen.org/'),
-                                  ).then((canLaunch) {
-                                    if (canLaunch) {
-                                      launchUrl(
-                                        Uri.parse(
-                                          'https://keepandroidopen.org/',
-                                        ),
-                                      );
-                                    }
-                                  });
-                                },
-                                label: Text(
-                                  AppLocalizations.of(context)!.learn_more,
-                                ),
-                                icon: const Icon(Symbols.open_in_new),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                )
-                .animate(delay: const Duration(milliseconds: 100))
-                .fadeIn(duration: 300.ms),
-            const SizedBox(height: 16),
+
             Column(
               spacing: 4,
               children: [
@@ -502,13 +456,79 @@ class _UserSettingsContentState extends State<_UserSettingsContent> {
               spacing: 4,
               children: [
                 const MListHeader(title: 'About', icon: Symbols.android),
+                Padding(
+                      padding: const EdgeInsets.only(left: 8.0, right: 8),
+                      child: Card(
+                        child: Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            spacing: 12.0,
+                            children: [
+                              Text(
+                                'Keep Android Open',
+                                style: Theme.of(context).textTheme.titleMedium
+                                    ?.copyWith(fontWeight: FontWeight.w600),
+                              ),
+                              const Text(
+                                'From 2026/2027 onward, Google will require developer verification for all Android apps on certified devices, including those installed outside of the Play Store.',
+                              ),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                children: [
+                                  FilledButton.tonalIcon(
+                                    onPressed: () {
+                                      canLaunchUrl(
+                                        Uri.parse(
+                                          'https://keepandroidopen.org/',
+                                        ),
+                                      ).then((canLaunch) {
+                                        if (canLaunch) {
+                                          launchUrl(
+                                            Uri.parse(
+                                              'https://keepandroidopen.org/',
+                                            ),
+                                          );
+                                        }
+                                      });
+                                    },
+                                    label: Text(
+                                      AppLocalizations.of(context)!.learn_more,
+                                    ),
+                                    icon: const Icon(Symbols.open_in_new),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    )
+                    .animate(delay: const Duration(milliseconds: 100))
+                    .fadeIn(duration: 300.ms),
                 MListView(
                   items: [
                     MListItemData(
                       leading: ListIcon(iconData: Symbols.info),
                       title: AppLocalizations.of(context)!.version,
                       subtitle: _appVersion.isEmpty ? 'Loading…' : _appVersion,
-                      onTap: () {},
+                      onTap: () {
+                        showAboutDialog(
+                          context: context,
+                          applicationName: kAppName,
+                          applicationVersion: _appVersion,
+                          children: [Text('A modern F-Droid client.')],
+                          applicationIcon: SvgPicture.asset(
+                            kAppLogoSvg,
+                            key: const ValueKey('app_logo'),
+                            height: 56,
+                            colorFilter: ColorFilter.mode(
+                              Theme.of(context).colorScheme.primary,
+                              BlendMode.srcIn,
+                            ),
+                          ),
+                        );
+                      },
                     ),
                     MListItemData(
                       leading: ListIcon(

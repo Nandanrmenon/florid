@@ -254,7 +254,7 @@ class DownloadProvider extends ChangeNotifier {
   /// Downloads an APK file
   Future<String?> downloadApk(FDroidApp app, {bool? skipAutoInstall}) async {
     final version = await _selectBestVersionForDevice(app);
-    skipAutoInstall = _settingsProvider.autoInstallApk;
+    skipAutoInstall ??= false;
     if (version == null) {
       throw Exception('No version available for download');
     }
@@ -387,7 +387,7 @@ class DownloadProvider extends ChangeNotifier {
       );
 
       // Auto-install after download completes if enabled
-      if (_settingsProvider.autoInstallApk) {
+      if (_settingsProvider.autoInstallApk && !skipAutoInstall) {
         debugPrint(
           '[DownloadProvider] Auto-install queued for ${app.packageName} ${version.versionName} (method: ${_settingsProvider.installMethod})',
         );

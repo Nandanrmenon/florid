@@ -34,11 +34,14 @@ class AppDetailsScreen extends StatefulWidget {
   State<AppDetailsScreen> createState() => _AppDetailsScreenState();
 }
 
-class _AppDetailsScreenState extends State<AppDetailsScreen> {
+class _AppDetailsScreenState extends State<AppDetailsScreen>
+    with WidgetsBindingObserver {
   late Future<List<String>> _screenshotsFuture;
   late Future<IzzyStats> _statsFuture;
   late Future<FDroidApp> _enrichedAppFuture;
   bool _isInstalling = false;
+  bool _pendingInstallStateRefresh = false;
+  bool _isInstallMonitorRunning = false;
   bool _isCollapsed = false;
   late ScrollController _scrollController;
   final double expandedBarHeight = 300;
@@ -47,6 +50,7 @@ class _AppDetailsScreenState extends State<AppDetailsScreen> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _scrollController = ScrollController();
     // Start with lightweight futures to keep route transition smooth.
     _screenshotsFuture = Future.value(const <String>[]);
@@ -79,11 +83,14 @@ class _AppDetailsScreenState extends State<AppDetailsScreen> {
     DownloadProvider downloadProvider,
     SettingsProvider settings,
   ) async {
-    // Poll for installation completion in background
-    for (int i = 0; i < 15; i++) {
+    // Poll for installation completion in background.
+    // Keep this window long enough for slow/manual install confirmation flows.
+    final deadline = DateTime.now().add(const Duration(minutes: 2));
+    while (DateTime.now().isBefore(deadline)) {
       await Future.delayed(const Duration(milliseconds: 800));
       await appProvider.fetchInstalledApps();
       if (appProvider.isAppInstalled(widget.app.packageName)) {
+        _pendingInstallStateRefresh = false;
         // App installed, clean up if auto-delete enabled
         if (settings.autoDeleteApk) {
           final latestVersion = await appProvider.getLatestVersion(widget.app);
@@ -105,6 +112,30 @@ class _AppDetailsScreenState extends State<AppDetailsScreen> {
         }
         break;
       }
+    }
+  }
+
+  Future<void> _ensureInstallStateRefresh() async {
+    if (!mounted || _isInstallMonitorRunning) return;
+    _isInstallMonitorRunning = true;
+    try {
+      await _startBackgroundCleanup(
+        context.read<AppProvider>(),
+        context.read<DownloadProvider>(),
+        context.read<SettingsProvider>(),
+      );
+    } finally {
+      _isInstallMonitorRunning = false;
+    }
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (!mounted || state != AppLifecycleState.resumed) return;
+
+    context.read<AppProvider>().fetchInstalledApps();
+    if (_pendingInstallStateRefresh) {
+      _ensureInstallStateRefresh();
     }
   }
 
@@ -252,6 +283,7 @@ class _AppDetailsScreenState extends State<AppDetailsScreen> {
 
           setState(() {
             _isInstalling = true;
+            _pendingInstallStateRefresh = true;
           });
           try {
             await downloadProvider.installApk(
@@ -340,184 +372,32 @@ class _AppDetailsScreenState extends State<AppDetailsScreen> {
         final appWithVersion = widget.app
             .copyWithVersion(version)
             .copyWith(repositoryUrl: repositoryUrl);
-        // Skip DownloadProvider's auto-install since we handle it here with proper UI updates
-        await downloadProvider.downloadApk(
-          appWithVersion,
-          skipAutoInstall: settingsProvider.autoInstallApk,
-        );
+        await downloadProvider.downloadApk(appWithVersion);
 
         if (context.mounted) {
           final settings = context.read<SettingsProvider>();
 
-          // Auto-install if enabled
+          // Provider owns auto-install. Here we only reflect state and refresh UI.
           if (settings.autoInstallApk) {
-            final downloadInfo = downloadProvider.getDownloadInfo(
-              widget.app.packageName,
-              version.versionName,
-            );
-
-            if (downloadInfo?.filePath != null &&
-                File(downloadInfo!.filePath!).existsSync()) {
-              debugPrint(
-                '[AppDetails] Auto-install start ${widget.app.packageName} ${version.versionName}',
-              );
-              try {
-                // Ensure the chosen installer is available (system permission or Shizuku binder)
-                final hasPermission = await downloadProvider
-                    .requestInstallPermission();
-                debugPrint(
-                  '[AppDetails] Auto-install permission result: $hasPermission',
-                );
-                if (!hasPermission) {
-                  if (!context.mounted) return;
-                  if (settings.installMethod == InstallMethod.shizuku) {
-                    await _handleShizukuUnavailable(context, settings);
-                  } else {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text(
-                          'Install permission required for auto-install',
-                        ),
-                      ),
-                    );
-                  }
-                  return;
-                }
-
-                if (mounted) {
-                  setState(() {
-                    _isInstalling = true;
-                  });
-                }
-                debugPrint(_isInstalling as String?);
-
-                // Trigger install without waiting (non-blocking). For Shizuku,
-                // run fire-and-forget to avoid UI stalls; for system, await as before.
-                if (settings.installMethod == InstallMethod.shizuku) {
-                  Future<void>(() async {
-                    try {
-                      await downloadProvider.installApk(
-                        downloadInfo.filePath!,
-                        widget.app.packageName,
-                        downloadInfo.versionName,
-                        widget.app.name,
-                        antiFeatures: widget.app.antiFeatures,
-                      );
-                      await Future.delayed(const Duration(seconds: 1));
-                      await appProvider.fetchInstalledApps();
-                      _startBackgroundCleanup(
-                        appProvider,
-                        downloadProvider,
-                        settings,
-                      );
-                    } catch (e) {
-                      debugPrint(
-                        '[AppDetails] Shizuku auto-install failed: $e',
-                      );
-                      if (context.mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              'Auto-install failed: ${e.toString()}',
-                            ),
-                          ),
-                        );
-                      }
-                    } finally {
-                      if (mounted) {
-                        setState(() {
-                          _isInstalling = false;
-                        });
-                      }
-                    }
-                  });
-                } else {
-                  downloadProvider
-                      .installApk(
-                        downloadInfo.filePath!,
-                        widget.app.packageName,
-                        downloadInfo.versionName,
-                        widget.app.name,
-                        antiFeatures: widget.app.antiFeatures,
-                      )
-                      .then((_) async {
-                        debugPrint('[AppDetails] Auto-install completed');
-                        try {
-                          await appProvider.waitForInstalled(
-                            widget.app.packageName,
-                          );
-                        } catch (_) {
-                          // Best-effort; UI will refresh on next poll
-                        }
-                        await Future.delayed(const Duration(seconds: 2));
-                        await appProvider.fetchInstalledApps();
-                        _startBackgroundCleanup(
-                          appProvider,
-                          downloadProvider,
-                          settings,
-                        );
-                      })
-                      .catchError((e) {
-                        if (context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(
-                                AppLocalizations.of(
-                                  context,
-                                )!.auto_install_failed_with_error(e.toString()),
-                              ),
-                            ),
-                          );
-                        }
-                      })
-                      .whenComplete(() async {
-                        if (mounted) {
-                          setState(() {
-                            _isInstalling = false;
-                          });
-                        }
-                        await Future.delayed(const Duration(milliseconds: 500));
-                        await appProvider.fetchInstalledApps();
-                      });
-                }
-                if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(
-                        AppLocalizations.of(
-                          context,
-                        )!.installing_app(widget.app.name),
-                      ),
-                    ),
-                  );
-                }
-
-                // Best-effort refresh a moment later so the UI can flip to Installed
-                Future.delayed(const Duration(seconds: 2), () async {
-                  await appProvider.fetchInstalledApps();
-                });
-
-                // Return early - don't wait for installation
-                return;
-              } catch (e) {
-                if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(
-                        AppLocalizations.of(
-                          context,
-                        )!.auto_install_failed_with_error(e.toString()),
-                      ),
-                    ),
-                  );
-                }
-                return;
-              }
-            } else {
-              debugPrint(
-                '[AppDetails] Auto-install skipped: downloadInfo missing or file not found',
+            if (mounted) {
+              setState(() {
+                _isInstalling = true;
+                _pendingInstallStateRefresh = true;
+              });
+            }
+            _ensureInstallStateRefresh();
+            if (context.mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(
+                    AppLocalizations.of(
+                      context,
+                    )!.installing_app(widget.app.name),
+                  ),
+                ),
               );
             }
+            return;
           }
 
           // Only run this polling loop when NOT auto-installing
@@ -731,6 +611,7 @@ class _AppDetailsScreenState extends State<AppDetailsScreen> {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _scrollController.dispose();
     super.dispose();
   }

@@ -123,19 +123,23 @@ class MListView extends StatelessWidget {
 
         return ClipRRect(
           borderRadius: BorderRadius.only(
-            topLeft: index == 0 ? Radius.circular(16.0) : Radius.circular(4.0),
-            topRight: index == 0 ? Radius.circular(16.0) : Radius.circular(4.0),
+            topLeft: index == 0
+                ? Radius.circular(isFlorid ? 16.0 : 0)
+                : Radius.circular(isFlorid ? 4.0 : 0),
+            topRight: index == 0
+                ? Radius.circular(isFlorid ? 16.0 : 0)
+                : Radius.circular(isFlorid ? 4.0 : 0),
             bottomLeft: isLastItem(index)
-                ? const Radius.circular(16.0)
-                : const Radius.circular(4.0),
+                ? Radius.circular(isFlorid ? 16.0 : 0)
+                : Radius.circular(isFlorid ? 4.0 : 0),
             bottomRight: isLastItem(index)
-                ? const Radius.circular(16.0)
-                : const Radius.circular(4.0),
+                ? Radius.circular(isFlorid ? 16.0 : 0)
+                : Radius.circular(isFlorid ? 4.0 : 0),
           ),
           child: Material(
             color: isFlorid
                 ? Theme.of(context).colorScheme.surfaceContainer
-                : Theme.of(context).colorScheme.surface,
+                : Colors.transparent,
             clipBehavior: Clip.antiAlias,
             child: ListTile(
               contentPadding: EdgeInsets.only(left: 16.0, right: 16.0),
@@ -304,19 +308,23 @@ class MRadioListView<T> extends StatelessWidget {
 
         return ClipRRect(
           borderRadius: BorderRadius.only(
-            topLeft: index == 0 ? Radius.circular(16.0) : Radius.circular(4.0),
-            topRight: index == 0 ? Radius.circular(16.0) : Radius.circular(4.0),
+            topLeft: index == 0
+                ? Radius.circular(isFlorid ? 16.0 : 0)
+                : Radius.circular(isFlorid ? 4.0 : 0),
+            topRight: index == 0
+                ? Radius.circular(isFlorid ? 16.0 : 0)
+                : Radius.circular(isFlorid ? 4.0 : 0),
             bottomLeft: isLastItem(index)
-                ? const Radius.circular(16.0)
-                : const Radius.circular(4.0),
+                ? Radius.circular(isFlorid ? 16.0 : 0)
+                : Radius.circular(isFlorid ? 4.0 : 0),
             bottomRight: isLastItem(index)
-                ? const Radius.circular(16.0)
-                : const Radius.circular(4.0),
+                ? Radius.circular(isFlorid ? 16.0 : 0)
+                : Radius.circular(isFlorid ? 4.0 : 0),
           ),
           child: Material(
             color: isFlorid
                 ? Theme.of(context).colorScheme.surfaceContainer
-                : Theme.of(context).colorScheme.surface,
+                : Colors.transparent,
             clipBehavior: Clip.antiAlias,
             child: RadioListTile<T>(
               contentPadding: EdgeInsets.only(left: 16.0, right: 18.0),
@@ -405,20 +413,24 @@ class MCheckboxListView extends StatelessWidget {
 
         return ClipRRect(
           borderRadius: BorderRadius.only(
-            topLeft: index == 0 ? Radius.circular(16.0) : Radius.circular(4.0),
-            topRight: index == 0 ? Radius.circular(16.0) : Radius.circular(4.0),
+            topLeft: index == 0
+                ? Radius.circular(isFlorid ? 16.0 : 0)
+                : Radius.circular(isFlorid ? 4.0 : 0),
+            topRight: index == 0
+                ? Radius.circular(isFlorid ? 16.0 : 0)
+                : Radius.circular(isFlorid ? 4.0 : 0),
             bottomLeft: isLastItem(index)
-                ? const Radius.circular(16.0)
-                : const Radius.circular(4.0),
+                ? Radius.circular(isFlorid ? 16.0 : 0)
+                : Radius.circular(isFlorid ? 4.0 : 0),
             bottomRight: isLastItem(index)
-                ? const Radius.circular(16.0)
-                : const Radius.circular(4.0),
+                ? Radius.circular(isFlorid ? 16.0 : 0)
+                : Radius.circular(isFlorid ? 4.0 : 0),
           ),
           child: Material(
             clipBehavior: Clip.antiAlias,
             color: isFlorid
                 ? Theme.of(context).colorScheme.surfaceContainer
-                : Theme.of(context).colorScheme.surface,
+                : Colors.transparent,
             child: CheckboxListTile(
               contentPadding: EdgeInsets.only(left: 16.0, right: 4.0),
               title: Text(items[index].title),

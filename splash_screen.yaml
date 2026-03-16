@@ -37,8 +37,8 @@ flutter_native_splash:
   # remain optional. NOTE that if you specify the [required] color, then you cant
   # use the [required] background_image in the next section. the reverse is true.
   # select one, they cant work together.
-  color: "#74DAB6" ##====================================[REQUIRED]==========
-  #color_dark: "#042a49"
+  color: "#f5f5f5" ##====================================[REQUIRED]==========
+  color_dark: "#1c1c1c"
   # platform-specific color. will override general color if active:
   #color_android: "#42a5f5"
   #color_dark_android: "#042a49"
@@ -63,8 +63,8 @@ flutter_native_splash:
   # general image for all platform (except android 12+):
   # allows you to specify an image used in the splash screen. It must be a
   # png file and should be sized for 4x pixel density.
-  image: assets/Splash.png
-  #image_dark:          assets/splash-invert.png
+  image: assets/splash-light.png
+  image_dark: assets/splash-dark.png
   # platform-specific image. will override general image if active:
   #image_android:       assets/splash-android.png
   #image_dark_android:  assets/splash-invert-android.png
@@ -133,8 +133,8 @@ flutter_native_splash:
   #! ANDROID 12+ configuration:
   android_12:
     # background color
-    color: "#74DAB6"
-    # color_dark: "#042a49"
+    color: "#f5f5f5"
+    color_dark: "#1c1c1c"
 
     # center-logo
     # If this parameter is not specified, the app's launcher icon will be used instead.
@@ -142,7 +142,8 @@ flutter_native_splash:
     # with background: 960×960 px (fit within circle 640px in diameter)
     # without background: 1152×1152 px (fit within circle 768px in diameter)
     # ensure that the most important design elements of your image are placed within a circular area
-    image: assets/Splash.png
+    image: assets/splash-light.png
+    image_dark: assets/splash-dark.png
     # image_dark: assets/images/logo/logo-splash2.png
 
     # center-logo background color

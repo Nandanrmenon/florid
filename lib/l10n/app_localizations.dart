@@ -1680,6 +1680,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Require authentication only for apps that have anti-features.'**
   String get auth_all_apps_w_anti_feat_desc;
+
+  /// No description provided for @support_the_developer.
+  ///
+  /// In en, this message translates to:
+  /// **'Support the Developer'**
+  String get support_the_developer;
 }
 
 class _AppLocalizationsDelegate

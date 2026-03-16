@@ -879,76 +879,17 @@ class _AppDetailsScreenState extends State<AppDetailsScreen>
                     );
                   },
                 ),
-                PopupMenuButton<String>(
+                IconButton(
+                  tooltip: AppLocalizations.of(context)!.share,
                   style: ButtonStyle(
                     backgroundColor: WidgetStateProperty.all(
                       Theme.of(context).colorScheme.surface,
                     ),
                   ),
-                  icon: const Icon(Symbols.more_vert),
-                  onSelected: (value) async {
-                    switch (value) {
-                      case 'share':
-                        await _shareApp();
-                        break;
-                      case 'website':
-                        if (widget.app.webSite != null) {
-                          await launchUrl(Uri.parse(widget.app.webSite!));
-                        }
-                        break;
-                      case 'source':
-                        if (widget.app.sourceCode != null) {
-                          await launchUrl(Uri.parse(widget.app.sourceCode!));
-                        }
-                        break;
-                      case 'issues':
-                        if (widget.app.issueTracker != null) {
-                          await launchUrl(Uri.parse(widget.app.issueTracker!));
-                        }
-                        break;
-                    }
+                  icon: Icon(Symbols.share),
+                  onPressed: () {
+                    _shareApp();
                   },
-                  itemBuilder: (context) => [
-                    PopupMenuItem(
-                      value: 'share',
-                      child: ListTile(
-                        leading: Icon(Symbols.share),
-                        title: Text(AppLocalizations.of(context)!.share),
-                        contentPadding: EdgeInsets.zero,
-                      ),
-                    ),
-                    if (widget.app.webSite != null)
-                      PopupMenuItem(
-                        value: 'website',
-                        child: ListTile(
-                          leading: Icon(Symbols.public),
-                          title: Text(AppLocalizations.of(context)!.website),
-                          contentPadding: EdgeInsets.zero,
-                        ),
-                      ),
-                    if (widget.app.sourceCode != null)
-                      PopupMenuItem(
-                        value: 'source',
-                        child: ListTile(
-                          leading: Icon(Symbols.code),
-                          title: Text(
-                            AppLocalizations.of(context)!.source_code,
-                          ),
-                          contentPadding: EdgeInsets.zero,
-                        ),
-                      ),
-                    if (widget.app.issueTracker != null)
-                      PopupMenuItem(
-                        value: 'issues',
-                        child: ListTile(
-                          leading: Icon(Symbols.bug_report),
-                          title: Text(
-                            AppLocalizations.of(context)!.issue_tracker,
-                          ),
-                          contentPadding: EdgeInsets.zero,
-                        ),
-                      ),
-                  ],
                 ),
               ],
             ),
@@ -1158,6 +1099,10 @@ class _AppDetailsScreenState extends State<AppDetailsScreen>
                       );
                     },
                   ).animate().fadeIn(
+                    delay: Duration(milliseconds: 300),
+                    duration: Duration(milliseconds: 300),
+                  ),
+                  AppExtraInfoSection(app: widget.app).animate().fadeIn(
                     delay: Duration(milliseconds: 300),
                     duration: Duration(milliseconds: 300),
                   ),
@@ -2707,6 +2652,254 @@ class _NoVersionInfoSection extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class AppExtraInfoSection extends StatefulWidget {
+  final FDroidApp app;
+  const AppExtraInfoSection({super.key, required this.app});
+
+  @override
+  State<AppExtraInfoSection> createState() => _AppExtraInfoSectionState();
+}
+
+class _AppExtraInfoSectionState extends State<AppExtraInfoSection> {
+  List<MapEntry<String, String>> _buildDonationItems() {
+    final entries = <MapEntry<String, String>>[];
+    final seen = <String>{};
+
+    void addEntry(String label, String? rawLink) {
+      final link = rawLink?.trim();
+      if (link == null || link.isEmpty) return;
+      if (seen.contains(link)) return;
+      seen.add(link);
+      entries.add(MapEntry(label, link));
+    }
+
+    void parseDonateField(String? rawDonate) {
+      if (rawDonate == null) return;
+      final raw = rawDonate.trim();
+      if (raw.isEmpty) return;
+
+      String normalizeLabel(String key) {
+        final normalizedKey = key.trim().toLowerCase();
+        if (normalizedKey.contains('bitcoin')) return 'Bitcoin';
+        if (normalizedKey.contains('flattr')) return 'Flattr';
+        if (normalizedKey.contains('liberapay')) return 'Liberapay';
+        if (normalizedKey.contains('collective')) return 'Open Collective';
+        return 'Donate';
+      }
+
+      void parseSingleEntry(String line) {
+        var value = line.trim();
+        if (value.isEmpty) return;
+
+        value = value
+            .replaceAll('{', '')
+            .replaceAll('}', '')
+            .replaceAll('"', '')
+            .replaceAll("'", '')
+            .trim();
+        if (value.isEmpty) return;
+
+        final match = RegExp(
+          r'^([A-Za-z][A-Za-z0-9_ ]{0,40})\s*[:=]\s*(.+)$',
+        ).firstMatch(value);
+        if (match != null) {
+          final key = match.group(1)?.trim() ?? '';
+          final parsedValue = match.group(2)?.trim() ?? '';
+          if (parsedValue.isNotEmpty && !parsedValue.startsWith('//')) {
+            addEntry(normalizeLabel(key), parsedValue);
+            return;
+          }
+        }
+
+        addEntry('Donate', value);
+      }
+
+      // Map-like format from metadata can become:
+      // {regular: https://..., bitcoin: bitcoin:..., liberapay: https://...}
+      if (raw.startsWith('{') && raw.endsWith('}')) {
+        final body = raw.substring(1, raw.length - 1);
+        final pairs = body.split(',');
+        for (final pair in pairs) {
+          parseSingleEntry(pair);
+        }
+        return;
+      }
+
+      // List-like format from metadata can become: [https://..., https://...]
+      if (raw.startsWith('[') && raw.endsWith(']')) {
+        final inner = raw.substring(1, raw.length - 1);
+        final values = inner
+            .split(',')
+            .map((e) => e.trim().replaceAll('"', '').replaceAll("'", ''))
+            .where((e) => e.isNotEmpty);
+        for (final value in values) {
+          parseSingleEntry(value);
+        }
+        return;
+      }
+
+      // Multi-line fallback
+      final byLines = raw
+          .split(RegExp(r'\r?\n'))
+          .map((e) => e.trim())
+          .where((e) => e.isNotEmpty)
+          .toList();
+      if (byLines.length > 1) {
+        for (final value in byLines) {
+          parseSingleEntry(value);
+        }
+        return;
+      }
+
+      parseSingleEntry(raw);
+    }
+
+    parseDonateField(widget.app.donate);
+    addEntry('Bitcoin', widget.app.bitcoin);
+    addEntry('Flattr', widget.app.flattrID);
+
+    return entries;
+  }
+
+  Uri? _resolveDonationUri(String label, String rawValue) {
+    var value = rawValue.trim();
+    if (value.isEmpty) return null;
+
+    if ((value.startsWith('"') && value.endsWith('"')) ||
+        (value.startsWith("'") && value.endsWith("'"))) {
+      value = value.substring(1, value.length - 1).trim();
+    }
+
+    final direct = Uri.tryParse(value);
+    if (direct != null && direct.hasScheme) {
+      return direct;
+    }
+
+    final lowerLabel = label.toLowerCase();
+
+    if (lowerLabel.contains('bitcoin')) {
+      final maybeAddress = value.replaceAll('bitcoin:', '').trim();
+      if (maybeAddress.isEmpty) return null;
+      return Uri.parse('bitcoin:$maybeAddress');
+    }
+
+    if (lowerLabel.contains('flattr')) {
+      if (value.startsWith('@')) {
+        value = value.substring(1);
+      }
+      return Uri.parse('https://flattr.com/@$value');
+    }
+
+    if (lowerLabel.contains('liberapay')) {
+      if (value.startsWith('@')) {
+        value = value.substring(1);
+      }
+      return Uri.parse('https://liberapay.com/$value');
+    }
+
+    if (lowerLabel.contains('collective')) {
+      if (value.startsWith('@')) {
+        value = value.substring(1);
+      }
+      return Uri.parse('https://opencollective.com/$value');
+    }
+
+    return Uri.tryParse('https://$value');
+  }
+
+  Future<void> _openDonateLink(
+    BuildContext context,
+    String label,
+    String link,
+  ) async {
+    final launchUri = _resolveDonationUri(label, link);
+    if (launchUri == null) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Invalid donation link: $link')));
+      }
+      return;
+    }
+
+    final opened = await launchUrl(
+      launchUri,
+      mode: LaunchMode.externalApplication,
+    );
+    if (!opened && context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Unable to open donation link: $link')),
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final donationItems = _buildDonationItems();
+    if (donationItems.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    return Column(
+      children: [
+        MListView(
+          items: [
+            if (widget.app.webSite != null)
+              MListItemData(
+                leading: ListIcon(iconData: Symbols.public),
+                title: AppLocalizations.of(context)!.website,
+                onTap: () async {
+                  if (widget.app.webSite != null) {
+                    await launchUrl(Uri.parse(widget.app.webSite!));
+                  }
+                },
+                suffix: Icon(Symbols.open_in_new_rounded),
+              ),
+            if (widget.app.sourceCode != null)
+              MListItemData(
+                leading: ListIcon(iconData: Symbols.code),
+                title: AppLocalizations.of(context)!.source_code,
+                onTap: () async {
+                  if (widget.app.webSite != null) {
+                    await launchUrl(Uri.parse(widget.app.sourceCode!));
+                  }
+                },
+                suffix: Icon(Symbols.open_in_new_rounded),
+              ),
+            if (widget.app.issueTracker != null)
+              MListItemData(
+                leading: ListIcon(iconData: Symbols.bug_report),
+                title: AppLocalizations.of(context)!.issue_tracker,
+                onTap: () async {
+                  if (widget.app.webSite != null) {
+                    await launchUrl(Uri.parse(widget.app.issueTracker!));
+                  }
+                },
+                suffix: Icon(Symbols.open_in_new_rounded),
+              ),
+          ],
+        ),
+        SizedBox(height: 16),
+        MListHeader(
+          icon: Symbols.volunteer_activism_rounded,
+          title: AppLocalizations.of(context)!.support_the_developer,
+        ),
+        MListView(
+          items: [
+            for (final item in donationItems)
+              MListItemData(
+                title: item.key,
+                subtitle: item.value,
+                suffix: const Icon(Symbols.open_in_new_rounded),
+                onTap: () => _openDonateLink(context, item.key, item.value),
+              ),
+          ],
+        ),
+      ],
     );
   }
 }

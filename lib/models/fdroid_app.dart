@@ -788,6 +788,52 @@ class FDroidRepository {
           combinedAntiFeatures.addAll(versionAntiFeatures);
         }
 
+        String? mergeDonationMetadata(Map<String, dynamic> metadata) {
+          final entries = <String>[];
+
+          dynamic findByKeyCI(List<String> keys) {
+            for (final key in keys) {
+              if (metadata.containsKey(key)) return metadata[key];
+            }
+            for (final entry in metadata.entries) {
+              final lowered = entry.key.toLowerCase();
+              for (final key in keys) {
+                if (lowered == key.toLowerCase()) {
+                  return entry.value;
+                }
+              }
+            }
+            return null;
+          }
+
+          void addDonationValue(String label, dynamic raw) {
+            if (raw == null) return;
+            if (raw is List) {
+              for (final value in raw) {
+                final text = value.toString().trim();
+                if (text.isNotEmpty) {
+                  entries.add('$label=$text');
+                }
+              }
+              return;
+            }
+            final text = raw.toString().trim();
+            if (text.isNotEmpty) {
+              entries.add('$label=$text');
+            }
+          }
+
+          addDonationValue('donate', findByKeyCI(['donate']));
+          addDonationValue('liberapay', findByKeyCI(['liberapay']));
+          addDonationValue(
+            'openCollective',
+            findByKeyCI(['openCollective', 'open_collective']),
+          );
+
+          if (entries.isEmpty) return null;
+          return entries.join('\n');
+        }
+
         final app = FDroidApp(
           packageName: pkgName,
           name: extractLocalized(
@@ -810,7 +856,7 @@ class FDroidRepository {
           issueTracker: metadata['issueTracker']?.toString(),
           sourceCode: metadata['sourceCode']?.toString(),
           changelog: metadata['changelog']?.toString(),
-          donate: metadata['donate']?.toString(),
+          donate: mergeDonationMetadata(metadata),
           bitcoin: metadata['bitcoin']?.toString(),
           flattrID: metadata['flattrID']?.toString(),
           license: (metadata['license'] ?? 'Unknown').toString(),

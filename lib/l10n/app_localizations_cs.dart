@@ -856,4 +856,7 @@ class AppLocalizationsCs extends AppLocalizations {
   @override
   String get auth_all_apps_w_anti_feat_desc =>
       'Require authentication only for apps that have anti-features.';
+
+  @override
+  String get support_the_developer => 'Support the Developer';
 }

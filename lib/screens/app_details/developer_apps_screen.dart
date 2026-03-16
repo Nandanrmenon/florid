@@ -1,6 +1,7 @@
 import 'package:florid/l10n/app_localizations.dart';
 import 'package:florid/models/fdroid_app.dart';
 import 'package:florid/providers/download_provider.dart';
+import 'package:florid/widgets/app_details_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:provider/provider.dart';
@@ -187,6 +188,7 @@ class _DeveloperAppsScreenState extends State<DeveloperAppsScreen> {
                       children: [
                         Material(
                           clipBehavior: Clip.antiAlias,
+                          color: Colors.transparent,
                           borderRadius: BorderRadius.circular(16),
                           elevation: 0.3,
                           child: AppDetailsIcon(app: _developerApps[index]),

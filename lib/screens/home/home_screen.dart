@@ -4,6 +4,7 @@ import 'package:florid/l10n/app_localizations.dart';
 import 'package:florid/providers/download_provider.dart';
 import 'package:florid/providers/settings_provider.dart';
 import 'package:florid/screens/settings/repositories_screen.dart';
+import 'package:florid/widgets/app_details_icon.dart';
 import 'package:florid/widgets/m_list.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -523,77 +524,84 @@ class _HomeScreenState extends State<HomeScreen>
                                     mainAxisAlignment: MainAxisAlignment.end,
                                     children: [
                                       Consumer2<AppProvider, DownloadProvider>(
-                                        builder: (context, appProvider, downloadProvider, _) {
-                                          final version = app.latestVersion;
-                                          final isDownloading = version != null
-                                              ? downloadProvider.isDownloading(
-                                                  app.packageName,
-                                                  version.versionName,
-                                                )
-                                              : false;
-                                          final progress = version != null
-                                              ? downloadProvider.getProgress(
-                                                  app.packageName,
-                                                  version.versionName,
-                                                )
-                                              : 0.0;
-                                          return SizedBox(
-                                            width: 72,
-                                            height: 72,
-                                            child: Stack(
-                                              alignment: Alignment.center,
-                                              children: [
-                                                AnimatedOpacity(
-                                                  opacity: isDownloading
-                                                      ? 1.0
-                                                      : 0.0,
-                                                  duration: const Duration(
-                                                    milliseconds: 300,
-                                                  ),
-                                                  child: SizedBox(
-                                                    width: 86,
-                                                    height: 86,
-                                                    child: Center(
-                                                      child: CircularProgressIndicator(
-                                                        value: isDownloading
-                                                            ? progress
-                                                            : null,
-                                                        strokeWidth: 2,
-                                                        backgroundColor:
-                                                            Theme.of(context)
-                                                                .colorScheme
-                                                                .surfaceContainerHighest,
+                                        builder:
+                                            (
+                                              context,
+                                              appProvider,
+                                              downloadProvider,
+                                              _,
+                                            ) {
+                                              final version = app.latestVersion;
+                                              final isDownloading =
+                                                  version != null
+                                                  ? downloadProvider
+                                                        .isDownloading(
+                                                          app.packageName,
+                                                          version.versionName,
+                                                        )
+                                                  : false;
+                                              final progress = version != null
+                                                  ? downloadProvider
+                                                        .getProgress(
+                                                          app.packageName,
+                                                          version.versionName,
+                                                        )
+                                                  : 0.0;
+                                              return SizedBox(
+                                                width: 72,
+                                                height: 72,
+                                                child: Stack(
+                                                  alignment: Alignment.center,
+                                                  children: [
+                                                    AnimatedOpacity(
+                                                      opacity: isDownloading
+                                                          ? 1.0
+                                                          : 0.0,
+                                                      duration: const Duration(
+                                                        milliseconds: 300,
+                                                      ),
+                                                      child: SizedBox(
+                                                        width: 86,
+                                                        height: 86,
+                                                        child: Center(
+                                                          child: CircularProgressIndicator(
+                                                            value: isDownloading
+                                                                ? progress
+                                                                : null,
+                                                            strokeWidth: 2,
+                                                            backgroundColor:
+                                                                Theme.of(
+                                                                      context,
+                                                                    )
+                                                                    .colorScheme
+                                                                    .surfaceContainerHighest,
+                                                          ),
+                                                        ),
                                                       ),
                                                     ),
-                                                  ),
+                                                    AnimatedContainer(
+                                                      duration: const Duration(
+                                                        milliseconds: 300,
+                                                      ),
+                                                      curve: Curves.easeInOut,
+                                                      width: isDownloading
+                                                          ? 24
+                                                          : 48,
+                                                      height: isDownloading
+                                                          ? 24
+                                                          : 48,
+                                                      clipBehavior:
+                                                          Clip.antiAlias,
+                                                      decoration:
+                                                          BoxDecoration(),
+                                                      child: AppDetailsIcon(
+                                                        app: app,
+                                                      ),
+                                                    ),
+                                                  ],
                                                 ),
-                                                AnimatedContainer(
-                                                  duration: const Duration(
-                                                    milliseconds: 300,
-                                                  ),
-                                                  curve: Curves.easeInOut,
-                                                  width: isDownloading
-                                                      ? 24
-                                                      : 48,
-                                                  height: isDownloading
-                                                      ? 24
-                                                      : 48,
-                                                  clipBehavior: Clip.antiAlias,
-                                                  decoration: BoxDecoration(
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                          12,
-                                                        ),
-                                                    color: Theme.of(context)
-                                                        .colorScheme
-                                                        .surfaceContainerHighest,
-                                                  ),
-                                                  child: MultiIcon(app: app),
-                                                ),
-                                              ],
-                                            ),
-                                          );
-                                        },
+                                              );
+                                            },
                                       ),
                                       Padding(
                                         padding: const EdgeInsets.symmetric(

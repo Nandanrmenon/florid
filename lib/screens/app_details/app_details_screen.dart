@@ -1,10 +1,10 @@
 import 'dart:io';
 
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:florid/l10n/app_localizations.dart';
 import 'package:florid/screens/app_details/developer_apps_screen.dart';
 import 'package:florid/screens/app_details/permissions_screen.dart';
 import 'package:florid/screens/home/category_apps_screen.dart';
+import 'package:florid/widgets/app_details_icon.dart';
 import 'package:florid/widgets/changelog_preview.dart';
 import 'package:florid/widgets/f_tabbar.dart';
 import 'package:florid/widgets/list_icon.dart';
@@ -726,14 +726,9 @@ class _AppDetailsScreenState extends State<AppDetailsScreen>
                         spacing: 16.0,
                         children: [
                           SizedBox(
-                            height: 128,
-                            width: 128,
-                            child: Material(
-                              elevation: 1,
-                              borderRadius: BorderRadius.circular(24),
-                              clipBehavior: Clip.antiAlias,
-                              child: AppDetailsIcon(app: widget.app),
-                            ),
+                            height: 84,
+                            width: 84,
+                            child: AppDetailsIcon(app: widget.app),
                           ),
                           Column(
                             children: [
@@ -816,12 +811,7 @@ class _AppDetailsScreenState extends State<AppDetailsScreen>
                     SizedBox(
                       height: 32,
                       width: 32,
-                      child: Material(
-                        elevation: 2,
-                        borderRadius: BorderRadius.circular(8),
-                        clipBehavior: Clip.antiAlias,
-                        child: AppDetailsIcon(app: widget.app),
-                      ),
+                      child: AppDetailsIcon(app: widget.app),
                     ),
                     Expanded(
                       child: Column(
@@ -2826,100 +2816,6 @@ class _AppExtraInfoSectionState extends State<AppExtraInfoSection> {
           ],
         ),
       ],
-    );
-  }
-}
-
-class AppDetailsIcon extends StatefulWidget {
-  final FDroidApp app;
-  const AppDetailsIcon({super.key, required this.app});
-
-  @override
-  State<AppDetailsIcon> createState() => _AppDetailsIconState();
-}
-
-class _AppDetailsIconState extends State<AppDetailsIcon> {
-  late List<String> _candidates;
-  int _index = 0;
-  bool _showFallback = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _candidates = widget.app.iconUrls;
-  }
-
-  void _next() {
-    if (!mounted) return;
-
-    // Always use addPostFrameCallback to avoid setState during build
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-
-      // Move through all candidates before showing a fallback
-      if (_index < _candidates.length - 1) {
-        setState(() {
-          _index++;
-        });
-      } else {
-        setState(() {
-          _showFallback = true;
-        });
-      }
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    if (_showFallback) {
-      return Container(
-        color: Colors.white.withValues(alpha: 0.2),
-        child: const Icon(Symbols.android, color: Colors.white, size: 40),
-      );
-    }
-
-    if (_index >= _candidates.length) {
-      return Container(
-        color: Colors.white.withValues(alpha: 0.2),
-        child: const Icon(Symbols.apps, color: Colors.white, size: 40),
-      );
-    }
-
-    final url = _candidates[_index];
-    return CachedNetworkImage(
-      imageUrl: url,
-      cacheKey: '${widget.app.packageName}:$url',
-      imageBuilder: (context, imageProvider) => Image(
-        image: imageProvider,
-        fit: BoxFit.cover,
-        filterQuality: FilterQuality.high,
-      ),
-      errorWidget: (context, _, _) {
-        // Move to next candidate or fallback.
-        _next();
-        return Container(
-          color: Colors.white.withValues(alpha: 0.2),
-          child: const Icon(
-            Symbols.broken_image,
-            color: Colors.white,
-            size: 40,
-          ),
-        );
-      },
-      placeholder: (context, _) => Container(
-        color: Colors.white.withValues(alpha: 0.2),
-        alignment: Alignment.center,
-        child: const SizedBox(
-          width: 20,
-          height: 20,
-          child: CircularProgressIndicator(
-            strokeWidth: 2,
-            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-          ),
-        ),
-      ),
-      // Suppress per-attempt error spam for fallback candidates.
-      errorListener: (_) {},
     );
   }
 }

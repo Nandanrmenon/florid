@@ -1,4 +1,3 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:florid/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/symbols.dart';
@@ -7,6 +6,7 @@ import 'package:provider/provider.dart';
 import '../models/fdroid_app.dart';
 import '../providers/app_provider.dart';
 import '../providers/download_provider.dart';
+import 'app_details_icon.dart';
 
 class AppListItem extends StatelessWidget {
   final FDroidApp app;
@@ -35,7 +35,6 @@ class AppListItem extends StatelessWidget {
     return ListTile(
       onTap: onTap,
       onLongPress: () => _showQuickViewModal(context),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
       contentPadding: const EdgeInsets.symmetric(vertical: 6),
       leading: Consumer2<AppProvider, DownloadProvider>(
         builder: (context, appProvider, downloadProvider, _) {
@@ -80,11 +79,8 @@ class AppListItem extends StatelessWidget {
                   width: isDownloading ? 24 : 48,
                   height: isDownloading ? 24 : 48,
                   clipBehavior: Clip.antiAlias,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(12),
-                    color: theme.colorScheme.surfaceContainerHighest,
-                  ),
-                  child: MultiIcon(app: app),
+                  decoration: BoxDecoration(),
+                  child: AppDetailsIcon(app: app),
                 ),
               ],
             ),
@@ -178,97 +174,6 @@ class AppListItem extends StatelessWidget {
   }
 }
 
-class MultiIcon extends StatefulWidget {
-  final FDroidApp app;
-  const MultiIcon({super.key, required this.app});
-
-  @override
-  State<MultiIcon> createState() => _MultiIconState();
-}
-
-class _MultiIconState extends State<MultiIcon> {
-  static final Map<String, String> _resolvedIconUrlByPackage =
-      <String, String>{};
-
-  late List<String> _candidates;
-  int _index = 0;
-
-  @override
-  void initState() {
-    super.initState();
-    _candidates = widget.app.iconUrls;
-
-    // Start from the last known-good URL for this package when possible.
-    final resolvedUrl = _resolvedIconUrlByPackage[widget.app.packageName];
-    if (resolvedUrl != null) {
-      final resolvedIndex = _candidates.indexOf(resolvedUrl);
-      if (resolvedIndex != -1) {
-        _index = resolvedIndex;
-      }
-    }
-  }
-
-  void _tryNext() {
-    if (!mounted) return;
-    if (_index < _candidates.length - 1) {
-      setState(() {
-        _index++;
-      });
-    } else {
-      _resolvedIconUrlByPackage.remove(widget.app.packageName);
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    if (_index >= _candidates.length) {
-      // No more URLs to try, show fallback
-      return Container(
-        color: theme.colorScheme.surfaceContainerHighest,
-        child: Icon(Symbols.android, color: theme.colorScheme.onSurfaceVariant),
-      );
-    }
-
-    final url = _candidates[_index];
-
-    return CachedNetworkImage(
-      imageUrl: url,
-      cacheKey: '${widget.app.packageName}:$url',
-      imageBuilder: (context, imageProvider) {
-        _resolvedIconUrlByPackage[widget.app.packageName] = url;
-        return Image(image: imageProvider, fit: BoxFit.cover);
-      },
-      placeholder: (context, url) => Container(
-        color: theme.colorScheme.surfaceContainerHighest,
-        alignment: Alignment.center,
-        child: const SizedBox(
-          width: 20,
-          height: 20,
-          child: CircularProgressIndicator(strokeWidth: 2),
-        ),
-      ),
-      errorWidget: (context, url, error) {
-        // Try next URL on error
-        Future.microtask(_tryNext);
-        return Container(
-          color: theme.colorScheme.surfaceContainerHighest,
-          child: Icon(
-            Symbols.image_not_supported,
-            color: theme.colorScheme.onSurfaceVariant,
-            size: 20,
-          ),
-        );
-      },
-      // Suppress error logs
-      errorListener: (error) {
-        // Silently catch errors - no logging
-      },
-    );
-  }
-}
-
 class _QuickViewModal extends StatelessWidget {
   final FDroidApp app;
   final VoidCallback? onViewDetails;
@@ -350,7 +255,7 @@ class _QuickViewModal extends StatelessWidget {
                               borderRadius: BorderRadius.circular(12),
                               color: theme.colorScheme.surfaceContainerHighest,
                             ),
-                            child: MultiIcon(app: app),
+                            child: AppDetailsIcon(app: app),
                           ),
                         ],
                       ),
@@ -429,7 +334,6 @@ class _QuickViewModal extends StatelessWidget {
                   right: 16.0,
                   top: 8.0,
                 ),
-
                 child: Row(
                   spacing: 8,
                   children: [

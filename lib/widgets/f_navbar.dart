@@ -53,7 +53,7 @@ class FNavBar extends StatelessWidget {
                 Widget innerMaterial() {
                   return Material(
                     color: effectiveColor,
-                    elevation: 1,
+                    elevation: 0.5,
                     borderRadius: BorderRadius.circular(999),
                     child: SizedBox(
                       height: height,
@@ -74,69 +74,74 @@ class FNavBar extends StatelessWidget {
                                       : Colors.transparent,
                                   borderRadius: BorderRadius.circular(999),
                                 ),
-                                child: InkWell(
-                                  onTap: () => onChanged(index),
-                                  borderRadius: BorderRadius.circular(99),
-                                  child: SizedBox(
-                                    height: double.infinity,
-                                    child: Row(
-                                      spacing: 16.0,
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      children: [
-                                        Flexible(
-                                          child: IconTheme(
-                                            data: IconThemeData(
-                                              color: selected
-                                                  ? selectedColor
-                                                  : unselectedColor,
-                                            ),
-                                            child: selected
-                                                ? item.selectedIcon
-                                                : item.icon,
-                                          ),
-                                        ),
-                                        if (selected)
+                                child: Tooltip(
+                                  message: item.label,
+                                  preferBelow: false,
+                                  child: InkWell(
+                                    onTap: () => onChanged(index),
+                                    borderRadius: BorderRadius.circular(99),
+                                    child: SizedBox(
+                                      height: double.infinity,
+                                      child: Row(
+                                        spacing: 16.0,
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
                                           Flexible(
-                                            child:
-                                                AnimatedDefaultTextStyle(
-                                                      duration: const Duration(
-                                                        milliseconds: 180,
-                                                      ),
-                                                      curve: Curves.easeOut,
-                                                      style: isFlorid
-                                                          ? TextStyle(
-                                                              color: selected
-                                                                  ? selectedColor
-                                                                  : unselectedColor,
-                                                              fontSize: 14,
-                                                              fontVariations: [
-                                                                FontVariation(
-                                                                  'ROND',
-                                                                  100,
-                                                                ),
-                                                              ],
-                                                            )
-                                                          : const TextStyle(
-                                                              inherit: true,
-                                                            ),
-                                                      child: Text(
-                                                        item.label,
-                                                        maxLines: 1,
-                                                        overflow: TextOverflow
-                                                            .ellipsis,
-                                                      ),
-                                                    )
-                                                    .animate()
-                                                    .fadeIn(duration: 180.ms)
-                                                    .slideX(
-                                                      begin: 0.5,
-                                                      end: 0,
-                                                      duration: 180.ms,
-                                                      curve: Curves.easeOut,
-                                                    ),
+                                            child: IconTheme(
+                                              data: IconThemeData(
+                                                color: selected
+                                                    ? selectedColor
+                                                    : unselectedColor,
+                                              ),
+                                              child: selected
+                                                  ? item.selectedIcon
+                                                  : item.icon,
+                                            ),
                                           ),
-                                      ],
+                                          if (selected)
+                                            Flexible(
+                                              child:
+                                                  AnimatedDefaultTextStyle(
+                                                        duration:
+                                                            const Duration(
+                                                              milliseconds: 180,
+                                                            ),
+                                                        curve: Curves.easeOut,
+                                                        style: isFlorid
+                                                            ? TextStyle(
+                                                                color: selected
+                                                                    ? selectedColor
+                                                                    : unselectedColor,
+                                                                fontSize: 14,
+                                                                fontVariations: [
+                                                                  FontVariation(
+                                                                    'ROND',
+                                                                    100,
+                                                                  ),
+                                                                ],
+                                                              )
+                                                            : const TextStyle(
+                                                                inherit: true,
+                                                              ),
+                                                        child: Text(
+                                                          item.label,
+                                                          maxLines: 1,
+                                                          overflow: TextOverflow
+                                                              .ellipsis,
+                                                        ),
+                                                      )
+                                                      .animate()
+                                                      .fadeIn(duration: 180.ms)
+                                                      .slideX(
+                                                        begin: 0.5,
+                                                        end: 0,
+                                                        duration: 180.ms,
+                                                        curve: Curves.easeOut,
+                                                      ),
+                                            ),
+                                        ],
+                                      ),
                                     ),
                                   ),
                                 ),

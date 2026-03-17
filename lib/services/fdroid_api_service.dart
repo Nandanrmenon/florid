@@ -44,6 +44,7 @@ class FDroidApiService {
   /// Cache for fetched repository indices by repository URL
   final Map<String, Map<String, dynamic>> _repositoryIndexCache = {};
   bool _backgroundRepositoryRefreshInProgress = false;
+  bool _cancelRepositoryOperations = false;
 
   FDroidApiService({
     http.Client? client,
@@ -188,6 +189,9 @@ class FDroidApiService {
   /// Fetches the complete repository index with database caching and automatic SNI bypass fallback.
   /// Flow: try database (fresh) -> network -> try opposite SNI bypass if failed -> database fallback.
   Future<FDroidRepository> fetchRepository() async {
+    if (_cancelRepositoryOperations) {
+      throw Exception('Repository operation cancelled');
+    }
     if (!hasRepositoryUrl()) {
       throw Exception(
         'No repository URL configured. Call setRepositoryUrl() first.',
@@ -215,6 +219,9 @@ class FDroidApiService {
           _backgroundRepositoryRefreshInProgress = true;
           Future(() async {
             try {
+              if (_cancelRepositoryOperations) {
+                return;
+              }
               await _fetchRepositoryWithAutoFallback(repoIndexUrl!);
             } catch (e) {
               debugPrint('Background repository refresh failed: $e');
@@ -238,6 +245,9 @@ class FDroidApiService {
   /// Fetches repository with automatic SNI bypass fallback
   /// First tries the current SNI bypass setting, if that fails, tries the opposite
   Future<FDroidRepository> _fetchRepositoryWithAutoFallback(String url) async {
+    if (_cancelRepositoryOperations) {
+      throw Exception('Repository operation cancelled');
+    }
     // Check if we have cached knowledge about what works for this URL
     final cachedSetting = _workingSniBypassSettings[url];
 
@@ -252,6 +262,9 @@ class FDroidApiService {
     // Try primary setting
     try {
       final repo = await _fetchRepositoryWithSNISetting(url, primarySetting);
+      if (_cancelRepositoryOperations) {
+        throw Exception('Repository operation cancelled');
+      }
       // Cache this working setting
       _workingSniBypassSettings[url] = primarySetting;
       return repo;
@@ -264,6 +277,9 @@ class FDroidApiService {
       debugPrint('Retrying with fallback SNI bypass setting: $fallbackSetting');
       try {
         final repo = await _fetchRepositoryWithSNISetting(url, fallbackSetting);
+        if (_cancelRepositoryOperations) {
+          throw Exception('Repository operation cancelled');
+        }
         // Cache this working setting
         _workingSniBypassSettings[url] = fallbackSetting;
         debugPrint('Successfully fetched with SNI bypass=$fallbackSetting');
@@ -305,6 +321,9 @@ class FDroidApiService {
     String url,
     bool useSniBypass,
   ) async {
+    if (_cancelRepositoryOperations) {
+      throw Exception('Repository operation cancelled');
+    }
     // Temporarily set SNI bypass for this request
     final originalSetting = _sniBypassEnabled;
     _sniBypassEnabled = useSniBypass;
@@ -314,6 +333,10 @@ class FDroidApiService {
         Uri.parse(url),
         headers: {'User-Agent': _userAgent},
       );
+
+      if (_cancelRepositoryOperations) {
+        throw Exception('Repository operation cancelled');
+      }
 
       if (response.statusCode == 200) {
         final body = response.body;
@@ -328,6 +351,10 @@ class FDroidApiService {
         final jsonData = result['json'] as Map<String, dynamic>;
         final repo = result['repo'] as FDroidRepository;
 
+        if (_cancelRepositoryOperations) {
+          throw Exception('Repository operation cancelled');
+        }
+
         // Cache the raw JSON for screenshot extraction
         _cachedRawJson = jsonData;
         debugPrint(
@@ -338,7 +365,9 @@ class FDroidApiService {
 
         // Store in database on a background isolate to avoid blocking UI
         try {
-          importRepositoryInBackground(repo); // Fire and forget
+          if (!_cancelRepositoryOperations) {
+            importRepositoryInBackground(repo); // Fire and forget
+          }
         } catch (e) {
           debugPrint('Error scheduling database import: $e');
         }
@@ -547,10 +576,18 @@ class FDroidApiService {
     int? repositoryId,
   }) {
     try {
+      if (_cancelRepositoryOperations) {
+        debugPrint('Repository import skipped: operation cancelled');
+        return;
+      }
       debugPrint('Scheduling database import...');
       // Defer import to run after the current frame without blocking UI
       Future.microtask(() async {
         try {
+          if (_cancelRepositoryOperations) {
+            debugPrint('Repository import aborted: operation cancelled');
+            return;
+          }
           await _databaseService.importRepository(
             repo,
             repositoryId: repositoryId,
@@ -624,6 +661,15 @@ class FDroidApiService {
     } catch (_) {
       // Ignore database clear failures
     }
+  }
+
+  void cancelRepositoryOperations() {
+    _cancelRepositoryOperations = true;
+    debugPrint('Repository operations cancellation requested');
+  }
+
+  void resetRepositoryOperationsCancellation() {
+    _cancelRepositoryOperations = false;
   }
 
   /// Fetches apps with pagination support

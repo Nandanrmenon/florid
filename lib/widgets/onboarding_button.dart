@@ -7,6 +7,7 @@ class OnboardingPrimaryButton extends StatelessWidget {
     required this.currentPage,
     required this.isFinishing,
     required this.canProceed,
+    required this.shouldStartSetup,
     required this.onNext,
     required this.onStartSetup,
   });
@@ -14,33 +15,33 @@ class OnboardingPrimaryButton extends StatelessWidget {
   final int currentPage;
   final bool isFinishing;
   final bool canProceed;
+  final bool shouldStartSetup;
   final VoidCallback onNext;
   final VoidCallback onStartSetup;
 
   @override
   Widget build(BuildContext context) {
     final localizations = AppLocalizations.of(context)!;
-    final isRepoStep = currentPage == 2;
     final isEnabled = !isFinishing && canProceed;
 
     final onPressed = !isEnabled
         ? null
         : () {
-            if (isRepoStep) {
+            if (shouldStartSetup) {
               onStartSetup();
             } else {
               onNext();
             }
           };
 
-    final label = isRepoStep
+    final label = shouldStartSetup
         ? localizations.start_setup
         : localizations.continue_text;
 
-    final button = isRepoStep
+    final button = shouldStartSetup
         ? FilledButton(onPressed: onPressed, child: Text(label))
         : FilledButton.tonal(onPressed: onPressed, child: Text(label));
 
-    return button;
+    return SizedBox(height: 48, child: button);
   }
 }

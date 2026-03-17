@@ -271,6 +271,14 @@ class AppProvider extends ChangeNotifier {
     }
   }
 
+  void cancelRepositoryOperations() {
+    _apiService.cancelRepositoryOperations();
+  }
+
+  void resetRepositoryOperationsCancellation() {
+    _apiService.resetRepositoryOperationsCancellation();
+  }
+
   /// Merges multiple repositories into one, tracking all available sources
   FDroidRepository _mergeRepositories(List<FDroidRepository> repos) {
     final mergedApps = <String, FDroidApp>{};

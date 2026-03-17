@@ -484,6 +484,16 @@ class AppLocalizationsDe extends AppLocalizations {
   String get alpha => 'Alpha';
 
   @override
+  String get privacy => 'Privacy';
+
+  @override
+  String get opt_out_of_telemetry => 'Opt out of telemetry';
+
+  @override
+  String get opt_out_of_telemetry_subtitle =>
+      'Helps us know how many users (annoymous) are active';
+
+  @override
   String get downloads_and_storage => 'Downloads & Storage';
 
   @override

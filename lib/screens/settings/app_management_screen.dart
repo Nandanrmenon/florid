@@ -4,6 +4,7 @@ import 'package:android_intent_plus/android_intent.dart';
 import 'package:florid/l10n/app_localizations.dart';
 import 'package:florid/providers/settings_provider.dart';
 import 'package:florid/services/update_check_service.dart';
+import 'package:florid/services/usage_analytics_service.dart';
 import 'package:florid/widgets/list_icon.dart';
 import 'package:florid/widgets/m_list.dart';
 import 'package:flutter/foundation.dart';
@@ -28,12 +29,22 @@ class AppManagementScreen extends StatefulWidget {
 
 class _AppManagementScreenState extends State<AppManagementScreen> {
   bool? _isIgnoringBatteryOptimizations;
+  bool _telemetryOptedOut = false;
   final LocalAuthentication _localAuth = LocalAuthentication();
 
   @override
   void initState() {
     super.initState();
     _loadBatteryOptimizationStatus();
+    _loadTelemetryOptOutStatus();
+  }
+
+  Future<void> _loadTelemetryOptOutStatus() async {
+    final optedOut = await UsageAnalyticsService().isOptedOut();
+    if (!mounted) return;
+    setState(() {
+      _telemetryOptedOut = optedOut;
+    });
   }
 
   String _installMethodLabel(
@@ -429,6 +440,50 @@ class _AppManagementScreenState extends State<AppManagementScreen> {
                                       .slideY(begin: -0.1, duration: 300.ms),
                               ],
                             ),
+                        ],
+                      ),
+                      Column(
+                        spacing: 4,
+                        children: [
+                          MListHeader(title: localizations.privacy),
+                          MListView(
+                            items: [
+                              MListItemData(
+                                leading: ListIcon(iconData: Symbols.security),
+                                title: localizations.opt_out_of_telemetry,
+                                onTap: () async {
+                                  await UsageAnalyticsService().setOptOut(
+                                    !_telemetryOptedOut,
+                                  );
+                                  await _loadTelemetryOptOutStatus();
+                                },
+                                suffix: Checkbox(
+                                  value: _telemetryOptedOut,
+                                  onChanged: (value) async {
+                                    if (value == null) return;
+                                    await UsageAnalyticsService().setOptOut(
+                                      value,
+                                    );
+                                    await _loadTelemetryOptOutStatus();
+                                  },
+                                ),
+                              ),
+                            ],
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 24.0,
+                            ),
+                            child: Text(
+                              localizations.opt_out_of_telemetry_subtitle,
+                              style: Theme.of(context).textTheme.bodyMedium
+                                  ?.copyWith(
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.onSurfaceVariant,
+                                  ),
+                            ),
+                          ),
                         ],
                       ),
                       Column(

@@ -1009,6 +1009,24 @@ abstract class AppLocalizations {
   /// **'Alpha'**
   String get alpha;
 
+  /// No description provided for @privacy.
+  ///
+  /// In en, this message translates to:
+  /// **'Privacy'**
+  String get privacy;
+
+  /// No description provided for @opt_out_of_telemetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Opt out of telemetry'**
+  String get opt_out_of_telemetry;
+
+  /// No description provided for @opt_out_of_telemetry_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Helps us know how many users (annoymous) are active'**
+  String get opt_out_of_telemetry_subtitle;
+
   /// No description provided for @downloads_and_storage.
   ///
   /// In en, this message translates to:

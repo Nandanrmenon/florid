@@ -18,6 +18,7 @@ import '../providers/app_provider.dart';
 import '../providers/repositories_provider.dart';
 import '../providers/settings_provider.dart';
 import '../services/fdroid_api_service.dart';
+import '../services/usage_analytics_service.dart';
 import 'device/updates_screen.dart';
 import 'search/search_screen.dart';
 
@@ -45,6 +46,8 @@ class _FloridAppState extends State<FloridApp> {
     super.initState();
     // Load installed apps and repositories once at startup
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      UsageAnalyticsService().trackAppOpen();
+
       final appProvider = context.read<AppProvider>();
       final repositoriesProvider = context.read<RepositoriesProvider>();
 

@@ -69,6 +69,7 @@ class _AppDetailsScreenState extends State<AppDetailsScreen>
         _screenshotsFuture = context.read<AppProvider>().getScreenshots(
           widget.app.packageName,
           repositoryUrl: widget.app.repositoryUrl,
+          locale: Localizations.localeOf(context).toLanguageTag(),
         );
         _enrichedAppFuture = context
             .read<AppProvider>()

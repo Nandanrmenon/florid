@@ -1326,10 +1326,12 @@ class AppProvider extends ChangeNotifier {
   Future<List<String>> getScreenshots(
     String packageName, {
     String? repositoryUrl,
+    String? locale,
   }) async {
     return await _apiService.getScreenshots(
       packageName,
       repositoryUrl: repositoryUrl,
+      locale: locale,
     );
   }
 

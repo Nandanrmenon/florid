@@ -1172,6 +1172,7 @@ class FDroidApiService {
   Future<List<String>> getScreenshots(
     String packageName, {
     String? repositoryUrl,
+    String? locale,
   }) async {
     Map<String, dynamic>? jsonData;
 
@@ -1250,7 +1251,10 @@ class FDroidApiService {
       // 1. Direct metadata.screenshots
       final metadata = (pkgData['metadata'] as Map?)?.cast<String, dynamic>();
       if (metadata != null) {
-        screenshotsList = _extractScreenshots(metadata['screenshots']);
+        screenshotsList = _extractScreenshots(
+          metadata['screenshots'],
+          locale: locale,
+        );
         if (screenshotsList.isNotEmpty) {
           return screenshotsList;
         }
@@ -1258,7 +1262,10 @@ class FDroidApiService {
         // 2. Check if screenshots might be in a localized format
         for (final key in metadata.keys) {
           if (key.toString().contains('screenshot')) {
-            screenshotsList = _extractScreenshots(metadata[key]);
+            screenshotsList = _extractScreenshots(
+              metadata[key],
+              locale: locale,
+            );
             if (screenshotsList.isNotEmpty) {
               return screenshotsList;
             }
@@ -1429,7 +1436,7 @@ class FDroidApiService {
     }
   }
 
-  List<String> _extractScreenshots(dynamic screenshotData) {
+  List<String> _extractScreenshots(dynamic screenshotData, {String? locale}) {
     if (screenshotData == null) {
       return [];
     }
@@ -1452,34 +1459,55 @@ class FDroidApiService {
         }
       }
     } else if (screenshotData is Map) {
-      // Check for device-type categories (phone, sevenInch, tenInch)
-      for (final deviceType in ['phone', 'sevenInch', 'tenInch']) {
+      // Prefer handheld/tablet screenshots over tv/wear when device buckets exist.
+      // Stop at the first device bucket that has screenshots.
+      for (final deviceType in [
+        'phone',
+        'sevenInch',
+        'tenInch',
+        'tablet',
+        'phoneScreenshots',
+        'wear',
+        'tv',
+      ]) {
         final deviceData = screenshotData[deviceType];
         if (deviceData != null) {
           // Device data could be localized: {en-US: [...], de: [...]}
           if (deviceData is Map) {
-            // Look for localized screenshot lists
-            for (final localeScreenshots in deviceData.values) {
-              if (localeScreenshots is List) {
-                for (final item in localeScreenshots) {
-                  if (item is String) {
-                    screenshots.add(item);
-                  } else if (item is Map && item['name'] is String) {
-                    screenshots.add(item['name'] as String);
-                  }
+            final localizedScreens = _extractLocalePreferredScreenshots(
+              deviceData,
+              locale,
+            );
+            if (localizedScreens.isNotEmpty) {
+              screenshots.addAll(localizedScreens);
+            } else {
+              for (final localeScreenshots in deviceData.values) {
+                final extracted = _extractScreenshots(
+                  localeScreenshots,
+                  locale: locale,
+                );
+                if (extracted.isNotEmpty) {
+                  screenshots.addAll(extracted);
+                  break;
                 }
               }
             }
           } else if (deviceData is List) {
-            for (final item in deviceData) {
-              if (item is String) {
-                screenshots.add(item);
-              } else if (item is Map && item['name'] is String) {
-                screenshots.add(item['name'] as String);
-              }
-            }
+            screenshots.addAll(_extractScreenshots(deviceData, locale: locale));
+          }
+
+          if (screenshots.isNotEmpty) {
+            return screenshots.toSet().toList();
           }
         }
+      }
+
+      final localePreferred = _extractLocalePreferredScreenshots(
+        screenshotData,
+        locale,
+      );
+      if (localePreferred.isNotEmpty) {
+        return localePreferred;
       }
 
       // If no device-type structure found, recursively look for screenshot lists
@@ -1495,12 +1523,12 @@ class FDroidApiService {
 
           // Recursively extract from nested structures
           if (value is List) {
-            final extracted = _extractScreenshots(value);
+            final extracted = _extractScreenshots(value, locale: locale);
             if (extracted.isNotEmpty) {
               screenshots.addAll(extracted);
             }
           } else if (value is Map) {
-            final extracted = _extractScreenshots(value);
+            final extracted = _extractScreenshots(value, locale: locale);
             if (extracted.isNotEmpty) {
               screenshots.addAll(extracted);
             }
@@ -1511,7 +1539,85 @@ class FDroidApiService {
       }
     }
 
-    return screenshots;
+    return screenshots.toSet().toList();
+  }
+
+  List<String> _extractLocalePreferredScreenshots(
+    Map screenshotMap,
+    String? locale,
+  ) {
+    final localePrefs = <String>[];
+    void addPref(String key) {
+      if (key.isEmpty) return;
+      if (!localePrefs.contains(key)) localePrefs.add(key);
+    }
+
+    if (locale != null && locale.trim().isNotEmpty) {
+      final normalized = locale.trim().replaceAll('_', '-');
+      addPref(normalized);
+      addPref(normalized.replaceAll('-', '_'));
+      final lang = normalized.split('-').first;
+      addPref(lang);
+    }
+
+    addPref('en-US');
+    addPref('en_US');
+    addPref('en');
+
+    const nonLocaleKeys = {
+      'phone',
+      'sevenInch',
+      'tenInch',
+      'tablet',
+      'phoneScreenshots',
+      'wear',
+      'tv',
+      'desktop',
+      'ios',
+      'android',
+      'icon',
+      'iconBase64',
+      'icon old',
+    };
+
+    bool looksLikeLocaleKey(String key) {
+      if (nonLocaleKeys.contains(key)) {
+        return false;
+      }
+      final normalized = key.replaceAll('_', '-');
+      return RegExp(
+        r'^[a-zA-Z]{2,3}(-[a-zA-Z0-9]{2,8})*$',
+      ).hasMatch(normalized);
+    }
+
+    final normalizedEntries = <String, dynamic>{};
+    for (final entry in screenshotMap.entries) {
+      final key = entry.key.toString();
+      normalizedEntries[key] = entry.value;
+      normalizedEntries[key.replaceAll('_', '-')] = entry.value;
+    }
+
+    for (final pref in localePrefs) {
+      final raw =
+          normalizedEntries[pref] ??
+          normalizedEntries[pref.replaceAll('_', '-')];
+      if (raw == null) continue;
+      final extracted = _extractScreenshots(raw, locale: locale);
+      if (extracted.isNotEmpty) {
+        return extracted;
+      }
+    }
+
+    for (final entry in screenshotMap.entries) {
+      final key = entry.key.toString();
+      if (!looksLikeLocaleKey(key)) continue;
+      final extracted = _extractScreenshots(entry.value, locale: locale);
+      if (extracted.isNotEmpty) {
+        return extracted;
+      }
+    }
+
+    return const <String>[];
   }
 
   /// Fetches the changelog content from a changelog URL

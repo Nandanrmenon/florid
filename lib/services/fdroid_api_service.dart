@@ -1278,6 +1278,76 @@ class FDroidApiService {
     }
   }
 
+  /// Extracts metadata video URL for a package.
+  /// Supports both plain string and locale-keyed map (from fastlane video.txt).
+  Future<String?> getVideoUrl(
+    String packageName, {
+    String? repositoryUrl,
+    String? locale,
+  }) async {
+    Map<String, dynamic>? jsonData;
+
+    if (repositoryUrl != null) {
+      try {
+        var cleanUrl = repositoryUrl.endsWith('/')
+            ? repositoryUrl.substring(0, repositoryUrl.length - 1)
+            : repositoryUrl;
+
+        if (cleanUrl.endsWith('/index-v2.json')) {
+          cleanUrl = cleanUrl.substring(
+            0,
+            cleanUrl.length - '/index-v2.json'.length,
+          );
+        }
+
+        final indexUrl = cleanUrl.endsWith('/repo')
+            ? '$cleanUrl/index-v2.json'
+            : '$cleanUrl/repo/index-v2.json';
+
+        if (_repositoryIndexCache.containsKey(indexUrl)) {
+          jsonData = _repositoryIndexCache[indexUrl];
+        } else {
+          final response = await _client.get(Uri.parse(indexUrl));
+          if (response.statusCode != 200) return null;
+          final parsedIndex = await compute(
+            _decodeJsonMapHelper,
+            response.body,
+          );
+          jsonData = parsedIndex;
+          _repositoryIndexCache[indexUrl] = parsedIndex;
+        }
+      } catch (_) {
+        return null;
+      }
+    } else {
+      if (_cachedRawJson == null) {
+        try {
+          await fetchRepository();
+        } catch (_) {
+          return null;
+        }
+      }
+      jsonData = _cachedRawJson;
+    }
+
+    try {
+      final packages = (jsonData?['packages'] as Map?)?.cast<String, dynamic>();
+      if (packages == null) return null;
+
+      final pkgData = packages[packageName] as Map?;
+      if (pkgData == null) return null;
+
+      final metadata = (pkgData['metadata'] as Map?)?.cast<String, dynamic>();
+      if (metadata == null) return null;
+
+      final rawVideo = metadata['video'];
+      final parsed = _extractLocalizedUrl(rawVideo, locale);
+      return parsed;
+    } catch (_) {
+      return null;
+    }
+  }
+
   /// Gets the feature graphic (branding image) for an app from the specified repository
   /// Uses cached repository index to avoid repeated Network requests
   Future<String?> getFeatureGraphic(
@@ -1540,6 +1610,46 @@ class FDroidApiService {
     }
 
     return screenshots.toSet().toList();
+  }
+
+  String? _extractLocalizedUrl(dynamic raw, String? locale) {
+    if (raw == null) return null;
+    if (raw is String) {
+      final value = raw.trim();
+      return value.isEmpty ? null : value;
+    }
+    if (raw is Map) {
+      final prefs = <String>[];
+      void addPref(String key) {
+        if (key.isEmpty) return;
+        if (!prefs.contains(key)) prefs.add(key);
+      }
+
+      if (locale != null && locale.trim().isNotEmpty) {
+        final normalized = locale.trim().replaceAll('_', '-');
+        addPref(normalized);
+        addPref(normalized.replaceAll('-', '_'));
+        addPref(normalized.split('-').first);
+      }
+
+      addPref('en-US');
+      addPref('en_US');
+      addPref('en');
+
+      for (final key in prefs) {
+        final value = raw[key] ?? raw[key.replaceAll('-', '_')];
+        if (value is String && value.trim().isNotEmpty) {
+          return value.trim();
+        }
+      }
+
+      for (final value in raw.values) {
+        if (value is String && value.trim().isNotEmpty) {
+          return value.trim();
+        }
+      }
+    }
+    return null;
   }
 
   List<String> _extractLocalePreferredScreenshots(

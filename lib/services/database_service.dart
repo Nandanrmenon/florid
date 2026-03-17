@@ -8,7 +8,7 @@ import '../models/fdroid_app.dart';
 
 class DatabaseService {
   static const String _databaseName = 'fdroid_repository.db';
-  static const int _databaseVersion = 8;
+  static const int _databaseVersion = 9;
 
   // Table names
   static const String _appsTable = 'apps';
@@ -77,6 +77,7 @@ class DatabaseService {
         author_email TEXT,
         author_website TEXT,
         website TEXT,
+        video TEXT,
         issue_tracker TEXT,
         source_code TEXT,
         changelog TEXT,
@@ -219,6 +220,16 @@ class DatabaseService {
         whereArgs: ['last_sync'],
       );
     }
+    if (oldVersion < 9) {
+      // Add video column to apps table for v8 to v9 upgrade
+      await db.execute('ALTER TABLE $_appsTable ADD COLUMN video TEXT');
+      // Force re-sync so new field is populated from repository
+      await db.delete(
+        _metadataTable,
+        where: 'key = ?',
+        whereArgs: ['last_sync'],
+      );
+    }
   }
 
   /// Sets the current locale for localized data extraction
@@ -348,6 +359,7 @@ class DatabaseService {
         'author_email': app.authorEmail,
         'author_website': app.authorWebSite,
         'website': app.webSite,
+        'video': app.video,
         'issue_tracker': app.issueTracker,
         'source_code': app.sourceCode,
         'changelog': app.changelog,
@@ -1100,6 +1112,7 @@ class DatabaseService {
       authorEmail: appMap['author_email'] as String?,
       authorWebSite: appMap['author_website'] as String?,
       webSite: appMap['website'] as String?,
+      video: appMap['video'] as String?,
       issueTracker: appMap['issue_tracker'] as String?,
       sourceCode: appMap['source_code'] as String?,
       changelog: appMap['changelog'] as String?,

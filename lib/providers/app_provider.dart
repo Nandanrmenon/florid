@@ -1335,6 +1335,19 @@ class AppProvider extends ChangeNotifier {
     );
   }
 
+  /// Gets the metadata video URL for an app package
+  Future<String?> getVideoUrl(
+    String packageName, {
+    String? repositoryUrl,
+    String? locale,
+  }) async {
+    return await _apiService.getVideoUrl(
+      packageName,
+      repositoryUrl: repositoryUrl,
+      locale: locale,
+    );
+  }
+
   /// Gets the feature graphic for an app
   Future<String?> getFeatureGraphic(
     String packageName, {

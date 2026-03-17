@@ -901,7 +901,7 @@ class _AppDetailsScreenState extends State<AppDetailsScreen>
                   // What's New preview from version.whatsNew
                   Padding(
                     padding: const EdgeInsets.symmetric(
-                      vertical: 4,
+                      vertical: 8,
                       horizontal: 16,
                     ),
                     child: Consumer<AppProvider>(
@@ -914,10 +914,20 @@ class _AppDetailsScreenState extends State<AppDetailsScreen>
                         );
 
                         return Column(
-                          spacing: 16,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-
+                          spacing: 8,
+                          crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
+                            if (isInstalled)
+                              Chip(
+                                visualDensity: VisualDensity.compact,
+                                avatar: Icon(Symbols.check_circle, fill: 1),
+                                label: Text(
+                                  'Installed${installedApp?.versionName != null ? ' (${installedApp!.versionName})' : ''}',
+                                ),
+                              ).animate().fadeIn(
+                                delay: Duration(milliseconds: 300),
+                                duration: Duration(milliseconds: 300),
+                              ),
                             // Progress indicator
                             FutureBuilder<IzzyStats>(
                               future: _statsFuture,
@@ -1006,17 +1016,6 @@ class _AppDetailsScreenState extends State<AppDetailsScreen>
                                 return const SizedBox.shrink();
                               },
                             ),
-                            if (isInstalled)
-                              Chip(
-                                visualDensity: VisualDensity.compact,
-                                avatar: Icon(Symbols.check_circle, fill: 1),
-                                label: Text(
-                                  'Installed${installedApp?.versionName != null ? ' (${installedApp!.versionName})' : ''}',
-                                ),
-                              ).animate().fadeIn(
-                                delay: Duration(milliseconds: 300),
-                                duration: Duration(milliseconds: 300),
-                              ),
                           ],
                         );
                       },
@@ -1024,21 +1023,33 @@ class _AppDetailsScreenState extends State<AppDetailsScreen>
                   ),
 
                   // Screenshots section
-                  FutureBuilder<List<String>>(
-                    future: _screenshotsFuture,
+                  FutureBuilder<(List<String>, String?)>(
+                    future:
+                        Future.wait<dynamic>([
+                          _screenshotsFuture,
+                          Future<String?>.value(widget.app.video ?? ''),
+                        ], eagerError: false).then((results) {
+                          final screenshots = (results[0] as List<dynamic>)
+                              .cast<String>();
+                          final videoUrl = results[1] as String?;
+                          return (screenshots, videoUrl);
+                        }),
                     builder: (context, snapshot) {
                       if (snapshot.connectionState == ConnectionState.waiting) {
                         return const SizedBox.shrink();
                       }
 
-                      final screenshots = snapshot.data ?? [];
-                      if (screenshots.isEmpty) {
+                      final (screenshots, videoUrl) =
+                          snapshot.data ?? (const <String>[], null);
+                      if (screenshots.isEmpty &&
+                          (videoUrl == null || videoUrl.isEmpty)) {
                         return const SizedBox.shrink();
                       }
 
                       return _ScreenshotsSection(
                         app: widget.app,
                         screenshots: screenshots,
+                        videoUrl: videoUrl,
                       );
                     },
                   ).animate().fadeIn(
@@ -2789,6 +2800,14 @@ class _AppExtraInfoSectionState extends State<AppExtraInfoSection> {
   @override
   Widget build(BuildContext context) {
     final donationItems = _buildDonationItems();
+    final localeTag = Localizations.localeOf(context).toLanguageTag();
+    final videoUrlFuture = widget.app.video != null
+        ? Future<String?>.value(widget.app.video)
+        : context.read<AppProvider>().getVideoUrl(
+            widget.app.packageName,
+            repositoryUrl: widget.app.repositoryUrl,
+            locale: localeTag,
+          );
     final repositoriesProvider = context.watch<RepositoriesProvider>();
     if (repositoriesProvider.repositories.isEmpty &&
         !repositoriesProvider.isLoading) {
@@ -2851,42 +2870,48 @@ class _AppExtraInfoSectionState extends State<AppExtraInfoSection> {
 
     return Column(
       children: [
-        MListView(
-          items: [
-            if (widget.app.webSite != null)
-              MListItemData(
-                leading: ListIcon(iconData: Symbols.public),
-                title: AppLocalizations.of(context)!.website,
-                onTap: () async {
-                  if (widget.app.webSite != null) {
-                    await launchUrl(Uri.parse(widget.app.webSite!));
-                  }
-                },
-                suffix: Icon(Symbols.open_in_new_rounded),
-              ),
-            if (widget.app.sourceCode != null)
-              MListItemData(
-                leading: ListIcon(iconData: Symbols.code),
-                title: AppLocalizations.of(context)!.source_code,
-                onTap: () async {
-                  if (widget.app.webSite != null) {
-                    await launchUrl(Uri.parse(widget.app.sourceCode!));
-                  }
-                },
-                suffix: Icon(Symbols.open_in_new_rounded),
-              ),
-            if (widget.app.issueTracker != null)
-              MListItemData(
-                leading: ListIcon(iconData: Symbols.bug_report),
-                title: AppLocalizations.of(context)!.issue_tracker,
-                onTap: () async {
-                  if (widget.app.webSite != null) {
-                    await launchUrl(Uri.parse(widget.app.issueTracker!));
-                  }
-                },
-                suffix: Icon(Symbols.open_in_new_rounded),
-              ),
-          ],
+        FutureBuilder<String?>(
+          future: videoUrlFuture,
+          builder: (context, videoSnapshot) {
+            final videoUrl = videoSnapshot.data;
+            return MListView(
+              items: [
+                if (widget.app.webSite != null)
+                  MListItemData(
+                    leading: ListIcon(iconData: Symbols.public),
+                    title: AppLocalizations.of(context)!.website,
+                    onTap: () async {
+                      if (widget.app.webSite != null) {
+                        await launchUrl(Uri.parse(widget.app.webSite!));
+                      }
+                    },
+                    suffix: Icon(Symbols.open_in_new_rounded),
+                  ),
+                if (widget.app.sourceCode != null)
+                  MListItemData(
+                    leading: ListIcon(iconData: Symbols.code),
+                    title: AppLocalizations.of(context)!.source_code,
+                    onTap: () async {
+                      if (widget.app.sourceCode != null) {
+                        await launchUrl(Uri.parse(widget.app.sourceCode!));
+                      }
+                    },
+                    suffix: Icon(Symbols.open_in_new_rounded),
+                  ),
+                if (widget.app.issueTracker != null)
+                  MListItemData(
+                    leading: ListIcon(iconData: Symbols.bug_report),
+                    title: AppLocalizations.of(context)!.issue_tracker,
+                    onTap: () async {
+                      if (widget.app.issueTracker != null) {
+                        await launchUrl(Uri.parse(widget.app.issueTracker!));
+                      }
+                    },
+                    suffix: Icon(Symbols.open_in_new_rounded),
+                  ),
+              ],
+            );
+          },
         ),
         SizedBox(height: 16),
         if (donationItems.isNotEmpty) ...[
@@ -3471,8 +3496,13 @@ Future<void> _handleShizukuUnavailable(
 class _ScreenshotsSection extends StatefulWidget {
   final FDroidApp app;
   final List<String> screenshots;
+  final String? videoUrl;
 
-  const _ScreenshotsSection({required this.app, required this.screenshots});
+  const _ScreenshotsSection({
+    required this.app,
+    required this.screenshots,
+    this.videoUrl,
+  });
 
   @override
   State<_ScreenshotsSection> createState() => _ScreenshotsSectionState();
@@ -3493,8 +3523,39 @@ class _ScreenshotsSectionState extends State<_ScreenshotsSection> {
 
   @override
   Widget build(BuildContext context) {
-    if (widget.screenshots.isEmpty) {
+    if (widget.screenshots.isEmpty &&
+        (widget.videoUrl == null || widget.videoUrl!.isEmpty)) {
       return const SizedBox.shrink();
+    }
+
+    // Build carousel items: video first (if available), then screenshots
+    final carouselItems = <Widget>[];
+
+    // Add video thumbnail as first item if available
+    if (widget.videoUrl != null && widget.videoUrl!.isNotEmpty) {
+      carouselItems.add(
+        Builder(
+          builder: (context) {
+            return Material(
+              color: Colors.black,
+              child: Center(
+                child: Container(
+                  padding: const EdgeInsets.all(8.0),
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                  child: Icon(
+                    Symbols.play_arrow,
+                    color: Theme.of(context).colorScheme.onPrimary,
+                    size: 32,
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+      );
     }
 
     return Column(
@@ -3502,84 +3563,115 @@ class _ScreenshotsSectionState extends State<_ScreenshotsSection> {
       spacing: 8.0,
       children: [
         SizedBox(
-          height: 400,
+          height: 250,
           child: CarouselView.weighted(
-            flexWeights: const [2, 2],
+            flexWeights: const [1, 1, 1],
             shrinkExtent: 250,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(8),
             ),
             onTap: (index) {
+              // If tapping on video (index 0 when video exists), launch URL
+              if (widget.videoUrl != null &&
+                  widget.videoUrl!.isNotEmpty &&
+                  index == 0) {
+                launchUrl(
+                  Uri.parse(widget.videoUrl!),
+                  mode: LaunchMode.externalApplication,
+                );
+                return;
+              }
+
+              // Otherwise navigate to full-screen gallery
+              // Adjust index to account for video item
+              final screenshotIndex =
+                  widget.videoUrl != null && widget.videoUrl!.isNotEmpty
+                  ? index - 1
+                  : index;
+
               Navigator.push(
                 context,
                 MaterialPageRoute(
                   builder: (context) => _FullScreenScreenshots(
                     app: widget.app,
                     screenshots: widget.screenshots,
-                    initialIndex: index,
+                    initialIndex: screenshotIndex,
                   ),
                 ),
               );
             },
-            children: widget.screenshots.asMap().entries.map((entry) {
-              final screenshot = entry.value;
-              final url = _getScreenshotUrl(screenshot);
-
-              return Builder(
-                builder: (context) {
-                  return Material(
-                    color: Theme.of(context).colorScheme.surfaceContainer,
-                    child: Image.network(
-                      url,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) {
-                        return Container(
-                          color: Theme.of(context).colorScheme.surfaceContainer,
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              const Icon(Symbols.broken_image),
-                              const SizedBox(height: 8),
-                              Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Text(
-                                  'Failed to load',
-                                  style: Theme.of(context).textTheme.bodySmall,
-                                  textAlign: TextAlign.center,
-                                ),
+            children: <Widget>[
+              ...carouselItems,
+              ...widget.screenshots.asMap().entries.map((entry) {
+                final screenshot = entry.value;
+                final url = _getScreenshotUrl(screenshot);
+                return Builder(
+                  builder: (context) {
+                    return Material(
+                      color: Theme.of(context).colorScheme.surfaceContainer,
+                      child: Hero(
+                        tag: 'screenshot_${entry.key}',
+                        child: Image.network(
+                          url,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) {
+                            return Container(
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.surfaceContainer,
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  const Icon(Symbols.broken_image),
+                                  const SizedBox(height: 8),
+                                  Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Text(
+                                      'Failed to load',
+                                      style: Theme.of(
+                                        context,
+                                      ).textTheme.bodySmall,
+                                      textAlign: TextAlign.center,
+                                    ),
+                                  ),
+                                ],
                               ),
-                            ],
-                          ),
-                        );
-                      },
-                      loadingBuilder: (context, child, loadingProgress) {
-                        if (loadingProgress == null) return child;
-                        return Container(
-                          color: Theme.of(context).colorScheme.surfaceContainer,
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              const CircularProgressIndicator(),
-                              const SizedBox(height: 12),
-                              Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 8.0,
-                                ),
-                                child: Text(
-                                  '${(loadingProgress.cumulativeBytesLoaded / (loadingProgress.expectedTotalBytes ?? 1) * 100).toInt()}%',
-                                  style: Theme.of(context).textTheme.bodySmall,
-                                  textAlign: TextAlign.center,
-                                ),
+                            );
+                          },
+                          loadingBuilder: (context, child, loadingProgress) {
+                            if (loadingProgress == null) return child;
+                            return Container(
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.surfaceContainer,
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  const CircularProgressIndicator(),
+                                  const SizedBox(height: 12),
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 8.0,
+                                    ),
+                                    child: Text(
+                                      '${(loadingProgress.cumulativeBytesLoaded / (loadingProgress.expectedTotalBytes ?? 1) * 100).toInt()}%',
+                                      style: Theme.of(
+                                        context,
+                                      ).textTheme.bodySmall,
+                                      textAlign: TextAlign.center,
+                                    ),
+                                  ),
+                                ],
                               ),
-                            ],
-                          ),
-                        );
-                      },
-                    ),
-                  );
-                },
-              );
-            }).toList(),
+                            );
+                          },
+                        ),
+                      ),
+                    );
+                  },
+                );
+              }),
+            ],
           ),
         ),
       ],
@@ -3663,37 +3755,40 @@ class _FullScreenScreenshotsState extends State<_FullScreenScreenshots> {
           return Padding(
             padding: const EdgeInsets.all(16),
             child: Center(
-              child: Image.network(
-                _getScreenshotUrl(screenshot),
-                filterQuality: FilterQuality.high,
-                fit: BoxFit.contain,
-                height: double.infinity,
-                errorBuilder: (context, error, stackTrace) {
-                  return Container(
-                    color: Colors.grey[900],
-                    child: const Center(
-                      child: Icon(
-                        Symbols.broken_image,
-                        color: Colors.white,
-                        size: 48,
+              child: Hero(
+                tag: 'screenshot_$index',
+                child: Image.network(
+                  _getScreenshotUrl(screenshot),
+                  filterQuality: FilterQuality.high,
+                  fit: BoxFit.contain,
+                  height: double.infinity,
+                  errorBuilder: (context, error, stackTrace) {
+                    return Container(
+                      color: Colors.grey[900],
+                      child: const Center(
+                        child: Icon(
+                          Symbols.broken_image,
+                          color: Colors.white,
+                          size: 48,
+                        ),
                       ),
-                    ),
-                  );
-                },
-                loadingBuilder: (context, child, loadingProgress) {
-                  if (loadingProgress == null) return child;
-                  return Center(
-                    child: CircularProgressIndicator(
-                      value: loadingProgress.expectedTotalBytes != null
-                          ? loadingProgress.cumulativeBytesLoaded /
-                                loadingProgress.expectedTotalBytes!
-                          : null,
-                      valueColor: const AlwaysStoppedAnimation<Color>(
-                        Colors.white,
+                    );
+                  },
+                  loadingBuilder: (context, child, loadingProgress) {
+                    if (loadingProgress == null) return child;
+                    return Center(
+                      child: CircularProgressIndicator(
+                        value: loadingProgress.expectedTotalBytes != null
+                            ? loadingProgress.cumulativeBytesLoaded /
+                                  loadingProgress.expectedTotalBytes!
+                            : null,
+                        valueColor: const AlwaysStoppedAnimation<Color>(
+                          Colors.white,
+                        ),
                       ),
-                    ),
-                  );
-                },
+                    );
+                  },
+                ),
               ),
             ),
           );

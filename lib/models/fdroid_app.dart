@@ -32,6 +32,7 @@ class FDroidApp {
   final String? authorEmail;
   final String? authorWebSite;
   final String? webSite;
+  final String? video;
   final String? issueTracker;
   final String? sourceCode;
   final String? changelog;
@@ -62,6 +63,7 @@ class FDroidApp {
     this.authorEmail,
     this.authorWebSite,
     this.webSite,
+    this.video,
     this.issueTracker,
     this.sourceCode,
     this.changelog,
@@ -168,6 +170,7 @@ class FDroidApp {
       authorEmail: authorEmail,
       authorWebSite: authorWebSite,
       webSite: webSite,
+      video: video,
       issueTracker: issueTracker,
       sourceCode: sourceCode,
       changelog: changelog,
@@ -198,6 +201,7 @@ class FDroidApp {
     String? authorEmail,
     String? authorWebSite,
     String? webSite,
+    String? video,
     String? issueTracker,
     String? sourceCode,
     String? changelog,
@@ -226,6 +230,7 @@ class FDroidApp {
       authorEmail: authorEmail ?? this.authorEmail,
       authorWebSite: authorWebSite ?? this.authorWebSite,
       webSite: webSite ?? this.webSite,
+      video: video ?? this.video,
       issueTracker: issueTracker ?? this.issueTracker,
       sourceCode: sourceCode ?? this.sourceCode,
       changelog: changelog ?? this.changelog,
@@ -853,6 +858,9 @@ class FDroidRepository {
           authorEmail: metadata['authorEmail']?.toString(),
           authorWebSite: metadata['authorWebSite']?.toString(),
           webSite: metadata['webSite']?.toString(),
+          video: extractLocalized(metadata['video']).trim().isEmpty
+              ? null
+              : extractLocalized(metadata['video']).trim(),
           issueTracker: metadata['issueTracker']?.toString(),
           sourceCode: metadata['sourceCode']?.toString(),
           changelog: metadata['changelog']?.toString(),

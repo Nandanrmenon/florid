@@ -2457,57 +2457,70 @@ class _IncludeUnstableSectionState extends State<IncludeUnstableSection> {
             padding: const EdgeInsets.symmetric(horizontal: 12.0),
             child:
                 Card.outlined(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16.0,
-                      vertical: 12.0,
-                    ),
-                    child: Row(
-                      children: [
-                        Icon(
-                          Symbols.science,
-                          size: 20,
-                          color: Theme.of(context).colorScheme.primary,
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(
-                                'Include unstable versions',
-                                style: Theme.of(context).textTheme.bodyMedium
-                                    ?.copyWith(fontWeight: FontWeight.w500),
-                              ),
-                              Text(
-                                'Show beta, alpha, and prerelease versions for this app',
-                                style: Theme.of(context).textTheme.bodySmall
-                                    ?.copyWith(
-                                      color: Theme.of(
-                                        context,
-                                      ).colorScheme.onSurfaceVariant,
-                                    ),
-                              ),
-                            ],
+                  clipBehavior: Clip.antiAlias,
+                  child: InkWell(
+                    onTap: () async {
+                      await context.read<AppProvider>().setIncludeUnstable(
+                        widget.app.packageName,
+                        !includeUnstable,
+                      );
+                      // Rebuild the widget to reflect the change
+                      if (mounted) {
+                        setState(() {});
+                      }
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16.0,
+                        vertical: 12.0,
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(
+                            Symbols.science,
+                            size: 20,
+                            color: Theme.of(context).colorScheme.primary,
                           ),
-                        ),
-                        Switch(
-                          value: includeUnstable,
-                          onChanged: (value) async {
-                            await context
-                                .read<AppProvider>()
-                                .setIncludeUnstable(
-                                  widget.app.packageName,
-                                  value,
-                                );
-                            // Rebuild the widget to reflect the change
-                            if (mounted) {
-                              setState(() {});
-                            }
-                          },
-                        ),
-                      ],
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  'Include unstable versions',
+                                  style: Theme.of(context).textTheme.bodyMedium
+                                      ?.copyWith(fontWeight: FontWeight.w500),
+                                ),
+                                Text(
+                                  'Show beta, alpha, and prerelease versions for this app',
+                                  style: Theme.of(context).textTheme.bodySmall
+                                      ?.copyWith(
+                                        color: Theme.of(
+                                          context,
+                                        ).colorScheme.onSurfaceVariant,
+                                      ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Switch(
+                            value: includeUnstable,
+                            onChanged: (value) async {
+                              await context
+                                  .read<AppProvider>()
+                                  .setIncludeUnstable(
+                                    widget.app.packageName,
+                                    value,
+                                  );
+                              // Rebuild the widget to reflect the change
+                              if (mounted) {
+                                setState(() {});
+                              }
+                            },
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ).animate().fadeIn(

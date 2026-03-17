@@ -3185,33 +3185,34 @@ class _AllVersionsSectionState extends State<_AllVersionsSection> {
                 icon: Icon(Symbols.keyboard_arrow_down),
               ),
             ),
-            DefaultTabController(
-              key: ValueKey('repo-tabs-${tabs.length}-$selectedIndex'),
-              length: tabs.length,
-              initialIndex: selectedIndex,
-              child: Builder(
-                builder: (context) {
-                  return FTabBar(
-                    controller: DefaultTabController.of(context),
-                    isScrollable: true,
-                    onTabChanged: (index) {
-                      setState(() {
-                        _selectedRepoIndex = index;
-                        _userSelectedRepo = true;
-                      });
-                    },
-                    items: [
-                      for (final tab in tabs)
-                        FloridTabBarItem(
-                          label: trackedRepoUrl == tab.repo.url
-                              ? '${tab.repo.name} (Installed)'
-                              : tab.repo.name,
-                        ),
-                    ],
-                  );
-                },
+            if (tabs.length > 1)
+              DefaultTabController(
+                key: ValueKey('repo-tabs-${tabs.length}-$selectedIndex'),
+                length: tabs.length,
+                initialIndex: selectedIndex,
+                child: Builder(
+                  builder: (context) {
+                    return FTabBar(
+                      controller: DefaultTabController.of(context),
+                      isScrollable: true,
+                      onTabChanged: (index) {
+                        setState(() {
+                          _selectedRepoIndex = index;
+                          _userSelectedRepo = true;
+                        });
+                      },
+                      items: [
+                        for (final tab in tabs)
+                          FloridTabBarItem(
+                            label: trackedRepoUrl == tab.repo.url
+                                ? '${tab.repo.name} (Installed)'
+                                : tab.repo.name,
+                          ),
+                      ],
+                    );
+                  },
+                ),
               ),
-            ),
             // Lazy-load app data for selected repo on-demand
             FutureBuilder<FDroidApp?>(
               future: _loadAppForRepoTab(selectedTab),

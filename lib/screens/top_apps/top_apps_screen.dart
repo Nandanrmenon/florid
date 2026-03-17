@@ -2,6 +2,7 @@ import 'package:florid/l10n/app_localizations.dart';
 import 'package:florid/models/fdroid_app.dart';
 import 'package:florid/providers/app_provider.dart';
 import 'package:florid/providers/repositories_provider.dart';
+import 'package:florid/providers/settings_provider.dart';
 import 'package:florid/screens/app_details/app_details_screen.dart';
 import 'package:florid/widgets/app_list_item.dart';
 import 'package:flutter/material.dart';
@@ -144,12 +145,20 @@ class _TopAppsAllTimeScreenState extends State<TopAppsAllTimeScreen>
         ),
       );
     }
+    final settingsProvider = context.watch<SettingsProvider>();
+    final isFlorid = settingsProvider.themeStyle == ThemeStyle.florid;
+    final isDarkKnight = settingsProvider.themeStyle == ThemeStyle.darkKnight;
 
     return Scaffold(
       body: RefreshIndicator(
         onRefresh: _onRefresh,
         child: ListView.builder(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+          padding: EdgeInsets.only(
+            left: 8,
+            right: 8,
+            top: 8,
+            bottom: isFlorid || isDarkKnight ? 100 : 8,
+          ),
           itemCount: apps.length,
           itemBuilder: (context, index) {
             final app = apps[index];

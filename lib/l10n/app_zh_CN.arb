@@ -158,6 +158,7 @@
   "beta": "Beta",
   "other": "其他",
   "show_whats_new": "查看最新内容",
+  "show_monthly_top_apps": "Show Monthly Top Apps",
   "feedback_on_florid_theme": "反馈Florid主题",
   "help_improve_florid_theme_feedback": "通过提供反馈帮助改善Florid的主题",
   "system_installer": "系统安装程序",
@@ -189,6 +190,9 @@
   "update_interval": "更新间隔",
   "app_management": "应用管理",
   "alpha": "Alpha",
+  "privacy": "Privacy",
+  "opt_out_of_telemetry": "Opt out of telemetry",
+  "opt_out_of_telemetry_subtitle": "Helps us know how many users (annoymous) are active",
   "downloads_and_storage": "下载 & 存储",
   "auto_install_after_download": "下载后自动安装",
   "auto_install_after_download_subtitle": "下载完成后自动安装 APK",
@@ -345,5 +349,33 @@
   "troubleshooting": "故障排除",
   "replace": "替换",
   "your_name": "你的昵称",
-  "enter_your_name": "输入你的昵称"
+  "enter_your_name": "输入你的昵称",
+  "top_apps": "热门应用",
+  "games": "游戏",
+  "auth_all_apps": "All Apps",
+  "auth_all_apps_desc": "Require authentication for all installations",
+  "auth_all_apps_w_anti_feat": "Apps with Anti-Features",
+  "auth_all_apps_w_anti_feat_desc": "Require authentication only for apps that have anti-features.",
+  "support_the_developer": "Support the Developer",
+  "available_on_repository": "Available on: {repositoryName}",
+  "@available_on_repository": {
+    "description": "Label showing the primary repository name for an app.",
+    "placeholders": {
+      "repositoryName": {}
+    }
+  },
+  "also_available_from_repositories": "Also available from: {repositoryNames}",
+  "@also_available_from_repositories": {
+    "description": "Label listing additional repository names where the app is available.",
+    "placeholders": {
+      "repositoryNames": {}
+    }
+  },
+  "onboarding_setup_type": "Setup Type",
+  "onboarding_setup_type_desc": "Choose how you want to set up Florid",
+  "onboarding_setup_basic": "Basic Setup",
+  "onboarding_setup_basic_desc": "Quick start with recommended repositories",
+  "onboarding_setup_advanced": "Advanced Setup",
+  "onboarding_setup_advanced_desc": "Customize repositories and preferences",
+  "help_us_improve_florid": "Help us improve Florid"
 }

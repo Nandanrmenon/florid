@@ -22,6 +22,8 @@ import 'package:florid/widgets/m_list.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:iconify_flutter/icons/bxl.dart';
+import 'package:iconify_flutter/icons/simple_icons.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path/path.dart' as p;
@@ -540,13 +542,39 @@ class _UserSettingsContentState extends State<_UserSettingsContent> {
                       onTap: () => _showUpdateDialog(context),
                     ),
                     MListItemData(
-                      leading: ListIcon(iconData: Symbols.code_rounded),
+                      leading: SocialListIcon(icon: Bxl.git),
                       title: 'Source code',
                       subtitle: 'View the Florid source code on GitHub',
                       suffix: const Icon(Symbols.open_in_new),
                       onTap: () async {
                         final url = Uri.parse(
                           'https://github.com/Nandanrmenon/florid',
+                        );
+                        if (await canLaunchUrl(url)) {
+                          await launchUrl(url);
+                        }
+                      },
+                    ),
+                    MListItemData(
+                      leading: SocialListIcon(icon: Bxl.telegram),
+                      title: 'Telegram',
+                      subtitle: 'Join the community on Telegram',
+                      suffix: const Icon(Symbols.open_in_new),
+                      onTap: () async {
+                        final url = Uri.parse('https://t.me/florid_app');
+                        if (await canLaunchUrl(url)) {
+                          await launchUrl(url);
+                        }
+                      },
+                    ),
+                    MListItemData(
+                      leading: SocialListIcon(icon: SimpleIcons.matrix),
+                      title: 'Matrix',
+                      subtitle: 'Join the community on Matrix',
+                      suffix: const Icon(Symbols.open_in_new),
+                      onTap: () async {
+                        final url = Uri.parse(
+                          'https://matrix.to/#/#florid:matrix.org',
                         );
                         if (await canLaunchUrl(url)) {
                           await launchUrl(url);

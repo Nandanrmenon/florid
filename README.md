@@ -18,7 +18,7 @@ Browse, search, and install open‑source Android apps from the F‑Droid reposi
 
 <div align="center">
 
-Join our [Matrix Group](https://matrix.to/#/#florid:matrix.org) for discussions, support, and contributing!
+Join our [Matrix Group](https://matrix.to/#/#florid:matrix.org) or [Telegram](https://t.me/florid_app)for discussions, support, and contributing!
 
 </div>
 
@@ -93,6 +93,10 @@ Help translate Florid into other languages at [Crowdin](https://crowdin.com/proj
 | English  | en   | @Nandanrmenon                                                                                                      |
 | German   | de   | [@JasmineLowen](https://github.com/JasmineLowen), [@mondlicht-und-sterne](https://github.com/mondlicht-und-sterne) |
 | Czech    | cz   | [@mondlicht-und-sterne](https://github.com/mondlicht-und-sterne)                                                   |
+
+## Misc
+
+View [Florid Analytics](https://florid.knoxxbox.in/v1/public/)
 
 ## License
 

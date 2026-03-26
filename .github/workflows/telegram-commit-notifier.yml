@@ -2,11 +2,11 @@ name: Telegram commit notifier (polling)
 
 on:
   schedule:
-    - cron: "*/5 * * * *"  # every 5 minutes
+    - cron: "*/5 * * * *" # every 5 minutes
   workflow_dispatch: {}
 
 permissions:
-  contents: read
+  contents: write
 
 concurrency:
   group: telegram-commit-notifier
@@ -15,108 +15,57 @@ concurrency:
 jobs:
   notify:
     runs-on: ubuntu-latest
+    env:
+      BRANCH: main
+
     steps:
-      - name: Checkout (for state file)
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Fetch latest commits for main
-        id: commits
+      - name: Read last seen SHA (state)
+        id: readstate
+        run: |
+          set -euo pipefail
+          LAST_FILE=".github/telegram_notifier_last_sha.txt"
+          if [ -f "$LAST_FILE" ]; then
+            echo "last_sha=$(cat "$LAST_FILE" | tr -d '\n' | tr -d '\r')" >> "$GITHUB_OUTPUT"
+          else
+            echo "last_sha=" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Fetch commits + build message
+        id: build
         env:
+          REPO: ${{ github.repository }}
           GH_TOKEN: ${{ github.token }}
+          LAST_SHA: ${{ steps.readstate.outputs.last_sha }}
         run: |
           set -euo pipefail
 
-          OWNER_REPO="${{ github.repository }}"
-          BRANCH="main"
-          API="https://api.github.com/repos/${OWNER_REPO}/commits?sha=${BRANCH}&per_page=10"
-
+          API="https://api.github.com/repos/${REPO}/commits?sha=${BRANCH}&per_page=10"
           curl -sS -H "Authorization: Bearer ${GH_TOKEN}" \
                -H "Accept: application/vnd.github+json" \
                "$API" > commits.json
 
-          # last seen sha stored in repo workspace (persisted via commit below)
-          LAST_FILE=".github/telegram_notifier_last_sha.txt"
-          if [ -f "$LAST_FILE" ]; then
-            LAST_SHA="$(cat "$LAST_FILE")"
-          else
-            LAST_SHA=""
-          fi
-
-          # Build list of new commits until we hit LAST_SHA
           python3 - <<'PY'
           import json, os
+
           commits = json.load(open("commits.json"))
           last_sha = os.environ.get("LAST_SHA","").strip()
-          new = []
-          for c in commits:
-            sha = c["sha"]
-            if last_sha and sha == last_sha:
-              break
-            new.append(c)
+          repo = os.environ["REPO"]
+          branch = os.environ["BRANCH"]
 
-          # Output newest sha and a formatted message
           newest_sha = commits[0]["sha"] if commits else ""
-          lines = []
-          for c in reversed(new):  # oldest->newest
-            short = c["sha"][:7]
-            msg = c["commit"]["message"].splitlines()[0]
-            author = (c.get("author") or {}).get("login") or c["commit"]["author"].get("name","")
-            url = c["html_url"]
-            lines.append(f"- {short} {msg} (by {author})\n  {url}")
-
-          print("NEWEST_SHA=" + newest_sha)
-          print("HAS_NEW=" + ("true" if new else "false"))
-          print("TEXT<<EOF")
-          print("\n".join(lines))
-          print("EOF")
-          PY
-        shell: bash
-        env:
-          LAST_SHA: ${{ steps.state.outputs.last_sha }}
-
-      - name: Set outputs
-        id: out
-        run: |
-          # Re-run python output capture in a safe way:
-          NEWEST_SHA="$(python3 -c 'import json; c=json.load(open("commits.json")); print(c[0]["sha"] if c else "")')"
-          echo "newest_sha=$NEWEST_SHA" >> "$GITHUB_OUTPUT"
-
-          LAST_FILE=".github/telegram_notifier_last_sha.txt"
-          if [ -f "$LAST_FILE" ]; then
-            LAST_SHA="$(cat "$LAST_FILE")"
-          else
-            LAST_SHA=""
-          fi
-          echo "last_sha=$LAST_SHA" >> "$GITHUB_OUTPUT"
-
-      - name: Build message + decide if new
-        id: msg
-        run: |
-          set -euo pipefail
-          LAST_FILE=".github/telegram_notifier_last_sha.txt"
-          LAST_SHA=""
-          if [ -f "$LAST_FILE" ]; then LAST_SHA="$(cat "$LAST_FILE")"; fi
-
-          python3 - <<'PY'
-          import json, os
-          commits = json.load(open("commits.json"))
-          last_sha = os.environ.get("LAST_SHA","").strip()
-
           new = []
           for c in commits:
-            sha = c["sha"]
-            if last_sha and sha == last_sha:
+            if last_sha and c["sha"] == last_sha:
               break
             new.append(c)
 
           has_new = bool(new)
-          newest_sha = commits[0]["sha"] if commits else ""
 
-          # message
-          repo = os.environ["REPO"]
-          branch = os.environ["BRANCH"]
           lines = []
-          for c in reversed(new):
+          for c in reversed(new):  # oldest -> newest
             short = c["sha"][:7]
             msg = c["commit"]["message"].splitlines()[0]
             author = (c.get("author") or {}).get("login") or c["commit"]["author"].get("name","")
@@ -125,50 +74,48 @@ jobs:
 
           text = ""
           if has_new:
-            text = f"New commits in {repo}@{branch}:\n" + "\n\n".join(lines)
+            text = f"New commits in {repo}@{branch}:\n\n" + "\n\n".join(lines)
 
-          # write outputs
-          with open(os.environ["GITHUB_OUTPUT"], "a") as f:
+          out = os.environ["GITHUB_OUTPUT"]
+          with open(out, "a", encoding="utf-8") as f:
             f.write(f"has_new={'true' if has_new else 'false'}\n")
             f.write(f"newest_sha={newest_sha}\n")
-            f.write("text<<EOF\n" + text + "\nEOF\n")
+            f.write("text<<EOF\n")
+            f.write(text + "\n")
+            f.write("EOF\n")
           PY
-        env:
-          GITHUB_OUTPUT: ${{ github.output }}
-          LAST_SHA: ${{ steps.out.outputs.last_sha }}
-          REPO: ${{ github.repository }}
-          BRANCH: main
 
-      - name: Send to Telegram (only if new)
-        if: steps.msg.outputs.has_new == 'true'
+      - name: Send Telegram message (topic)
+        if: steps.build.outputs.has_new == 'true'
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           TELEGRAM_TOPIC_ID: ${{ secrets.TELEGRAM_TOPIC_ID }}
-          TEXT: ${{ steps.msg.outputs.text }}
+          TEXT: ${{ steps.build.outputs.text }}
         run: |
           set -euo pipefail
           curl -sS -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
             -H "content-type: application/json" \
-            -d "$(python3 - <<PY
-              import json, os
-              print(json.dumps({
-                "chat_id": os.environ["TELEGRAM_CHAT_ID"],
-                "message_thread_id": int(os.environ["TELEGRAM_TOPIC_ID"]),
-                "text": os.environ["TEXT"],
-                "disable_web_page_preview": True
-              }))
-              PY
-              )"
+            -d "$(python3 - <<'PY'
+          import json, os
+          print(json.dumps({
+            "chat_id": int(os.environ["TELEGRAM_CHAT_ID"]),
+            "message_thread_id": int(os.environ["TELEGRAM_TOPIC_ID"]),
+            "text": os.environ["TEXT"],
+            "disable_web_page_preview": True
+          }))
+          PY
+          )"
 
       - name: Update last seen SHA
-        if: steps.msg.outputs.has_new == 'true'
+        if: steps.build.outputs.has_new == 'true'
         run: |
           set -euo pipefail
-          echo "${{ steps.msg.outputs.newest_sha }}" > .github/telegram_notifier_last_sha.txt
+          mkdir -p .github
+          echo "${{ steps.build.outputs.newest_sha }}" > .github/telegram_notifier_last_sha.txt
 
       - name: Commit state file
-        if: steps.msg.outputs.has_new == 'true'
+        if: steps.build.outputs.has_new == 'true'
         run: |
           set -euo pipefail
           git config user.name "github-actions[bot]"

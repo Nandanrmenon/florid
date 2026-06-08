@@ -2,7 +2,6 @@ import 'dart:convert';
 
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:florid/l10n/app_localizations.dart';
-import 'package:florid/providers/app_update_provider.dart';
 import 'package:florid/providers/settings_provider.dart';
 import 'package:florid/screens/florid_app.dart';
 import 'package:florid/themes/app_themes.dart';
@@ -93,9 +92,6 @@ class MainApp extends StatelessWidget {
             previous.updateSettings(settings);
             return previous;
           },
-        ),
-        ChangeNotifierProvider<AppUpdateProvider>(
-          create: (_) => AppUpdateProvider(),
         ),
       ],
       child: Consumer<SettingsProvider>(

@@ -12,16 +12,16 @@ class UsageAnalyticsService {
 
   static const String _installIdKey = 'usage_install_id';
   static const String _lastPingDayKey = 'usage_last_ping_day_utc';
-  static const String _optOutKey = 'usage_telemetry_opt_out';
+  static const String _optInKey = 'usage_telemetry_opt_out';
 
   Future<bool> isOptedOut() async {
     final prefs = await SharedPreferences.getInstance();
-    return prefs.getBool(_optOutKey) ?? false;
+    return prefs.getBool(_optInKey) ?? false;
   }
 
-  Future<void> setOptOut(bool optOut) async {
+  Future<void> setOptIn(bool optIn) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool(_optOutKey, optOut);
+    await prefs.setBool(_optInKey, optIn);
   }
 
   Future<void> trackAppOpen() async {
@@ -29,8 +29,8 @@ class UsageAnalyticsService {
       final prefs = await SharedPreferences.getInstance();
 
       // Check if user has opted out
-      final isOptedOut = prefs.getBool(_optOutKey) ?? false;
-      if (isOptedOut) {
+      final isOptedIn = prefs.getBool(_optInKey) ?? false;
+      if (isOptedIn) {
         print('[Analytics] User has opted out of telemetry');
         return;
       }

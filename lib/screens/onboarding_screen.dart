@@ -42,7 +42,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   bool _notificationsGranted = false;
   bool _installPermissionGranted = false;
   SetupType? _setupType;
-  bool _telemetryOptOut = false;
+  bool _telemetryOptIn = false;
 
   @override
   void initState() {
@@ -69,7 +69,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         }
       }
       // Opt-in to telemetry for basic setup
-      _telemetryOptOut = false;
+      _telemetryOptIn = false;
       // Move to permissions
       _pageController.nextPage(
         duration: const Duration(milliseconds: 500),
@@ -294,10 +294,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           },
         ),
         _TelemetryStep(
-          telemetryOptOut: _telemetryOptOut,
+          telemetryOptOut: _telemetryOptIn,
           onTelemetryChoice: (optOut) {
             setState(() {
-              _telemetryOptOut = optOut;
+              _telemetryOptIn = optOut;
             });
           },
         ),
@@ -361,7 +361,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       final analyticsService = UsageAnalyticsService();
 
       // Save telemetry preference
-      await analyticsService.setOptOut(_telemetryOptOut);
+      await analyticsService.setOptIn(_telemetryOptIn);
 
       // Step 1: Load repositories
       if (_setupCancelled) {

@@ -371,7 +371,7 @@ class _AppManagementScreenState extends State<AppManagementScreen> {
                                 leading: ListIcon(iconData: Symbols.security),
                                 title: localizations.opt_out_of_telemetry,
                                 onTap: () async {
-                                  await UsageAnalyticsService().setOptOut(
+                                  await UsageAnalyticsService().setOptIn(
                                     !_telemetryOptedOut,
                                   );
                                   await _loadTelemetryOptOutStatus();
@@ -380,7 +380,7 @@ class _AppManagementScreenState extends State<AppManagementScreen> {
                                   value: _telemetryOptedOut,
                                   onChanged: (value) async {
                                     if (value == null) return;
-                                    await UsageAnalyticsService().setOptOut(
+                                    await UsageAnalyticsService().setOptIn(
                                       value,
                                     );
                                     await _loadTelemetryOptOutStatus();

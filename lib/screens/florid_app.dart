@@ -496,11 +496,6 @@ class _FloridAppState extends State<FloridApp> {
                     selectedIcon: Icon(SolarIconsBold.home2),
                     label: localizations.home,
                   ),
-                  // NavigationDestination(
-                  //   icon: Icon(SolarIconsOutline.widget_5),
-                  //   selectedIcon: const Icon(SolarIconsBold.widget_5),
-                  //   label: localizations.categories,
-                  // ),
                   NavigationDestination(
                     icon: Icon(SolarIconsOutline.roundedMagnifier),
                     selectedIcon: Icon(SolarIconsBold.roundedMagnifier),

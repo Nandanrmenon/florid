@@ -1,6 +1,5 @@
 import 'package:florid/constants.dart';
 import 'package:flutter/material.dart';
-import 'package:solar_icons/solar_icons.dart';
 
 class AppThemes {
   // Material Theme (Original)
@@ -196,14 +195,6 @@ class AppThemes {
             return scheme.primary;
           }
           return null; // Use the default thumb color
-        }),
-        thumbIcon: WidgetStateProperty.resolveWith<Icon?>((
-          Set<WidgetState> states,
-        ) {
-          if (states.contains(WidgetState.selected)) {
-            return Icon(SolarIconsOutline.checkCircle, color: scheme.onPrimary);
-          }
-          return null;
         }),
         trackColor: WidgetStateProperty.resolveWith<Color?>((
           Set<WidgetState> states,
@@ -403,14 +394,6 @@ class AppThemes {
             return scheme.primary;
           }
           return null; // Use the default thumb color
-        }),
-        thumbIcon: WidgetStateProperty.resolveWith<Icon?>((
-          Set<WidgetState> states,
-        ) {
-          if (states.contains(WidgetState.selected)) {
-            return Icon(SolarIconsOutline.checkCircle, color: scheme.onPrimary);
-          }
-          return null;
         }),
         trackColor: WidgetStateProperty.resolveWith<Color?>((
           Set<WidgetState> states,

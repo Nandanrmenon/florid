@@ -211,10 +211,6 @@ class _CategoriesScreenState extends State<CategoriesScreen>
         onRefresh: _onRefresh,
         child: CustomScrollView(
           slivers: [
-            SliverAppBar(
-              floating: true,
-              title: Text(AppLocalizations.of(context)!.categories),
-            ),
             SliverPadding(
               padding: const EdgeInsets.only(bottom: 16),
               sliver: SliverList(

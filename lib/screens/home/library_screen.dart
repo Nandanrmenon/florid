@@ -33,7 +33,7 @@ class _LibraryScreenState extends State<LibraryScreen>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
+    _tabController = TabController(length: 3, vsync: this);
     _titleSwitchTimer = Timer(const Duration(seconds: 3), () {
       if (!mounted) return;
       setState(() {
@@ -71,7 +71,7 @@ class _LibraryScreenState extends State<LibraryScreen>
         newIndex = oldIndex + 1;
       }
 
-      final newLength = shouldShowTopApps ? 3 : 2;
+      final newLength = shouldShowTopApps ? 4 : 3;
       final clampedIndex = newIndex.clamp(0, newLength - 1);
 
       _tabController.dispose();
@@ -96,6 +96,7 @@ class _LibraryScreenState extends State<LibraryScreen>
     final localizations = AppLocalizations.of(context)!;
     final tabs = <Widget>[
       const HomeScreen(),
+      const CategoriesScreen(),
       if (_showTopAppsTab)
         AppSectionViewer(
           showAppBar: false,
@@ -181,7 +182,12 @@ class _LibraryScreenState extends State<LibraryScreen>
                   : Theme.of(context).colorScheme.surface,
               snap: true,
               floating: true,
-              shape: LinearBorder(bottom: LinearBorderEdge(), side: BorderSide(color: Theme.of(context).colorScheme.surfaceContainerLow)),
+              shape: LinearBorder(
+                bottom: LinearBorderEdge(),
+                side: BorderSide(
+                  color: Theme.of(context).colorScheme.surfaceContainerLow,
+                ),
+              ),
               bottom: PreferredSize(
                 preferredSize: Size.fromHeight(
                   settingsProvider.themeStyle == ThemeStyle.florid ? 64 : 56,
@@ -203,6 +209,10 @@ class _LibraryScreenState extends State<LibraryScreen>
                       FloridTabBarItem(
                         icon: SolarIconsOutline.home,
                         label: AppLocalizations.of(context)!.home,
+                      ),
+                      FloridTabBarItem(
+                        icon: SolarIconsOutline.widget_5,
+                        label: AppLocalizations.of(context)!.categories,
                       ),
                       if (_showTopAppsTab)
                         FloridTabBarItem(

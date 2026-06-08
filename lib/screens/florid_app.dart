@@ -1,6 +1,5 @@
 import 'package:florid/l10n/app_localizations.dart';
 import 'package:florid/models/fdroid_app.dart';
-import 'package:florid/screens/home/categories_screen.dart';
 import 'package:florid/screens/home/library_screen.dart';
 import 'package:florid/screens/settings/settings_screen.dart';
 import 'package:florid/screens/settings/user_screen.dart';
@@ -36,7 +35,7 @@ class _FloridAppState extends State<FloridApp> {
 
   late final List<Widget> _screens = [
     const LibraryScreen(),
-    CategoriesScreen(),
+    // CategoriesScreen(),
     SearchScreen(),
     UpdatesScreen(),
     UserScreen(),
@@ -497,11 +496,11 @@ class _FloridAppState extends State<FloridApp> {
                     selectedIcon: Icon(SolarIconsBold.home2),
                     label: localizations.home,
                   ),
-                  NavigationDestination(
-                    icon: Icon(SolarIconsOutline.widget_5),
-                    selectedIcon: const Icon(SolarIconsBold.widget_5),
-                    label: localizations.categories,
-                  ),
+                  // NavigationDestination(
+                  //   icon: Icon(SolarIconsOutline.widget_5),
+                  //   selectedIcon: const Icon(SolarIconsBold.widget_5),
+                  //   label: localizations.categories,
+                  // ),
                   NavigationDestination(
                     icon: Icon(SolarIconsOutline.roundedMagnifier),
                     selectedIcon: Icon(SolarIconsBold.roundedMagnifier),

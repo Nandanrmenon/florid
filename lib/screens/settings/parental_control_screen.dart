@@ -10,8 +10,7 @@ import 'package:flutter_m3shapes_extended/flutter_m3shapes_extended.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:provider/provider.dart';
-import 'package:solar_icon_pack/solar_bold_icons.dart';
-import 'package:solar_icon_pack/solar_linear_icons.dart';
+import 'package:solar_icons/solar_icons.dart';
 
 class ParentalControlScreen extends StatefulWidget {
   const ParentalControlScreen({super.key});
@@ -36,10 +35,8 @@ class _ParentalControlScreenState extends State<ParentalControlScreen> {
 
       return await _localAuth.authenticate(
         localizedReason: 'Authenticate to change installation settings',
-        options: const AuthenticationOptions(
-          biometricOnly: false,
-          stickyAuth: true,
-        ),
+        biometricOnly: false,
+        persistAcrossBackgrounding: true,
       );
     } on PlatformException {
       return false;
@@ -130,7 +127,7 @@ class _ParentalControlScreenState extends State<ParentalControlScreen> {
               onPressed: () {
                 Navigator.pop(context);
               },
-              icon: Icon(SolarLinearIcons.altArrowLeft),
+              icon: Icon(SolarIconsOutline.altArrowLeft),
             ),
             title: const Text('Parental Control'),
           ),
@@ -158,7 +155,7 @@ class _ParentalControlScreenState extends State<ParentalControlScreen> {
                             ).colorScheme.primaryContainer,
                             padding: const EdgeInsets.all(24.0),
                             child: Icon(
-                              SolarLinearIcons.faceScanSquare,
+                              SolarIconsOutline.faceScanSquare,
                               size: 64,
                               color: Theme.of(context).colorScheme.primary,
                             ),
@@ -186,8 +183,8 @@ class _ParentalControlScreenState extends State<ParentalControlScreen> {
                           MListItemData(
                             leading: ListIcon(
                               iconData: settings.hideAntiFeatureApps
-                                  ? SolarBoldIcons.eyeClosed
-                                  : SolarBoldIcons.eye,
+                                  ? SolarIconsBold.eyeClosed
+                                  : SolarIconsBold.eye,
                             ),
                             title: 'Hide anti-feature apps',
                             subtitle:
@@ -221,7 +218,7 @@ class _ParentalControlScreenState extends State<ParentalControlScreen> {
                           items: [
                             MListItemData(
                               leading: const ListIcon(
-                                iconData: SolarBoldIcons.lock,
+                                iconData: SolarIconsBold.lock,
                               ),
                               title: 'Biometric Authentication',
                               subtitle:

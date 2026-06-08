@@ -1,6 +1,6 @@
 import 'package:florid/constants.dart';
 import 'package:flutter/material.dart';
-import 'package:solar_icon_pack/solar_linear_icons.dart';
+import 'package:solar_icons/solar_icons.dart';
 
 class AppThemes {
   // Material Theme (Original)
@@ -201,7 +201,7 @@ class AppThemes {
           Set<WidgetState> states,
         ) {
           if (states.contains(WidgetState.selected)) {
-            return Icon(SolarLinearIcons.check, color: scheme.onPrimary);
+            return Icon(SolarIconsOutline.checkCircle, color: scheme.onPrimary);
           }
           return null;
         }),
@@ -408,7 +408,7 @@ class AppThemes {
           Set<WidgetState> states,
         ) {
           if (states.contains(WidgetState.selected)) {
-            return Icon(SolarLinearIcons.check, color: scheme.onPrimary);
+            return Icon(SolarIconsOutline.checkCircle, color: scheme.onPrimary);
           }
           return null;
         }),

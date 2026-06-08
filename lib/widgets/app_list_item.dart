@@ -2,7 +2,7 @@ import 'package:florid/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:provider/provider.dart';
-import 'package:solar_icon_pack/solar_icon_pack.dart';
+import 'package:solar_icons/solar_icons.dart';
 
 import '../models/fdroid_app.dart';
 import '../providers/app_provider.dart';
@@ -208,14 +208,14 @@ class AppListItem extends StatelessWidget {
                                 : hasUpdate
                                 ? IconButton.filledTonal(
                                     onPressed: onUpdate,
-                                    icon: const Icon(
-                                      SolarBoldIcons.downloadMinimalistic,
+                                    icon: Icon(
+                                      SolarIconsBold.downloadMinimalistic,
                                     ),
                                     tooltip: 'Update',
                                   )
                                 : isInstalled
                                 ? Icon(
-                                    SolarBoldIcons.checkCircle,
+                                    SolarIconsBold.checkCircle,
                                     color: Theme.of(
                                       context,
                                     ).colorScheme.primary,
@@ -382,7 +382,7 @@ class _QuickViewModal extends StatelessWidget {
                           ],
                         ),
                       ),
-                      Icon(SolarLinearIcons.arrowRight),
+                      Icon(SolarIconsOutline.arrowRight),
                     ],
                   ),
                 ),

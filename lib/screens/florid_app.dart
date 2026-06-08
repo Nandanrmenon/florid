@@ -1,21 +1,17 @@
 import 'package:florid/l10n/app_localizations.dart';
 import 'package:florid/models/fdroid_app.dart';
-import 'package:florid/providers/app_update_provider.dart';
 import 'package:florid/screens/home/categories_screen.dart';
 import 'package:florid/screens/home/library_screen.dart';
-import 'package:florid/screens/settings/app_updater.dart';
 import 'package:florid/screens/settings/settings_screen.dart';
 import 'package:florid/screens/settings/user_screen.dart';
 import 'package:florid/utils/responsive.dart';
 import 'package:florid/utils/whats_new.dart';
-import 'package:florid/widgets/f_navbar.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:provider/provider.dart';
-import 'package:solar_icon_pack/solar_bold_icons.dart';
-import 'package:solar_icon_pack/solar_linear_icons.dart';
+import 'package:solar_icons/solar_icons.dart';
 
 import '../providers/app_provider.dart';
 import '../providers/repositories_provider.dart';
@@ -62,7 +58,7 @@ class _FloridAppState extends State<FloridApp> {
         _autoSyncRepositoriesIfNeeded();
       });
       _maybeShowWhatsNewDialog();
-      _checkForAppUpdates();
+      // _checkForAppUpdates();
     });
   }
 
@@ -116,23 +112,23 @@ class _FloridAppState extends State<FloridApp> {
     await _showWhatsNew(force: false, markSeen: true);
   }
 
-  Future<void> _checkForAppUpdates() async {
-    try {
-      final updateProvider = context.read<AppUpdateProvider>();
-      await updateProvider.checkForUpdates();
+  // Future<void> _checkForAppUpdates() async {
+  //   try {
+  //     final updateProvider = context.read<AppUpdateProvider>();
+  //     await updateProvider.checkForUpdates();
 
-      if (updateProvider.hasUpdate && mounted) {
-        // Navigate to the update page
-        if (!mounted) return;
-        await Navigator.of(
-          context,
-        ).push(MaterialPageRoute(builder: (context) => const AppUpdatePage()));
-      }
-    } catch (e) {
-      debugPrint('Error checking for app updates: $e');
-      // Don't block the app if update check fails
-    }
-  }
+  //     if (updateProvider.hasUpdate && mounted) {
+  //       // Navigate to the update page
+  //       if (!mounted) return;
+  //       await Navigator.of(
+  //         context,
+  //       ).push(MaterialPageRoute(builder: (context) => const AppUpdatePage()));
+  //     }
+  //   } catch (e) {
+  //     debugPrint('Error checking for app updates: $e');
+  //     // Don't block the app if update check fails
+  //   }
+  // }
 
   Future<void> _showWhatsNew({
     required bool force,
@@ -207,16 +203,6 @@ class _FloridAppState extends State<FloridApp> {
     }
 
     _isShowingWhatsNew = false;
-  }
-
-  static Future<void> triggerWhatsNew(
-    BuildContext context, {
-    bool markSeen = true,
-  }) async {
-    final state = context.findAncestorStateOfType<_FloridAppState>();
-    if (state != null) {
-      await state._showWhatsNew(force: true, markSeen: markSeen);
-    }
   }
 
   List<Widget> _buildWhatsNewContent(BuildContext context, WhatsNewData? data) {
@@ -300,12 +286,6 @@ class _FloridAppState extends State<FloridApp> {
                 selected: true,
               );
 
-              final searchIcon = buildIcon(Symbols.search, selected: false);
-              final searchSelectedIcon = buildIcon(
-                Symbols.search,
-                selected: true,
-              );
-
               final deviceIcon = buildIcon(
                 Symbols.mobile_3_rounded,
                 selected: false,
@@ -323,28 +303,6 @@ class _FloridAppState extends State<FloridApp> {
                 Symbols.person_rounded,
                 selected: true,
               );
-
-              final floridNavItems = [
-                FloridNavBarItem(
-                  icon: homeIcon,
-                  selectedIcon: homeSelectedIcon,
-                  label: localizations.home,
-                ),
-                FloridNavBarItem(
-                  icon: deviceIcon,
-                  selectedIcon: deviceSelectedIcon,
-                  label: localizations.device,
-                ),
-                FloridNavBarItem(
-                  icon: userIcon,
-                  selectedIcon: userSelectedIcon,
-                  label: settings.userName.isNotEmpty
-                      ? (settings.userName.length > 10
-                            ? '${settings.userName.substring(0, 10)}...'
-                            : settings.userName)
-                      : 'User',
-                ),
-              ];
 
               final navRailDestinations = [
                 NavigationRailDestination(
@@ -369,12 +327,6 @@ class _FloridAppState extends State<FloridApp> {
                   ),
                 ),
               ];
-
-              final floridNavIndex = _currentIndex == 1
-                  ? 1
-                  : _currentIndex == 2
-                  ? 2
-                  : 0;
 
               final searchFab = FloatingActionButton(
                 onPressed: () {
@@ -541,39 +493,39 @@ class _FloridAppState extends State<FloridApp> {
 
                 final destinations = [
                   NavigationDestination(
-                    icon: const Icon(SolarLinearIcons.home2),
-                    selectedIcon: const Icon(SolarBoldIcons.home2),
+                    icon: Icon(SolarIconsOutline.home2),
+                    selectedIcon: Icon(SolarIconsBold.home2),
                     label: localizations.home,
                   ),
                   NavigationDestination(
-                    icon: const Icon(SolarLinearIcons.widget5),
-                    selectedIcon: const Icon(SolarBoldIcons.widget5),
+                    icon: Icon(SolarIconsOutline.widget_5),
+                    selectedIcon: const Icon(SolarIconsBold.widget_5),
                     label: localizations.categories,
                   ),
                   NavigationDestination(
-                    icon: const Icon(SolarLinearIcons.magniferRounded),
-                    selectedIcon: const Icon(SolarBoldIcons.magniferRounded),
+                    icon: Icon(SolarIconsOutline.roundedMagnifier),
+                    selectedIcon: Icon(SolarIconsBold.roundedMagnifier),
                     label: localizations.search,
                   ),
                   NavigationDestination(
                     icon: updatableAppsCount > 0
                         ? Badge.count(
                             count: updatableAppsCount,
-                            child: const Icon(SolarLinearIcons.smartphone),
+                            child: const Icon(SolarIconsOutline.smartphone),
                           )
-                        : const Icon(SolarLinearIcons.smartphone),
+                        : const Icon(SolarIconsOutline.smartphone),
                     selectedIcon: updatableAppsCount > 0
                         ? Badge.count(
                             count: updatableAppsCount,
-                            child: const Icon(SolarBoldIcons.smartphone),
+                            child: const Icon(SolarIconsBold.smartphone),
                           )
-                        : const Icon(SolarBoldIcons.smartphone),
+                        : const Icon(SolarIconsBold.smartphone),
                     label: localizations.device,
                   ),
                   NavigationDestination(
-                    icon: Icon(SolarLinearIcons.user),
+                    icon: Icon(SolarIconsOutline.user),
                     selectedIcon: Icon(
-                      SolarBoldIcons.user,
+                      SolarIconsBold.user,
                       fill: 1,
                       weight: 600,
                     ),

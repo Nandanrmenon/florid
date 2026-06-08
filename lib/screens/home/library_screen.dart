@@ -14,7 +14,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:material_symbols_icons/material_symbols_icons.dart';
 import 'package:provider/provider.dart';
-import 'package:solar_icon_pack/solar_icon_pack.dart';
+import 'package:solar_icons/solar_icons.dart';
 
 class LibraryScreen extends StatefulWidget {
   const LibraryScreen({super.key});
@@ -201,16 +201,16 @@ class _LibraryScreenState extends State<LibraryScreen>
                     isScrollable: true,
                     items: [
                       FloridTabBarItem(
-                        icon: SolarLinearIcons.home,
+                        icon: SolarIconsOutline.home,
                         label: AppLocalizations.of(context)!.home,
                       ),
                       if (_showTopAppsTab)
                         FloridTabBarItem(
-                          icon: SolarLinearIcons.courseUp,
+                          icon: SolarIconsOutline.courseUp,
                           label: AppLocalizations.of(context)!.top_apps,
                         ),
                       FloridTabBarItem(
-                        icon: SolarLinearIcons.gamepad,
+                        icon: SolarIconsOutline.gamepad,
                         label: AppLocalizations.of(context)!.games,
                       ),
                     ],

@@ -6,8 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:provider/provider.dart';
-import 'package:solar_icon_pack/solar_bold_icons.dart';
-import 'package:solar_icon_pack/solar_linear_icons.dart';
+import 'package:solar_icons/solar_icons.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../widgets/m_list.dart';
@@ -34,7 +33,7 @@ class AppearanceScreen extends StatelessWidget {
                       onPressed: () {
                         Navigator.pop(context);
                       },
-                      icon: Icon(SolarLinearIcons.altArrowLeft),
+                      icon: Icon(SolarIconsOutline.altArrowLeft),
                     ),
                     title: Text(localizations.appearance),
                   ),
@@ -55,19 +54,19 @@ class AppearanceScreen extends StatelessWidget {
                                     title: localizations.follow_system_theme,
                                     subtitle: '',
                                     value: ThemeMode.system,
-                                    suffix: Icon(SolarBoldIcons.devices),
+                                    suffix: Icon(SolarIconsBold.devices),
                                   ),
                                   MRadioListItemData<ThemeMode>(
                                     title: localizations.light_theme,
                                     subtitle: '',
                                     value: ThemeMode.light,
-                                    suffix: Icon(SolarBoldIcons.sun),
+                                    suffix: Icon(SolarIconsBold.sun),
                                   ),
                                   MRadioListItemData<ThemeMode>(
                                     title: localizations.dark_theme,
                                     subtitle: '',
                                     value: ThemeMode.dark,
-                                    suffix: Icon(SolarBoldIcons.moonStars),
+                                    suffix: Icon(SolarIconsBold.moonStars),
                                   ),
                                 ],
                                 groupValue: settings.themeMode,
@@ -181,7 +180,7 @@ class AppearanceScreen extends StatelessWidget {
                                                 ),
                                                 child: selected
                                                     ? Icon(
-                                                        SolarBoldIcons
+                                                        SolarIconsBold
                                                             .checkSquare,
                                                         color: isDarkMode
                                                             ? Theme.of(context)

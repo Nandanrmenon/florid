@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:provider/provider.dart';
-import 'package:solar_icon_pack/solar_icon_pack.dart';
+import 'package:solar_icons/solar_icons.dart';
 
 import '../../providers/app_provider.dart';
 import '../../providers/repositories_provider.dart';
@@ -145,14 +145,14 @@ class _SearchScreenState extends State<SearchScreen> {
                 child: Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: SearchAnchor.bar(
-                    barLeading: const Icon(SolarLinearIcons.magnifer),
+                    barLeading: const Icon(SolarIconsOutline.magnifier),
                     barHintText: localizations.search,
                     barElevation: WidgetStatePropertyAll(0),
                     searchController: _searchController,
                     barTrailing: [
                       if (_searchController.text.isNotEmpty)
                         IconButton(
-                          icon: Icon(SolarLinearIcons.close),
+                          icon: Icon(SolarIconsOutline.closeCircle),
                           onPressed: _clearSearch,
                         ),
                       Badge(
@@ -161,7 +161,7 @@ class _SearchScreenState extends State<SearchScreen> {
                         child: IconButton.filled(
                           onPressed: _openFilters,
                           icon: Icon(
-                            SolarLinearIcons.filter,
+                            SolarIconsOutline.filter,
                             color: Theme.of(context).colorScheme.onPrimary,
                           ),
                           tooltip: localizations.filters,
@@ -297,7 +297,7 @@ class _SearchScreenState extends State<SearchScreen> {
                       children: [
                         SizedBox(height: 64),
                         Icon(
-                          SolarLinearIcons.magnifer,
+                          SolarIconsOutline.magnifier,
                           size: 64,
                           color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
@@ -381,7 +381,7 @@ class _SearchScreenState extends State<SearchScreen> {
                         children: [
                           SizedBox(height: 64),
                           Icon(
-                            SolarLinearIcons.emojiFunnySquare,
+                            SolarIconsOutline.emojiFunnySquare,
                             size: 64,
                             color: Theme.of(
                               context,

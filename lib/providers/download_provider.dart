@@ -689,10 +689,8 @@ class DownloadProvider extends ChangeNotifier {
 
       return await _localAuth.authenticate(
         localizedReason: 'Authenticate to install $appName',
-        options: const AuthenticationOptions(
-          biometricOnly: false,
-          stickyAuth: true,
-        ),
+        biometricOnly: false,
+        persistAcrossBackgrounding: true,
       );
     } on PlatformException catch (e) {
       debugPrint('[DownloadProvider] Install authentication failed: $e');

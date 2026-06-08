@@ -9,7 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:provider/provider.dart';
-import 'package:solar_icon_pack/solar_linear_icons.dart';
+import 'package:solar_icons/solar_icons.dart';
 
 class AppSectionViewer extends StatefulWidget {
   const AppSectionViewer({
@@ -296,7 +296,7 @@ class _AppSectionViewerState extends State<AppSectionViewer>
                             onPressed: () {
                               Navigator.pop(context);
                             },
-                            icon: Icon(SolarLinearIcons.altArrowLeft),
+                            icon: Icon(SolarIconsOutline.altArrowLeft),
                           ),
                           title: _buildTitle(context),
                         ),
@@ -334,7 +334,7 @@ class _AppSectionViewerState extends State<AppSectionViewer>
                           onPressed: () {
                             Navigator.pop(context);
                           },
-                          icon: Icon(SolarLinearIcons.altArrowLeft),
+                          icon: Icon(SolarIconsOutline.altArrowLeft),
                         ),
                         title: _buildTitle(context),
                       ),

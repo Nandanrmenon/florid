@@ -6,7 +6,7 @@ import 'package:florid/widgets/m_list.dart';
 import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:provider/provider.dart';
-import 'package:solar_icon_pack/solar_linear_icons.dart';
+import 'package:solar_icons/solar_icons.dart';
 
 import '../../models/repository.dart';
 import '../../providers/app_provider.dart';
@@ -69,7 +69,7 @@ class _RepositoriesScreenState extends State<RepositoriesScreen> {
               onPressed: () {
                 Navigator.pop(context);
               },
-              icon: Icon(SolarLinearIcons.altArrowLeft),
+              icon: Icon(SolarIconsOutline.altArrowLeft),
             ),
             title: Column(
               mainAxisSize: MainAxisSize.min,

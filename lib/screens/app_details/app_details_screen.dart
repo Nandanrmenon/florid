@@ -18,7 +18,7 @@ import 'package:material_symbols_icons/symbols.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
-import 'package:solar_icon_pack/solar_icon_pack.dart';
+import 'package:solar_icons/solar_icons.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../models/fdroid_app.dart';
@@ -193,7 +193,7 @@ class _AppDetailsScreenState extends State<AppDetailsScreen>
                           icon: Icon(
                             isDownloaded
                                 ? Symbols.install_mobile
-                                : SolarBoldIcons.download,
+                                : SolarIconsBold.download,
                           ),
                           label: Text(isDownloaded ? 'Install' : 'Download'),
                           style: FilledButton.styleFrom(),
@@ -233,7 +233,7 @@ class _AppDetailsScreenState extends State<AppDetailsScreen>
                     icon: Icon(
                       isDownloaded
                           ? Symbols.install_mobile
-                          : SolarBoldIcons.download,
+                          : SolarIconsBold.download,
                     ),
                     label: Text(isDownloaded ? 'Install' : 'Download'),
                   ),
@@ -682,7 +682,7 @@ class _AppDetailsScreenState extends State<AppDetailsScreen>
                 onPressed: () {
                   Navigator.pop(context);
                 },
-                icon: Icon(SolarLinearIcons.altArrowLeft),
+                icon: Icon(SolarIconsOutline.altArrowLeft),
               ),
               flexibleSpace: FlexibleSpaceBar(
                 collapseMode: CollapseMode.pin,
@@ -893,8 +893,8 @@ class _AppDetailsScreenState extends State<AppDetailsScreen>
                         ),
                       ),
                       icon: !isFavorite
-                          ? Icon(SolarLinearIcons.heart)
-                          : Icon(SolarBoldIcons.heart, color: Colors.redAccent),
+                          ? Icon(SolarIconsOutline.heart)
+                          : Icon(SolarIconsBold.heart, color: Colors.redAccent),
                       onPressed: () {
                         appProvider.toggleFavorite(widget.app.packageName);
                       },
@@ -910,7 +910,7 @@ class _AppDetailsScreenState extends State<AppDetailsScreen>
                       builder: (context, snapshot) {
                         final ignoreUpdates = snapshot.data ?? false;
                         return PopupMenuButton<_AppDetailsMenuAction>(
-                          icon: Icon(SolarBoldIcons.menuDots),
+                          icon: Icon(SolarIconsBold.menuDots),
                           style: ButtonStyle(
                             backgroundColor: WidgetStateProperty.all(
                               Theme.of(context).colorScheme.surface,
@@ -1310,7 +1310,7 @@ class _DetailsSheetsSection extends StatelessWidget {
                       title: AppLocalizations.of(context)!.version_information,
                       trailing: IconButton(
                         onPressed: () => Navigator.pop(context),
-                        icon: Icon(SolarLinearIcons.altArrowDown),
+                        icon: Icon(SolarIconsOutline.altArrowDown),
                       ),
                     ),
                     MListView(
@@ -1381,22 +1381,22 @@ class _DetailsSheetsSection extends StatelessWidget {
         MListItemData(
           title: AppLocalizations.of(context)!.app_information,
           subtitle: '',
-          leading: ListIcon(iconData: SolarBoldIcons.infoSquare),
-          suffix: Icon(SolarLinearIcons.altArrowRight),
+          leading: ListIcon(iconData: SolarIconsBold.infoSquare),
+          suffix: Icon(SolarIconsOutline.altArrowRight),
           onTap: () => _showAppInfoSheet(context),
         ),
         MListItemData(
           title: AppLocalizations.of(context)!.version_information,
           subtitle: '',
-          leading: ListIcon(iconData: SolarBoldIcons.document),
-          suffix: Icon(SolarLinearIcons.altArrowRight),
+          leading: ListIcon(iconData: SolarIconsBold.document),
+          suffix: Icon(SolarIconsOutline.altArrowRight),
           onTap: () => _showVersionInfoSheet(context),
         ),
         MListItemData(
           title: AppLocalizations.of(context)!.all_versions,
           subtitle: '',
-          leading: ListIcon(iconData: SolarBoldIcons.history),
-          suffix: Icon(SolarLinearIcons.altArrowRight),
+          leading: ListIcon(iconData: SolarIconsBold.history),
+          suffix: Icon(SolarIconsOutline.altArrowRight),
           onTap: () => _showAllVersionsSheet(context),
         ),
       ],
@@ -1600,7 +1600,7 @@ class _IzzyStatsSection extends StatelessWidget {
                 spacing: 8,
                 children: [
                   Icon(
-                    SolarLinearIcons.diagramUp,
+                    SolarIconsOutline.diagramUp,
                     color: Theme.of(context).colorScheme.primary,
                   ),
                   Text(
@@ -1959,7 +1959,7 @@ class _InstallActionsSection extends StatelessWidget {
                                       }
                                     }
                                   },
-                                  icon: Icon(SolarBoldIcons.download),
+                                  icon: Icon(SolarIconsBold.download),
                                   label: Text(
                                     AppLocalizations.of(context)!.update,
                                   ),
@@ -1999,7 +1999,7 @@ class _InstallActionsSection extends StatelessWidget {
                                       }
                                     }
                                   },
-                                  icon: Icon(SolarLinearIcons.squareBottomUp),
+                                  icon: Icon(SolarIconsOutline.squareBottomUp),
                                   label: Text(
                                     AppLocalizations.of(context)!.open,
                                   ),
@@ -2040,7 +2040,7 @@ class _InstallActionsSection extends StatelessWidget {
                                       context,
                                     ).colorScheme.errorContainer,
                                   ),
-                                  child: Icon(SolarBoldIcons.trashBin2),
+                                  child: Icon(SolarIconsBold.trashBin2),
                                 ),
                               ),
                           ],
@@ -2077,7 +2077,7 @@ class _InstallActionsSection extends StatelessWidget {
                                 }
                               }
                             },
-                            icon: Icon(SolarBoldIcons.trashBin2),
+                            icon: Icon(SolarIconsBold.trashBin2),
                             label: Text(
                               AppLocalizations.of(context)!.uninstall,
                             ),
@@ -2121,7 +2121,7 @@ class _InstallActionsSection extends StatelessWidget {
                                 }
                               }
                             },
-                            icon: Icon(SolarLinearIcons.squareBottomUp),
+                            icon: Icon(SolarIconsOutline.squareBottomUp),
                             label: Text(AppLocalizations.of(context)!.open),
                           ),
                         ),
@@ -2236,7 +2236,7 @@ class _ShortInfoRow extends StatelessWidget {
                 SizedBox(
                   height: 32,
                   child: Icon(
-                    SolarLinearIcons.zipFile,
+                    SolarIconsOutline.zipFile,
                     size: 32,
                     color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
@@ -2266,7 +2266,7 @@ class _ShortInfoRow extends StatelessWidget {
                 SizedBox(
                   height: 32,
                   child: Icon(
-                    SolarLinearIcons.codeFile,
+                    SolarIconsOutline.codeFile,
                     size: 32,
                     color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
@@ -2306,7 +2306,7 @@ class _ShortInfoRow extends StatelessWidget {
                       SizedBox(
                         height: 32,
                         child: Icon(
-                          SolarLinearIcons.copyright,
+                          SolarIconsOutline.copyright,
                           size: 32,
                           color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
@@ -2334,7 +2334,7 @@ class _ShortInfoRow extends StatelessWidget {
                     SizedBox(
                       height: 32,
                       child: Icon(
-                        SolarLinearIcons.graphUp,
+                        SolarIconsOutline.graphUp,
                         size: 32,
                         color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
@@ -2384,7 +2384,7 @@ class _AppInfoSection extends StatelessWidget {
                       title: AppLocalizations.of(context)!.app_information,
                       trailing: IconButton(
                         onPressed: () => Navigator.pop(context),
-                        icon: Icon(SolarLinearIcons.altArrowDown),
+                        icon: Icon(SolarIconsOutline.altArrowDown),
                       ),
                     ),
                     MListView(
@@ -2420,7 +2420,7 @@ class _AppInfoSection extends StatelessWidget {
                             leading: ListIcon(iconData: Symbols.security),
                             title: AppLocalizations.of(context)!.permissions,
                             subtitle: '(${latestVersion!.permissions!.length})',
-                            suffix: Icon(SolarLinearIcons.altArrowRight),
+                            suffix: Icon(SolarIconsOutline.altArrowRight),
                             onTap: () {
                               Navigator.push(
                                 context,
@@ -2542,8 +2542,8 @@ class _DescriptionSectionState extends State<_DescriptionSection>
 
             trailing: Icon(
               _isExpanded
-                  ? SolarLinearIcons.altArrowUp
-                  : SolarLinearIcons.altArrowDown,
+                  ? SolarIconsOutline.altArrowUp
+                  : SolarIconsOutline.altArrowDown,
               color: Theme.of(context).colorScheme.primary,
             ),
           ),
@@ -2651,7 +2651,7 @@ class _IncludeUnstableSectionState extends State<IncludeUnstableSection> {
                       ),
                       child: Row(
                         children: [
-                          ListIcon(iconData: SolarBoldIcons.testTube),
+                          ListIcon(iconData: SolarIconsBold.testTube),
                           const SizedBox(width: 12),
                           Expanded(
                             child: Column(
@@ -2733,7 +2733,7 @@ class _NoVersionInfoSection extends StatelessWidget {
             child: Column(
               children: [
                 Icon(
-                  SolarLinearIcons.infoSquare,
+                  SolarIconsOutline.infoSquare,
                   color: Theme.of(context).colorScheme.onSurfaceVariant,
                   size: 32,
                 ),
@@ -3062,36 +3062,36 @@ class _AppExtraInfoSectionState extends State<AppExtraInfoSection> {
               items: [
                 if (widget.app.webSite != null)
                   MListItemData(
-                    leading: ListIcon(iconData: SolarLinearIcons.global),
+                    leading: ListIcon(iconData: SolarIconsOutline.global),
                     title: AppLocalizations.of(context)!.website,
                     onTap: () async {
                       if (widget.app.webSite != null) {
                         await launchUrl(Uri.parse(widget.app.webSite!));
                       }
                     },
-                    suffix: Icon(SolarLinearIcons.squareBottomUp),
+                    suffix: Icon(SolarIconsOutline.squareBottomUp),
                   ),
                 if (widget.app.sourceCode != null)
                   MListItemData(
-                    leading: ListIcon(iconData: SolarLinearIcons.code),
+                    leading: ListIcon(iconData: SolarIconsOutline.code),
                     title: AppLocalizations.of(context)!.source_code,
                     onTap: () async {
                       if (widget.app.sourceCode != null) {
                         await launchUrl(Uri.parse(widget.app.sourceCode!));
                       }
                     },
-                    suffix: Icon(SolarLinearIcons.squareBottomUp),
+                    suffix: Icon(SolarIconsOutline.squareBottomUp),
                   ),
                 if (widget.app.issueTracker != null)
                   MListItemData(
-                    leading: ListIcon(iconData: SolarLinearIcons.bug),
+                    leading: ListIcon(iconData: SolarIconsOutline.bug),
                     title: AppLocalizations.of(context)!.issue_tracker,
                     onTap: () async {
                       if (widget.app.issueTracker != null) {
                         await launchUrl(Uri.parse(widget.app.issueTracker!));
                       }
                     },
-                    suffix: Icon(SolarLinearIcons.squareBottomUp),
+                    suffix: Icon(SolarIconsOutline.squareBottomUp),
                   ),
               ],
             );
@@ -3100,7 +3100,7 @@ class _AppExtraInfoSectionState extends State<AppExtraInfoSection> {
         SizedBox(height: 16),
         if (donationItems.isNotEmpty) ...[
           MListHeader(
-            icon: SolarLinearIcons.handMoney,
+            icon: SolarIconsOutline.handMoney,
             title: AppLocalizations.of(context)!.support_the_developer,
           ),
           MListView(
@@ -3109,7 +3109,7 @@ class _AppExtraInfoSectionState extends State<AppExtraInfoSection> {
                 MListItemData(
                   title: item.key,
                   subtitle: item.value,
-                  suffix: Icon(SolarLinearIcons.squareBottomUp),
+                  suffix: Icon(SolarIconsOutline.squareBottomUp),
                   onTap: () => _openDonateLink(context, item.key, item.value),
                 ),
             ],

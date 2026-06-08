@@ -14,7 +14,7 @@ import 'package:local_auth/local_auth.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:provider/provider.dart';
-import 'package:solar_icon_pack/solar_linear_icons.dart';
+import 'package:solar_icons/solar_icons.dart';
 
 class AppManagementScreen extends StatefulWidget {
   const AppManagementScreen({super.key});
@@ -142,10 +142,8 @@ class _AppManagementScreenState extends State<AppManagementScreen> {
 
       return await _localAuth.authenticate(
         localizedReason: 'Authenticate to change installation settings',
-        options: const AuthenticationOptions(
-          biometricOnly: false,
-          stickyAuth: true,
-        ),
+        biometricOnly: false,
+        persistAcrossBackgrounding: true,
       );
     } on PlatformException {
       return false;
@@ -296,7 +294,7 @@ class _AppManagementScreenState extends State<AppManagementScreen> {
                   onPressed: () {
                     Navigator.pop(context);
                   },
-                  icon: Icon(SolarLinearIcons.altArrowLeft),
+                  icon: Icon(SolarIconsOutline.altArrowLeft),
                 ),
                 title: Text(localizations.app_management),
               ),

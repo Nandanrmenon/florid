@@ -2,7 +2,7 @@ name: florid
 description: "A modern F-Droid client for Android built with Flutter."
 publish_to: "none"
 
-version: 1.4.0+17
+version: 1.3.0+16
 
 environment:
   sdk: ^3.9.2
@@ -35,7 +35,7 @@ dependencies:
   path: ^1.9.0
 
   # Material Symbols icon pack
-  material_symbols_icons: ^4.2771.0
+  material_symbols_icons: ^4.2928.1
 
   # Material You dynamic color
   dynamic_color: ^1.7.0
@@ -50,10 +50,10 @@ dependencies:
   permission_handler: ^12.0.1
 
   # Package info for app version checking
-  package_info_plus: ^9.0.0
+  package_info_plus: ^10.1.0
 
   # Device info for ABI detection
-  device_info_plus: ^12.3.0
+  device_info_plus: ^13.1.0
 
   # Cached network image for app icons
   cached_network_image: ^3.3.1
@@ -63,7 +63,7 @@ dependencies:
 
   # File picker and downloads
   dio: ^5.4.1
-  file_picker: ^10.1.2
+  file_picker: ^12.0.0-beta.5
   workmanager: ^0.9.0+3
 
   # App installer for APK installation
@@ -73,7 +73,7 @@ dependencies:
   shizuku_api: 1.2.2
 
   # Share plus for sharing apps
-  share_plus: ^12.0.1
+  share_plus: ^13.1.0
 
   # Detect installed applications on Android
   installed_apps: ^2.0.0
@@ -82,7 +82,7 @@ dependencies:
   android_intent_plus: ^6.0.0
 
   # Local notifications for download progress
-  flutter_local_notifications: ^20.1.0
+  flutter_local_notifications: ^22.0.0
   flutter_native_splash: ^2.4.7
   flutter_animate: ^4.5.2
 
@@ -94,9 +94,9 @@ dependencies:
   intl: any
   flutter_svg: ^2.2.3
   qr_code_scanner_plus: ^2.1.1
-  local_auth: ^2.3.0
+  local_auth: ^3.0.1
   iconify_flutter: ^0.0.7
-  solar_icon_pack: ^0.2.1
+  solar_icons: ^0.1.0
   flutter_m3shapes_extended: ^1.1.0
 
 dev_dependencies:

@@ -6,12 +6,10 @@ import 'package:florid/constants.dart';
 import 'package:florid/l10n/app_localizations.dart';
 import 'package:florid/models/fdroid_app.dart';
 import 'package:florid/providers/app_provider.dart';
-import 'package:florid/providers/app_update_provider.dart';
 import 'package:florid/providers/repositories_provider.dart';
 import 'package:florid/providers/settings_provider.dart';
 import 'package:florid/screens/app_details/app_details_screen.dart';
 import 'package:florid/screens/settings/app_management_screen.dart';
-import 'package:florid/screens/settings/app_updater.dart';
 import 'package:florid/screens/settings/appearance_screen.dart';
 import 'package:florid/screens/settings/parental_control_screen.dart';
 import 'package:florid/screens/settings/repositories_screen.dart';
@@ -31,8 +29,7 @@ import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
-import 'package:solar_icon_pack/solar_bold_icons.dart';
-import 'package:solar_icon_pack/solar_linear_icons.dart';
+import 'package:solar_icons/solar_icons.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class UserScreen extends StatefulWidget {
@@ -288,43 +285,6 @@ class _UserSettingsContentState extends State<_UserSettingsContent> {
     });
   }
 
-  Future<void> _showUpdateDialog(BuildContext context) async {
-    final updateProvider = context.read<AppUpdateProvider>();
-
-    if (!mounted) return;
-    showDialog<void>(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => AlertDialog(
-        title: Text(AppLocalizations.of(context)!.checking_for_updates),
-        content: const SizedBox(
-          height: 60,
-          child: Center(child: CircularProgressIndicator()),
-        ),
-      ),
-    );
-
-    await updateProvider.checkForUpdates();
-
-    if (!mounted) return;
-    Navigator.pop(context);
-
-    if (updateProvider.hasUpdate) {
-      if (!mounted) return;
-      await Navigator.of(
-        context,
-      ).push(MaterialPageRoute(builder: (context) => const AppUpdatePage()));
-    } else {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Florid is up to date!'),
-          duration: Duration(seconds: 2),
-        ),
-      );
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Consumer<SettingsProvider>(
@@ -343,7 +303,7 @@ class _UserSettingsContentState extends State<_UserSettingsContent> {
                 MListView(
                   items: [
                     MListItemData(
-                      leading: ListIcon(iconData: SolarBoldIcons.heart),
+                      leading: ListIcon(iconData: SolarIconsBold.heart),
                       title: 'Favourites',
                       subtitle: 'View your favourite apps',
                       onTap: () {
@@ -357,7 +317,7 @@ class _UserSettingsContentState extends State<_UserSettingsContent> {
                       suffix: const Icon(Symbols.chevron_right),
                     ),
                     MListItemData(
-                      leading: ListIcon(iconData: SolarBoldIcons.palette),
+                      leading: ListIcon(iconData: SolarIconsBold.palette),
                       title: 'Appearance',
                       subtitle: 'Theme mode and style',
                       onTap: () {
@@ -371,7 +331,7 @@ class _UserSettingsContentState extends State<_UserSettingsContent> {
                       suffix: const Icon(Symbols.chevron_right),
                     ),
                     MListItemData(
-                      leading: ListIcon(iconData: SolarBoldIcons.shield),
+                      leading: ListIcon(iconData: SolarIconsBold.shield),
                       title: 'Parental Control',
                       subtitle: 'Hide anti-feature apps and protect installs',
                       onTap: () {
@@ -385,7 +345,7 @@ class _UserSettingsContentState extends State<_UserSettingsContent> {
                       suffix: const Icon(Symbols.chevron_right),
                     ),
                     MListItemData(
-                      leading: ListIcon(iconData: SolarBoldIcons.globus),
+                      leading: ListIcon(iconData: SolarIconsBold.globus),
                       title: 'App content language',
                       onTap: () => _showLanguageDialog(context, settings),
                       subtitle: SettingsProvider.getLocaleDisplayName(
@@ -408,7 +368,7 @@ class _UserSettingsContentState extends State<_UserSettingsContent> {
                 MListView(
                   items: [
                     MListItemData(
-                      leading: ListIcon(iconData: SolarBoldIcons.cloud),
+                      leading: ListIcon(iconData: SolarIconsBold.cloud),
                       title: 'Manage repositories',
                       onTap: () {
                         Navigator.push(
@@ -423,7 +383,7 @@ class _UserSettingsContentState extends State<_UserSettingsContent> {
                     ),
                     MListItemData(
                       leading: ListIcon(
-                        iconData: SolarBoldIcons.settingsMinimalistic,
+                        iconData: SolarIconsBold.settingsMinimalistic,
                       ),
                       title: 'App Management',
                       subtitle:
@@ -502,7 +462,7 @@ class _UserSettingsContentState extends State<_UserSettingsContent> {
                 MListView(
                   items: [
                     MListItemData(
-                      leading: ListIcon(iconData: SolarBoldIcons.sledgehammer),
+                      leading: ListIcon(iconData: SolarIconsBold.sledgehammer),
                       title: 'Troubleshooting',
                       subtitle: 'Storage, cache, and downloads',
                       onTap: () {
@@ -520,7 +480,7 @@ class _UserSettingsContentState extends State<_UserSettingsContent> {
                 MListView(
                   items: [
                     MListItemData(
-                      leading: ListIcon(iconData: SolarBoldIcons.infoSquare),
+                      leading: ListIcon(iconData: SolarIconsBold.infoSquare),
                       title: AppLocalizations.of(context)!.version,
                       subtitle: _appVersion.isEmpty ? 'Loading…' : _appVersion,
                       onTap: () {
@@ -542,17 +502,10 @@ class _UserSettingsContentState extends State<_UserSettingsContent> {
                       },
                     ),
                     MListItemData(
-                      leading: ListIcon(iconData: SolarBoldIcons.cloudDownload),
-                      title: 'Check for updates',
-                      subtitle: 'Manually check for new Florid versions',
-                      suffix: const Icon(Symbols.chevron_right),
-                      onTap: () => _showUpdateDialog(context),
-                    ),
-                    MListItemData(
                       leading: SocialListIcon(icon: Bxl.git),
                       title: 'Source code',
                       subtitle: 'View the Florid source code on GitHub',
-                      suffix: Icon(SolarLinearIcons.squareBottomUp),
+                      suffix: Icon(SolarIconsOutline.squareBottomUp),
                       onTap: () async {
                         final url = Uri.parse(
                           'https://github.com/Nandanrmenon/florid',
@@ -566,7 +519,7 @@ class _UserSettingsContentState extends State<_UserSettingsContent> {
                       leading: SocialListIcon(icon: Bxl.telegram),
                       title: 'Telegram',
                       subtitle: 'Join the community on Telegram',
-                      suffix: Icon(SolarLinearIcons.squareBottomUp),
+                      suffix: Icon(SolarIconsOutline.squareBottomUp),
                       onTap: () async {
                         final url = Uri.parse('https://t.me/florid_app');
                         if (await canLaunchUrl(url)) {
@@ -578,7 +531,7 @@ class _UserSettingsContentState extends State<_UserSettingsContent> {
                       leading: SocialListIcon(icon: SimpleIcons.matrix),
                       title: 'Matrix',
                       subtitle: 'Join the community on Matrix',
-                      suffix: Icon(SolarLinearIcons.squareBottomUp),
+                      suffix: Icon(SolarIconsOutline.squareBottomUp),
                       onTap: () async {
                         final url = Uri.parse(
                           'https://matrix.to/#/#florid:matrix.org',
@@ -590,11 +543,11 @@ class _UserSettingsContentState extends State<_UserSettingsContent> {
                     ),
                     MListItemData(
                       leading: ListIcon(
-                        iconData: SolarBoldIcons.magniferBugRounded,
+                        iconData: SolarIconsBold.roundedMagnifierBug,
                       ),
                       title: 'Report an issue',
                       subtitle: 'Found a bug? Let us know!',
-                      suffix: Icon(SolarLinearIcons.squareBottomUp),
+                      suffix: Icon(SolarIconsOutline.squareBottomUp),
                       onTap: () async {
                         final url = Uri.parse(
                           'https://github.com/Nandanrmenon/florid/issues/new?template=bug_report.md',
@@ -605,10 +558,10 @@ class _UserSettingsContentState extends State<_UserSettingsContent> {
                       },
                     ),
                     MListItemData(
-                      leading: ListIcon(iconData: SolarBoldIcons.heartShine),
+                      leading: ListIcon(iconData: SolarIconsBold.heartShine),
                       title: 'Donate',
                       subtitle: 'Support continued development of Florid',
-                      suffix: Icon(SolarLinearIcons.squareBottomUp),
+                      suffix: Icon(SolarIconsOutline.squareBottomUp),
                       onTap: () async {
                         final url = Uri.parse('https://ko-fi.com/nandanrmenon');
                         if (await canLaunchUrl(url)) {
@@ -617,7 +570,7 @@ class _UserSettingsContentState extends State<_UserSettingsContent> {
                       },
                     ),
                     MListItemData(
-                      leading: ListIcon(iconData: SolarBoldIcons.share),
+                      leading: ListIcon(iconData: SolarIconsBold.share),
                       title: 'Share Florid',
                       subtitle: 'Let your nerdy friends know about Florid!',
                       onTap: () {
@@ -786,7 +739,7 @@ class _FavoriteAppsScreenState extends State<_FavoriteAppsScreen> {
 
   Future<void> _importFavorites(BuildContext context) async {
     final appProvider = context.read<AppProvider>();
-    final picked = await FilePicker.platform.pickFiles(
+    final picked = await FilePicker.pickFiles(
       type: FileType.custom,
       allowedExtensions: ['json'],
       withData: true,
@@ -908,13 +861,13 @@ class _FavoriteAppsScreenState extends State<_FavoriteAppsScreen> {
                   onPressed: () {
                     Navigator.pop(context);
                   },
-                  icon: Icon(SolarLinearIcons.altArrowLeft),
+                  icon: Icon(SolarIconsOutline.altArrowLeft),
                 ),
                 title: Text(AppLocalizations.of(context)!.favourites),
                 actions: [
                   if (favoriteApps.isNotEmpty)
                     PopupMenuButton(
-                      icon: Icon(SolarBoldIcons.menuDots),
+                      icon: Icon(SolarIconsBold.menuDots),
                       itemBuilder: (context) {
                         return [
                           PopupMenuItem(

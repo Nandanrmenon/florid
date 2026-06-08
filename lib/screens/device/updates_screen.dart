@@ -12,7 +12,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:provider/provider.dart';
-import 'package:solar_icon_pack/solar_icon_pack.dart';
+import 'package:solar_icons/solar_icons.dart';
 
 class UpdatesScreen extends StatefulWidget {
   const UpdatesScreen({super.key});
@@ -261,7 +261,7 @@ class _UpdatesScreenState extends State<UpdatesScreen>
     if (updatableApps.isNotEmpty) {
       widgets.add(
         MListHeader(
-          icon: SolarLinearIcons.downloadMinimalistic,
+          icon: SolarIconsOutline.downloadMinimalistic,
           title: AppLocalizations.of(context)!.updates,
           subtitle:
               '${updatableApps.length} ${updatableApps.length == 1 ? 'update' : 'updates'} available',
@@ -339,7 +339,7 @@ class _UpdatesScreenState extends State<UpdatesScreen>
 
     widgets.add(
       MListHeader(
-        icon: SolarLinearIcons.devices,
+        icon: SolarIconsOutline.devices,
         title: AppLocalizations.of(context)!.installed,
       ),
     );

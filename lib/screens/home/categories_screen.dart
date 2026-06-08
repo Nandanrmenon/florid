@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:provider/provider.dart';
-import 'package:solar_icon_pack/solar_icon_pack.dart';
+import 'package:solar_icons/solar_icons.dart';
 
 import '../../providers/app_provider.dart';
 import '../app_details/app_details_screen.dart';
@@ -110,7 +110,7 @@ class _CategoriesScreenState extends State<CategoriesScreen>
                 ),
                 const SizedBox(width: 12),
                 Icon(
-                  SolarLinearIcons.arrowRight,
+                  SolarIconsOutline.arrowRight,
                   size: 26,
                   color: Theme.of(context).colorScheme.primary,
                 ),
@@ -254,7 +254,7 @@ class _CategoriesScreenState extends State<CategoriesScreen>
                         trailing: IconButton(
                           onPressed: () =>
                               _openCategoryViewer(context, category),
-                          icon: const Icon(SolarLinearIcons.arrowRight),
+                          icon: const Icon(SolarIconsOutline.arrowRight),
                         ),
                       ),
                       if (isCategoryLoading) ...[

@@ -473,7 +473,7 @@ class _UpdatesScreenState extends State<UpdatesScreen>
     final appProvider = context.read<AppProvider>();
     for (final app in apps) {
       try {
-        await downloadProvider.queueDownload(app);
+        downloadProvider.queueDownload(app);
       } catch (_) {
         // If queueing fails, continue with the remaining apps.
       }
@@ -501,7 +501,7 @@ class _UpdatesScreenState extends State<UpdatesScreen>
       }
 
       try {
-        await downloadProvider.downloadApk(app, requireInstallAuth: false);
+        downloadProvider.downloadApk(app, requireInstallAuth: false);
         successful++;
 
         if (context.mounted) {

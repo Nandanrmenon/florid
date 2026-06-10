@@ -7,6 +7,7 @@ import 'package:florid/screens/florid_app.dart';
 import 'package:florid/themes/app_themes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
 
 import 'providers/app_provider.dart';
@@ -128,6 +129,22 @@ class MainApp extends StatelessWidget {
                 navigatorKey: appNavigatorKey,
                 localizationsDelegates: AppLocalizations.localizationsDelegates,
                 supportedLocales: AppLocalizations.supportedLocales,
+                locale: settings.uiLocale,
+                localeResolutionCallback: (deviceLocale, supportedLocales) {
+                  final forced = settings.uiLocale;
+                  if (forced != null) {
+                    return basicLocaleListResolution(
+                          [forced],
+                          supportedLocales,
+                        ) ??
+                        const Locale('en');
+                  }
+                  return basicLocaleListResolution(
+                        [deviceLocale ?? const Locale('en')],
+                        supportedLocales,
+                      ) ??
+                      const Locale('en');
+                },
                 theme: lightTheme,
                 darkTheme: darkThemeData,
                 themeMode: settings.themeMode,

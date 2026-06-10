@@ -37,6 +37,9 @@
     <!-- Permission for camera - used for QR code scanning -->
     <uses-permission android:name="android.permission.CAMERA" />
 
+    <!-- Permission for Dhizuku API -->
+    <uses-permission android:name="com.rosan.dhizuku.permission.API" />
+
     <application
         android:label="${appLabel}"
         android:name="${applicationName}"
@@ -106,5 +109,7 @@
             <action android:name="android.intent.action.PROCESS_TEXT"/>
             <data android:mimeType="text/plain"/>
         </intent>
+        <package android:name="com.rosan.dhizuku" />
+        <provider android:authorities="com.rosan.dhizuku.server.provider" />
     </queries>
 </manifest>

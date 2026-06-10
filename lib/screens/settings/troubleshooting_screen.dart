@@ -17,9 +17,22 @@ class TroubleshootingScreen extends StatelessWidget {
     switch (method) {
       case InstallMethod.shizuku:
         return 'Shizuku';
+      case InstallMethod.dhizuku:
+        return 'Dhizuku';
       case InstallMethod.system:
-      default:
         return 'System installer';
+    }
+  }
+
+  String _installMethodSubtitle(BuildContext context, InstallMethod method) {
+    final localizations = AppLocalizations.of(context)!;
+    switch (method) {
+      case InstallMethod.shizuku:
+        return localizations.requires_shizuku_running;
+      case InstallMethod.dhizuku:
+        return localizations.requires_dhizuku_active;
+      case InstallMethod.system:
+        return localizations.uses_standard_system_installer;
     }
   }
 
@@ -39,17 +52,7 @@ class TroubleshootingScreen extends StatelessWidget {
                   value: method,
                   groupValue: settings.installMethod,
                   title: Text(_installMethodLabel(method)),
-                  subtitle: method == InstallMethod.shizuku
-                      ? Text(
-                          AppLocalizations.of(
-                            context,
-                          )!.requires_shizuku_running,
-                        )
-                      : Text(
-                          AppLocalizations.of(
-                            context,
-                          )!.uses_standard_system_installer,
-                        ),
+                  subtitle: Text(_installMethodSubtitle(context, method)),
                   onChanged: (value) async {
                     if (value == null) return;
                     await settings.setInstallMethod(value);

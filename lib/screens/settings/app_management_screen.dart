@@ -54,9 +54,29 @@ class _AppManagementScreenState extends State<AppManagementScreen> {
     switch (method) {
       case InstallMethod.shizuku:
         return localizations.shizuku;
+      case InstallMethod.dhizuku:
+        return localizations.dhizuku;
       case InstallMethod.system:
         return localizations.system_installer;
     }
+  }
+
+  String _installMethodSubtitle(
+    AppLocalizations localizations,
+    InstallMethod method,
+  ) {
+    switch (method) {
+      case InstallMethod.shizuku:
+        return localizations.requires_shizuku_running;
+      case InstallMethod.dhizuku:
+        return localizations.requires_dhizuku_active;
+      case InstallMethod.system:
+        return localizations.uses_standard_system_installer;
+    }
+  }
+
+  bool _isAlphaInstallMethod(InstallMethod method) {
+    return method == InstallMethod.shizuku || method == InstallMethod.dhizuku;
   }
 
   Future<void> _showInstallMethodDialog(
@@ -76,9 +96,7 @@ class _AppManagementScreenState extends State<AppManagementScreen> {
                   value: method,
                   groupValue: settings.installMethod,
                   title: Text(_installMethodLabel(localizations, method)),
-                  subtitle: method == InstallMethod.shizuku
-                      ? Text(localizations.requires_shizuku_running)
-                      : Text(localizations.uses_standard_system_installer),
+                  subtitle: Text(_installMethodSubtitle(localizations, method)),
                   onChanged: (value) async {
                     if (value == null) return;
                     await settings.setInstallMethod(value);
@@ -317,12 +335,12 @@ class _AppManagementScreenState extends State<AppManagementScreen> {
                                       localizations,
                                       method,
                                     ),
-                                    subtitle: method == InstallMethod.shizuku
-                                        ? localizations.requires_shizuku_running
-                                        : localizations
-                                              .uses_standard_system_installer,
+                                    subtitle: _installMethodSubtitle(
+                                      localizations,
+                                      method,
+                                    ),
                                     value: method,
-                                    suffix: method == InstallMethod.shizuku
+                                    suffix: _isAlphaInstallMethod(method)
                                         ? Container(
                                             margin: const EdgeInsets.only(
                                               right: 8.0,

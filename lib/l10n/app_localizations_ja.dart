@@ -289,7 +289,8 @@ class AppLocalizationsJa extends AppLocalizations {
   String get unable_to_load_repository => 'リポジトリを読み込めません';
 
   @override
-  String get repository_loading_error_descrption => '接続またはリポジトリ設定を確認して、もう一度お試しください。';
+  String get repository_loading_error_descrption =>
+      '接続またはリポジトリ設定を確認して、もう一度お試しください。';
 
   @override
   String get appUpdateAvailable => '更新あり';
@@ -372,7 +373,8 @@ class AppLocalizationsJa extends AppLocalizations {
   String get material_you_dynamic => 'Material You Dynamic';
 
   @override
-  String get use_system_colors_supported_android => '対応する Android デバイスでシステムカラーを使用';
+  String get use_system_colors_supported_android =>
+      '対応する Android デバイスでシステムカラーを使用';
 
   @override
   String get theme_style => 'テーマスタイル';
@@ -405,7 +407,8 @@ class AppLocalizationsJa extends AppLocalizations {
   String get feedback_on_florid_theme => 'Florid テーマへのフィードバック';
 
   @override
-  String get help_improve_florid_theme_feedback => 'フィードバックで Florid テーマの改善にご協力ください';
+  String get help_improve_florid_theme_feedback =>
+      'フィードバックで Florid テーマの改善にご協力ください';
 
   @override
   String get system_installer => 'システムインストーラー';
@@ -460,7 +463,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String every_hours(int hours) {
-    return '${hours} 時間ごと';
+    return '$hours 時間ごと';
   }
 
   @override
@@ -491,7 +494,8 @@ class AppLocalizationsJa extends AppLocalizations {
   String get auto_install_after_download => 'ダウンロード後に自動インストール';
 
   @override
-  String get auto_install_after_download_subtitle => 'ダウンロード完了後に APK を自動的にインストール';
+  String get auto_install_after_download_subtitle =>
+      'ダウンロード完了後に APK を自動的にインストール';
 
   @override
   String get delete_apk_after_install => 'インストール後に APK を削除';
@@ -545,7 +549,8 @@ class AppLocalizationsJa extends AppLocalizations {
   String get sync_required => '同期が必要です';
 
   @override
-  String get izzyondroid_sync_required_message => 'トップアプリを表示するには IzzyOnDroid リポジトリの同期が必要です。';
+  String get izzyondroid_sync_required_message =>
+      'トップアプリを表示するには IzzyOnDroid リポジトリの同期が必要です。';
 
   @override
   String get go_to_settings => '設定へ';
@@ -613,7 +618,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String search_results_for_query(int count, Object query) {
-    return '「$query」の検索結果 ${count} 件';
+    return '「$query」の検索結果 $count 件';
   }
 
   @override
@@ -725,7 +730,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String importing_apps_to_database_seconds(int seconds) {
-    return 'アプリをデータベースにインポート中... (${seconds}秒)';
+    return 'アプリをデータベースにインポート中... ($seconds秒)';
   }
 
   @override
@@ -738,7 +743,8 @@ class AppLocalizationsJa extends AppLocalizations {
   String get welcome_to => 'ようこそ';
 
   @override
-  String get onboarding_intro_subtitle => 'オープンソース Android アプリを簡単に閲覧・検索・ダウンロードできるモダンな F-Droid クライアントです。';
+  String get onboarding_intro_subtitle =>
+      'オープンソース Android アプリを簡単に閲覧・検索・ダウンロードできるモダンな F-Droid クライアントです。';
 
   @override
   String get curated_open_source_apps => '厳選されたオープンソースアプリ';
@@ -766,7 +772,8 @@ class AppLocalizationsJa extends AppLocalizations {
   String get request_permissions => '権限のリクエスト';
 
   @override
-  String get permissions_step_description => 'Florid は最高の体験を提供するためにいくつかの権限が必要です。';
+  String get permissions_step_description =>
+      'Florid は最高の体験を提供するためにいくつかの権限が必要です。';
 
   @override
   String get notifications => '通知';
@@ -882,4 +889,114 @@ class AppLocalizationsJa extends AppLocalizations {
   @override
   String get ignore_future_updates => '今後の更新を無視';
 
+  @override
+  String get general_settings => '一般設定';
+
+  @override
+  String get view_favourite_apps_subtitle => 'お気に入りアプリを表示';
+
+  @override
+  String get appearance_subtitle => 'テーマモードとスタイル';
+
+  @override
+  String get parental_control => 'ペアレンタルコントロール';
+
+  @override
+  String get parental_control_subtitle => 'アンチ機能アプリの非表示とインストール保護';
+
+  @override
+  String get app_content_language => 'アプリ表示言語';
+
+  @override
+  String get repositories_and_management => 'リポジトリと管理';
+
+  @override
+  String get manage_repositories_subtitle => 'F-Droid リポジトリの追加・削除';
+
+  @override
+  String get app_management_subtitle => 'インストールと更新に関する設定';
+
+  @override
+  String get miscellaneous => 'その他';
+
+  @override
+  String get troubleshooting_subtitle => 'ストレージ、キャッシュ、ダウンロード';
+
+  @override
+  String get florid_tagline => 'モダンな F-Droid クライアント。';
+
+  @override
+  String get source_code_subtitle => 'GitHub で Florid のソースコードを表示';
+
+  @override
+  String get telegram => 'Telegram';
+
+  @override
+  String get telegram_subtitle => 'Telegram コミュニティに参加';
+
+  @override
+  String get matrix => 'Matrix';
+
+  @override
+  String get matrix_subtitle => 'Matrix コミュニティに参加';
+
+  @override
+  String get report_an_issue => '問題を報告';
+
+  @override
+  String get report_an_issue_subtitle => 'バグを見つけましたか？お知らせください！';
+
+  @override
+  String get donate => '寄付';
+
+  @override
+  String get donate_subtitle => 'Florid の開発を支援';
+
+  @override
+  String get share_florid => 'Florid を共有';
+
+  @override
+  String get share_florid_subtitle => '詳しい友達に Florid を教えましょう！';
+
+  @override
+  String get share_florid_title => 'Florid をチェック！';
+
+  @override
+  String get share_florid_message =>
+      'モダンな F-Droid クライアント！ https://github.com/Nandanrmenon/florid';
+
+  @override
+  String get select_language => '言語を選択';
+
+  @override
+  String language_changed_to(Object language) {
+    return '言語を $language に変更しました。';
+  }
+
+  @override
+  String get export_favourites => 'お気に入りをエクスポート';
+
+  @override
+  String get no_favourites_to_export => 'エクスポートするお気に入りがありません';
+
+  @override
+  String get unable_to_access_downloads => 'ダウンロードフォルダにアクセスできません';
+
+  @override
+  String saved_to_downloads(Object path) {
+    return 'ダウンロードに保存しました: $path';
+  }
+
+  @override
+  String get no_favourites_to_import => 'インポートするお気に入りが見つかりません';
+
+  @override
+  String favourites_import_found(int count, Object fileName) {
+    return '$fileName に $count 件のお気に入りが見つかりました。';
+  }
+
+  @override
+  String favourites_imported(int count) {
+    return '$count 件のお気に入りをインポートしました';
+  }
 }

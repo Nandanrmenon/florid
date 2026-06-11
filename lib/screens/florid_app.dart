@@ -322,7 +322,7 @@ class _FloridAppState extends State<FloridApp> {
                         ? (settings.userName.length > 10
                               ? '${settings.userName.substring(0, 10)}...'
                               : settings.userName)
-                        : 'User',
+                        : localizations.user,
                   ),
                 ),
               ];
@@ -527,7 +527,7 @@ class _FloridAppState extends State<FloridApp> {
                         ? (settings.userName.length > 10
                               ? '${settings.userName.substring(0, 10)}...'
                               : settings.userName)
-                        : 'User',
+                        : localizations.user,
                   ),
                 ];
 

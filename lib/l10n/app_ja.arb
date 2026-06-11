@@ -385,5 +385,64 @@
       "appCount": {}
     }
   },
-  "ignore_future_updates": "今後の更新を無視"
+  "ignore_future_updates": "今後の更新を無視",
+  "general_settings": "一般設定",
+  "view_favourite_apps_subtitle": "お気に入りアプリを表示",
+  "appearance_subtitle": "テーマモードとスタイル",
+  "parental_control": "ペアレンタルコントロール",
+  "parental_control_subtitle": "アンチ機能アプリの非表示とインストール保護",
+  "app_content_language": "アプリ表示言語",
+  "repositories_and_management": "リポジトリと管理",
+  "manage_repositories_subtitle": "F-Droid リポジトリの追加・削除",
+  "app_management_subtitle": "インストールと更新に関する設定",
+  "miscellaneous": "その他",
+  "troubleshooting_subtitle": "ストレージ、キャッシュ、ダウンロード",
+  "florid_tagline": "モダンな F-Droid クライアント。",
+  "source_code_subtitle": "GitHub で Florid のソースコードを表示",
+  "telegram": "Telegram",
+  "telegram_subtitle": "Telegram コミュニティに参加",
+  "matrix": "Matrix",
+  "matrix_subtitle": "Matrix コミュニティに参加",
+  "report_an_issue": "問題を報告",
+  "report_an_issue_subtitle": "バグを見つけましたか？お知らせください！",
+  "donate": "寄付",
+  "donate_subtitle": "Florid の開発を支援",
+  "share_florid": "Florid を共有",
+  "share_florid_subtitle": "詳しい友達に Florid を教えましょう！",
+  "share_florid_title": "Florid をチェック！",
+  "share_florid_message": "モダンな F-Droid クライアント！ https://github.com/Nandanrmenon/florid",
+  "select_language": "言語を選択",
+  "language_changed_to": "言語を {language} に変更しました。",
+  "@language_changed_to": {
+    "placeholders": {
+      "language": {}
+    }
+  },
+  "export_favourites": "お気に入りをエクスポート",
+  "no_favourites_to_export": "エクスポートするお気に入りがありません",
+  "unable_to_access_downloads": "ダウンロードフォルダにアクセスできません",
+  "saved_to_downloads": "ダウンロードに保存しました: {path}",
+  "@saved_to_downloads": {
+    "placeholders": {
+      "path": {}
+    }
+  },
+  "no_favourites_to_import": "インポートするお気に入りが見つかりません",
+  "favourites_import_found": "{fileName} に {count} 件のお気に入りが見つかりました。",
+  "@favourites_import_found": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "fileName": {}
+    }
+  },
+  "favourites_imported": "{count} 件のお気に入りをインポートしました",
+  "@favourites_imported": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

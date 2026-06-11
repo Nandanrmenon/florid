@@ -912,4 +912,131 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get ignore_future_updates => 'Ignore Future Updates';
+
+  @override
+  String get general_settings => 'General Settings';
+
+  @override
+  String get view_favourite_apps_subtitle => 'View your favourite apps';
+
+  @override
+  String get appearance_subtitle => 'Theme mode and style';
+
+  @override
+  String get parental_control => 'Parental Control';
+
+  @override
+  String get parental_control_subtitle =>
+      'Hide anti-feature apps and protect installs';
+
+  @override
+  String get app_content_language => 'App content language';
+
+  @override
+  String get repositories_and_management => 'Repositories & Management';
+
+  @override
+  String get manage_repositories_subtitle =>
+      'Add or remove F-Droid repositories';
+
+  @override
+  String get app_management_subtitle =>
+      'Manage settings regarding installs and updates';
+
+  @override
+  String get miscellaneous => 'Miscellaneous';
+
+  @override
+  String get troubleshooting_subtitle => 'Storage, cache, and downloads';
+
+  @override
+  String get florid_tagline => 'A modern F-Droid client.';
+
+  @override
+  String get source_code_subtitle => 'View the Florid source code on GitHub';
+
+  @override
+  String get telegram => 'Telegram';
+
+  @override
+  String get telegram_subtitle => 'Join the community on Telegram';
+
+  @override
+  String get matrix => 'Matrix';
+
+  @override
+  String get matrix_subtitle => 'Join the community on Matrix';
+
+  @override
+  String get report_an_issue => 'Report an issue';
+
+  @override
+  String get report_an_issue_subtitle => 'Found a bug? Let us know!';
+
+  @override
+  String get donate => 'Donate';
+
+  @override
+  String get donate_subtitle => 'Support continued development of Florid';
+
+  @override
+  String get share_florid => 'Share Florid';
+
+  @override
+  String get share_florid_subtitle =>
+      'Let your nerdy friends know about Florid!';
+
+  @override
+  String get share_florid_title => 'Check out Florid!';
+
+  @override
+  String get share_florid_message =>
+      'A modern F-Droid client! https://github.com/Nandanrmenon/florid';
+
+  @override
+  String get select_language => 'Select Language';
+
+  @override
+  String language_changed_to(Object language) {
+    return 'Language changed to $language.';
+  }
+
+  @override
+  String get export_favourites => 'Export favourites';
+
+  @override
+  String get no_favourites_to_export => 'No favourites to export';
+
+  @override
+  String get unable_to_access_downloads => 'Unable to access Downloads folder';
+
+  @override
+  String saved_to_downloads(Object path) {
+    return 'Saved to Downloads: $path';
+  }
+
+  @override
+  String get no_favourites_to_import => 'No favourites found to import';
+
+  @override
+  String favourites_import_found(int count, Object fileName) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'favourites',
+      one: 'favourite',
+    );
+    return 'Found $count $_temp0 in $fileName.';
+  }
+
+  @override
+  String favourites_imported(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'favourites',
+      one: 'favourite',
+    );
+    return 'Imported $count $_temp0';
+  }
 }

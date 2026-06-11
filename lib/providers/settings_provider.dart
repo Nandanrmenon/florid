@@ -241,6 +241,43 @@ class SettingsProvider extends ChangeNotifier {
 
   String get effectiveLocale => resolveEffectiveLocale(_locale);
 
+  /// Maps the settings locale to a Flutter [Locale] for MaterialApp UI strings.
+  /// Returns null when following the system locale.
+  Locale? get uiLocale {
+    if (_locale == systemLocale) {
+      return null;
+    }
+    return mapSettingsLocaleToUi(_locale);
+  }
+
+  /// Maps a settings locale code to a supported UI [Locale].
+  static Locale mapSettingsLocaleToUi(String locale) {
+    switch (locale) {
+      case 'de-DE':
+      case 'de':
+        return const Locale('de');
+      case 'it-IT':
+      case 'it':
+        return const Locale('it');
+      case 'ja-JP':
+      case 'ja':
+        return const Locale('ja');
+      case 'zh-CN':
+      case 'zh':
+        return const Locale('zh', 'CN');
+      case 'en-US':
+      case 'en':
+        return const Locale('en');
+      case 'cs':
+      case 'cz':
+        return const Locale('cs');
+      case 'tr':
+        return const Locale('tr');
+      default:
+        return const Locale('en');
+    }
+  }
+
   static String resolveEffectiveLocale(String locale) {
     if (locale != systemLocale) {
       return locale;

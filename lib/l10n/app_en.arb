@@ -387,5 +387,64 @@
       "appCount": {}
     }
   },
-  "ignore_future_updates": "Ignore Future Updates"
+  "ignore_future_updates": "Ignore Future Updates",
+  "general_settings": "General Settings",
+  "view_favourite_apps_subtitle": "View your favourite apps",
+  "appearance_subtitle": "Theme mode and style",
+  "parental_control": "Parental Control",
+  "parental_control_subtitle": "Hide anti-feature apps and protect installs",
+  "app_content_language": "App content language",
+  "repositories_and_management": "Repositories & Management",
+  "manage_repositories_subtitle": "Add or remove F-Droid repositories",
+  "app_management_subtitle": "Manage settings regarding installs and updates",
+  "miscellaneous": "Miscellaneous",
+  "troubleshooting_subtitle": "Storage, cache, and downloads",
+  "florid_tagline": "A modern F-Droid client.",
+  "source_code_subtitle": "View the Florid source code on GitHub",
+  "telegram": "Telegram",
+  "telegram_subtitle": "Join the community on Telegram",
+  "matrix": "Matrix",
+  "matrix_subtitle": "Join the community on Matrix",
+  "report_an_issue": "Report an issue",
+  "report_an_issue_subtitle": "Found a bug? Let us know!",
+  "donate": "Donate",
+  "donate_subtitle": "Support continued development of Florid",
+  "share_florid": "Share Florid",
+  "share_florid_subtitle": "Let your nerdy friends know about Florid!",
+  "share_florid_title": "Check out Florid!",
+  "share_florid_message": "A modern F-Droid client! https://github.com/Nandanrmenon/florid",
+  "select_language": "Select Language",
+  "language_changed_to": "Language changed to {language}.",
+  "@language_changed_to": {
+    "placeholders": {
+      "language": {}
+    }
+  },
+  "export_favourites": "Export favourites",
+  "no_favourites_to_export": "No favourites to export",
+  "unable_to_access_downloads": "Unable to access Downloads folder",
+  "saved_to_downloads": "Saved to Downloads: {path}",
+  "@saved_to_downloads": {
+    "placeholders": {
+      "path": {}
+    }
+  },
+  "no_favourites_to_import": "No favourites found to import",
+  "favourites_import_found": "Found {count} {count, plural, =1{favourite} other{favourites}} in {fileName}.",
+  "@favourites_import_found": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "fileName": {}
+    }
+  },
+  "favourites_imported": "Imported {count} {count, plural, =1{favourite} other{favourites}}",
+  "@favourites_imported": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

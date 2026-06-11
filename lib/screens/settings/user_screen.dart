@@ -289,6 +289,8 @@ class _UserSettingsContentState extends State<_UserSettingsContent> {
   Widget build(BuildContext context) {
     return Consumer<SettingsProvider>(
       builder: (context, settings, _) {
+        final localizations = AppLocalizations.of(context)!;
+
         return Column(
           children: <Widget>[
             const SizedBox(height: 16),
@@ -296,16 +298,16 @@ class _UserSettingsContentState extends State<_UserSettingsContent> {
             Column(
               spacing: 4,
               children: [
-                const MListHeader(
-                  title: 'General Settings',
+                MListHeader(
+                  title: localizations.general_settings,
                   icon: Symbols.mobile,
                 ),
                 MListView(
                   items: [
                     MListItemData(
                       leading: ListIcon(iconData: SolarIconsBold.heart),
-                      title: 'Favourites',
-                      subtitle: 'View your favourite apps',
+                      title: localizations.favourites,
+                      subtitle: localizations.view_favourite_apps_subtitle,
                       onTap: () {
                         Navigator.push(
                           context,
@@ -318,8 +320,8 @@ class _UserSettingsContentState extends State<_UserSettingsContent> {
                     ),
                     MListItemData(
                       leading: ListIcon(iconData: SolarIconsBold.palette),
-                      title: 'Appearance',
-                      subtitle: 'Theme mode and style',
+                      title: localizations.appearance,
+                      subtitle: localizations.appearance_subtitle,
                       onTap: () {
                         Navigator.push(
                           context,
@@ -332,8 +334,8 @@ class _UserSettingsContentState extends State<_UserSettingsContent> {
                     ),
                     MListItemData(
                       leading: ListIcon(iconData: SolarIconsBold.shield),
-                      title: 'Parental Control',
-                      subtitle: 'Hide anti-feature apps and protect installs',
+                      title: localizations.parental_control,
+                      subtitle: localizations.parental_control_subtitle,
                       onTap: () {
                         Navigator.push(
                           context,
@@ -346,7 +348,7 @@ class _UserSettingsContentState extends State<_UserSettingsContent> {
                     ),
                     MListItemData(
                       leading: ListIcon(iconData: SolarIconsBold.globus),
-                      title: 'App content language',
+                      title: localizations.app_content_language,
                       onTap: () => _showLanguageDialog(context, settings),
                       subtitle: SettingsProvider.getLocaleDisplayName(
                         settings.locale,
@@ -361,15 +363,15 @@ class _UserSettingsContentState extends State<_UserSettingsContent> {
             Column(
               spacing: 4,
               children: [
-                const MListHeader(
-                  title: 'Repositories & Management',
+                MListHeader(
+                  title: localizations.repositories_and_management,
                   icon: Symbols.settings,
                 ),
                 MListView(
                   items: [
                     MListItemData(
                       leading: ListIcon(iconData: SolarIconsBold.cloud),
-                      title: 'Manage repositories',
+                      title: localizations.manage_repositories,
                       onTap: () {
                         Navigator.push(
                           context,
@@ -378,16 +380,15 @@ class _UserSettingsContentState extends State<_UserSettingsContent> {
                           ),
                         );
                       },
-                      subtitle: 'Add or remove F-Droid repositories',
+                      subtitle: localizations.manage_repositories_subtitle,
                       suffix: const Icon(Symbols.chevron_right),
                     ),
                     MListItemData(
                       leading: ListIcon(
                         iconData: SolarIconsBold.settingsMinimalistic,
                       ),
-                      title: 'App Management',
-                      subtitle:
-                          'Manage settings regarding installs and updates',
+                      title: localizations.app_management,
+                      subtitle: localizations.app_management_subtitle,
                       onTap: () {
                         Navigator.push(
                           context,
@@ -413,13 +414,11 @@ class _UserSettingsContentState extends State<_UserSettingsContent> {
                         spacing: 12.0,
                         children: [
                           Text(
-                            'Keep Android Open',
+                            localizations.keep_android_open,
                             style: Theme.of(context).textTheme.titleMedium
                                 ?.copyWith(fontWeight: FontWeight.w600),
                           ),
-                          const Text(
-                            'From 2026/2027 onward, Google will require developer verification for all Android apps on certified devices, including those installed outside of the Play Store.',
-                          ),
+                          Text(localizations.keep_android_open_message),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.end,
                             children: [
@@ -455,16 +454,16 @@ class _UserSettingsContentState extends State<_UserSettingsContent> {
             Column(
               spacing: 4.0,
               children: [
-                const MListHeader(
-                  title: 'Miscellaneous',
+                MListHeader(
+                  title: localizations.miscellaneous,
                   icon: Symbols.more_horiz,
                 ),
                 MListView(
                   items: [
                     MListItemData(
                       leading: ListIcon(iconData: SolarIconsBold.sledgehammer),
-                      title: 'Troubleshooting',
-                      subtitle: 'Storage, cache, and downloads',
+                      title: localizations.troubleshooting,
+                      subtitle: localizations.troubleshooting_subtitle,
                       onTap: () {
                         Navigator.push(
                           context,
@@ -482,13 +481,15 @@ class _UserSettingsContentState extends State<_UserSettingsContent> {
                     MListItemData(
                       leading: ListIcon(iconData: SolarIconsBold.infoSquare),
                       title: AppLocalizations.of(context)!.version,
-                      subtitle: _appVersion.isEmpty ? 'Loading…' : _appVersion,
+                      subtitle: _appVersion.isEmpty
+                          ? AppLocalizations.of(context)!.loading
+                          : _appVersion,
                       onTap: () {
                         showAboutDialog(
                           context: context,
                           applicationName: kAppName,
                           applicationVersion: _appVersion,
-                          children: [Text('A modern F-Droid client.')],
+                          children: [Text(localizations.florid_tagline)],
                           applicationIcon: SvgPicture.asset(
                             kAppLogoSvg,
                             key: const ValueKey('app_logo'),
@@ -503,8 +504,8 @@ class _UserSettingsContentState extends State<_UserSettingsContent> {
                     ),
                     MListItemData(
                       leading: SocialListIcon(icon: Bxl.git),
-                      title: 'Source code',
-                      subtitle: 'View the Florid source code on GitHub',
+                      title: localizations.source_code,
+                      subtitle: localizations.source_code_subtitle,
                       suffix: Icon(SolarIconsOutline.squareBottomUp),
                       onTap: () async {
                         final url = Uri.parse(
@@ -517,8 +518,8 @@ class _UserSettingsContentState extends State<_UserSettingsContent> {
                     ),
                     MListItemData(
                       leading: SocialListIcon(icon: Bxl.telegram),
-                      title: 'Telegram',
-                      subtitle: 'Join the community on Telegram',
+                      title: localizations.telegram,
+                      subtitle: localizations.telegram_subtitle,
                       suffix: Icon(SolarIconsOutline.squareBottomUp),
                       onTap: () async {
                         final url = Uri.parse('https://t.me/florid_app');
@@ -529,8 +530,8 @@ class _UserSettingsContentState extends State<_UserSettingsContent> {
                     ),
                     MListItemData(
                       leading: SocialListIcon(icon: SimpleIcons.matrix),
-                      title: 'Matrix',
-                      subtitle: 'Join the community on Matrix',
+                      title: localizations.matrix,
+                      subtitle: localizations.matrix_subtitle,
                       suffix: Icon(SolarIconsOutline.squareBottomUp),
                       onTap: () async {
                         final url = Uri.parse(
@@ -545,8 +546,8 @@ class _UserSettingsContentState extends State<_UserSettingsContent> {
                       leading: ListIcon(
                         iconData: SolarIconsBold.roundedMagnifierBug,
                       ),
-                      title: 'Report an issue',
-                      subtitle: 'Found a bug? Let us know!',
+                      title: localizations.report_an_issue,
+                      subtitle: localizations.report_an_issue_subtitle,
                       suffix: Icon(SolarIconsOutline.squareBottomUp),
                       onTap: () async {
                         final url = Uri.parse(
@@ -559,8 +560,8 @@ class _UserSettingsContentState extends State<_UserSettingsContent> {
                     ),
                     MListItemData(
                       leading: ListIcon(iconData: SolarIconsBold.heartShine),
-                      title: 'Donate',
-                      subtitle: 'Support continued development of Florid',
+                      title: localizations.donate,
+                      subtitle: localizations.donate_subtitle,
                       suffix: Icon(SolarIconsOutline.squareBottomUp),
                       onTap: () async {
                         final url = Uri.parse('https://ko-fi.com/nandanrmenon');
@@ -571,14 +572,13 @@ class _UserSettingsContentState extends State<_UserSettingsContent> {
                     ),
                     MListItemData(
                       leading: ListIcon(iconData: SolarIconsBold.share),
-                      title: 'Share Florid',
-                      subtitle: 'Let your nerdy friends know about Florid!',
+                      title: localizations.share_florid,
+                      subtitle: localizations.share_florid_subtitle,
                       onTap: () {
                         SharePlus.instance.share(
                           ShareParams(
-                            title: 'Check out Florid!',
-                            text:
-                                'A modern F-Droid client! https://github.com/Nandanrmenon/florid',
+                            title: localizations.share_florid_title,
+                            text: localizations.share_florid_message,
                           ),
                         );
                       },
@@ -605,10 +605,12 @@ class _UserSettingsContentState extends State<_UserSettingsContent> {
     final appProvider = parentContext.read<AppProvider>();
     final repositoriesProvider = parentContext.read<RepositoriesProvider>();
 
+    final localizations = AppLocalizations.of(parentContext)!;
+
     await showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('Select Language'),
+        title: Text(localizations.select_language),
         content: SizedBox(
           width: double.maxFinite,
           child: ListView.builder(
@@ -643,7 +645,9 @@ class _UserSettingsContentState extends State<_UserSettingsContent> {
                     messenger.showSnackBar(
                       SnackBar(
                         content: Text(
-                          'Language changed to ${SettingsProvider.getLocaleDisplayName(value)}.',
+                          localizations.language_changed_to(
+                            SettingsProvider.getLocaleDisplayName(value),
+                          ),
                         ),
                       ),
                     );
@@ -673,6 +677,7 @@ class _FavoriteAppsScreen extends StatefulWidget {
 
 class _FavoriteAppsScreenState extends State<_FavoriteAppsScreen> {
   Future<void> _exportFavorites(BuildContext context) async {
+    final localizations = AppLocalizations.of(context)!;
     final appProvider = context.read<AppProvider>();
     final favorites = appProvider.favoritePackages.toList()..sort();
 
@@ -680,7 +685,7 @@ class _FavoriteAppsScreenState extends State<_FavoriteAppsScreen> {
       if (!mounted) return;
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(const SnackBar(content: Text('No favourites to export')));
+      ).showSnackBar(SnackBar(content: Text(localizations.no_favourites_to_export)));
       return;
     }
 
@@ -698,7 +703,7 @@ class _FavoriteAppsScreenState extends State<_FavoriteAppsScreen> {
     if (downloadsDir == null) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Unable to access Downloads folder')),
+        SnackBar(content: Text(localizations.unable_to_access_downloads)),
       );
       return;
     }
@@ -709,7 +714,9 @@ class _FavoriteAppsScreenState extends State<_FavoriteAppsScreen> {
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('Saved to Downloads: ${downloadsDir.path}/$fileName'),
+        content: Text(
+          localizations.saved_to_downloads('${downloadsDir.path}/$fileName'),
+        ),
       ),
     );
   }
@@ -738,6 +745,7 @@ class _FavoriteAppsScreenState extends State<_FavoriteAppsScreen> {
   }
 
   Future<void> _importFavorites(BuildContext context) async {
+    final localizations = AppLocalizations.of(context)!;
     final appProvider = context.read<AppProvider>();
     final picked = await FilePicker.pickFiles(
       type: FileType.custom,
@@ -757,7 +765,7 @@ class _FavoriteAppsScreenState extends State<_FavoriteAppsScreen> {
     if (parsed.isEmpty) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('No favourites found to import')),
+        SnackBar(content: Text(localizations.no_favourites_to_import)),
       );
       return;
     }
@@ -768,7 +776,7 @@ class _FavoriteAppsScreenState extends State<_FavoriteAppsScreen> {
         icon: const Icon(Symbols.star),
         title: Text(AppLocalizations.of(context)!.import_favourites),
         content: Text(
-          'Found ${parsed.length} favourite${parsed.length == 1 ? '' : 's'} in ${file.name}.',
+          localizations.favourites_import_found(parsed.length, file.name),
         ),
         actions: [
           TextButton(
@@ -799,9 +807,7 @@ class _FavoriteAppsScreenState extends State<_FavoriteAppsScreen> {
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(
-          'Imported ${parsed.length} favourite${parsed.length == 1 ? '' : 's'}',
-        ),
+        content: Text(localizations.favourites_imported(parsed.length)),
       ),
     );
   }
@@ -890,7 +896,7 @@ class _FavoriteAppsScreenState extends State<_FavoriteAppsScreen> {
                               spacing: 8.0,
                               children: [
                                 const Icon(Symbols.file_download),
-                                const Text('Export favourites'),
+                                Text(localizations.export_favourites),
                               ],
                             ),
                           ),

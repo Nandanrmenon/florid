@@ -9,6 +9,7 @@ import 'app_localizations_cs.dart';
 import 'app_localizations_de.dart';
 import 'app_localizations_en.dart';
 import 'app_localizations_it.dart';
+import 'app_localizations_ja.dart';
 import 'app_localizations_tr.dart';
 import 'app_localizations_zh.dart';
 
@@ -102,6 +103,7 @@ abstract class AppLocalizations {
     Locale('de'),
     Locale('en'),
     Locale('it'),
+    Locale('ja'),
     Locale('tr'),
     Locale('zh'),
     Locale('zh', 'CN'),
@@ -1774,6 +1776,210 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Ignore Future Updates'**
   String get ignore_future_updates;
+
+  /// No description provided for @general_settings.
+  ///
+  /// In en, this message translates to:
+  /// **'General Settings'**
+  String get general_settings;
+
+  /// No description provided for @view_favourite_apps_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'View your favourite apps'**
+  String get view_favourite_apps_subtitle;
+
+  /// No description provided for @appearance_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Theme mode and style'**
+  String get appearance_subtitle;
+
+  /// No description provided for @parental_control.
+  ///
+  /// In en, this message translates to:
+  /// **'Parental Control'**
+  String get parental_control;
+
+  /// No description provided for @parental_control_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide anti-feature apps and protect installs'**
+  String get parental_control_subtitle;
+
+  /// No description provided for @app_content_language.
+  ///
+  /// In en, this message translates to:
+  /// **'App content language'**
+  String get app_content_language;
+
+  /// No description provided for @repositories_and_management.
+  ///
+  /// In en, this message translates to:
+  /// **'Repositories & Management'**
+  String get repositories_and_management;
+
+  /// No description provided for @manage_repositories_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add or remove F-Droid repositories'**
+  String get manage_repositories_subtitle;
+
+  /// No description provided for @app_management_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage settings regarding installs and updates'**
+  String get app_management_subtitle;
+
+  /// No description provided for @miscellaneous.
+  ///
+  /// In en, this message translates to:
+  /// **'Miscellaneous'**
+  String get miscellaneous;
+
+  /// No description provided for @troubleshooting_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Storage, cache, and downloads'**
+  String get troubleshooting_subtitle;
+
+  /// No description provided for @florid_tagline.
+  ///
+  /// In en, this message translates to:
+  /// **'A modern F-Droid client.'**
+  String get florid_tagline;
+
+  /// No description provided for @source_code_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'View the Florid source code on GitHub'**
+  String get source_code_subtitle;
+
+  /// No description provided for @telegram.
+  ///
+  /// In en, this message translates to:
+  /// **'Telegram'**
+  String get telegram;
+
+  /// No description provided for @telegram_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Join the community on Telegram'**
+  String get telegram_subtitle;
+
+  /// No description provided for @matrix.
+  ///
+  /// In en, this message translates to:
+  /// **'Matrix'**
+  String get matrix;
+
+  /// No description provided for @matrix_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Join the community on Matrix'**
+  String get matrix_subtitle;
+
+  /// No description provided for @report_an_issue.
+  ///
+  /// In en, this message translates to:
+  /// **'Report an issue'**
+  String get report_an_issue;
+
+  /// No description provided for @report_an_issue_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Found a bug? Let us know!'**
+  String get report_an_issue_subtitle;
+
+  /// No description provided for @donate.
+  ///
+  /// In en, this message translates to:
+  /// **'Donate'**
+  String get donate;
+
+  /// No description provided for @donate_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Support continued development of Florid'**
+  String get donate_subtitle;
+
+  /// No description provided for @share_florid.
+  ///
+  /// In en, this message translates to:
+  /// **'Share Florid'**
+  String get share_florid;
+
+  /// No description provided for @share_florid_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Let your nerdy friends know about Florid!'**
+  String get share_florid_subtitle;
+
+  /// No description provided for @share_florid_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Check out Florid!'**
+  String get share_florid_title;
+
+  /// No description provided for @share_florid_message.
+  ///
+  /// In en, this message translates to:
+  /// **'A modern F-Droid client! https://github.com/Nandanrmenon/florid'**
+  String get share_florid_message;
+
+  /// No description provided for @select_language.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Language'**
+  String get select_language;
+
+  /// No description provided for @language_changed_to.
+  ///
+  /// In en, this message translates to:
+  /// **'Language changed to {language}.'**
+  String language_changed_to(Object language);
+
+  /// No description provided for @export_favourites.
+  ///
+  /// In en, this message translates to:
+  /// **'Export favourites'**
+  String get export_favourites;
+
+  /// No description provided for @no_favourites_to_export.
+  ///
+  /// In en, this message translates to:
+  /// **'No favourites to export'**
+  String get no_favourites_to_export;
+
+  /// No description provided for @unable_to_access_downloads.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to access Downloads folder'**
+  String get unable_to_access_downloads;
+
+  /// No description provided for @saved_to_downloads.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved to Downloads: {path}'**
+  String saved_to_downloads(Object path);
+
+  /// No description provided for @no_favourites_to_import.
+  ///
+  /// In en, this message translates to:
+  /// **'No favourites found to import'**
+  String get no_favourites_to_import;
+
+  /// No description provided for @favourites_import_found.
+  ///
+  /// In en, this message translates to:
+  /// **'Found {count} {count, plural, =1{favourite} other{favourites}} in {fileName}.'**
+  String favourites_import_found(int count, Object fileName);
+
+  /// No description provided for @favourites_imported.
+  ///
+  /// In en, this message translates to:
+  /// **'Imported {count} {count, plural, =1{favourite} other{favourites}}'**
+  String favourites_imported(int count);
 }
 
 class _AppLocalizationsDelegate
@@ -1791,6 +1997,7 @@ class _AppLocalizationsDelegate
     'de',
     'en',
     'it',
+    'ja',
     'tr',
     'zh',
   ].contains(locale.languageCode);
@@ -1822,6 +2029,8 @@ AppLocalizations lookupAppLocalizations(Locale locale) {
       return AppLocalizationsEn();
     case 'it':
       return AppLocalizationsIt();
+    case 'ja':
+      return AppLocalizationsJa();
     case 'tr':
       return AppLocalizationsTr();
     case 'zh':

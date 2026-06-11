@@ -278,6 +278,10 @@ class _AppDetailsScreenState extends State<AppDetailsScreen>
               await _handleShizukuUnavailable(context, settings);
               return;
             }
+            if (settings.installMethod == InstallMethod.dhizuku) {
+              await _handleDhizukuUnavailable(context, settings);
+              return;
+            }
             if (context.mounted) {
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
@@ -3620,13 +3624,13 @@ class _AllVersionsInitData {
   });
 }
 
-enum _ShizukuAction { switchToSystem, cancel }
+enum _PrivilegedInstallerAction { switchToSystem, cancel }
 
 Future<void> _handleShizukuUnavailable(
   BuildContext context,
   SettingsProvider settings,
 ) async {
-  final action = await showDialog<_ShizukuAction>(
+  final action = await showDialog<_PrivilegedInstallerAction>(
     context: context,
     builder: (context) => SimpleDialog(
       contentPadding: EdgeInsets.all(24),
@@ -3661,11 +3665,15 @@ Future<void> _handleShizukuUnavailable(
             ),
             FilledButton.tonal(
               onPressed: () =>
-                  Navigator.of(context).pop(_ShizukuAction.switchToSystem),
+                  Navigator.of(context).pop(
+                    _PrivilegedInstallerAction.switchToSystem,
+                  ),
               child: Text(AppLocalizations.of(context)!.use_system_installer),
             ),
             TextButton(
-              onPressed: () => Navigator.of(context).pop(_ShizukuAction.cancel),
+              onPressed: () => Navigator.of(context).pop(
+                _PrivilegedInstallerAction.cancel,
+              ),
               child: Text(AppLocalizations.of(context)!.cancel),
             ),
           ],
@@ -3674,11 +3682,73 @@ Future<void> _handleShizukuUnavailable(
     ),
   );
 
-  if (action == _ShizukuAction.switchToSystem) {
+  if (action == _PrivilegedInstallerAction.switchToSystem) {
     await settings.setInstallMethod(InstallMethod.system);
     if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Switched to system installer')),
+      );
+    }
+  }
+}
+
+Future<void> _handleDhizukuUnavailable(
+  BuildContext context,
+  SettingsProvider settings,
+) async {
+  final localizations = AppLocalizations.of(context)!;
+  final action = await showDialog<_PrivilegedInstallerAction>(
+    context: context,
+    builder: (context) => SimpleDialog(
+      contentPadding: EdgeInsets.all(24),
+      title: Text(localizations.dhizuku_not_running),
+      children: [
+        Text(localizations.dhizuku_not_running_message),
+        SizedBox(height: 16),
+        Column(
+          spacing: 2.0,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            FilledButton(
+              onPressed: () async {
+                try {
+                  final appProvider = context.read<AppProvider>();
+                  await appProvider.openInstalledApp('com.rosan.dhizuku');
+                } catch (e) {
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(localizations.dhizuku_not_running),
+                      ),
+                    );
+                  }
+                }
+              },
+              child: Text(localizations.open_dhizuku),
+            ),
+            FilledButton.tonal(
+              onPressed: () => Navigator.of(context).pop(
+                _PrivilegedInstallerAction.switchToSystem,
+              ),
+              child: Text(localizations.use_system_installer),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(
+                _PrivilegedInstallerAction.cancel,
+              ),
+              child: Text(localizations.cancel),
+            ),
+          ],
+        ),
+      ],
+    ),
+  );
+
+  if (action == _PrivilegedInstallerAction.switchToSystem) {
+    await settings.setInstallMethod(InstallMethod.system);
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(localizations.use_system_installer)),
       );
     }
   }

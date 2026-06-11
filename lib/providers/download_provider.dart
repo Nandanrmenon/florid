@@ -6,7 +6,6 @@ import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:local_auth/local_auth.dart';
-import 'package:package_info_plus/package_info_plus.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shizuku_api/shizuku_api.dart';
 
@@ -14,6 +13,7 @@ import '../models/fdroid_app.dart';
 import '../providers/settings_provider.dart';
 import '../services/app_preferences_service.dart';
 import '../services/fdroid_api_service.dart';
+import '../services/dhizuku_api_service.dart';
 import '../services/installation_tracking_service.dart';
 import '../services/notification_service.dart';
 
@@ -96,12 +96,12 @@ class DownloadProvider extends ChangeNotifier {
       InstallationTrackingService();
   final AppPreferencesService _preferencesService = AppPreferencesService();
   final ShizukuApi _shizukuApi = ShizukuApi();
+  final DhizukuApiService _dhizukuApi = DhizukuApiService();
   final LocalAuthentication _localAuth = LocalAuthentication();
-  String? _androidPackageName;
   List<String>? _supportedAbis;
 
-  // Delay after Shizuku installation to allow UI to fetch installed apps
-  static const Duration _shizukuInstallSettleDelay = Duration(seconds: 2);
+  // Delay after privileged installation to allow UI to fetch installed apps
+  static const Duration _privilegedInstallSettleDelay = Duration(seconds: 2);
 
   DownloadProvider(this._apiService, this._settingsProvider) {
     _initNotifications();
@@ -440,9 +440,10 @@ class DownloadProvider extends ChangeNotifier {
           '[DownloadProvider] Auto-install queued for ${app.packageName} ${version.versionName} (method: ${_settingsProvider.installMethod})',
         );
         try {
-          if (_settingsProvider.installMethod == InstallMethod.shizuku) {
+          if (_isPrivilegedInstallMethod(_settingsProvider.installMethod)) {
+            final methodName = _settingsProvider.installMethod.name;
             Future.microtask(() async {
-              debugPrint('[DownloadProvider] Auto-install (shizuku) start');
+              debugPrint('[DownloadProvider] Auto-install ($methodName) start');
               try {
                 await installApk(
                   filePath,
@@ -452,9 +453,9 @@ class DownloadProvider extends ChangeNotifier {
                   antiFeatures: app.antiFeatures,
                   requireAuthentication: requireInstallAuth,
                 );
-                debugPrint('[DownloadProvider] Auto-install (shizuku) done');
+                debugPrint('[DownloadProvider] Auto-install ($methodName) done');
               } catch (e) {
-                debugPrint('Auto-install (shizuku) failed: $e');
+                debugPrint('Auto-install ($methodName) failed: $e');
               }
             });
           } else {
@@ -620,20 +621,17 @@ class DownloadProvider extends ChangeNotifier {
         );
       }
 
-      if (_settingsProvider.installMethod == InstallMethod.shizuku) {
-        // Schedule Shizuku install work off the immediate call stack to avoid
-        // blocking UI when the platform channel does synchronous work.
-        await Future<void>(() => _installWithShizuku(filePath));
-
-        // Keep the installing status for a bit longer to allow the UI layer
-        // (which has access to AppProvider) to call fetchInstalledApps().
-        // Note: This is a workaround for the architectural constraint that
-        // DownloadProvider doesn't have access to AppProvider. A better solution
-        // would be to use a callback or event system, but that would require
-        // larger architectural changes.
-        await Future.delayed(_shizukuInstallSettleDelay);
-      } else {
-        await _installWithSystemInstaller(filePath);
+      switch (_settingsProvider.installMethod) {
+        case InstallMethod.shizuku:
+          // Schedule privileged install work off the immediate call stack to
+          // avoid blocking UI when the platform channel does synchronous work.
+          await Future<void>(() => _installWithShizuku(filePath));
+          await Future.delayed(_privilegedInstallSettleDelay);
+        case InstallMethod.dhizuku:
+          await Future<void>(() => _installWithDhizuku(filePath));
+          await Future.delayed(_privilegedInstallSettleDelay);
+        case InstallMethod.system:
+          await _installWithSystemInstaller(filePath);
       }
 
       // Update status back to completed after installation
@@ -702,87 +700,113 @@ class DownloadProvider extends ChangeNotifier {
     await AppInstaller.installApk(filePath);
   }
 
+  bool _isPrivilegedInstallMethod(InstallMethod method) {
+    return method == InstallMethod.shizuku || method == InstallMethod.dhizuku;
+  }
+
   Future<void> _installWithShizuku(String filePath) async {
+    await _installWithPrivilegedRunner(
+      filePath,
+      serviceName: 'Shizuku',
+      pingBinder: () => _shizukuApi.pingBinder(),
+      checkPermission: () => _shizukuApi.checkPermission(),
+      requestPermission: () => _shizukuApi.requestPermission(),
+      runCommand: (command) => _shizukuApi.runCommand(command),
+      unavailableMessage: 'Shizuku is not running',
+      permissionDeniedMessage: 'Shizuku permission denied',
+    );
+  }
+
+  Future<void> _installWithDhizuku(String filePath) async {
     if (!Platform.isAndroid) {
-      throw Exception('Shizuku install is only available on Android');
+      throw Exception('Dhizuku install is only available on Android');
     }
 
-    final isBinderRunning = await _shizukuApi.pingBinder() ?? false;
+    final isBinderRunning = await _dhizukuApi.pingBinder() ?? false;
     if (!isBinderRunning) {
-      throw Exception('Shizuku is not running');
+      throw Exception('Dhizuku is not available');
     }
 
-    var hasPermission = await _shizukuApi.checkPermission() ?? false;
+    var hasPermission = await _dhizukuApi.checkPermission() ?? false;
     if (!hasPermission) {
-      hasPermission = await _shizukuApi.requestPermission() ?? false;
+      hasPermission = await _dhizukuApi.requestPermission() ?? false;
     }
     if (!hasPermission) {
-      throw Exception('Shizuku permission denied');
+      throw Exception('Dhizuku permission denied');
     }
 
-    final packageName = await _getAndroidPackageName();
-    final sourcePath = await _prepareShizukuSource(filePath);
+    try {
+      final result = await _dhizukuApi.installApk(filePath);
+      if (result == null) {
+        throw Exception('Dhizuku install returned no response');
+      }
+      if (!result.toLowerCase().contains('success')) {
+        throw Exception('Dhizuku install failed: $result');
+      }
+    } on PlatformException catch (e) {
+      throw Exception(e.message ?? 'Dhizuku install failed');
+    }
+  }
+
+  Future<void> _installWithPrivilegedRunner(
+    String filePath, {
+    required String serviceName,
+    required Future<bool?> Function() pingBinder,
+    required Future<bool?> Function() checkPermission,
+    required Future<bool?> Function() requestPermission,
+    required Future<String?> Function(String command) runCommand,
+    required String unavailableMessage,
+    required String permissionDeniedMessage,
+  }) async {
+    if (!Platform.isAndroid) {
+      throw Exception('$serviceName install is only available on Android');
+    }
+
+    final isBinderRunning = await pingBinder() ?? false;
+    if (!isBinderRunning) {
+      throw Exception(unavailableMessage);
+    }
+
+    var hasPermission = await checkPermission() ?? false;
+    if (!hasPermission) {
+      hasPermission = await requestPermission() ?? false;
+    }
+    if (!hasPermission) {
+      throw Exception(permissionDeniedMessage);
+    }
+
+    final sourcePath = filePath;
     final escapedPath = _escapeForDoubleQuotes(sourcePath);
     final fileName = Uri.file(sourcePath).pathSegments.last;
     final tempPath = '/data/local/tmp/$fileName';
 
     try {
-      // Copy into /data/local/tmp so system_server can read it.
-      final copyCommand = _buildShizukuCopyCommand(
-        packageName: packageName,
-        sourcePath: escapedPath,
-        destPath: tempPath,
-      );
-      final copyResult = await _shizukuApi.runCommand(copyCommand);
+      final copyCommand = 'cp -f "$escapedPath" "$tempPath"';
+      final copyResult = await runCommand(copyCommand);
       if (copyResult == null) {
-        throw Exception('Shizuku copy returned no response');
+        throw Exception('$serviceName copy returned no response');
       }
       final copyLower = copyResult.toLowerCase();
       if (copyLower.contains('permission denied') ||
           copyLower.contains('no such file') ||
           copyLower.contains('error')) {
-        throw Exception('Shizuku copy failed: $copyResult');
+        throw Exception('$serviceName copy failed: $copyResult');
       }
 
       final installCommand = 'pm install -r -g "$tempPath"';
-      final result = await _shizukuApi.runCommand(installCommand);
+      final result = await runCommand(installCommand);
       if (result == null) {
-        throw Exception('Shizuku install returned no response');
+        throw Exception('$serviceName install returned no response');
       }
 
       final normalized = result.toLowerCase();
       final success = normalized.contains('success');
       if (!success) {
-        throw Exception('Shizuku install failed: $result');
+        throw Exception('$serviceName install failed: $result');
       }
     } finally {
-      await _shizukuApi.runCommand('rm -f "$tempPath"');
+      await runCommand('rm -f "$tempPath"');
     }
-  }
-
-  Future<String> _prepareShizukuSource(String filePath) async {
-    // Don't copy to cache - Shizuku can read from external storage directly
-    // but cannot access app's private cache directory
-    return filePath;
-  }
-
-  String _buildShizukuCopyCommand({
-    required String packageName,
-    required String sourcePath,
-    required String destPath,
-  }) {
-    // Shizuku runs with system-level permissions, use simple cp
-    return 'cp -f "$sourcePath" "$destPath"';
-  }
-
-  Future<String> _getAndroidPackageName() async {
-    if (_androidPackageName != null) {
-      return _androidPackageName!;
-    }
-    final info = await PackageInfo.fromPlatform();
-    final packageName = info.packageName;
-    _androidPackageName = packageName;
-    return packageName;
   }
 
   String _escapeForDoubleQuotes(String value) {
@@ -792,23 +816,43 @@ class DownloadProvider extends ChangeNotifier {
   /// Requests install permission
   Future<bool> requestInstallPermission() async {
     try {
-      if (_settingsProvider.installMethod == InstallMethod.shizuku) {
-        final isBinderRunning = await _shizukuApi.pingBinder() ?? false;
-        if (!isBinderRunning) {
-          return false;
-        }
-        final hasPermission = await _shizukuApi.checkPermission() ?? false;
-        if (hasPermission) {
-          return true;
-        }
-        return await _shizukuApi.requestPermission() ?? false;
+      switch (_settingsProvider.installMethod) {
+        case InstallMethod.shizuku:
+          return _requestPrivilegedInstallPermission(
+            pingBinder: () => _shizukuApi.pingBinder(),
+            checkPermission: () => _shizukuApi.checkPermission(),
+            requestPermission: () => _shizukuApi.requestPermission(),
+          );
+        case InstallMethod.dhizuku:
+          return _requestPrivilegedInstallPermission(
+            pingBinder: () => _dhizukuApi.pingBinder(),
+            checkPermission: () => _dhizukuApi.checkPermission(),
+            requestPermission: () => _dhizukuApi.requestPermission(),
+          );
+        case InstallMethod.system:
+          final status = await Permission.requestInstallPackages.request();
+          return status.isGranted;
       }
-      final status = await Permission.requestInstallPackages.request();
-      return status.isGranted;
     } catch (e) {
       debugPrint('Error requesting install permission: $e');
       return false;
     }
+  }
+
+  Future<bool> _requestPrivilegedInstallPermission({
+    required Future<bool?> Function() pingBinder,
+    required Future<bool?> Function() checkPermission,
+    required Future<bool?> Function() requestPermission,
+  }) async {
+    final isBinderRunning = await pingBinder() ?? false;
+    if (!isBinderRunning) {
+      return false;
+    }
+    final hasPermission = await checkPermission() ?? false;
+    if (hasPermission) {
+      return true;
+    }
+    return await requestPermission() ?? false;
   }
 
   /// Deletes a downloaded APK file

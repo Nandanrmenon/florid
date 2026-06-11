@@ -426,6 +426,21 @@ class AppLocalizationsZh extends AppLocalizations {
   String get open_shizuku => '打开 Shizuku';
 
   @override
+  String get dhizuku => 'Dhizuku';
+
+  @override
+  String get requires_dhizuku_active => '需要 Dhizuku 处于活动状态';
+
+  @override
+  String get open_dhizuku => '打开 Dhizuku';
+
+  @override
+  String get dhizuku_not_running => 'Dhizuku 不可用';
+
+  @override
+  String get dhizuku_not_running_message => '请启动 Dhizuku 并授予权限，或切换到系统安装程序。';
+
+  @override
   String get use_system_installer => '使用系统安装程序';
 
   @override
@@ -1311,6 +1326,21 @@ class AppLocalizationsZhCn extends AppLocalizationsZh {
 
   @override
   String get open_shizuku => '打开 Shizuku';
+
+  @override
+  String get dhizuku => 'Dhizuku';
+
+  @override
+  String get requires_dhizuku_active => '需要 Dhizuku 处于活动状态';
+
+  @override
+  String get open_dhizuku => '打开 Dhizuku';
+
+  @override
+  String get dhizuku_not_running => 'Dhizuku 不可用';
+
+  @override
+  String get dhizuku_not_running_message => '请启动 Dhizuku 并授予权限，或切换到系统安装程序。';
 
   @override
   String get use_system_installer => '使用系统安装程序';

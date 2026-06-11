@@ -6,7 +6,7 @@ enum ThemeStyle { material, florid, darkKnight }
 
 enum UpdateNetworkPolicy { any, wifiOnly, wifiAndCharging }
 
-enum InstallMethod { system, shizuku }
+enum InstallMethod { system, shizuku, dhizuku }
 
 enum InstallAuthPolicy { all, antiFeatures }
 

@@ -431,6 +431,22 @@ class AppLocalizationsTr extends AppLocalizations {
   String get open_shizuku => 'Shizuku\'yu Aç';
 
   @override
+  String get dhizuku => 'Dhizuku';
+
+  @override
+  String get requires_dhizuku_active => 'Dhizuku\'nun etkin olması gerekir';
+
+  @override
+  String get open_dhizuku => 'Dhizuku\'yu Aç';
+
+  @override
+  String get dhizuku_not_running => 'Dhizuku kullanılamıyor';
+
+  @override
+  String get dhizuku_not_running_message =>
+      'Dhizuku\'yu başlatıp izin verin veya sistem kurucusuna geçin.';
+
+  @override
   String get use_system_installer => 'Sistem kurucusunu kullan';
 
   @override

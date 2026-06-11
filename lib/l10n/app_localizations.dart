@@ -917,6 +917,36 @@ abstract class AppLocalizations {
   /// **'Open Shizuku'**
   String get open_shizuku;
 
+  /// No description provided for @dhizuku.
+  ///
+  /// In en, this message translates to:
+  /// **'Dhizuku'**
+  String get dhizuku;
+
+  /// No description provided for @requires_dhizuku_active.
+  ///
+  /// In en, this message translates to:
+  /// **'Requires Dhizuku to be active'**
+  String get requires_dhizuku_active;
+
+  /// No description provided for @open_dhizuku.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Dhizuku'**
+  String get open_dhizuku;
+
+  /// No description provided for @dhizuku_not_running.
+  ///
+  /// In en, this message translates to:
+  /// **'Dhizuku is not available'**
+  String get dhizuku_not_running;
+
+  /// No description provided for @dhizuku_not_running_message.
+  ///
+  /// In en, this message translates to:
+  /// **'Start Dhizuku and grant permission, or switch to the system installer.'**
+  String get dhizuku_not_running_message;
+
   /// No description provided for @use_system_installer.
   ///
   /// In en, this message translates to:

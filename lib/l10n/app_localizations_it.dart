@@ -435,6 +435,22 @@ class AppLocalizationsIt extends AppLocalizations {
   String get open_shizuku => 'Apri Shizuku';
 
   @override
+  String get dhizuku => 'Dhizuku';
+
+  @override
+  String get requires_dhizuku_active => 'Richiede che Dhizuku sia attivo';
+
+  @override
+  String get open_dhizuku => 'Apri Dhizuku';
+
+  @override
+  String get dhizuku_not_running => 'Dhizuku non è disponibile';
+
+  @override
+  String get dhizuku_not_running_message =>
+      'Avvia Dhizuku e concedi l\'autorizzazione, oppure passa all\'installazione di sistema.';
+
+  @override
   String get use_system_installer => 'Utilizza l\'installazione di sistema';
 
   @override

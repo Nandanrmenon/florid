@@ -16,7 +16,7 @@ if (keystorePropertiesFile.exists()) {
 
 android {
     namespace = "com.nahnah.florid"
-    compileSdk = flutter.compileSdkVersion
+    compileSdk = 37
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
@@ -79,6 +79,7 @@ android {
             manifestPlaceholders["appLabel"] = "Florid"
         }
     }
+    compileSdkMinor = 0
 }
 
 dependencies {

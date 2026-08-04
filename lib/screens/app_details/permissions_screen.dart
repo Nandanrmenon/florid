@@ -1,5 +1,5 @@
-import 'package:florid/widgets/m_list.dart';
 import 'package:flutter/material.dart';
+import 'package:hornbill/hornbill.dart';
 import 'package:material_symbols_icons/symbols.dart';
 
 import '../../constants.dart';
@@ -131,8 +131,8 @@ class _PermissionsScreenState extends State<PermissionsScreen> {
                   Column(
                     spacing: 4.0,
                     children: [
-                      MListHeader(title: group, icon: _groupIcon(group)),
-                      MListViewBuilder(
+                      HListHeader(title: group, icon: _groupIcon(group)),
+                      HListView.builder(
                         itemCount: permissions.length,
                         itemBuilder: (index) {
                           final permission = permissions[index];
@@ -140,7 +140,7 @@ class _PermissionsScreenState extends State<PermissionsScreen> {
                             permission,
                           );
 
-                          return MListItemData(
+                          return HListItemData(
                             title: permission,
                             subtitle: description,
                             onTap: () {},

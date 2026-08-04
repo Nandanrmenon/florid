@@ -1,9 +1,9 @@
 import 'package:florid/l10n/app_localizations.dart';
 import 'package:florid/providers/settings_provider.dart';
 import 'package:florid/widgets/app_list_item.dart';
-import 'package:florid/widgets/m_list.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:hornbill/hornbill.dart';
 import 'package:m3e_core/m3e_core.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:provider/provider.dart';
@@ -240,7 +240,7 @@ class _CategoriesScreenState extends State<CategoriesScreen>
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      MListHeader(
+                      HListHeader(
                         title: category,
                         onTap: () => _openCategoryViewer(context, category),
                         subtitle: categoryApps.isNotEmpty

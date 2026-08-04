@@ -8,6 +8,7 @@ import 'package:florid/widgets/onboarding_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:hornbill/hornbill.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
@@ -16,7 +17,6 @@ import '../providers/app_provider.dart';
 import '../providers/repositories_provider.dart';
 import '../providers/settings_provider.dart';
 import '../services/fdroid_api_service.dart';
-import '../widgets/m_list.dart';
 import 'florid_app.dart';
 import 'settings/repository_qr_scanner.dart';
 
@@ -838,18 +838,18 @@ class _ReposStep extends StatelessWidget {
             spacing: 4.0,
             children: [
               if (presets.isNotEmpty)
-                MListHeader(
+                HListHeader(
                   title: localizations.available_repositories,
                 ).animate().fadeIn(duration: 500.ms, delay: 400.ms),
               if (presets.isEmpty)
                 Center(child: CircularProgressIndicator())
               else
-                MCheckboxListViewBuilder(
+                HCheckboxListView.builder(
                   itemCount: presets.length,
                   itemBuilder: (index) {
                     final preset = presets[index];
                     final url = preset['url'] as String;
-                    return MCheckboxListItemData(
+                    return HCheckboxListItemData(
                       title: preset['name'],
                       subtitle: preset['description'],
                       value: selectedRepos[url] ?? false,
@@ -984,9 +984,9 @@ class _PermissionsStep extends StatelessWidget {
                 ],
               ),
             ),
-            MListView(
+            HListView(
               items: [
-                MListItemData(
+                HListItemData(
                   title: localizations.app_installation,
                   subtitle: localizations.allow_florid_install_apps,
                   leading: ListIcon(
@@ -1006,10 +1006,10 @@ class _PermissionsStep extends StatelessWidget {
             ),
             Column(
               children: [
-                MListHeader(title: 'Optional'),
-                MListView(
+                HListHeader(title: 'Optional'),
+                HListView(
                   items: [
-                    MListItemData(
+                    HListItemData(
                       title: localizations.notifications,
                       subtitle: localizations.get_notified_updates,
                       leading: ListIcon(
@@ -1328,9 +1328,9 @@ class _TelemetryStepState extends State<_TelemetryStep> {
                 ],
               ),
             ),
-            MListView(
+            HListView(
               items: [
-                MListItemData(
+                HListItemData(
                   title: AppLocalizations.of(context)!.opt_out_of_telemetry,
                   subtitle: AppLocalizations.of(
                     context,

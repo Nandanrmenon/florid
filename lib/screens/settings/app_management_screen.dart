@@ -6,10 +6,10 @@ import 'package:florid/providers/settings_provider.dart';
 import 'package:florid/services/update_check_service.dart';
 import 'package:florid/services/usage_analytics_service.dart';
 import 'package:florid/widgets/list_icon.dart';
-import 'package:florid/widgets/m_list.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:hornbill/hornbill.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:package_info_plus/package_info_plus.dart';
@@ -308,11 +308,11 @@ class _AppManagementScreenState extends State<AppManagementScreen> {
                       Column(
                         spacing: 4,
                         children: [
-                          MListHeader(title: localizations.installation_method),
-                          MRadioListView<InstallMethod>(
+                          HListHeader(title: localizations.installation_method),
+                          HRadioListView<InstallMethod>(
                             items: InstallMethod.values
                                 .map(
-                                  (method) => MRadioListItemData<InstallMethod>(
+                                  (method) => HRadioListItemData<InstallMethod>(
                                     title: _installMethodLabel(
                                       localizations,
                                       method,
@@ -364,10 +364,10 @@ class _AppManagementScreenState extends State<AppManagementScreen> {
                       Column(
                         spacing: 4,
                         children: [
-                          MListHeader(title: localizations.privacy),
-                          MListView(
+                          HListHeader(title: localizations.privacy),
+                          HListView(
                             items: [
-                              MListItemData(
+                              HListItemData(
                                 leading: ListIcon(iconData: Symbols.security),
                                 title: localizations.opt_out_of_telemetry,
                                 onTap: () async {
@@ -408,12 +408,12 @@ class _AppManagementScreenState extends State<AppManagementScreen> {
                       Column(
                         spacing: 4,
                         children: [
-                          MListHeader(
+                          HListHeader(
                             title: localizations.downloads_and_storage,
                           ),
-                          MListView(
+                          HListView(
                             items: [
-                              MListItemData(
+                              HListItemData(
                                 title:
                                     localizations.auto_install_after_download,
                                 onTap: () {
@@ -430,7 +430,7 @@ class _AppManagementScreenState extends State<AppManagementScreen> {
                                   },
                                 ),
                               ),
-                              MListItemData(
+                              HListItemData(
                                 title: localizations.delete_apk_after_install,
                                 onTap: () {
                                   settings.setAutoDeleteApk(
@@ -453,10 +453,10 @@ class _AppManagementScreenState extends State<AppManagementScreen> {
                       Column(
                         spacing: 4,
                         children: [
-                          MListHeader(title: localizations.background_updates),
-                          MListView(
+                          HListHeader(title: localizations.background_updates),
+                          HListView(
                             items: [
-                              MListItemData(
+                              HListItemData(
                                 leading: ListIcon(
                                   iconData: Symbols.notifications,
                                 ),
@@ -480,7 +480,7 @@ class _AppManagementScreenState extends State<AppManagementScreen> {
                                   },
                                 ),
                               ),
-                              MListItemData(
+                              HListItemData(
                                 leading: ListIcon(
                                   iconData: Symbols.network_check,
                                 ),
@@ -495,7 +495,7 @@ class _AppManagementScreenState extends State<AppManagementScreen> {
                                 ),
                                 suffix: Icon(Symbols.chevron_right),
                               ),
-                              MListItemData(
+                              HListItemData(
                                 leading: ListIcon(iconData: Symbols.schedule),
                                 title: localizations.update_interval,
                                 subtitle: _updateIntervalLabel(
@@ -517,12 +517,12 @@ class _AppManagementScreenState extends State<AppManagementScreen> {
                         children: [
                           if (settings.backgroundUpdatesEnabled &&
                               _isIgnoringBatteryOptimizations == false)
-                            MListHeader(title: localizations.reliability),
-                          MListView(
+                            HListHeader(title: localizations.reliability),
+                          HListView(
                             items: [
                               if (settings.backgroundUpdatesEnabled &&
                                   _isIgnoringBatteryOptimizations == false)
-                                MListItemData(
+                                HListItemData(
                                   leading: Icon(
                                     Symbols.battery_saver,
                                     fill: 1,
@@ -535,7 +535,7 @@ class _AppManagementScreenState extends State<AppManagementScreen> {
                                   onTap: _requestDisableBatteryOptimizations,
                                 ),
                               if (kDebugMode)
-                                MListItemData(
+                                HListItemData(
                                   leading: Icon(Symbols.bolt),
                                   title: localizations.run_debug_check_10s,
                                   subtitle: localizations

@@ -8,12 +8,12 @@ import 'package:florid/widgets/app_details_icon.dart';
 import 'package:florid/widgets/changelog_preview.dart';
 import 'package:florid/widgets/f_tabbar.dart';
 import 'package:florid/widgets/list_icon.dart';
-import 'package:florid/widgets/m_list.dart';
 import 'package:florid/widgets/markup_content.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_html/flutter_html.dart';
+import 'package:hornbill/hornbill.dart';
 import 'package:m3e_core/m3e_core.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -554,14 +554,14 @@ class _AppDetailsScreenState extends State<AppDetailsScreen>
                 ],
               ),
             ),
-            MListViewBuilder(
+            HListView.builder(
               itemCount: availableRepos.length,
               itemBuilder: (index) {
                 final repo = availableRepos[index];
                 final isPrimary = repo.url == app.repositoryUrl;
                 final isTracked =
                     trackedRepo != null && repo.url == trackedRepo;
-                return MListItemData(
+                return HListItemData(
                   selected: isPrimary || isTracked,
                   leading: (isPrimary || isTracked)
                       ? Icon(Symbols.check)
@@ -1307,38 +1307,38 @@ class _DetailsSheetsSection extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    MListHeader(
+                    HListHeader(
                       title: AppLocalizations.of(context)!.version_information,
                       trailing: IconButton(
                         onPressed: () => Navigator.pop(context),
                         icon: Icon(SolarIconsOutline.altArrowDown),
                       ),
                     ),
-                    MListView(
+                    HListView(
                       items: [
-                        MListItemData(
+                        HListItemData(
                           title: AppLocalizations.of(context)!.version_name,
                           subtitle: version.versionName,
                           onTap: () {},
                         ),
-                        MListItemData(
+                        HListItemData(
                           title: AppLocalizations.of(context)!.version_code,
                           subtitle: version.versionCode.toString(),
                           onTap: () {},
                         ),
-                        MListItemData(
+                        HListItemData(
                           title: AppLocalizations.of(context)!.size,
                           subtitle: version.sizeString,
                           onTap: () {},
                         ),
                         if (version.minSdkVersion != null)
-                          MListItemData(
+                          HListItemData(
                             title: AppLocalizations.of(context)!.min_sdk,
                             subtitle: version.minSdkVersion!,
                             onTap: () {},
                           ),
                         if (version.targetSdkVersion != null)
-                          MListItemData(
+                          HListItemData(
                             title: AppLocalizations.of(context)!.target_sdk,
                             subtitle: version.targetSdkVersion!,
                             onTap: () {},
@@ -1377,23 +1377,23 @@ class _DetailsSheetsSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MListView(
+    return HListView(
       items: [
-        MListItemData(
+        HListItemData(
           title: AppLocalizations.of(context)!.app_information,
           subtitle: '',
           leading: ListIcon(iconData: SolarIconsBold.infoSquare),
           suffix: Icon(SolarIconsOutline.altArrowRight),
           onTap: () => _showAppInfoSheet(context),
         ),
-        MListItemData(
+        HListItemData(
           title: AppLocalizations.of(context)!.version_information,
           subtitle: '',
           leading: ListIcon(iconData: SolarIconsBold.document),
           suffix: Icon(SolarIconsOutline.altArrowRight),
           onTap: () => _showVersionInfoSheet(context),
         ),
-        MListItemData(
+        HListItemData(
           title: AppLocalizations.of(context)!.all_versions,
           subtitle: '',
           leading: ListIcon(iconData: SolarIconsBold.history),
@@ -2381,43 +2381,43 @@ class _AppInfoSection extends StatelessWidget {
                 Column(
                   spacing: 4,
                   children: [
-                    MListHeader(
+                    HListHeader(
                       title: AppLocalizations.of(context)!.app_information,
                       trailing: IconButton(
                         onPressed: () => Navigator.pop(context),
                         icon: Icon(SolarIconsOutline.altArrowDown),
                       ),
                     ),
-                    MListView(
+                    HListView(
                       items: [
-                        MListItemData(
+                        HListItemData(
                           leading: ListIcon(iconData: Symbols.package_rounded),
                           title: AppLocalizations.of(context)!.package_name,
                           subtitle: app.packageName,
                           onTap: () {},
                         ),
-                        MListItemData(
+                        HListItemData(
                           leading: ListIcon(iconData: Symbols.license_rounded),
                           title: AppLocalizations.of(context)!.license,
                           subtitle: app.license,
                           onTap: () {},
                         ),
                         if (app.added != null)
-                          MListItemData(
+                          HListItemData(
                             leading: ListIcon(iconData: Symbols.add),
                             title: AppLocalizations.of(context)!.added,
                             subtitle: _formatDate(app.added!),
                             onTap: () {},
                           ),
                         if (app.added != null)
-                          MListItemData(
+                          HListItemData(
                             leading: ListIcon(iconData: Symbols.update),
                             title: AppLocalizations.of(context)!.last_updated,
                             subtitle: _formatDate(app.lastUpdated!),
                             onTap: () {},
                           ),
                         if (latestVersion?.permissions?.isNotEmpty == true)
-                          MListItemData(
+                          HListItemData(
                             leading: ListIcon(iconData: Symbols.security),
                             title: AppLocalizations.of(context)!.permissions,
                             subtitle: '(${latestVersion!.permissions!.length})',
@@ -2443,7 +2443,7 @@ class _AppInfoSection extends StatelessWidget {
                     spacing: 4,
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      MListHeader(title: 'Anti-features'),
+                      HListHeader(title: 'Anti-features'),
                       Card(
                         margin: const EdgeInsets.symmetric(horizontal: 16.0),
                         child: Padding(
@@ -2538,7 +2538,7 @@ class _DescriptionSectionState extends State<_DescriptionSection>
         crossAxisAlignment: CrossAxisAlignment.stretch,
         spacing: 4.0,
         children: [
-          MListHeader(
+          HListHeader(
             title: 'Description',
 
             trailing: Icon(
@@ -3059,10 +3059,10 @@ class _AppExtraInfoSectionState extends State<AppExtraInfoSection> {
         FutureBuilder<String?>(
           future: videoUrlFuture,
           builder: (context, videoSnapshot) {
-            return MListView(
+            return HListView(
               items: [
                 if (widget.app.webSite != null)
-                  MListItemData(
+                  HListItemData(
                     leading: ListIcon(iconData: SolarIconsOutline.global),
                     title: AppLocalizations.of(context)!.website,
                     onTap: () async {
@@ -3073,7 +3073,7 @@ class _AppExtraInfoSectionState extends State<AppExtraInfoSection> {
                     suffix: Icon(SolarIconsOutline.squareBottomUp),
                   ),
                 if (widget.app.sourceCode != null)
-                  MListItemData(
+                  HListItemData(
                     leading: ListIcon(iconData: SolarIconsOutline.code),
                     title: AppLocalizations.of(context)!.source_code,
                     onTap: () async {
@@ -3084,7 +3084,7 @@ class _AppExtraInfoSectionState extends State<AppExtraInfoSection> {
                     suffix: Icon(SolarIconsOutline.squareBottomUp),
                   ),
                 if (widget.app.issueTracker != null)
-                  MListItemData(
+                  HListItemData(
                     leading: ListIcon(iconData: SolarIconsOutline.bug),
                     title: AppLocalizations.of(context)!.issue_tracker,
                     onTap: () async {
@@ -3100,14 +3100,14 @@ class _AppExtraInfoSectionState extends State<AppExtraInfoSection> {
         ),
         SizedBox(height: 16),
         if (donationItems.isNotEmpty) ...[
-          MListHeader(
+          HListHeader(
             icon: SolarIconsOutline.handMoney,
             title: AppLocalizations.of(context)!.support_the_developer,
           ),
-          MListView(
+          HListView(
             items: [
               for (final item in donationItems)
-                MListItemData(
+                HListItemData(
                   title: item.key,
                   subtitle: item.value,
                   suffix: Icon(SolarIconsOutline.squareBottomUp),
@@ -3306,7 +3306,7 @@ class _AllVersionsSectionState extends State<_AllVersionsSection> {
             crossAxisAlignment: CrossAxisAlignment.start,
             spacing: 8.0,
             children: [
-              MListHeader(
+              HListHeader(
                 title: 'All Versions',
                 trailing: IconButton(
                   onPressed: () => Navigator.pop(context),
@@ -3363,7 +3363,7 @@ class _AllVersionsSectionState extends State<_AllVersionsSection> {
           crossAxisAlignment: CrossAxisAlignment.start,
           spacing: 8.0,
           children: [
-            MListHeader(
+            HListHeader(
               title: 'All Versions',
               trailing: IconButton(
                 onPressed: () => Navigator.pop(context),
@@ -3480,7 +3480,7 @@ class _AllVersionsSectionState extends State<_AllVersionsSection> {
                   );
                 }
 
-                return MListViewBuilder(
+                return HListView.builder(
                   itemCount: versions.length,
                   itemBuilder: (index) {
                     final version = versions[index];
@@ -3495,7 +3495,7 @@ class _AllVersionsSectionState extends State<_AllVersionsSection> {
                         (installedApp.versionCode != null
                             ? installedApp.versionCode == version.versionCode
                             : installedApp.versionName == version.versionName);
-                    return MListItemData(
+                    return HListItemData(
                       title: version.versionName,
                       subtitle: version.sizeString,
                       suffix: Row(

@@ -17,10 +17,10 @@ import 'package:florid/screens/settings/troubleshooting_screen.dart';
 import 'package:florid/services/fdroid_api_service.dart';
 import 'package:florid/widgets/app_list_item.dart';
 import 'package:florid/widgets/list_icon.dart';
-import 'package:florid/widgets/m_list.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:hornbill/hornbill.dart';
 import 'package:iconify_flutter/icons/bxl.dart';
 import 'package:iconify_flutter/icons/simple_icons.dart';
 import 'package:material_symbols_icons/symbols.dart';
@@ -296,13 +296,13 @@ class _UserSettingsContentState extends State<_UserSettingsContent> {
             Column(
               spacing: 4,
               children: [
-                const MListHeader(
+                const HListHeader(
                   title: 'General Settings',
                   icon: Symbols.mobile,
                 ),
-                MListView(
+                HListView(
                   items: [
-                    MListItemData(
+                    HListItemData(
                       leading: ListIcon(iconData: SolarIconsBold.heart),
                       title: 'Favourites',
                       subtitle: 'View your favourite apps',
@@ -316,7 +316,7 @@ class _UserSettingsContentState extends State<_UserSettingsContent> {
                       },
                       suffix: const Icon(Symbols.chevron_right),
                     ),
-                    MListItemData(
+                    HListItemData(
                       leading: ListIcon(iconData: SolarIconsBold.palette),
                       title: 'Appearance',
                       subtitle: 'Theme mode and style',
@@ -330,7 +330,7 @@ class _UserSettingsContentState extends State<_UserSettingsContent> {
                       },
                       suffix: const Icon(Symbols.chevron_right),
                     ),
-                    MListItemData(
+                    HListItemData(
                       leading: ListIcon(iconData: SolarIconsBold.shield),
                       title: 'Parental Control',
                       subtitle: 'Hide anti-feature apps and protect installs',
@@ -344,7 +344,7 @@ class _UserSettingsContentState extends State<_UserSettingsContent> {
                       },
                       suffix: const Icon(Symbols.chevron_right),
                     ),
-                    MListItemData(
+                    HListItemData(
                       leading: ListIcon(iconData: SolarIconsBold.globus),
                       title: 'App content language',
                       onTap: () => _showLanguageDialog(context, settings),
@@ -361,13 +361,13 @@ class _UserSettingsContentState extends State<_UserSettingsContent> {
             Column(
               spacing: 4,
               children: [
-                const MListHeader(
+                const HListHeader(
                   title: 'Repositories & Management',
                   icon: Symbols.settings,
                 ),
-                MListView(
+                HListView(
                   items: [
-                    MListItemData(
+                    HListItemData(
                       leading: ListIcon(iconData: SolarIconsBold.cloud),
                       title: 'Manage repositories',
                       onTap: () {
@@ -381,7 +381,7 @@ class _UserSettingsContentState extends State<_UserSettingsContent> {
                       subtitle: 'Add or remove F-Droid repositories',
                       suffix: const Icon(Symbols.chevron_right),
                     ),
-                    MListItemData(
+                    HListItemData(
                       leading: ListIcon(
                         iconData: SolarIconsBold.settingsMinimalistic,
                       ),
@@ -455,13 +455,13 @@ class _UserSettingsContentState extends State<_UserSettingsContent> {
             Column(
               spacing: 4.0,
               children: [
-                const MListHeader(
+                const HListHeader(
                   title: 'Miscellaneous',
                   icon: Symbols.more_horiz,
                 ),
-                MListView(
+                HListView(
                   items: [
-                    MListItemData(
+                    HListItemData(
                       leading: ListIcon(iconData: SolarIconsBold.sledgehammer),
                       title: 'Troubleshooting',
                       subtitle: 'Storage, cache, and downloads',
@@ -477,9 +477,9 @@ class _UserSettingsContentState extends State<_UserSettingsContent> {
                     ),
                   ],
                 ),
-                MListView(
+                HListView(
                   items: [
-                    MListItemData(
+                    HListItemData(
                       leading: ListIcon(iconData: SolarIconsBold.infoSquare),
                       title: AppLocalizations.of(context)!.version,
                       subtitle: _appVersion.isEmpty ? 'Loading…' : _appVersion,
@@ -501,7 +501,7 @@ class _UserSettingsContentState extends State<_UserSettingsContent> {
                         );
                       },
                     ),
-                    MListItemData(
+                    HListItemData(
                       leading: SocialListIcon(icon: Bxl.git),
                       title: 'Source code',
                       subtitle: 'View the Florid source code on GitHub',
@@ -515,7 +515,7 @@ class _UserSettingsContentState extends State<_UserSettingsContent> {
                         }
                       },
                     ),
-                    MListItemData(
+                    HListItemData(
                       leading: SocialListIcon(icon: Bxl.telegram),
                       title: 'Telegram',
                       subtitle: 'Join the community on Telegram',
@@ -527,7 +527,7 @@ class _UserSettingsContentState extends State<_UserSettingsContent> {
                         }
                       },
                     ),
-                    MListItemData(
+                    HListItemData(
                       leading: SocialListIcon(icon: SimpleIcons.matrix),
                       title: 'Matrix',
                       subtitle: 'Join the community on Matrix',
@@ -541,7 +541,7 @@ class _UserSettingsContentState extends State<_UserSettingsContent> {
                         }
                       },
                     ),
-                    MListItemData(
+                    HListItemData(
                       leading: ListIcon(
                         iconData: SolarIconsBold.roundedMagnifierBug,
                       ),
@@ -557,7 +557,7 @@ class _UserSettingsContentState extends State<_UserSettingsContent> {
                         }
                       },
                     ),
-                    MListItemData(
+                    HListItemData(
                       leading: ListIcon(iconData: SolarIconsBold.heartShine),
                       title: 'Donate',
                       subtitle: 'Support continued development of Florid',
@@ -569,7 +569,7 @@ class _UserSettingsContentState extends State<_UserSettingsContent> {
                         }
                       },
                     ),
-                    MListItemData(
+                    HListItemData(
                       leading: ListIcon(iconData: SolarIconsBold.share),
                       title: 'Share Florid',
                       subtitle: 'Let your nerdy friends know about Florid!',

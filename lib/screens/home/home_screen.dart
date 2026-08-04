@@ -5,9 +5,9 @@ import 'package:florid/providers/download_provider.dart';
 import 'package:florid/providers/settings_provider.dart';
 import 'package:florid/screens/settings/repositories_screen.dart';
 import 'package:florid/widgets/app_details_icon.dart';
-import 'package:florid/widgets/m_list.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:hornbill/hornbill.dart';
 import 'package:m3e_core/m3e_core.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:provider/provider.dart';
@@ -267,7 +267,7 @@ class _HomeScreenState extends State<HomeScreen>
               child: Column(
                 spacing: 4.0,
                 children: [
-                  MListHeader(
+                  HListHeader(
                     title: AppLocalizations.of(context)!.recently_updated,
                     onTap: _openRecentlyUpdatedScreen,
                     trailing: Icon(Symbols.arrow_forward),
@@ -275,9 +275,7 @@ class _HomeScreenState extends State<HomeScreen>
                   if (isLoading && recentlyUpdatedApps.isEmpty)
                     const Padding(
                       padding: EdgeInsets.symmetric(vertical: 32.0),
-                      child: Center(
-                        child: M3EContainedLoadingIndicator(),
-                      ),
+                      child: Center(child: M3EContainedLoadingIndicator()),
                     )
                   else if (recentlyUpdatedApps.isEmpty)
                     Padding(
@@ -304,45 +302,43 @@ class _HomeScreenState extends State<HomeScreen>
                   else
                     SizedBox(
                       height: 200,
-                      child: Card(
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 8.0),
-                          child: GridView.builder(
-                            scrollDirection: Axis.horizontal,
-                            padding: const EdgeInsets.symmetric(horizontal: 8),
-                            gridDelegate:
-                                const SliverGridDelegateWithFixedCrossAxisCount(
-                                  crossAxisCount: 2,
-                                  mainAxisSpacing: 8,
-                                  crossAxisSpacing: 8,
-                                  childAspectRatio: 0.3,
-                                ),
-                            itemCount: recentlyUpdatedApps.length,
-                            itemBuilder: (context, index) {
-                              final app = recentlyUpdatedApps[index];
-                              final heroTag =
-                                  'home_recent_${app.packageName}_$index';
-                              return AppListItem(
-                                key: ValueKey(app.packageName),
-                                app: app,
-                                heroTag: heroTag,
-                                showInstallStatus: false,
-                                onTap: () {
-                                  Navigator.of(context).push(
-                                    MaterialPageRoute(
-                                      builder: (context) => AppDetailsScreen(
-                                        app: app,
-                                        heroTag: heroTag,
-                                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 8.0),
+                        child: GridView.builder(
+                          scrollDirection: Axis.horizontal,
+                          padding: const EdgeInsets.symmetric(horizontal: 8),
+                          gridDelegate:
+                              const SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: 2,
+                                mainAxisSpacing: 8,
+                                crossAxisSpacing: 8,
+                                childAspectRatio: 0.3,
+                              ),
+                          itemCount: recentlyUpdatedApps.length,
+                          itemBuilder: (context, index) {
+                            final app = recentlyUpdatedApps[index];
+                            final heroTag =
+                                'home_recent_${app.packageName}_$index';
+                            return AppListItem(
+                              key: ValueKey(app.packageName),
+                              app: app,
+                              heroTag: heroTag,
+                              showInstallStatus: false,
+                              onTap: () {
+                                Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (context) => AppDetailsScreen(
+                                      app: app,
+                                      heroTag: heroTag,
                                     ),
-                                  );
-                                },
-                              ).animate().fadeIn(
-                                duration: 300.ms,
-                                delay: (50 * index).ms,
-                              );
-                            },
-                          ),
+                                  ),
+                                );
+                              },
+                            ).animate().fadeIn(
+                              duration: 300.ms,
+                              delay: (50 * index).ms,
+                            );
+                          },
                         ),
                       ),
                     ),
@@ -357,7 +353,7 @@ class _HomeScreenState extends State<HomeScreen>
             spacing: 4.0,
             children: [
               // New Releases Section
-              MListHeader(
+              HListHeader(
                 title: AppLocalizations.of(context)!.latest_apps,
                 onTap: _openLatestScreen,
                 trailing: Icon(Symbols.arrow_forward),
@@ -365,9 +361,7 @@ class _HomeScreenState extends State<HomeScreen>
               if (isLoading && latestApps.isEmpty)
                 const Padding(
                   padding: EdgeInsets.symmetric(horizontal: 32.0),
-                  child: Center(
-                    child: M3EContainedLoadingIndicator(),
-                  ),
+                  child: Center(child: M3EContainedLoadingIndicator()),
                 )
               else if (latestApps.isEmpty)
                 Padding(
@@ -386,34 +380,32 @@ class _HomeScreenState extends State<HomeScreen>
                   ),
                 )
               else
-                Card(
-                  child: ListView.builder(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    padding: const EdgeInsets.symmetric(horizontal: 8),
-                    itemCount: latestApps.length,
-                    itemBuilder: (context, index) {
-                      final app = latestApps[index];
-                      final heroTag = 'home_latest_${app.packageName}_$index';
-                      return AppListItem(
-                        key: ValueKey(app.packageName),
-                        app: app,
-                        heroTag: heroTag,
-                        showInstallStatus: false,
-                        onTap: () {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (context) =>
-                                  AppDetailsScreen(app: app, heroTag: heroTag),
-                            ),
-                          );
-                        },
-                      ).animate().fadeIn(
-                        duration: 300.ms,
-                        delay: (50 * index).ms,
-                      );
-                    },
-                  ),
+                ListView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  itemCount: latestApps.length,
+                  itemBuilder: (context, index) {
+                    final app = latestApps[index];
+                    final heroTag = 'home_latest_${app.packageName}_$index';
+                    return AppListItem(
+                      key: ValueKey(app.packageName),
+                      app: app,
+                      heroTag: heroTag,
+                      showInstallStatus: false,
+                      onTap: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                AppDetailsScreen(app: app, heroTag: heroTag),
+                          ),
+                        );
+                      },
+                    ).animate().fadeIn(
+                      duration: 300.ms,
+                      delay: (50 * index).ms,
+                    );
+                  },
                 ),
             ],
           );
@@ -437,7 +429,7 @@ class _HomeScreenState extends State<HomeScreen>
             spacing: 4.0,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              MListHeader(
+              HListHeader(
                 title: AppLocalizations.of(context)!.monthly_top_apps,
                 subtitle: AppLocalizations.of(context)!.from_izzyondroid,
                 onTap: _openTopAppsScreen,
@@ -446,9 +438,7 @@ class _HomeScreenState extends State<HomeScreen>
               if (isTopAppsLoading && carouselApps.isEmpty)
                 const Padding(
                   padding: EdgeInsets.symmetric(horizontal: 32.0),
-                  child: Center(
-                    child: M3EContainedLoadingIndicator(),
-                  ),
+                  child: Center(child: M3EContainedLoadingIndicator()),
                 )
               else if (carouselApps.isEmpty)
                 Padding(
@@ -760,37 +750,32 @@ class _HomeScreenState extends State<HomeScreen>
                     ),
                   ),
                 if (listApps.isNotEmpty)
-                  Card(
-                    child: ListView.builder(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      padding: const EdgeInsets.symmetric(horizontal: 8),
-                      itemCount: listApps.length,
-                      itemBuilder: (context, index) {
-                        final app = listApps[index];
-                        final heroTag =
-                            'home_top_list_${app.packageName}_$index';
-                        return AppListItem(
-                          key: ValueKey(app.packageName),
-                          app: app,
-                          heroTag: heroTag,
-                          showInstallStatus: false,
-                          onTap: () {
-                            Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder: (context) => AppDetailsScreen(
-                                  app: app,
-                                  heroTag: heroTag,
-                                ),
-                              ),
-                            );
-                          },
-                        ).animate().fadeIn(
-                          duration: 300.ms,
-                          delay: (50 * index).ms,
-                        );
-                      },
-                    ),
+                  ListView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                    itemCount: listApps.length,
+                    itemBuilder: (context, index) {
+                      final app = listApps[index];
+                      final heroTag = 'home_top_list_${app.packageName}_$index';
+                      return AppListItem(
+                        key: ValueKey(app.packageName),
+                        app: app,
+                        heroTag: heroTag,
+                        showInstallStatus: false,
+                        onTap: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  AppDetailsScreen(app: app, heroTag: heroTag),
+                            ),
+                          );
+                        },
+                      ).animate().fadeIn(
+                        duration: 300.ms,
+                        delay: (50 * index).ms,
+                      );
+                    },
                   ),
               ],
             ],

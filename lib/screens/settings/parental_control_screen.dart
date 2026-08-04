@@ -3,10 +3,10 @@ import 'dart:io';
 import 'package:florid/l10n/app_localizations.dart';
 import 'package:florid/providers/settings_provider.dart';
 import 'package:florid/widgets/list_icon.dart';
-import 'package:florid/widgets/m_list.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_m3shapes_extended/flutter_m3shapes_extended.dart';
+import 'package:hornbill/hornbill.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:provider/provider.dart';
@@ -177,10 +177,10 @@ class _ParentalControlScreenState extends State<ParentalControlScreen> {
                   Column(
                     spacing: 4,
                     children: [
-                      const MListHeader(title: 'Parental Control'),
-                      MListView(
+                      const HListHeader(title: 'Parental Control'),
+                      HListView(
                         items: [
-                          MListItemData(
+                          HListItemData(
                             leading: ListIcon(
                               iconData: settings.hideAntiFeatureApps
                                   ? SolarIconsBold.eyeClosed
@@ -213,10 +213,10 @@ class _ParentalControlScreenState extends State<ParentalControlScreen> {
                     Column(
                       spacing: 4,
                       children: [
-                        MListHeader(title: localizations.installation_method),
-                        MListView(
+                        HListHeader(title: localizations.installation_method),
+                        HListView(
                           items: [
-                            MListItemData(
+                            HListItemData(
                               leading: const ListIcon(
                                 iconData: SolarIconsBold.lock,
                               ),
@@ -242,9 +242,9 @@ class _ParentalControlScreenState extends State<ParentalControlScreen> {
                           ],
                         ),
                         if (settings.installAuthEnabled)
-                          MRadioListView<InstallAuthPolicy>(
+                          HRadioListView<InstallAuthPolicy>(
                             items: [
-                              MRadioListItemData<InstallAuthPolicy>(
+                              HRadioListItemData<InstallAuthPolicy>(
                                 leading: const Icon(Symbols.apps),
                                 title: localizations.auth_all_apps,
                                 subtitle: '',
@@ -260,7 +260,7 @@ class _ParentalControlScreenState extends State<ParentalControlScreen> {
                                   icon: const Icon(Symbols.info),
                                 ),
                               ),
-                              MRadioListItemData<InstallAuthPolicy>(
+                              HRadioListItemData<InstallAuthPolicy>(
                                 leading: const Icon(Symbols.warning),
                                 title: localizations.auth_all_apps_w_anti_feat,
                                 subtitle: '',

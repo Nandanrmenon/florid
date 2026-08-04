@@ -3,9 +3,9 @@ import 'package:florid/providers/download_provider.dart';
 import 'package:florid/providers/settings_provider.dart';
 import 'package:florid/services/fdroid_api_service.dart';
 import 'package:florid/widgets/list_icon.dart';
-import 'package:florid/widgets/m_list.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
+import 'package:hornbill/hornbill.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:provider/provider.dart';
 import 'package:solar_icons/solar_icons.dart';
@@ -130,10 +130,10 @@ class TroubleshootingScreen extends StatelessWidget {
                       Column(
                         spacing: 4,
                         children: [
-                          MListHeader(title: 'Downloads & Storage'),
-                          MListView(
+                          HListHeader(title: 'Downloads & Storage'),
+                          HListView(
                             items: [
-                              MListItemData(
+                              HListItemData(
                                 title: 'Installation method',
                                 subtitle: _installMethodLabel(
                                   settings.installMethod,
@@ -142,7 +142,7 @@ class TroubleshootingScreen extends StatelessWidget {
                                     _showInstallMethodDialog(context, settings),
                                 suffix: const Icon(Symbols.chevron_right),
                               ),
-                              MListItemData(
+                              HListItemData(
                                 title: 'Auto-install after download',
                                 onTap: () {
                                   settings.setAutoInstallApk(
@@ -158,7 +158,7 @@ class TroubleshootingScreen extends StatelessWidget {
                                   },
                                 ),
                               ),
-                              MListItemData(
+                              HListItemData(
                                 title: 'Delete APK after install',
                                 onTap: () {
                                   settings.setAutoInstallApk(
@@ -176,9 +176,9 @@ class TroubleshootingScreen extends StatelessWidget {
                               ),
                             ],
                           ),
-                          MListView(
+                          HListView(
                             items: [
-                              MListItemData(
+                              HListItemData(
                                 leading: ListIcon(
                                   iconData: Symbols.cleaning_services,
                                 ),
@@ -187,7 +187,7 @@ class TroubleshootingScreen extends StatelessWidget {
                                 subtitle:
                                     'Refresh app list and metadata on next load',
                               ),
-                              MListItemData(
+                              HListItemData(
                                 leading: ListIcon(
                                   iconData: Symbols.delete_sweep,
                                 ),
@@ -196,7 +196,7 @@ class TroubleshootingScreen extends StatelessWidget {
                                 subtitle:
                                     'Remove downloaded installer files from storage',
                               ),
-                              MListItemData(
+                              HListItemData(
                                 leading: ListIcon(
                                   iconData: Symbols.image_not_supported,
                                 ),

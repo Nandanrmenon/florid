@@ -2,8 +2,8 @@ import 'dart:convert';
 
 import 'package:florid/l10n/app_localizations.dart';
 import 'package:florid/screens/settings/repository_qr_scanner.dart';
-import 'package:florid/widgets/m_list.dart';
 import 'package:flutter/material.dart';
+import 'package:hornbill/hornbill.dart';
 import 'package:m3e_core/m3e_core.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:provider/provider.dart';
@@ -77,7 +77,10 @@ class _RepositoriesScreenState extends State<RepositoriesScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(localizations.repositories),
-                Text(localizations.manage_repositories, style: TextStyle(fontSize: 13),),
+                Text(
+                  localizations.manage_repositories,
+                  style: TextStyle(fontSize: 13),
+                ),
               ],
             ),
             actions: [
@@ -136,8 +139,8 @@ class _RepositoriesScreenState extends State<RepositoriesScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         spacing: 4.0,
                         children: [
-                          MListHeader(title: localizations.preset),
-                          MListViewBuilder(
+                          HListHeader(title: localizations.preset),
+                          HListView.builder(
                             itemCount: _presets.length,
                             itemBuilder: (index) {
                               final preset = _presets[index];
@@ -145,7 +148,7 @@ class _RepositoriesScreenState extends State<RepositoriesScreen> {
                                 (repo) => repo.url == preset['url'],
                               );
 
-                              return MListItemData(
+                              return HListItemData(
                                 title: preset['name']!,
                                 subtitle: preset['description']!,
                                 onTap: () {},
@@ -235,7 +238,7 @@ class _RepositoriesScreenState extends State<RepositoriesScreen> {
                     Column(
                       spacing: 4.0,
                       children: [
-                        MListHeader(title: localizations.your_repositories),
+                        HListHeader(title: localizations.your_repositories),
                         provider.repositories
                                 .where(
                                   (repo) => !_presets.any(
@@ -272,7 +275,7 @@ class _RepositoriesScreenState extends State<RepositoriesScreen> {
                                   ],
                                 ),
                               )
-                            : MListViewBuilder(
+                            : HListView.builder(
                                 itemCount: provider.repositories
                                     .where(
                                       (repo) => !_presets.any(
@@ -289,7 +292,7 @@ class _RepositoriesScreenState extends State<RepositoriesScreen> {
                                       )
                                       .toList();
                                   final repo = customRepos[index];
-                                  return MListItemData(
+                                  return HListItemData(
                                     title: repo.name,
                                     subtitle: repo.url,
                                     suffix: Row(

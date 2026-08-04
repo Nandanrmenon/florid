@@ -7,9 +7,9 @@ import 'package:florid/screens/app_details/app_details_screen.dart';
 import 'package:florid/utils/menu_actions.dart';
 import 'package:florid/widgets/app_list_item.dart';
 import 'package:florid/widgets/changelog_preview.dart';
-import 'package:florid/widgets/m_list.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:hornbill/hornbill.dart';
 import 'package:m3e_core/m3e_core.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:provider/provider.dart';
@@ -261,7 +261,7 @@ class _UpdatesScreenState extends State<UpdatesScreen>
 
     if (updatableApps.isNotEmpty) {
       widgets.add(
-        MListHeader(
+        HListHeader(
           icon: SolarIconsOutline.downloadMinimalistic,
           title: AppLocalizations.of(context)!.updates,
           subtitle:
@@ -300,24 +300,39 @@ class _UpdatesScreenState extends State<UpdatesScreen>
                       padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
                       child: Row(
                         children: [
-                          Text(
-                            'Update from ${installedApp.versionName ?? 'Unknown'}',
-                            style: Theme.of(context).textTheme.labelMedium
-                                ?.copyWith(
-                                  color: Theme.of(context).colorScheme.primary,
-                                ),
+                          Expanded(
+                            child: Text(
+                              'Update from ${installedApp.versionName ?? 'Unknown'}',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: Theme.of(context).textTheme.labelMedium
+                                  ?.copyWith(
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.primary,
+                                  ),
+                            ),
                           ),
+                          const SizedBox(width: 4),
                           Icon(
                             Symbols.arrow_right_alt,
                             size: 16,
                             color: Theme.of(context).colorScheme.primary,
                           ),
-                          Text(
-                            app.latestVersion?.versionName ?? 'Unknown',
-                            style: Theme.of(context).textTheme.labelMedium
-                                ?.copyWith(
-                                  color: Theme.of(context).colorScheme.primary,
-                                ),
+                          const SizedBox(width: 4),
+                          Expanded(
+                            child: Text(
+                              app.latestVersion?.versionName ?? 'Unknown',
+                              maxLines: 1,
+                              textAlign: TextAlign.end,
+                              overflow: TextOverflow.ellipsis,
+                              style: Theme.of(context).textTheme.labelMedium
+                                  ?.copyWith(
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.primary,
+                                  ),
+                            ),
                           ),
                         ],
                       ),
@@ -339,7 +354,7 @@ class _UpdatesScreenState extends State<UpdatesScreen>
     }
 
     widgets.add(
-      MListHeader(
+      HListHeader(
         icon: SolarIconsOutline.devices,
         title: AppLocalizations.of(context)!.installed,
       ),

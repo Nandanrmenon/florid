@@ -4,12 +4,11 @@ import 'package:florid/providers/settings_provider.dart';
 import 'package:florid/widgets/list_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:hornbill/hornbill.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:provider/provider.dart';
 import 'package:solar_icons/solar_icons.dart';
 import 'package:url_launcher/url_launcher.dart';
-
-import '../../widgets/m_list.dart';
 
 class AppearanceScreen extends StatelessWidget {
   const AppearanceScreen({super.key});
@@ -47,22 +46,22 @@ class AppearanceScreen extends StatelessWidget {
                           Column(
                             spacing: 4,
                             children: [
-                              MListHeader(title: localizations.theme_mode),
-                              MRadioListView(
+                              HListHeader(title: localizations.theme_mode),
+                              HRadioListView(
                                 items: [
-                                  MRadioListItemData<ThemeMode>(
+                                  HRadioListItemData<ThemeMode>(
                                     title: localizations.follow_system_theme,
                                     subtitle: '',
                                     value: ThemeMode.system,
                                     suffix: Icon(SolarIconsBold.devices),
                                   ),
-                                  MRadioListItemData<ThemeMode>(
+                                  HRadioListItemData<ThemeMode>(
                                     title: localizations.light_theme,
                                     subtitle: '',
                                     value: ThemeMode.light,
                                     suffix: Icon(SolarIconsBold.sun),
                                   ),
-                                  MRadioListItemData<ThemeMode>(
+                                  HRadioListItemData<ThemeMode>(
                                     title: localizations.dark_theme,
                                     subtitle: '',
                                     value: ThemeMode.dark,
@@ -80,11 +79,11 @@ class AppearanceScreen extends StatelessWidget {
                           Column(
                             spacing: 4.0,
                             children: [
-                              MListHeader(title: localizations.dynamic_color),
+                              HListHeader(title: localizations.dynamic_color),
                               if (dynamicColorSupported)
-                                MListView(
+                                HListView(
                                   items: [
-                                    MListItemData(
+                                    HListItemData(
                                       title: localizations.material_you_dynamic,
                                       subtitle: localizations
                                           .use_system_colors_supported_android,
@@ -105,9 +104,9 @@ class AppearanceScreen extends StatelessWidget {
                                   ],
                                 )
                               else
-                                MListView(
+                                HListView(
                                   items: [
-                                    MListItemData(
+                                    HListItemData(
                                       title:
                                           'Dynamic color is not supported on this device',
                                       subtitle:
@@ -123,7 +122,7 @@ class AppearanceScreen extends StatelessWidget {
                                   spacing: 4,
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    MListHeader(
+                                    HListHeader(
                                       title: 'Theme color',
                                       subtitle:
                                           'Pick a custom accent color when dynamic color is disabled',
@@ -210,10 +209,10 @@ class AppearanceScreen extends StatelessWidget {
                           Column(
                             spacing: 4.0,
                             children: [
-                              MListHeader(title: localizations.other),
-                              MListView(
+                              HListHeader(title: localizations.other),
+                              HListView(
                                 items: [
-                                  MListItemData(
+                                  HListItemData(
                                     title: localizations.show_whats_new,
                                     onTap: () {
                                       settings.setShowWhatsNew(
@@ -227,7 +226,7 @@ class AppearanceScreen extends StatelessWidget {
                                       },
                                     ),
                                   ),
-                                  MListItemData(
+                                  HListItemData(
                                     title: localizations.show_monthly_top_apps,
                                     onTap: () {
                                       settings.setShowMonthlyTopApps(
@@ -241,7 +240,7 @@ class AppearanceScreen extends StatelessWidget {
                                       },
                                     ),
                                   ),
-                                  MListItemData(
+                                  HListItemData(
                                     title: 'Show navigation labels',
                                     onTap: () {
                                       settings.setShowNavigationLabels(
@@ -259,9 +258,9 @@ class AppearanceScreen extends StatelessWidget {
                               ),
                             ],
                           ),
-                          MListView(
+                          HListView(
                             items: [
-                              MListItemData(
+                              HListItemData(
                                 leading: ListIcon(iconData: Symbols.feedback),
                                 title: localizations.feedback_on_florid_theme,
                                 subtitle: localizations

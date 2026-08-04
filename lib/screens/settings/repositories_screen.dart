@@ -4,6 +4,7 @@ import 'package:florid/l10n/app_localizations.dart';
 import 'package:florid/screens/settings/repository_qr_scanner.dart';
 import 'package:florid/widgets/m_list.dart';
 import 'package:flutter/material.dart';
+import 'package:m3e_core/m3e_core.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:provider/provider.dart';
 import 'package:solar_icons/solar_icons.dart';
@@ -91,7 +92,7 @@ class _RepositoriesScreenState extends State<RepositoriesScreen> {
             child: Consumer<RepositoriesProvider>(
               builder: (context, provider, _) {
                 if (provider.isLoading) {
-                  return const Center(child: CircularProgressIndicator());
+                  return const Center(child: M3EContainedLoadingIndicator());
                 }
 
                 return Column(

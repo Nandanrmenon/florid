@@ -10,6 +10,7 @@ import 'package:florid/widgets/changelog_preview.dart';
 import 'package:florid/widgets/m_list.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:m3e_core/m3e_core.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:provider/provider.dart';
 import 'package:solar_icons/solar_icons.dart';
@@ -127,7 +128,7 @@ class _UpdatesScreenState extends State<UpdatesScreen>
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const CircularProgressIndicator(),
+                    const M3EContainedLoadingIndicator(),
                     const SizedBox(height: 12),
                     Text(AppLocalizations.of(context)!.loading_repository),
                   ],

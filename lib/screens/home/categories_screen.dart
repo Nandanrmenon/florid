@@ -4,6 +4,7 @@ import 'package:florid/widgets/app_list_item.dart';
 import 'package:florid/widgets/m_list.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:m3e_core/m3e_core.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:provider/provider.dart';
 import 'package:solar_icons/solar_icons.dart';
@@ -151,7 +152,7 @@ class _CategoriesScreenState extends State<CategoriesScreen>
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const CircularProgressIndicator(year2023: false),
+            const M3EContainedLoadingIndicator(),
             const SizedBox(height: 16),
             Text(AppLocalizations.of(context)!.loading_categories),
           ],
@@ -256,7 +257,7 @@ class _CategoriesScreenState extends State<CategoriesScreen>
                       if (isCategoryLoading) ...[
                         const SizedBox(height: 160),
                         const Center(
-                          child: CircularProgressIndicator(year2023: false),
+                          child: M3EContainedLoadingIndicator(),
                         ),
                       ] else if (isCategoryError) ...[
                         Padding(

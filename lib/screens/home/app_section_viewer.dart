@@ -7,6 +7,7 @@ import 'package:florid/screens/app_details/app_details_screen.dart';
 import 'package:florid/widgets/app_list_item.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:m3e_core/m3e_core.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:provider/provider.dart';
 import 'package:solar_icons/solar_icons.dart';
@@ -345,8 +346,8 @@ class _AppSectionViewerState extends State<AppSectionViewer>
                               child: Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  const CircularProgressIndicator(
-                                    year2023: false,
+                                  const M3EContainedLoadingIndicator(
+
                                   ),
                                   const SizedBox(height: 16),
                                   Text(widget.loadingMessage),

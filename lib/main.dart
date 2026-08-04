@@ -7,6 +7,7 @@ import 'package:florid/screens/florid_app.dart';
 import 'package:florid/themes/app_themes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:m3e_core/m3e_core.dart';
 import 'package:provider/provider.dart';
 
 import 'providers/app_provider.dart';
@@ -133,7 +134,7 @@ class MainApp extends StatelessWidget {
                 themeMode: settings.themeMode,
                 home: !settings.isLoaded
                     ? const Scaffold(
-                        body: Center(child: CircularProgressIndicator()),
+                        body: Center(child: M3EContainedLoadingIndicator()),
                       )
                     : settings.onboardingComplete
                     ? const FloridApp()

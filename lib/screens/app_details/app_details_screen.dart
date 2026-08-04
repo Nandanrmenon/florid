@@ -14,6 +14,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_html/flutter_html.dart';
+import 'package:m3e_core/m3e_core.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
@@ -1702,7 +1703,7 @@ class _IzzyStatsLoadingCard extends StatelessWidget {
           child: Row(
             spacing: 12,
             children: [
-              CircularProgressIndicator(),
+              M3EContainedLoadingIndicator(),
               Expanded(
                 child: Text(
                   'Loading IzzyOnDroid download stats...',
@@ -3314,7 +3315,7 @@ class _AllVersionsSectionState extends State<_AllVersionsSection> {
               ),
               SizedBox(
                 height: 260,
-                child: Center(child: CircularProgressIndicator()),
+                child: Center(child: M3EContainedLoadingIndicator()),
               ),
             ],
           );
@@ -3415,7 +3416,7 @@ class _AllVersionsSectionState extends State<_AllVersionsSection> {
                             SizedBox(
                               width: 20,
                               height: 20,
-                              child: CircularProgressIndicator(strokeWidth: 2),
+                              child: M3EContainedLoadingIndicator(),
                             ),
                             Expanded(
                               child: Text(

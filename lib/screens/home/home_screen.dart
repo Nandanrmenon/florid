@@ -8,6 +8,7 @@ import 'package:florid/widgets/app_details_icon.dart';
 import 'package:florid/widgets/m_list.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:m3e_core/m3e_core.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -275,7 +276,7 @@ class _HomeScreenState extends State<HomeScreen>
                     const Padding(
                       padding: EdgeInsets.symmetric(vertical: 32.0),
                       child: Center(
-                        child: CircularProgressIndicator(year2023: false),
+                        child: M3EContainedLoadingIndicator(),
                       ),
                     )
                   else if (recentlyUpdatedApps.isEmpty)
@@ -365,7 +366,7 @@ class _HomeScreenState extends State<HomeScreen>
                 const Padding(
                   padding: EdgeInsets.symmetric(horizontal: 32.0),
                   child: Center(
-                    child: CircularProgressIndicator(year2023: false),
+                    child: M3EContainedLoadingIndicator(),
                   ),
                 )
               else if (latestApps.isEmpty)
@@ -446,7 +447,7 @@ class _HomeScreenState extends State<HomeScreen>
                 const Padding(
                   padding: EdgeInsets.symmetric(horizontal: 32.0),
                   child: Center(
-                    child: CircularProgressIndicator(year2023: false),
+                    child: M3EContainedLoadingIndicator(),
                   ),
                 )
               else if (carouselApps.isEmpty)

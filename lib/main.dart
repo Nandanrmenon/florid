@@ -4,9 +4,9 @@ import 'package:dynamic_color/dynamic_color.dart';
 import 'package:florid/l10n/app_localizations.dart';
 import 'package:florid/providers/settings_provider.dart';
 import 'package:florid/screens/florid_app.dart';
-import 'package:florid/themes/app_themes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:hornbill/hornbill.dart';
 import 'package:m3e_core/m3e_core.dart';
 import 'package:provider/provider.dart';
 
@@ -103,6 +103,11 @@ class MainApp extends StatelessWidget {
                   lightDynamic != null || darkDynamic != null;
               final useDynamic =
                   settings.dynamicColorEnabled && dynamicColorSupported;
+
+              // Debug: log dynamic color availability and selected seeds
+              debugPrint(
+                'DynamicColor supported: $dynamicColorSupported, useDynamic: $useDynamic',
+              );
               final ColorScheme lightScheme = useDynamic && lightDynamic != null
                   ? lightDynamic
                   : ColorScheme.fromSeed(
@@ -116,12 +121,19 @@ class MainApp extends StatelessWidget {
                       brightness: Brightness.dark,
                     );
 
-              final ThemeData lightTheme = AppThemes.floridLightTheme(
-                colorScheme: lightScheme,
+              // Use Hornbill for both light and dark themes so styles match
+              // Use the generated ColorScheme primary color as Hornbill's seed
+              // so system/dynamic colors (when enabled) are respected.
+              debugPrint(
+                'Light seed: ${lightScheme.primary}, Dark seed: ${darkScheme.primary}',
               );
-              final ThemeData darkThemeData = AppThemes.floridDarkTheme(
-                colorScheme: darkScheme,
-              );
+
+              final ThemeData lightTheme = HornbillTheme(
+                seedColor: lightScheme.primary,
+              ).lightTheme();
+              final ThemeData darkThemeData = HornbillTheme(
+                seedColor: darkScheme.primary,
+              ).darkTheme();
 
               return MaterialApp(
                 title: 'Florid - F-Droid Client',

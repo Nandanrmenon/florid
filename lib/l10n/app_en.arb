@@ -387,5 +387,67 @@
       "appCount": {}
     }
   },
-  "ignore_future_updates": "Ignore Future Updates"
+  "ignore_future_updates": "Ignore Future Updates",
+  "general_settings": "General Settings",
+  "view_favourite_apps": "View your favourite apps",
+  "theme_mode_and_style": "Theme mode and style",
+  "parental_control": "Parental Control",
+  "parental_control_subtitle": "Hide anti-feature apps and protect installs",
+  "app_content_language": "App content language",
+  "repositories_and_management": "Repositories & Management",
+  "add_or_remove_fdroid_repositories": "Add or remove F-Droid repositories",
+  "manage_installs_and_updates": "Manage settings regarding installs and updates",
+  "miscellaneous": "Miscellaneous",
+  "storage_cache_and_downloads": "Storage, cache, and downloads",
+  "a_modern_fdroid_client": "A modern F-Droid client.",
+  "view_florid_source_github": "View the Florid source code on GitHub",
+  "telegram": "Telegram",
+  "join_community_telegram": "Join the community on Telegram",
+  "matrix": "Matrix",
+  "join_community_matrix": "Join the community on Matrix",
+  "report_an_issue": "Report an issue",
+  "found_a_bug": "Found a bug? Let us know!",
+  "donate": "Donate",
+  "support_continued_development": "Support continued development of Florid",
+  "share_florid": "Share Florid",
+  "let_nerdy_friends_know": "Let your nerdy friends know about Florid!",
+  "check_out_florid": "Check out Florid!",
+  "share_florid_text": "A modern F-Droid client! https://github.com/Nandanrmenon/florid",
+  "select_language": "Select Language",
+  "language_changed_to": "Language changed to {name}.",
+  "@language_changed_to": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "export_favourites": "Export favourites",
+  "no_favourites_to_export": "No favourites to export",
+  "unable_to_access_downloads": "Unable to access Downloads folder",
+  "saved_to_downloads": "Saved to Downloads: {path}",
+  "@saved_to_downloads": {
+    "placeholders": {
+      "path": {}
+    }
+  },
+  "no_favourites_found_to_import": "No favourites found to import",
+  "found_favourites_in_file": "Found {count} favourites in {fileName}.",
+  "@found_favourites_in_file": {
+    "placeholders": {
+      "count": {},
+      "fileName": {}
+    }
+  },
+  "imported_favourites_count": "Imported {count} favourites",
+  "@imported_favourites_count": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "system_default_language": "System default",
+  "authenticate_to_change_install_settings": "Authenticate to change installation settings",
+  "parental_control_intro": "Keep your family safe with parental controls. Manage app visibility and installation settings to ensure a secure experience for everyone.",
+  "hide_anti_feature_apps": "Hide anti-feature apps",
+  "hide_anti_feature_apps_subtitle": "Prevent apps with anti-features from appearing in app lists",
+  "biometric_authentication": "Biometric Authentication",
+  "require_auth_before_installs": "Require authentication before installations"
 }

@@ -916,4 +916,147 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get ignore_future_updates => 'Игнорировать будущие обновления';
+
+  @override
+  String get general_settings => 'Основные настройки';
+
+  @override
+  String get view_favourite_apps => 'Ваши избранные приложения';
+
+  @override
+  String get theme_mode_and_style => 'Тема и стиль оформления';
+
+  @override
+  String get parental_control => 'Родительский контроль';
+
+  @override
+  String get parental_control_subtitle =>
+      'Скрывать приложения с антифункциями и защищать установку';
+
+  @override
+  String get app_content_language => 'Язык описаний приложений';
+
+  @override
+  String get repositories_and_management => 'Репозитории и управление';
+
+  @override
+  String get add_or_remove_fdroid_repositories =>
+      'Добавление и удаление репозиториев F-Droid';
+
+  @override
+  String get manage_installs_and_updates =>
+      'Установка и обновление приложений';
+
+  @override
+  String get miscellaneous => 'Разное';
+
+  @override
+  String get storage_cache_and_downloads => 'Хранилище, кэш и загрузки';
+
+  @override
+  String get a_modern_fdroid_client => 'Современный клиент F-Droid.';
+
+  @override
+  String get view_florid_source_github => 'Исходный код Florid на GitHub';
+
+  @override
+  String get telegram => 'Telegram';
+
+  @override
+  String get join_community_telegram => 'Сообщество Florid в Telegram';
+
+  @override
+  String get matrix => 'Matrix';
+
+  @override
+  String get join_community_matrix => 'Сообщество Florid в Matrix';
+
+  @override
+  String get report_an_issue => 'Сообщить о проблеме';
+
+  @override
+  String get found_a_bug => 'Нашли ошибку? Напишите нам!';
+
+  @override
+  String get donate => 'Поддержать';
+
+  @override
+  String get support_continued_development =>
+      'Поддержать дальнейшую разработку Florid';
+
+  @override
+  String get share_florid => 'Поделиться Florid';
+
+  @override
+  String get let_nerdy_friends_know => 'Расскажите друзьям про Florid!';
+
+  @override
+  String get check_out_florid => 'Попробуйте Florid!';
+
+  @override
+  String get share_florid_text =>
+      'Современный клиент F-Droid: https://github.com/Nandanrmenon/florid';
+
+  @override
+  String get select_language => 'Выберите язык';
+
+  @override
+  String language_changed_to(Object name) {
+    return 'Язык изменён на $name.';
+  }
+
+  @override
+  String get export_favourites => 'Экспорт избранного';
+
+  @override
+  String get no_favourites_to_export => 'Нет избранного для экспорта';
+
+  @override
+  String get unable_to_access_downloads =>
+      'Не удалось открыть папку «Загрузки»';
+
+  @override
+  String saved_to_downloads(Object path) {
+    return 'Сохранено в «Загрузки»: $path';
+  }
+
+  @override
+  String get no_favourites_found_to_import =>
+      'В файле нет избранного для импорта';
+
+  @override
+  String found_favourites_in_file(Object count, Object fileName) {
+    return 'Найдено избранных записей: $count в файле $fileName.';
+  }
+
+  @override
+  String imported_favourites_count(Object count) {
+    return 'Импортировано избранного: $count';
+  }
+
+  @override
+  String get system_default_language => 'Как в системе';
+
+  @override
+  String get authenticate_to_change_install_settings =>
+      'Подтвердите личность, чтобы изменить настройки установки';
+
+  @override
+  String get parental_control_intro =>
+      'Родительский контроль помогает защитить семью: можно скрывать приложения и ограничивать установку.';
+
+  @override
+  String get hide_anti_feature_apps => 'Скрывать приложения с антифункциями';
+
+  @override
+  String get hide_anti_feature_apps_subtitle =>
+      'Не показывать такие приложения в списках';
+
+  @override
+  String get biometric_authentication => 'Биометрическая аутентификация';
+
+  @override
+  String get require_auth_before_installs =>
+      'Требовать подтверждение перед установкой';
+
 }

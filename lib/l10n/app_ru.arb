@@ -385,5 +385,67 @@
       "appCount": {}
     }
   },
-  "ignore_future_updates": "Игнорировать будущие обновления"
+  "ignore_future_updates": "Игнорировать будущие обновления",
+  "general_settings": "Основные настройки",
+  "view_favourite_apps": "Ваши избранные приложения",
+  "theme_mode_and_style": "Тема и стиль оформления",
+  "parental_control": "Родительский контроль",
+  "parental_control_subtitle": "Скрывать приложения с антифункциями и защищать установку",
+  "app_content_language": "Язык описаний приложений",
+  "repositories_and_management": "Репозитории и управление",
+  "add_or_remove_fdroid_repositories": "Добавление и удаление репозиториев F-Droid",
+  "manage_installs_and_updates": "Установка и обновление приложений",
+  "miscellaneous": "Разное",
+  "storage_cache_and_downloads": "Хранилище, кэш и загрузки",
+  "a_modern_fdroid_client": "Современный клиент F-Droid.",
+  "view_florid_source_github": "Исходный код Florid на GitHub",
+  "telegram": "Telegram",
+  "join_community_telegram": "Сообщество Florid в Telegram",
+  "matrix": "Matrix",
+  "join_community_matrix": "Сообщество Florid в Matrix",
+  "report_an_issue": "Сообщить о проблеме",
+  "found_a_bug": "Нашли ошибку? Напишите нам!",
+  "donate": "Поддержать",
+  "support_continued_development": "Поддержать дальнейшую разработку Florid",
+  "share_florid": "Поделиться Florid",
+  "let_nerdy_friends_know": "Расскажите друзьям про Florid!",
+  "check_out_florid": "Попробуйте Florid!",
+  "share_florid_text": "Современный клиент F-Droid: https://github.com/Nandanrmenon/florid",
+  "select_language": "Выберите язык",
+  "language_changed_to": "Язык изменён на {name}.",
+  "@language_changed_to": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "export_favourites": "Экспорт избранного",
+  "no_favourites_to_export": "Нет избранного для экспорта",
+  "unable_to_access_downloads": "Не удалось открыть папку «Загрузки»",
+  "saved_to_downloads": "Сохранено в «Загрузки»: {path}",
+  "@saved_to_downloads": {
+    "placeholders": {
+      "path": {}
+    }
+  },
+  "no_favourites_found_to_import": "В файле нет избранного для импорта",
+  "found_favourites_in_file": "Найдено избранных записей: {count} в файле {fileName}.",
+  "@found_favourites_in_file": {
+    "placeholders": {
+      "count": {},
+      "fileName": {}
+    }
+  },
+  "imported_favourites_count": "Импортировано избранного: {count}",
+  "@imported_favourites_count": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "system_default_language": "Как в системе",
+  "authenticate_to_change_install_settings": "Подтвердите личность, чтобы изменить настройки установки",
+  "parental_control_intro": "Родительский контроль помогает защитить семью: можно скрывать приложения и ограничивать установку.",
+  "hide_anti_feature_apps": "Скрывать приложения с антифункциями",
+  "hide_anti_feature_apps_subtitle": "Не показывать такие приложения в списках",
+  "biometric_authentication": "Биометрическая аутентификация",
+  "require_auth_before_installs": "Требовать подтверждение перед установкой"
 }

@@ -1776,6 +1776,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Ignore Future Updates'**
   String get ignore_future_updates;
+
+  String get general_settings;
+  String get view_favourite_apps;
+  String get theme_mode_and_style;
+  String get parental_control;
+  String get parental_control_subtitle;
+  String get app_content_language;
+  String get repositories_and_management;
+  String get add_or_remove_fdroid_repositories;
+  String get manage_installs_and_updates;
+  String get miscellaneous;
+  String get storage_cache_and_downloads;
+  String get a_modern_fdroid_client;
+  String get view_florid_source_github;
+  String get telegram;
+  String get join_community_telegram;
+  String get matrix;
+  String get join_community_matrix;
+  String get report_an_issue;
+  String get found_a_bug;
+  String get donate;
+  String get support_continued_development;
+  String get share_florid;
+  String get let_nerdy_friends_know;
+  String get check_out_florid;
+  String get share_florid_text;
+  String get select_language;
+  String language_changed_to(Object name);
+  String get export_favourites;
+  String get no_favourites_to_export;
+  String get unable_to_access_downloads;
+  String saved_to_downloads(Object path);
+  String get no_favourites_found_to_import;
+  String found_favourites_in_file(Object count, Object fileName);
+  String imported_favourites_count(Object count);
+  String get system_default_language;
+  String get authenticate_to_change_install_settings;
+  String get parental_control_intro;
+  String get hide_anti_feature_apps;
+  String get hide_anti_feature_apps_subtitle;
+  String get biometric_authentication;
+  String get require_auth_before_installs;
 }
 
 class _AppLocalizationsDelegate

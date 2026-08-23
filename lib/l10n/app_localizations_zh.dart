@@ -889,6 +889,151 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get ignore_future_updates => 'Ignore Future Updates';
+
+  @override
+  String get general_settings => 'General Settings';
+
+  @override
+  String get view_favourite_apps => 'View your favourite apps';
+
+  @override
+  String get theme_mode_and_style => 'Theme mode and style';
+
+  @override
+  String get parental_control => 'Parental Control';
+
+  @override
+  String get parental_control_subtitle =>
+      'Hide anti-feature apps and protect installs';
+
+  @override
+  String get app_content_language => 'App content language';
+
+  @override
+  String get repositories_and_management => 'Repositories & Management';
+
+  @override
+  String get add_or_remove_fdroid_repositories =>
+      'Add or remove F-Droid repositories';
+
+  @override
+  String get manage_installs_and_updates =>
+      'Manage settings regarding installs and updates';
+
+  @override
+  String get miscellaneous => 'Miscellaneous';
+
+  @override
+  String get storage_cache_and_downloads => 'Storage, cache, and downloads';
+
+  @override
+  String get a_modern_fdroid_client => 'A modern F-Droid client.';
+
+  @override
+  String get view_florid_source_github =>
+      'View the Florid source code on GitHub';
+
+  @override
+  String get telegram => 'Telegram';
+
+  @override
+  String get join_community_telegram => 'Join the community on Telegram';
+
+  @override
+  String get matrix => 'Matrix';
+
+  @override
+  String get join_community_matrix => 'Join the community on Matrix';
+
+  @override
+  String get report_an_issue => 'Report an issue';
+
+  @override
+  String get found_a_bug => 'Found a bug? Let us know!';
+
+  @override
+  String get donate => 'Donate';
+
+  @override
+  String get support_continued_development =>
+      'Support continued development of Florid';
+
+  @override
+  String get share_florid => 'Share Florid';
+
+  @override
+  String get let_nerdy_friends_know =>
+      'Let your nerdy friends know about Florid!';
+
+  @override
+  String get check_out_florid => 'Check out Florid!';
+
+  @override
+  String get share_florid_text =>
+      'A modern F-Droid client! https://github.com/Nandanrmenon/florid';
+
+  @override
+  String get select_language => 'Select Language';
+
+  @override
+  String language_changed_to(Object name) {
+    return 'Language changed to $name.';
+  }
+
+  @override
+  String get export_favourites => 'Export favourites';
+
+  @override
+  String get no_favourites_to_export => 'No favourites to export';
+
+  @override
+  String get unable_to_access_downloads =>
+      'Unable to access Downloads folder';
+
+  @override
+  String saved_to_downloads(Object path) {
+    return 'Saved to Downloads: $path';
+  }
+
+  @override
+  String get no_favourites_found_to_import =>
+      'No favourites found to import';
+
+  @override
+  String found_favourites_in_file(Object count, Object fileName) {
+    return 'Found $count favourites in $fileName.';
+  }
+
+  @override
+  String imported_favourites_count(Object count) {
+    return 'Imported $count favourites';
+  }
+
+  @override
+  String get system_default_language => 'System default';
+
+  @override
+  String get authenticate_to_change_install_settings =>
+      'Authenticate to change installation settings';
+
+  @override
+  String get parental_control_intro =>
+      'Keep your family safe with parental controls. Manage app visibility and installation settings to ensure a secure experience for everyone.';
+
+  @override
+  String get hide_anti_feature_apps => 'Hide anti-feature apps';
+
+  @override
+  String get hide_anti_feature_apps_subtitle =>
+      'Prevent apps with anti-features from appearing in app lists';
+
+  @override
+  String get biometric_authentication => 'Biometric Authentication';
+
+  @override
+  String get require_auth_before_installs =>
+      'Require authentication before installations';
+
 }
 
 /// The translations for Chinese, as used in China (`zh_CN`).

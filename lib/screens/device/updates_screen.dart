@@ -71,12 +71,12 @@ class _UpdatesScreenState extends State<UpdatesScreen>
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  'Failed to check installed apps',
+                  AppLocalizations.of(context)!.failed_to_check_installed_apps,
                   style: Theme.of(context).textTheme.headlineSmall,
                 ),
                 const SizedBox(height: 8),
-                const Text(
-                  'Unable to access device app list',
+                Text(
+                  AppLocalizations.of(context)!.unable_to_access_device_app_list,
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 24),
@@ -205,7 +205,7 @@ class _UpdatesScreenState extends State<UpdatesScreen>
               color: Theme.of(context).colorScheme.error,
             ),
             Text(
-              'Unable to load repository',
+              AppLocalizations.of(context)!.unable_to_load_repository,
               style: Theme.of(context).textTheme.headlineSmall,
               textAlign: TextAlign.center,
             ),
@@ -218,7 +218,7 @@ class _UpdatesScreenState extends State<UpdatesScreen>
                 ),
               ),
             Text(
-              'Check your connection or repository settings, then try again.',
+              AppLocalizations.of(context)!.repository_loading_error_descrption,
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 color: Theme.of(context).colorScheme.onSurfaceVariant,
@@ -263,8 +263,9 @@ class _UpdatesScreenState extends State<UpdatesScreen>
         MListHeader(
           icon: SolarIconsOutline.downloadMinimalistic,
           title: AppLocalizations.of(context)!.updates,
-          subtitle:
-              '${updatableApps.length} ${updatableApps.length == 1 ? 'update' : 'updates'} available',
+          subtitle: AppLocalizations.of(
+            context,
+          )!.updates_available_count(updatableApps.length),
           trailing: TextButton(
             onPressed: () => _updateAllApps(context, updatableApps),
             child: Text(AppLocalizations.of(context)!.update_all),
@@ -300,7 +301,10 @@ class _UpdatesScreenState extends State<UpdatesScreen>
                       child: Row(
                         children: [
                           Text(
-                            'Update from ${installedApp.versionName ?? 'Unknown'}',
+                            AppLocalizations.of(context)!.update_from_version(
+                              installedApp.versionName ??
+                                  AppLocalizations.of(context)!.unknown,
+                            ),
                             style: Theme.of(context).textTheme.labelMedium
                                 ?.copyWith(
                                   color: Theme.of(context).colorScheme.primary,
@@ -312,7 +316,8 @@ class _UpdatesScreenState extends State<UpdatesScreen>
                             color: Theme.of(context).colorScheme.primary,
                           ),
                           Text(
-                            app.latestVersion?.versionName ?? 'Unknown',
+                            app.latestVersion?.versionName ??
+                                AppLocalizations.of(context)!.unknown,
                             style: Theme.of(context).textTheme.labelMedium
                                 ?.copyWith(
                                   color: Theme.of(context).colorScheme.primary,
@@ -355,12 +360,12 @@ class _UpdatesScreenState extends State<UpdatesScreen>
               Icon(Symbols.check_circle, size: 64, color: Colors.green[400]),
               const SizedBox(height: 16),
               Text(
-                'No F-Droid apps installed',
+                AppLocalizations.of(context)!.no_fdroid_apps_installed,
                 style: Theme.of(context).textTheme.headlineSmall,
               ),
               const SizedBox(height: 8),
               Text(
-                'No F-Droid apps are installed on this device',
+                AppLocalizations.of(context)!.no_fdroid_apps_installed_subtitle,
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   color: Theme.of(context).colorScheme.onSurfaceVariant,
@@ -375,7 +380,7 @@ class _UpdatesScreenState extends State<UpdatesScreen>
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
           child: Text(
-            'All installed F-Droid apps already have updates available.',
+            AppLocalizations.of(context)!.all_installed_apps_have_updates,
             textAlign: TextAlign.center,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
               color: Theme.of(context).colorScheme.onSurfaceVariant,
@@ -457,7 +462,13 @@ class _UpdatesScreenState extends State<UpdatesScreen>
         if (context.mounted) {
           ScaffoldMessenger.of(
             context,
-          ).showSnackBar(SnackBar(content: Text('Update failed: $errorMsg')));
+          ).showSnackBar(
+            SnackBar(
+              content: Text(
+                AppLocalizations.of(context)!.update_failed_with_error(errorMsg),
+              ),
+            ),
+          );
         }
       }
     }
@@ -482,7 +493,11 @@ class _UpdatesScreenState extends State<UpdatesScreen>
     if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Starting download of ${apps.length} updates...'),
+          content: Text(
+            AppLocalizations.of(
+              context,
+            )!.starting_download_of_updates(apps.length),
+          ),
           duration: const Duration(seconds: 2),
         ),
       );
@@ -529,7 +544,11 @@ class _UpdatesScreenState extends State<UpdatesScreen>
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            'Updates complete: $successful successful${failed > 0 ? ', $failed failed' : ''}',
+            failed > 0
+                ? AppLocalizations.of(
+                    context,
+                  )!.updates_complete_with_failures(successful, failed)
+                : AppLocalizations.of(context)!.updates_complete(successful),
           ),
           duration: const Duration(seconds: 3),
         ),

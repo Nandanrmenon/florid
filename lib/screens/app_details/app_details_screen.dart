@@ -195,7 +195,11 @@ class _AppDetailsScreenState extends State<AppDetailsScreen>
                                 ? Symbols.install_mobile
                                 : SolarIconsBold.download,
                           ),
-                          label: Text(isDownloaded ? 'Install' : 'Download'),
+                          label: Text(
+                            isDownloaded
+                                ? AppLocalizations.of(context)!.install
+                                : AppLocalizations.of(context)!.download,
+                          ),
                           style: FilledButton.styleFrom(),
                         ),
                       ),
@@ -235,7 +239,11 @@ class _AppDetailsScreenState extends State<AppDetailsScreen>
                           ? Symbols.install_mobile
                           : SolarIconsBold.download,
                     ),
-                    label: Text(isDownloaded ? 'Install' : 'Download'),
+                    label: Text(
+                      isDownloaded
+                          ? AppLocalizations.of(context)!.install
+                          : AppLocalizations.of(context)!.download,
+                    ),
                   ),
                 ),
         );
@@ -280,9 +288,11 @@ class _AppDetailsScreenState extends State<AppDetailsScreen>
             }
             if (context.mounted) {
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
+                SnackBar(
                   content: Text(
-                    'Install permission is required to install APK files',
+                    AppLocalizations.of(
+                      context,
+                    )!.install_permission_required_apk,
                   ),
                 ),
               );
@@ -334,7 +344,13 @@ class _AppDetailsScreenState extends State<AppDetailsScreen>
         if (context.mounted) {
           print('Installation failed: $e');
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Installation failed: ${e.toString()}')),
+            SnackBar(
+              content: Text(
+                AppLocalizations.of(
+                  context,
+                )!.installation_failed_with_error(e.toString()),
+              ),
+            ),
           );
         }
       }
@@ -347,26 +363,23 @@ class _AppDetailsScreenState extends State<AppDetailsScreen>
             context: context,
             builder: (context) => AlertDialog(
               icon: const Icon(Symbols.warning, size: 48),
-              title: const Text('Storage Permission Required'),
-              content: const Text(
-                'Florid needs storage permission to download APK files.\n\n'
-                'To enable:\n'
-                '1. Go to Settings (button below)\n'
-                '2. Find "Permissions"\n'
-                '3. Enable "Files and media" or "Storage"\n\n'
-                'Then try downloading again.',
+              title: Text(
+                AppLocalizations.of(context)!.storage_permission_dialog_title,
+              ),
+              content: Text(
+                AppLocalizations.of(context)!.storage_permission_dialog_body,
               ),
               actions: [
                 TextButton(
                   onPressed: () => Navigator.of(context).pop(),
-                  child: const Text('Cancel'),
+                  child: Text(AppLocalizations.of(context)!.cancel),
                 ),
                 FilledButton(
                   onPressed: () async {
                     Navigator.of(context).pop();
                     await openAppSettings();
                   },
-                  child: const Text('Open Settings'),
+                  child: Text(AppLocalizations.of(context)!.open_settings),
                 ),
               ],
             ),
@@ -916,7 +929,7 @@ class _AppDetailsScreenState extends State<AppDetailsScreen>
                               Theme.of(context).colorScheme.surface,
                             ),
                           ),
-                          tooltip: 'More actions',
+                          tooltip: AppLocalizations.of(context)!.more_actions,
                           itemBuilder: (context) => [
                             PopupMenuItem(
                               value: _AppDetailsMenuAction.share,
@@ -997,7 +1010,13 @@ class _AppDetailsScreenState extends State<AppDetailsScreen>
                                 visualDensity: VisualDensity.compact,
                                 avatar: Icon(Symbols.check_circle, fill: 1),
                                 label: Text(
-                                  'Installed${installedApp?.versionName != null ? ' (${installedApp!.versionName})' : ''}',
+                                  installedApp?.versionName != null
+                                      ? AppLocalizations.of(
+                                          context,
+                                        )!.installed_with_version(
+                                          installedApp!.versionName!,
+                                        )
+                                      : AppLocalizations.of(context)!.installed,
                                 ),
                               ).animate().fadeIn(
                                 delay: Duration(milliseconds: 300),
@@ -1209,9 +1228,10 @@ class _AppDetailsScreenState extends State<AppDetailsScreen>
                         return const _IzzyStatsLoadingCard();
                       }
                       if (snapshot.hasError) {
-                        return const _IzzyStatsInfoCard(
-                          message:
-                              'Unable to load IzzyOnDroid download stats right now.',
+                        return _IzzyStatsInfoCard(
+                          message: AppLocalizations.of(
+                            context,
+                          )!.unable_to_load_izzy_stats,
                         );
                       }
 
@@ -1433,7 +1453,7 @@ class _DownloadSectionState extends State<_DownloadSection> {
                         ),
                         const SizedBox(width: 8),
                         Text(
-                          'No Version Available',
+                          AppLocalizations.of(context)!.no_version_available,
                           style: Theme.of(context).textTheme.titleMedium
                               ?.copyWith(
                                 color: Theme.of(
@@ -1446,7 +1466,7 @@ class _DownloadSectionState extends State<_DownloadSection> {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      'This app doesn\'t have any downloadable versions available.',
+                      AppLocalizations.of(context)!.no_downloadable_versions,
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                         color: Theme.of(context).colorScheme.onErrorContainer,
                       ),
@@ -1500,7 +1520,9 @@ class _DownloadSectionState extends State<_DownloadSection> {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Text(
-                                'Downloading... ${(progress * 100).toInt()}%',
+                                AppLocalizations.of(
+                                  context,
+                                )!.downloading_percent((progress * 100).toInt()),
                                 style: Theme.of(context).textTheme.bodySmall
                                     ?.copyWith(
                                       color: Theme.of(
@@ -1604,7 +1626,7 @@ class _IzzyStatsSection extends StatelessWidget {
                     color: Theme.of(context).colorScheme.primary,
                   ),
                   Text(
-                    'Downloads stats',
+                    AppLocalizations.of(context)!.downloads_stats,
                     style: textTheme.labelMedium?.copyWith(
                       // fontWeight: FontWeight.w600,
                     ),
@@ -1617,21 +1639,21 @@ class _IzzyStatsSection extends StatelessWidget {
                 children: [
                   Expanded(
                     child: _IzzyStatTile(
-                      label: 'Last day',
+                      label: AppLocalizations.of(context)!.last_day,
                       value: stats.lastDay,
                       // icon: Symbols.calendar_clock_rounded,
                     ),
                   ),
                   Expanded(
                     child: _IzzyStatTile(
-                      label: 'Last 30 days',
+                      label: AppLocalizations.of(context)!.last_30_days,
                       value: stats.last30Days,
                       // icon: Symbols.event_available,
                     ),
                   ),
                   Expanded(
                     child: _IzzyStatTile(
-                      label: 'Last 365 days',
+                      label: AppLocalizations.of(context)!.last_365_days,
                       value: stats.last365Days,
                       // icon: Symbols.timeline_rounded,
                     ),
@@ -1639,7 +1661,7 @@ class _IzzyStatsSection extends StatelessWidget {
                 ],
               ),
               Text(
-                'Stats are pulled from IzzyOnDroid mirrors for $packageName when available.',
+                AppLocalizations.of(context)!.izzy_stats_source(packageName),
                 style: captionStyle,
                 textAlign: TextAlign.center,
               ),
@@ -1670,7 +1692,9 @@ class _IzzyStatTile extends StatelessWidget {
       children: [
         Text(label, style: textTheme.bodySmall?.copyWith(color: subColor)),
         Text(
-          value != null ? _formatCount(value!) : 'Not available',
+          value != null
+              ? _formatCount(value!)
+              : AppLocalizations.of(context)!.not_available,
           style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
           textAlign: TextAlign.center,
         ),
@@ -1694,18 +1718,18 @@ class _IzzyStatsLoadingCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Padding(
-      padding: EdgeInsets.symmetric(horizontal: 16.0),
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0),
       child: Card.outlined(
         child: Padding(
-          padding: EdgeInsets.all(16.0),
+          padding: const EdgeInsets.all(16.0),
           child: Row(
             spacing: 12,
             children: [
-              CircularProgressIndicator(),
+              const CircularProgressIndicator(),
               Expanded(
                 child: Text(
-                  'Loading IzzyOnDroid download stats...',
+                  AppLocalizations.of(context)!.loading_izzy_stats,
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
@@ -1846,7 +1870,7 @@ class _InstallActionsSection extends StatelessWidget {
                       downloadingVersionName,
                     );
                   },
-                  child: const Text('Cancel Download'),
+                  child: Text(AppLocalizations.of(context)!.cancel_download),
                 ),
               );
             }
@@ -1896,30 +1920,35 @@ class _InstallActionsSection extends StatelessWidget {
                                               Symbols.warning,
                                               size: 48,
                                             ),
-                                            title: const Text(
-                                              'Storage Permission Required',
+                                            title: Text(
+                                              AppLocalizations.of(
+                                                context,
+                                              )!.storage_permission_dialog_title,
                                             ),
-                                            content: const Text(
-                                              'Florid needs storage permission to download APK files.\n\n'
-                                              'To enable:\n'
-                                              '1. Go to Settings (button below)\n'
-                                              '2. Find "Permissions"\n'
-                                              '3. Enable "Files and media" or "Storage"\n\n'
-                                              'Then try downloading again.',
+                                            content: Text(
+                                              AppLocalizations.of(
+                                                context,
+                                              )!.storage_permission_dialog_body,
                                             ),
                                             actions: [
                                               TextButton(
                                                 onPressed: () =>
                                                     Navigator.of(context).pop(),
-                                                child: const Text('Cancel'),
+                                                child: Text(
+                                                  AppLocalizations.of(
+                                                    context,
+                                                  )!.cancel,
+                                                ),
                                               ),
                                               FilledButton(
                                                 onPressed: () async {
                                                   Navigator.of(context).pop();
                                                   await openAppSettings();
                                                 },
-                                                child: const Text(
-                                                  'Open Settings',
+                                                child: Text(
+                                                  AppLocalizations.of(
+                                                    context,
+                                                  )!.open_settings,
                                                 ),
                                               ),
                                             ],
@@ -1942,7 +1971,11 @@ class _InstallActionsSection extends StatelessWidget {
                                         ).showSnackBar(
                                           SnackBar(
                                             content: Text(
-                                              'Downloading ${app.name} update...',
+                                              AppLocalizations.of(
+                                                context,
+                                              )!.downloading_app_update(
+                                                app.name,
+                                              ),
                                             ),
                                           ),
                                         );
@@ -1953,7 +1986,11 @@ class _InstallActionsSection extends StatelessWidget {
                                           context,
                                         ).showSnackBar(
                                           SnackBar(
-                                            content: Text('Update failed: $e'),
+                                            content: Text(
+                                              AppLocalizations.of(
+                                                context,
+                                              )!.update_failed_with_error(e),
+                                            ),
                                           ),
                                         );
                                       }
@@ -1980,7 +2017,9 @@ class _InstallActionsSection extends StatelessWidget {
                                         ).showSnackBar(
                                           SnackBar(
                                             content: Text(
-                                              'Unable to open ${app.name}.',
+                                              AppLocalizations.of(
+                                                context,
+                                              )!.unable_to_open_app(app.name),
                                             ),
                                           ),
                                         );
@@ -1992,7 +2031,7 @@ class _InstallActionsSection extends StatelessWidget {
                                         ).showSnackBar(
                                           SnackBar(
                                             content: Text(
-                                              'Open failed: ${e.toString()}',
+                                              '${AppLocalizations.of(context)!.open_failed}: ${e.toString()}',
                                             ),
                                           ),
                                         );
@@ -2025,7 +2064,9 @@ class _InstallActionsSection extends StatelessWidget {
                                         ).showSnackBar(
                                           SnackBar(
                                             content: Text(
-                                              'Uninstall failed: ${e.toString()}',
+                                              AppLocalizations.of(
+                                                context,
+                                              )!.uninstall_failed,
                                             ),
                                           ),
                                         );
@@ -2070,7 +2111,9 @@ class _InstallActionsSection extends StatelessWidget {
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     SnackBar(
                                       content: Text(
-                                        'Uninstall failed: ${e.toString()}',
+                                        AppLocalizations.of(
+                                          context,
+                                        )!.uninstall_failed,
                                       ),
                                     ),
                                   );
@@ -2104,7 +2147,9 @@ class _InstallActionsSection extends StatelessWidget {
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     SnackBar(
                                       content: Text(
-                                        'Unable to open ${app.name}.',
+                                        AppLocalizations.of(
+                                          context,
+                                        )!.unable_to_open_app(app.name),
                                       ),
                                     ),
                                   );
@@ -2114,7 +2159,7 @@ class _InstallActionsSection extends StatelessWidget {
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     SnackBar(
                                       content: Text(
-                                        'Open failed: ${e.toString()}',
+                                        '${AppLocalizations.of(context)!.open_failed}: ${e.toString()}',
                                       ),
                                     ),
                                   );
@@ -2145,7 +2190,9 @@ class _InstallActionsSection extends StatelessWidget {
                                 const SizedBox(width: 12),
                                 Expanded(
                                   child: Text(
-                                    'Updates are ignored for this app.',
+                                    AppLocalizations.of(
+                                      context,
+                                    )!.updates_ignored_for_app,
                                     style: Theme.of(
                                       context,
                                     ).textTheme.bodyMedium,
@@ -2442,7 +2489,9 @@ class _AppInfoSection extends StatelessWidget {
                     spacing: 4,
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      MListHeader(title: 'Anti-features'),
+                      MListHeader(
+                        title: AppLocalizations.of(context)!.anti_features,
+                      ),
                       Card(
                         margin: const EdgeInsets.symmetric(horizontal: 16.0),
                         child: Padding(
@@ -2538,7 +2587,7 @@ class _DescriptionSectionState extends State<_DescriptionSection>
         spacing: 4.0,
         children: [
           MListHeader(
-            title: 'Description',
+            title: AppLocalizations.of(context)!.description,
 
             trailing: Icon(
               _isExpanded
@@ -2659,12 +2708,16 @@ class _IncludeUnstableSectionState extends State<IncludeUnstableSection> {
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 Text(
-                                  'Include unstable versions',
+                                  AppLocalizations.of(
+                                    context,
+                                  )!.include_unstable_versions,
                                   style: Theme.of(context).textTheme.bodyMedium
                                       ?.copyWith(fontWeight: FontWeight.w500),
                                 ),
                                 Text(
-                                  'Show beta, alpha, and prerelease versions for this app',
+                                  AppLocalizations.of(
+                                    context,
+                                  )!.include_unstable_versions_subtitle,
                                   style: Theme.of(context).textTheme.bodySmall
                                       ?.copyWith(
                                         color: Theme.of(
@@ -2717,7 +2770,7 @@ class _NoVersionInfoSection extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Version Information',
+            AppLocalizations.of(context)!.version_information,
             style: Theme.of(
               context,
             ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
@@ -2739,14 +2792,14 @@ class _NoVersionInfoSection extends StatelessWidget {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'No Version Information Available',
+                  AppLocalizations.of(context)!.no_version_information_available,
                   style: Theme.of(context).textTheme.titleSmall?.copyWith(
                     color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'This app doesn\'t have detailed version information in the F-Droid repository.',
+                  AppLocalizations.of(context)!.no_detailed_version_info,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
@@ -2952,7 +3005,13 @@ class _AppExtraInfoSectionState extends State<AppExtraInfoSection> {
       if (context.mounted) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text('Invalid donation link: $link')));
+        ).showSnackBar(
+          SnackBar(
+            content: Text(
+              AppLocalizations.of(context)!.invalid_donation_link(link),
+            ),
+          ),
+        );
       }
       return;
     }
@@ -2964,20 +3023,28 @@ class _AppExtraInfoSectionState extends State<AppExtraInfoSection> {
       );
       if (!opened && context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Unable to open donation link: $link')),
+          SnackBar(
+            content: Text(
+              AppLocalizations.of(context)!.unable_to_open_donation_link(link),
+            ),
+          ),
         );
       }
     } on PlatformException {
       if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('No app is available to handle this donation link.'),
+        SnackBar(
+          content: Text(AppLocalizations.of(context)!.no_app_for_donation_link),
         ),
       );
     } catch (_) {
       if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Unable to open donation link: $link')),
+        SnackBar(
+          content: Text(
+            AppLocalizations.of(context)!.unable_to_open_donation_link(link),
+          ),
+        ),
       );
     }
   }
@@ -3306,7 +3373,7 @@ class _AllVersionsSectionState extends State<_AllVersionsSection> {
             spacing: 8.0,
             children: [
               MListHeader(
-                title: 'All Versions',
+                title: AppLocalizations.of(context)!.all_versions,
                 trailing: IconButton(
                   onPressed: () => Navigator.pop(context),
                   icon: Icon(Symbols.keyboard_arrow_down),
@@ -3363,7 +3430,7 @@ class _AllVersionsSectionState extends State<_AllVersionsSection> {
           spacing: 8.0,
           children: [
             MListHeader(
-              title: 'All Versions',
+              title: AppLocalizations.of(context)!.all_versions,
               trailing: IconButton(
                 onPressed: () => Navigator.pop(context),
                 icon: Icon(Symbols.keyboard_arrow_down),
@@ -3419,7 +3486,11 @@ class _AllVersionsSectionState extends State<_AllVersionsSection> {
                             ),
                             Expanded(
                               child: Text(
-                                'Loading ${selectedTab.repo.name}...',
+                                AppLocalizations.of(
+                                  context,
+                                )!.loading_from_repository(
+                                  selectedTab.repo.name,
+                                ),
                                 style: Theme.of(context).textTheme.bodySmall,
                               ),
                             ),
@@ -3437,7 +3508,11 @@ class _AllVersionsSectionState extends State<_AllVersionsSection> {
                       child: Padding(
                         padding: const EdgeInsets.all(12.0),
                         child: Text(
-                          'Failed to load from ${selectedTab.repo.name}.',
+                          AppLocalizations.of(
+                            context,
+                          )!.failed_to_load_from_repository(
+                            selectedTab.repo.name,
+                          ),
                           style: Theme.of(context).textTheme.bodySmall,
                         ),
                       ),
@@ -3452,7 +3527,11 @@ class _AllVersionsSectionState extends State<_AllVersionsSection> {
                       child: Padding(
                         padding: const EdgeInsets.all(12.0),
                         child: Text(
-                          'No version metadata available from ${selectedTab.repo.name}.',
+                          AppLocalizations.of(
+                            context,
+                          )!.no_version_metadata_available(
+                            selectedTab.repo.name,
+                          ),
                         ),
                       ),
                     ),
@@ -3472,7 +3551,11 @@ class _AllVersionsSectionState extends State<_AllVersionsSection> {
                       child: Padding(
                         padding: const EdgeInsets.all(12.0),
                         child: Text(
-                          'No compatible versions available in ${selectedTab.repo.name}.',
+                          AppLocalizations.of(
+                            context,
+                          )!.no_compatible_versions_available(
+                            selectedTab.repo.name,
+                          ),
                         ),
                       ),
                     ),
@@ -3523,7 +3606,11 @@ class _AllVersionsSectionState extends State<_AllVersionsSection> {
                                   if (context.mounted) {
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       SnackBar(
-                                        content: Text('Uninstall failed: $e'),
+                                        content: Text(
+                                          AppLocalizations.of(
+                                            context,
+                                          )!.uninstall_failed,
+                                        ),
                                       ),
                                     );
                                   }
@@ -3569,7 +3656,9 @@ class _AllVersionsSectionState extends State<_AllVersionsSection> {
                                           ).showSnackBar(
                                             SnackBar(
                                               content: Text(
-                                                'Download failed: $e',
+                                                AppLocalizations.of(
+                                                  context,
+                                                )!.download_failed_with_error(e),
                                               ),
                                             ),
                                           );
@@ -3630,11 +3719,9 @@ Future<void> _handleShizukuUnavailable(
     context: context,
     builder: (context) => SimpleDialog(
       contentPadding: EdgeInsets.all(24),
-      title: const Text('Shizuku is not running'),
+      title: Text(AppLocalizations.of(context)!.shizuku_not_running),
       children: [
-        Text(
-          'Start the Shizuku app to continue, or switch to the system installer instead.',
-        ),
+        Text(AppLocalizations.of(context)!.shizuku_not_running_message),
         SizedBox(height: 16),
         Column(
           spacing: 2.0,
@@ -3650,8 +3737,10 @@ Future<void> _handleShizukuUnavailable(
                 } catch (e) {
                   if (context.mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Unable to open Shizuku app'),
+                      SnackBar(
+                        content: Text(
+                          AppLocalizations.of(context)!.unable_to_open_shizuku,
+                        ),
                       ),
                     );
                   }
@@ -3678,7 +3767,11 @@ Future<void> _handleShizukuUnavailable(
     await settings.setInstallMethod(InstallMethod.system);
     if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Switched to system installer')),
+        SnackBar(
+          content: Text(
+            AppLocalizations.of(context)!.switched_to_system_installer,
+          ),
+        ),
       );
     }
   }
@@ -3818,7 +3911,7 @@ class _ScreenshotsSectionState extends State<_ScreenshotsSection> {
                                   Padding(
                                     padding: const EdgeInsets.all(8.0),
                                     child: Text(
-                                      'Failed to load',
+                                      AppLocalizations.of(context)!.failed_to_load,
                                       style: Theme.of(
                                         context,
                                       ).textTheme.bodySmall,

@@ -285,10 +285,18 @@ class _UserSettingsContentState extends State<_UserSettingsContent> {
     });
   }
 
+  String _localeLabel(AppLocalizations l10n, String locale) {
+    if (locale == SettingsProvider.systemLocale) {
+      return l10n.system_default_language;
+    }
+    return SettingsProvider.getLocaleDisplayName(locale);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Consumer<SettingsProvider>(
       builder: (context, settings, _) {
+        final l10n = AppLocalizations.of(context)!;
         return Column(
           children: <Widget>[
             const SizedBox(height: 16),
@@ -296,16 +304,16 @@ class _UserSettingsContentState extends State<_UserSettingsContent> {
             Column(
               spacing: 4,
               children: [
-                const MListHeader(
-                  title: 'General Settings',
+                MListHeader(
+                  title: l10n.general_settings,
                   icon: Symbols.mobile,
                 ),
                 MListView(
                   items: [
                     MListItemData(
                       leading: ListIcon(iconData: SolarIconsBold.heart),
-                      title: 'Favourites',
-                      subtitle: 'View your favourite apps',
+                      title: l10n.favourites,
+                      subtitle: l10n.view_favourite_apps,
                       onTap: () {
                         Navigator.push(
                           context,
@@ -318,8 +326,8 @@ class _UserSettingsContentState extends State<_UserSettingsContent> {
                     ),
                     MListItemData(
                       leading: ListIcon(iconData: SolarIconsBold.palette),
-                      title: 'Appearance',
-                      subtitle: 'Theme mode and style',
+                      title: l10n.appearance,
+                      subtitle: l10n.theme_mode_and_style,
                       onTap: () {
                         Navigator.push(
                           context,
@@ -332,8 +340,8 @@ class _UserSettingsContentState extends State<_UserSettingsContent> {
                     ),
                     MListItemData(
                       leading: ListIcon(iconData: SolarIconsBold.shield),
-                      title: 'Parental Control',
-                      subtitle: 'Hide anti-feature apps and protect installs',
+                      title: l10n.parental_control,
+                      subtitle: l10n.parental_control_subtitle,
                       onTap: () {
                         Navigator.push(
                           context,
@@ -346,11 +354,9 @@ class _UserSettingsContentState extends State<_UserSettingsContent> {
                     ),
                     MListItemData(
                       leading: ListIcon(iconData: SolarIconsBold.globus),
-                      title: 'App content language',
+                      title: l10n.app_content_language,
                       onTap: () => _showLanguageDialog(context, settings),
-                      subtitle: SettingsProvider.getLocaleDisplayName(
-                        settings.locale,
-                      ),
+                      subtitle: _localeLabel(l10n, settings.locale),
                       suffix: const Icon(Symbols.chevron_right),
                     ),
                   ],
@@ -361,15 +367,15 @@ class _UserSettingsContentState extends State<_UserSettingsContent> {
             Column(
               spacing: 4,
               children: [
-                const MListHeader(
-                  title: 'Repositories & Management',
+                MListHeader(
+                  title: l10n.repositories_and_management,
                   icon: Symbols.settings,
                 ),
                 MListView(
                   items: [
                     MListItemData(
                       leading: ListIcon(iconData: SolarIconsBold.cloud),
-                      title: 'Manage repositories',
+                      title: l10n.manage_repositories,
                       onTap: () {
                         Navigator.push(
                           context,
@@ -378,16 +384,15 @@ class _UserSettingsContentState extends State<_UserSettingsContent> {
                           ),
                         );
                       },
-                      subtitle: 'Add or remove F-Droid repositories',
+                      subtitle: l10n.add_or_remove_fdroid_repositories,
                       suffix: const Icon(Symbols.chevron_right),
                     ),
                     MListItemData(
                       leading: ListIcon(
                         iconData: SolarIconsBold.settingsMinimalistic,
                       ),
-                      title: 'App Management',
-                      subtitle:
-                          'Manage settings regarding installs and updates',
+                      title: l10n.app_management,
+                      subtitle: l10n.manage_installs_and_updates,
                       onTap: () {
                         Navigator.push(
                           context,
@@ -413,13 +418,11 @@ class _UserSettingsContentState extends State<_UserSettingsContent> {
                         spacing: 12.0,
                         children: [
                           Text(
-                            'Keep Android Open',
+                            l10n.keep_android_open,
                             style: Theme.of(context).textTheme.titleMedium
                                 ?.copyWith(fontWeight: FontWeight.w600),
                           ),
-                          const Text(
-                            'From 2026/2027 onward, Google will require developer verification for all Android apps on certified devices, including those installed outside of the Play Store.',
-                          ),
+                          Text(l10n.keep_android_open_message),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.end,
                             children: [
@@ -455,16 +458,16 @@ class _UserSettingsContentState extends State<_UserSettingsContent> {
             Column(
               spacing: 4.0,
               children: [
-                const MListHeader(
-                  title: 'Miscellaneous',
+                MListHeader(
+                  title: l10n.miscellaneous,
                   icon: Symbols.more_horiz,
                 ),
                 MListView(
                   items: [
                     MListItemData(
                       leading: ListIcon(iconData: SolarIconsBold.sledgehammer),
-                      title: 'Troubleshooting',
-                      subtitle: 'Storage, cache, and downloads',
+                      title: l10n.troubleshooting,
+                      subtitle: l10n.storage_cache_and_downloads,
                       onTap: () {
                         Navigator.push(
                           context,
@@ -481,14 +484,16 @@ class _UserSettingsContentState extends State<_UserSettingsContent> {
                   items: [
                     MListItemData(
                       leading: ListIcon(iconData: SolarIconsBold.infoSquare),
-                      title: AppLocalizations.of(context)!.version,
-                      subtitle: _appVersion.isEmpty ? 'Loading…' : _appVersion,
+                      title: l10n.version,
+                      subtitle: _appVersion.isEmpty
+                          ? l10n.loading
+                          : _appVersion,
                       onTap: () {
                         showAboutDialog(
                           context: context,
                           applicationName: kAppName,
                           applicationVersion: _appVersion,
-                          children: [Text('A modern F-Droid client.')],
+                          children: [Text(l10n.a_modern_fdroid_client)],
                           applicationIcon: SvgPicture.asset(
                             kAppLogoSvg,
                             key: const ValueKey('app_logo'),
@@ -503,8 +508,8 @@ class _UserSettingsContentState extends State<_UserSettingsContent> {
                     ),
                     MListItemData(
                       leading: SocialListIcon(icon: Bxl.git),
-                      title: 'Source code',
-                      subtitle: 'View the Florid source code on GitHub',
+                      title: l10n.source_code,
+                      subtitle: l10n.view_florid_source_github,
                       suffix: Icon(SolarIconsOutline.squareBottomUp),
                       onTap: () async {
                         final url = Uri.parse(
@@ -517,8 +522,8 @@ class _UserSettingsContentState extends State<_UserSettingsContent> {
                     ),
                     MListItemData(
                       leading: SocialListIcon(icon: Bxl.telegram),
-                      title: 'Telegram',
-                      subtitle: 'Join the community on Telegram',
+                      title: l10n.telegram,
+                      subtitle: l10n.join_community_telegram,
                       suffix: Icon(SolarIconsOutline.squareBottomUp),
                       onTap: () async {
                         final url = Uri.parse('https://t.me/florid_app');
@@ -529,8 +534,8 @@ class _UserSettingsContentState extends State<_UserSettingsContent> {
                     ),
                     MListItemData(
                       leading: SocialListIcon(icon: SimpleIcons.matrix),
-                      title: 'Matrix',
-                      subtitle: 'Join the community on Matrix',
+                      title: l10n.matrix,
+                      subtitle: l10n.join_community_matrix,
                       suffix: Icon(SolarIconsOutline.squareBottomUp),
                       onTap: () async {
                         final url = Uri.parse(
@@ -545,8 +550,8 @@ class _UserSettingsContentState extends State<_UserSettingsContent> {
                       leading: ListIcon(
                         iconData: SolarIconsBold.roundedMagnifierBug,
                       ),
-                      title: 'Report an issue',
-                      subtitle: 'Found a bug? Let us know!',
+                      title: l10n.report_an_issue,
+                      subtitle: l10n.found_a_bug,
                       suffix: Icon(SolarIconsOutline.squareBottomUp),
                       onTap: () async {
                         final url = Uri.parse(
@@ -559,8 +564,8 @@ class _UserSettingsContentState extends State<_UserSettingsContent> {
                     ),
                     MListItemData(
                       leading: ListIcon(iconData: SolarIconsBold.heartShine),
-                      title: 'Donate',
-                      subtitle: 'Support continued development of Florid',
+                      title: l10n.donate,
+                      subtitle: l10n.support_continued_development,
                       suffix: Icon(SolarIconsOutline.squareBottomUp),
                       onTap: () async {
                         final url = Uri.parse('https://ko-fi.com/nandanrmenon');
@@ -571,14 +576,13 @@ class _UserSettingsContentState extends State<_UserSettingsContent> {
                     ),
                     MListItemData(
                       leading: ListIcon(iconData: SolarIconsBold.share),
-                      title: 'Share Florid',
-                      subtitle: 'Let your nerdy friends know about Florid!',
+                      title: l10n.share_florid,
+                      subtitle: l10n.let_nerdy_friends_know,
                       onTap: () {
                         SharePlus.instance.share(
                           ShareParams(
-                            title: 'Check out Florid!',
-                            text:
-                                'A modern F-Droid client! https://github.com/Nandanrmenon/florid',
+                            title: l10n.check_out_florid,
+                            text: l10n.share_florid_text,
                           ),
                         );
                       },
@@ -605,10 +609,11 @@ class _UserSettingsContentState extends State<_UserSettingsContent> {
     final appProvider = parentContext.read<AppProvider>();
     final repositoriesProvider = parentContext.read<RepositoriesProvider>();
 
+    final l10n = AppLocalizations.of(parentContext)!;
     await showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('Select Language'),
+        title: Text(l10n.select_language),
         content: SizedBox(
           width: double.maxFinite,
           child: ListView.builder(
@@ -616,7 +621,7 @@ class _UserSettingsContentState extends State<_UserSettingsContent> {
             itemCount: SettingsProvider.availableLocales.length,
             itemBuilder: (_, index) {
               final locale = SettingsProvider.availableLocales[index];
-              final displayName = SettingsProvider.getLocaleDisplayName(locale);
+              final displayName = _localeLabel(l10n, locale);
 
               return RadioListTile<String>(
                 title: Text(displayName),
@@ -643,7 +648,7 @@ class _UserSettingsContentState extends State<_UserSettingsContent> {
                     messenger.showSnackBar(
                       SnackBar(
                         content: Text(
-                          'Language changed to ${SettingsProvider.getLocaleDisplayName(value)}.',
+                          l10n.language_changed_to(_localeLabel(l10n, value)),
                         ),
                       ),
                     );
@@ -678,9 +683,11 @@ class _FavoriteAppsScreenState extends State<_FavoriteAppsScreen> {
 
     if (favorites.isEmpty) {
       if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('No favourites to export')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(AppLocalizations.of(context)!.no_favourites_to_export),
+        ),
+      );
       return;
     }
 
@@ -698,7 +705,11 @@ class _FavoriteAppsScreenState extends State<_FavoriteAppsScreen> {
     if (downloadsDir == null) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Unable to access Downloads folder')),
+        SnackBar(
+          content: Text(
+            AppLocalizations.of(context)!.unable_to_access_downloads,
+          ),
+        ),
       );
       return;
     }
@@ -709,7 +720,11 @@ class _FavoriteAppsScreenState extends State<_FavoriteAppsScreen> {
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('Saved to Downloads: ${downloadsDir.path}/$fileName'),
+        content: Text(
+          AppLocalizations.of(
+            context,
+          )!.saved_to_downloads('${downloadsDir.path}/$fileName'),
+        ),
       ),
     );
   }
@@ -757,7 +772,11 @@ class _FavoriteAppsScreenState extends State<_FavoriteAppsScreen> {
     if (parsed.isEmpty) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('No favourites found to import')),
+        SnackBar(
+          content: Text(
+            AppLocalizations.of(context)!.no_favourites_found_to_import,
+          ),
+        ),
       );
       return;
     }
@@ -768,7 +787,9 @@ class _FavoriteAppsScreenState extends State<_FavoriteAppsScreen> {
         icon: const Icon(Symbols.star),
         title: Text(AppLocalizations.of(context)!.import_favourites),
         content: Text(
-          'Found ${parsed.length} favourite${parsed.length == 1 ? '' : 's'} in ${file.name}.',
+          AppLocalizations.of(
+            context,
+          )!.found_favourites_in_file(parsed.length, file.name),
         ),
         actions: [
           TextButton(
@@ -800,7 +821,7 @@ class _FavoriteAppsScreenState extends State<_FavoriteAppsScreen> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
-          'Imported ${parsed.length} favourite${parsed.length == 1 ? '' : 's'}',
+          AppLocalizations.of(context)!.imported_favourites_count(parsed.length),
         ),
       ),
     );
@@ -890,7 +911,11 @@ class _FavoriteAppsScreenState extends State<_FavoriteAppsScreen> {
                               spacing: 8.0,
                               children: [
                                 const Icon(Symbols.file_download),
-                                const Text('Export favourites'),
+                                Text(
+                                  AppLocalizations.of(
+                                    context,
+                                  )!.export_favourites,
+                                ),
                               ],
                             ),
                           ),

@@ -108,10 +108,10 @@ class AppearanceScreen extends StatelessWidget {
                                 MListView(
                                   items: [
                                     MListItemData(
-                                      title:
-                                          'Dynamic color is not supported on this device',
-                                      subtitle:
-                                          'Use the theme color palette below instead.',
+                                      title: localizations
+                                          .dynamic_color_not_supported,
+                                      subtitle: localizations
+                                          .use_theme_color_palette_instead,
                                       onTap: () {},
                                     ),
                                   ],
@@ -124,9 +124,9 @@ class AppearanceScreen extends StatelessWidget {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     MListHeader(
-                                      title: 'Theme color',
+                                      title: localizations.theme_color,
                                       subtitle:
-                                          'Pick a custom accent color when dynamic color is disabled',
+                                          localizations.theme_color_subtitle,
                                     ),
                                     Card(
                                       margin: const EdgeInsets.symmetric(
@@ -242,7 +242,7 @@ class AppearanceScreen extends StatelessWidget {
                                     ),
                                   ),
                                   MListItemData(
-                                    title: 'Show navigation labels',
+                                    title: localizations.show_navigation_labels,
                                     onTap: () {
                                       settings.setShowNavigationLabels(
                                         !settings.showNavigationLabels,

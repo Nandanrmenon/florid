@@ -387,5 +387,316 @@
       "appCount": {}
     }
   },
-  "ignore_future_updates": "Ignore Future Updates"
+  "ignore_future_updates": "Ignore Future Updates",
+  "general_settings": "General Settings",
+  "view_favourite_apps": "View your favourite apps",
+  "theme_mode_and_style": "Theme mode and style",
+  "parental_control": "Parental Control",
+  "parental_control_subtitle": "Hide anti-feature apps and protect installs",
+  "app_content_language": "App content language",
+  "repositories_and_management": "Repositories & Management",
+  "add_or_remove_fdroid_repositories": "Add or remove F-Droid repositories",
+  "manage_installs_and_updates": "Manage settings regarding installs and updates",
+  "miscellaneous": "Miscellaneous",
+  "storage_cache_and_downloads": "Storage, cache, and downloads",
+  "a_modern_fdroid_client": "A modern F-Droid client.",
+  "view_florid_source_github": "View the Florid source code on GitHub",
+  "telegram": "Telegram",
+  "join_community_telegram": "Join the community on Telegram",
+  "matrix": "Matrix",
+  "join_community_matrix": "Join the community on Matrix",
+  "report_an_issue": "Report an issue",
+  "found_a_bug": "Found a bug? Let us know!",
+  "donate": "Donate",
+  "support_continued_development": "Support continued development of Florid",
+  "share_florid": "Share Florid",
+  "let_nerdy_friends_know": "Let your nerdy friends know about Florid!",
+  "check_out_florid": "Check out Florid!",
+  "share_florid_text": "A modern F-Droid client! https://github.com/Nandanrmenon/florid",
+  "select_language": "Select Language",
+  "language_changed_to": "Language changed to {name}.",
+  "@language_changed_to": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "export_favourites": "Export favourites",
+  "no_favourites_to_export": "No favourites to export",
+  "unable_to_access_downloads": "Unable to access Downloads folder",
+  "saved_to_downloads": "Saved to Downloads: {path}",
+  "@saved_to_downloads": {
+    "placeholders": {
+      "path": {}
+    }
+  },
+  "no_favourites_found_to_import": "No favourites found to import",
+  "found_favourites_in_file": "Found {count} favourites in {fileName}.",
+  "@found_favourites_in_file": {
+    "placeholders": {
+      "count": {},
+      "fileName": {}
+    }
+  },
+  "imported_favourites_count": "Imported {count} favourites",
+  "@imported_favourites_count": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "system_default_language": "System default",
+  "authenticate_to_change_install_settings": "Authenticate to change installation settings",
+  "parental_control_intro": "Keep your family safe with parental controls. Manage app visibility and installation settings to ensure a secure experience for everyone.",
+  "hide_anti_feature_apps": "Hide anti-feature apps",
+  "hide_anti_feature_apps_subtitle": "Prevent apps with anti-features from appearing in app lists",
+  "biometric_authentication": "Biometric Authentication",
+  "require_auth_before_installs": "Require authentication before installations",
+  "clear_repository_cache": "Clear repository cache",
+  "clear_repository_cache_subtitle": "Refresh app list and metadata on next load",
+  "clear_apk_downloads": "Clear APK downloads",
+  "clear_apk_downloads_subtitle": "Remove downloaded installer files from storage",
+  "clear_image_cache": "Clear image cache",
+  "clear_image_cache_subtitle": "Remove cached icons and screenshots",
+  "repository_cache_cleared": "Repository cache cleared",
+  "image_cache_cleared": "Image cache cleared",
+  "deleted_apk_files": "Deleted {count} APK files",
+  "@deleted_apk_files": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "no_apk_downloads_to_delete": "No APK downloads to delete",
+  "dynamic_color_not_supported": "Dynamic color is not supported on this device",
+  "use_theme_color_palette_instead": "Use the theme color palette below instead.",
+  "theme_color": "Theme color",
+  "theme_color_subtitle": "Pick a custom accent color when dynamic color is disabled",
+  "show_navigation_labels": "Show navigation labels",
+  "whats_new_in_version": "What's new in {version}",
+  "@whats_new_in_version": {
+    "placeholders": {
+      "version": {}
+    }
+  },
+  "thanks_for_updating": "Thanks for updating Florid!",
+  "enjoy_latest_improvements": "Enjoy the latest improvements.",
+  "repository_url_already_exists": "This repository URL already exists",
+  "invalid_url_format": "Invalid URL format",
+  "custom_repository": "Custom repository",
+  "install_permission_required_continue": "App installation permission is required to continue.",
+  "cancel_setup_question": "Cancel setup?",
+  "cancel_setup_message": "Are you sure you want to cancel the setup? You can restart it later.",
+  "cancel_setup": "Cancel setup",
+  "optional": "Optional",
+  "repository_name_label": "Repository Name",
+  "repository_url_label": "Repository URL",
+  "fingerprint_optional": "Fingerprint (Optional)",
+  "fingerprint_hint": "13784BA6C80FF4E...",
+  "fingerprint_helper": "For enhanced security and verification",
+  "url_format_help": "URL format: https://repo.example.com (we'll add /repo/index-v2.json automatically)",
+  "repo_name_hint": "e.g., MyRepo",
+  "repo_url_hint": "https://example.com",
+  "open_settings": "Open Settings",
+  "more_actions": "More actions",
+  "unable_to_load_izzy_stats": "Unable to load IzzyOnDroid download stats right now.",
+  "anti_features": "Anti-features",
+  "no_version_information_available": "No Version Information Available",
+  "unable_to_open_app": "Unable to open {appName}.",
+  "@unable_to_open_app": {
+    "placeholders": {
+      "appName": {}
+    }
+  },
+  "invalid_donation_link": "Invalid donation link: {link}",
+  "@invalid_donation_link": {
+    "placeholders": {
+      "link": {}
+    }
+  },
+  "unable_to_open_donation_link": "Unable to open donation link: {link}",
+  "@unable_to_open_donation_link": {
+    "placeholders": {
+      "link": {}
+    }
+  },
+  "no_app_for_donation_link": "No app is available to handle this donation link.",
+  "no_version_metadata_available": "No version metadata available from {repositoryName}.",
+  "@no_version_metadata_available": {
+    "placeholders": {
+      "repositoryName": {}
+    }
+  },
+  "no_compatible_versions_available": "No compatible versions available in {repositoryName}.",
+  "@no_compatible_versions_available": {
+    "placeholders": {
+      "repositoryName": {}
+    }
+  },
+  "shizuku_not_running": "Shizuku is not running",
+  "shizuku_not_running_message": "Start the Shizuku app to continue, or switch to the system installer instead.",
+  "unable_to_open_shizuku": "Unable to open Shizuku app",
+  "switched_to_system_installer": "Switched to system installer",
+  "storage_permission_dialog_title": "Storage Permission Required",
+  "storage_permission_dialog_body": "Florid needs storage permission to download APK files.\n\nTo enable:\n1. Go to Settings (button below)\n2. Find \"Permissions\"\n3. Enable \"Files and media\" or \"Storage\"\n\nThen try downloading again.",
+  "starting_download_of_updates": "Starting download of {count} updates...",
+  "@starting_download_of_updates": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "no_suggestions_found": "No suggestions found",
+  "failed_to_load_categories": "Failed to load categories",
+  "izzy_stats_source": "Stats are pulled from IzzyOnDroid mirrors for {packageName} when available.",
+  "@izzy_stats_source": {
+    "placeholders": {
+      "packageName": {}
+    }
+  },
+  "no_detailed_version_info": "This app doesn't have detailed version information in the F-Droid repository.",
+  "permission_required_by_app": "Permission required by app.",
+  "permission_group_location": "Location",
+  "permission_group_storage": "Storage",
+  "permission_group_network": "Network",
+  "permission_group_bluetooth": "Bluetooth",
+  "permission_group_camera": "Camera",
+  "permission_group_audio": "Audio",
+  "permission_group_contacts": "Contacts",
+  "permission_group_startup": "Startup",
+  "permission_group_nfc": "NFC",
+  "permission_desc_internet": "Allows the app to create network connections.",
+  "permission_desc_access_network_state": "Allows the app to view network connections.",
+  "permission_desc_access_wifi_state": "Allows the app to view Wi-Fi connection status.",
+  "permission_desc_change_wifi_state": "Allows the app to change Wi-Fi connectivity.",
+  "permission_desc_read_external_storage": "Allows the app to read files from storage.",
+  "permission_desc_write_external_storage": "Allows the app to write files to storage.",
+  "permission_desc_manage_external_storage": "Allows the app broad access to manage files on storage.",
+  "permission_desc_request_install_packages": "Allows the app to request installation of packages.",
+  "permission_desc_post_notifications": "Allows the app to show notifications.",
+  "permission_desc_vibrate": "Allows the app to control vibration.",
+  "permission_desc_wake_lock": "Allows the app to keep the device awake.",
+  "permission_desc_receive_boot_completed": "Allows the app to run at device startup.",
+  "permission_desc_foreground_service": "Allows the app to run foreground services.",
+  "permission_desc_camera": "Allows the app to use the camera.",
+  "permission_desc_record_audio": "Allows the app to record audio.",
+  "permission_desc_read_contacts": "Allows the app to read contacts.",
+  "permission_desc_write_contacts": "Allows the app to modify contacts.",
+  "permission_desc_access_fine_location": "Allows the app to access precise location.",
+  "permission_desc_access_coarse_location": "Allows the app to access approximate location.",
+  "permission_desc_bluetooth": "Allows the app to connect to Bluetooth devices.",
+  "permission_desc_bluetooth_connect": "Allows the app to connect to Bluetooth devices.",
+  "permission_desc_bluetooth_scan": "Allows the app to discover nearby Bluetooth devices.",
+  "permission_desc_nfc": "Allows the app to use NFC.",
+  "failed_to_check_installed_apps": "Failed to check installed apps",
+  "unable_to_access_device_app_list": "Unable to access device app list",
+  "updates_available_count": "{count} updates available",
+  "@updates_available_count": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "update_from_version": "Update from {version}",
+  "@update_from_version": {
+    "placeholders": {
+      "version": {}
+    }
+  },
+  "no_fdroid_apps_installed": "No F-Droid apps installed",
+  "no_fdroid_apps_installed_subtitle": "No F-Droid apps are installed on this device",
+  "all_installed_apps_have_updates": "All installed F-Droid apps already have updates available.",
+  "updates_complete": "Updates complete: {successful} successful",
+  "@updates_complete": {
+    "placeholders": {
+      "successful": {}
+    }
+  },
+  "updates_complete_with_failures": "Updates complete: {successful} successful, {failed} failed",
+  "@updates_complete_with_failures": {
+    "placeholders": {
+      "successful": {},
+      "failed": {}
+    }
+  },
+  "installed_with_version": "Installed ({version})",
+  "@installed_with_version": {
+    "placeholders": {
+      "version": {}
+    }
+  },
+  "no_downloadable_versions": "This app doesn't have any downloadable versions available.",
+  "downloading_percent": "Downloading... {percent}%",
+  "@downloading_percent": {
+    "placeholders": {
+      "percent": {}
+    }
+  },
+  "loading_izzy_stats": "Loading IzzyOnDroid download stats...",
+  "downloading_app_update": "Downloading {appName} update...",
+  "@downloading_app_update": {
+    "placeholders": {
+      "appName": {}
+    }
+  },
+  "updates_ignored_for_app": "Updates are ignored for this app.",
+  "include_unstable_versions": "Include unstable versions",
+  "include_unstable_versions_subtitle": "Show beta, alpha, and prerelease versions for this app",
+  "loading_from_repository": "Loading {name}...",
+  "@loading_from_repository": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "failed_to_load_from_repository": "Failed to load from {name}.",
+  "@failed_to_load_from_repository": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "failed_to_load": "Failed to load",
+  "search_suggestions": "Search suggestions",
+  "anonymous_telemetry_note": "Your data is anonymous and never shared with third parties",
+  "initializing": "Initializing...",
+  "install_permission_required_apk": "Install permission is required to install APK files",
+  "download_channel_name": "Download Progress",
+  "download_progress_channel_description": "Download progress notifications",
+  "download_notifications_channel_description": "Download notifications",
+  "download_error_channel_description": "Download error notifications",
+  "downloading_package_percent": "{percent}% — Downloading {packageName}",
+  "@downloading_package_percent": {
+    "placeholders": {
+      "percent": {},
+      "packageName": {}
+    }
+  },
+  "download_complete_body": "Download complete — {packageName}",
+  "@download_complete_body": {
+    "placeholders": {
+      "packageName": {}
+    }
+  },
+  "updates_channel_name": "App Updates",
+  "updates_channel_description": "App update notifications",
+  "debug_update_check": "Debug update check",
+  "updates_available_title": "Updates available ({count})",
+  "@updates_available_title": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "and_n_more": "{names} and {count} more",
+  "@and_n_more": {
+    "placeholders": {
+      "names": {},
+      "count": {}
+    }
+  },
+  "authenticate_to_install": "Authenticate to install {appName}",
+  "@authenticate_to_install": {
+    "placeholders": {
+      "appName": {}
+    }
+  },
+  "last_synced": "Last synced: {date}",
+  "@last_synced": {
+    "placeholders": {
+      "date": {}
+    }
+  }
 }

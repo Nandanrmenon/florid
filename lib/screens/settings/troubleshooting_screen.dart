@@ -13,13 +13,13 @@ import 'package:solar_icons/solar_icons.dart';
 class TroubleshootingScreen extends StatelessWidget {
   const TroubleshootingScreen({super.key});
 
-  String _installMethodLabel(InstallMethod method) {
+  String _installMethodLabel(AppLocalizations l10n, InstallMethod method) {
     switch (method) {
       case InstallMethod.shizuku:
-        return 'Shizuku';
+        return l10n.shizuku;
       case InstallMethod.system:
       default:
-        return 'System installer';
+        return l10n.system_installer;
     }
   }
 
@@ -38,7 +38,12 @@ class TroubleshootingScreen extends StatelessWidget {
                 (method) => RadioListTile<InstallMethod>(
                   value: method,
                   groupValue: settings.installMethod,
-                  title: Text(_installMethodLabel(method)),
+                  title: Text(
+                    _installMethodLabel(
+                      AppLocalizations.of(context)!,
+                      method,
+                    ),
+                  ),
                   subtitle: method == InstallMethod.shizuku
                       ? Text(
                           AppLocalizations.of(
@@ -74,9 +79,11 @@ class TroubleshootingScreen extends StatelessWidget {
     final api = context.read<FDroidApiService>();
     await api.clearRepositoryCache();
     if (!context.mounted) return;
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text('Repository cache cleared')));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(AppLocalizations.of(context)!.repository_cache_cleared),
+      ),
+    );
   }
 
   Future<void> _clearImageCache(BuildContext context) async {
@@ -84,9 +91,11 @@ class TroubleshootingScreen extends StatelessWidget {
     imageCache.clear();
     imageCache.clearLiveImages();
     if (!context.mounted) return;
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text('Image cache cleared')));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(AppLocalizations.of(context)!.image_cache_cleared),
+      ),
+    );
   }
 
   Future<void> _clearApkDownloads(BuildContext context) async {
@@ -96,8 +105,8 @@ class TroubleshootingScreen extends StatelessWidget {
       SnackBar(
         content: Text(
           deleted > 0
-              ? 'Deleted $deleted APK file${deleted == 1 ? '' : 's'}'
-              : 'No APK downloads to delete',
+              ? AppLocalizations.of(context)!.deleted_apk_files(deleted)
+              : AppLocalizations.of(context)!.no_apk_downloads_to_delete,
         ),
       ),
     );
@@ -107,6 +116,7 @@ class TroubleshootingScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<SettingsProvider>(
       builder: (context, settings, _) {
+        final l10n = AppLocalizations.of(context)!;
         return Scaffold(
           body: CustomScrollView(
             slivers: [
@@ -118,7 +128,7 @@ class TroubleshootingScreen extends StatelessWidget {
                   },
                   icon: Icon(SolarIconsOutline.altArrowLeft),
                 ),
-                title: Text(AppLocalizations.of(context)!.troubleshooting),
+                title: Text(l10n.troubleshooting),
               ),
               SliverToBoxAdapter(
                 child: Padding(
@@ -130,12 +140,13 @@ class TroubleshootingScreen extends StatelessWidget {
                       Column(
                         spacing: 4,
                         children: [
-                          MListHeader(title: 'Downloads & Storage'),
+                          MListHeader(title: l10n.downloads_and_storage),
                           MListView(
                             items: [
                               MListItemData(
-                                title: 'Installation method',
+                                title: l10n.installation_method,
                                 subtitle: _installMethodLabel(
+                                  l10n,
                                   settings.installMethod,
                                 ),
                                 onTap: () =>
@@ -143,14 +154,13 @@ class TroubleshootingScreen extends StatelessWidget {
                                 suffix: const Icon(Symbols.chevron_right),
                               ),
                               MListItemData(
-                                title: 'Auto-install after download',
+                                title: l10n.auto_install_after_download,
                                 onTap: () {
                                   settings.setAutoInstallApk(
                                     !settings.autoInstallApk,
                                   );
                                 },
-                                subtitle:
-                                    'Install APKs automatically once download finishes',
+                                subtitle: l10n.auto_install_after_download_subtitle,
                                 suffix: Switch(
                                   value: settings.autoInstallApk,
                                   onChanged: (value) {
@@ -159,14 +169,13 @@ class TroubleshootingScreen extends StatelessWidget {
                                 ),
                               ),
                               MListItemData(
-                                title: 'Delete APK after install',
+                                title: l10n.delete_apk_after_install,
                                 onTap: () {
                                   settings.setAutoInstallApk(
                                     !settings.autoInstallApk,
                                   );
                                 },
-                                subtitle:
-                                    'Remove installer files after successful installation',
+                                subtitle: l10n.delete_apk_after_install_subtitle,
                                 suffix: Switch(
                                   value: settings.autoDeleteApk,
                                   onChanged: (value) {
@@ -182,27 +191,25 @@ class TroubleshootingScreen extends StatelessWidget {
                                 leading: ListIcon(
                                   iconData: Symbols.cleaning_services,
                                 ),
-                                title: 'Clear repository cache',
+                                title: l10n.clear_repository_cache,
                                 onTap: () => _clearRepoCache(context),
-                                subtitle:
-                                    'Refresh app list and metadata on next load',
+                                subtitle: l10n.clear_repository_cache_subtitle,
                               ),
                               MListItemData(
                                 leading: ListIcon(
                                   iconData: Symbols.delete_sweep,
                                 ),
-                                title: 'Clear APK downloads',
+                                title: l10n.clear_apk_downloads,
                                 onTap: () => _clearApkDownloads(context),
-                                subtitle:
-                                    'Remove downloaded installer files from storage',
+                                subtitle: l10n.clear_apk_downloads_subtitle,
                               ),
                               MListItemData(
                                 leading: ListIcon(
                                   iconData: Symbols.image_not_supported,
                                 ),
-                                title: 'Clear image cache',
+                                title: l10n.clear_image_cache,
                                 onTap: () => _clearImageCache(context),
-                                subtitle: 'Remove cached icons and screenshots',
+                                subtitle: l10n.clear_image_cache_subtitle,
                               ),
                             ],
                           ),

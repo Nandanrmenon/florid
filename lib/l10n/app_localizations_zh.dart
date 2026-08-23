@@ -889,6 +889,588 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get ignore_future_updates => 'Ignore Future Updates';
+
+  @override
+  String get general_settings => 'General Settings';
+
+  @override
+  String get view_favourite_apps => 'View your favourite apps';
+
+  @override
+  String get theme_mode_and_style => 'Theme mode and style';
+
+  @override
+  String get parental_control => 'Parental Control';
+
+  @override
+  String get parental_control_subtitle =>
+      'Hide anti-feature apps and protect installs';
+
+  @override
+  String get app_content_language => 'App content language';
+
+  @override
+  String get repositories_and_management => 'Repositories & Management';
+
+  @override
+  String get add_or_remove_fdroid_repositories =>
+      'Add or remove F-Droid repositories';
+
+  @override
+  String get manage_installs_and_updates =>
+      'Manage settings regarding installs and updates';
+
+  @override
+  String get miscellaneous => 'Miscellaneous';
+
+  @override
+  String get storage_cache_and_downloads => 'Storage, cache, and downloads';
+
+  @override
+  String get a_modern_fdroid_client => 'A modern F-Droid client.';
+
+  @override
+  String get view_florid_source_github =>
+      'View the Florid source code on GitHub';
+
+  @override
+  String get telegram => 'Telegram';
+
+  @override
+  String get join_community_telegram => 'Join the community on Telegram';
+
+  @override
+  String get matrix => 'Matrix';
+
+  @override
+  String get join_community_matrix => 'Join the community on Matrix';
+
+  @override
+  String get report_an_issue => 'Report an issue';
+
+  @override
+  String get found_a_bug => 'Found a bug? Let us know!';
+
+  @override
+  String get donate => 'Donate';
+
+  @override
+  String get support_continued_development =>
+      'Support continued development of Florid';
+
+  @override
+  String get share_florid => 'Share Florid';
+
+  @override
+  String get let_nerdy_friends_know =>
+      'Let your nerdy friends know about Florid!';
+
+  @override
+  String get check_out_florid => 'Check out Florid!';
+
+  @override
+  String get share_florid_text =>
+      'A modern F-Droid client! https://github.com/Nandanrmenon/florid';
+
+  @override
+  String get select_language => 'Select Language';
+
+  @override
+  String language_changed_to(Object name) {
+    return 'Language changed to $name.';
+  }
+
+  @override
+  String get export_favourites => 'Export favourites';
+
+  @override
+  String get no_favourites_to_export => 'No favourites to export';
+
+  @override
+  String get unable_to_access_downloads =>
+      'Unable to access Downloads folder';
+
+  @override
+  String saved_to_downloads(Object path) {
+    return 'Saved to Downloads: $path';
+  }
+
+  @override
+  String get no_favourites_found_to_import =>
+      'No favourites found to import';
+
+  @override
+  String found_favourites_in_file(Object count, Object fileName) {
+    return 'Found $count favourites in $fileName.';
+  }
+
+  @override
+  String imported_favourites_count(Object count) {
+    return 'Imported $count favourites';
+  }
+
+  @override
+  String get system_default_language => 'System default';
+
+  @override
+  String get authenticate_to_change_install_settings =>
+      'Authenticate to change installation settings';
+
+  @override
+  String get parental_control_intro =>
+      'Keep your family safe with parental controls. Manage app visibility and installation settings to ensure a secure experience for everyone.';
+
+  @override
+  String get hide_anti_feature_apps => 'Hide anti-feature apps';
+
+  @override
+  String get hide_anti_feature_apps_subtitle =>
+      'Prevent apps with anti-features from appearing in app lists';
+
+  @override
+  String get biometric_authentication => 'Biometric Authentication';
+
+  @override
+  String get require_auth_before_installs =>
+      'Require authentication before installations';
+
+
+  @override
+  String get clear_repository_cache => 'Clear repository cache';
+
+  @override
+  String get clear_repository_cache_subtitle => 'Refresh app list and metadata on next load';
+
+  @override
+  String get clear_apk_downloads => 'Clear APK downloads';
+
+  @override
+  String get clear_apk_downloads_subtitle => 'Remove downloaded installer files from storage';
+
+  @override
+  String get clear_image_cache => 'Clear image cache';
+
+  @override
+  String get clear_image_cache_subtitle => 'Remove cached icons and screenshots';
+
+  @override
+  String get repository_cache_cleared => 'Repository cache cleared';
+
+  @override
+  String get image_cache_cleared => 'Image cache cleared';
+
+  @override
+  String get no_apk_downloads_to_delete => 'No APK downloads to delete';
+
+  @override
+  String get dynamic_color_not_supported => 'Dynamic color is not supported on this device';
+
+  @override
+  String get use_theme_color_palette_instead => 'Use the theme color palette below instead.';
+
+  @override
+  String get theme_color => 'Theme color';
+
+  @override
+  String get theme_color_subtitle => 'Pick a custom accent color when dynamic color is disabled';
+
+  @override
+  String get show_navigation_labels => 'Show navigation labels';
+
+  @override
+  String get thanks_for_updating => 'Thanks for updating Florid!';
+
+  @override
+  String get enjoy_latest_improvements => 'Enjoy the latest improvements.';
+
+  @override
+  String get repository_url_already_exists => 'This repository URL already exists';
+
+  @override
+  String get invalid_url_format => 'Invalid URL format';
+
+  @override
+  String get custom_repository => 'Custom repository';
+
+  @override
+  String get install_permission_required_continue => 'App installation permission is required to continue.';
+
+  @override
+  String get cancel_setup_question => 'Cancel setup?';
+
+  @override
+  String get cancel_setup_message => 'Are you sure you want to cancel the setup? You can restart it later.';
+
+  @override
+  String get cancel_setup => 'Cancel setup';
+
+  @override
+  String get optional => 'Optional';
+
+  @override
+  String get repository_name_label => 'Repository Name';
+
+  @override
+  String get repository_url_label => 'Repository URL';
+
+  @override
+  String get fingerprint_optional => 'Fingerprint (Optional)';
+
+  @override
+  String get fingerprint_hint => '13784BA6C80FF4E...';
+
+  @override
+  String get fingerprint_helper => 'For enhanced security and verification';
+
+  @override
+  String get url_format_help => 'URL format: https://repo.example.com (we\'ll add /repo/index-v2.json automatically)';
+
+  @override
+  String get repo_name_hint => 'e.g., MyRepo';
+
+  @override
+  String get repo_url_hint => 'https://example.com';
+
+  @override
+  String get open_settings => 'Open Settings';
+
+  @override
+  String get more_actions => 'More actions';
+
+  @override
+  String get unable_to_load_izzy_stats => 'Unable to load IzzyOnDroid download stats right now.';
+
+  @override
+  String get anti_features => 'Anti-features';
+
+  @override
+  String get no_version_information_available => 'No Version Information Available';
+
+  @override
+  String get no_app_for_donation_link => 'No app is available to handle this donation link.';
+
+  @override
+  String get shizuku_not_running => 'Shizuku is not running';
+
+  @override
+  String get shizuku_not_running_message => 'Start the Shizuku app to continue, or switch to the system installer instead.';
+
+  @override
+  String get unable_to_open_shizuku => 'Unable to open Shizuku app';
+
+  @override
+  String get switched_to_system_installer => 'Switched to system installer';
+
+  @override
+  String get storage_permission_dialog_title => 'Storage Permission Required';
+
+  @override
+  String get storage_permission_dialog_body =>
+      'Florid needs storage permission to download APK files.
+
+To enable:
+1. Go to Settings (button below)
+2. Find "Permissions"
+3. Enable "Files and media" or "Storage"
+
+Then try downloading again.';
+
+  @override
+  String get no_suggestions_found => 'No suggestions found';
+
+  @override
+  String get failed_to_load_categories => 'Failed to load categories';
+
+  @override
+  String deleted_apk_files(Object count) {
+    return 'Deleted $count APK files';
+  }
+
+  @override
+  String whats_new_in_version(Object version) {
+    return 'What\'s new in $version';
+  }
+
+  @override
+  String unable_to_open_app(Object appName) {
+    return 'Unable to open $appName.';
+  }
+
+  @override
+  String invalid_donation_link(Object link) {
+    return 'Invalid donation link: $link';
+  }
+
+  @override
+  String unable_to_open_donation_link(Object link) {
+    return 'Unable to open donation link: $link';
+  }
+
+  @override
+  String no_version_metadata_available(Object repositoryName) {
+    return 'No version metadata available from $repositoryName.';
+  }
+
+  @override
+  String no_compatible_versions_available(Object repositoryName) {
+    return 'No compatible versions available in $repositoryName.';
+  }
+
+  @override
+  String starting_download_of_updates(Object count) {
+    return 'Starting download of $count updates...';
+  }
+
+  @override
+  String izzy_stats_source(Object packageName) {
+    return 'Stats are pulled from IzzyOnDroid mirrors for $packageName when available.';
+  }
+
+  @override
+  String get no_detailed_version_info =>
+      'This app doesn\'t have detailed version information in the F-Droid repository.';
+
+
+  @override
+  String get permission_required_by_app => 'Permission required by app.';
+
+  @override
+  String get permission_group_location => 'Location';
+
+  @override
+  String get permission_group_storage => 'Storage';
+
+  @override
+  String get permission_group_network => 'Network';
+
+  @override
+  String get permission_group_bluetooth => 'Bluetooth';
+
+  @override
+  String get permission_group_camera => 'Camera';
+
+  @override
+  String get permission_group_audio => 'Audio';
+
+  @override
+  String get permission_group_contacts => 'Contacts';
+
+  @override
+  String get permission_group_startup => 'Startup';
+
+  @override
+  String get permission_group_nfc => 'NFC';
+
+  @override
+  String get permission_desc_internet => 'Allows the app to create network connections.';
+
+  @override
+  String get permission_desc_access_network_state => 'Allows the app to view network connections.';
+
+  @override
+  String get permission_desc_access_wifi_state => 'Allows the app to view Wi-Fi connection status.';
+
+  @override
+  String get permission_desc_change_wifi_state => 'Allows the app to change Wi-Fi connectivity.';
+
+  @override
+  String get permission_desc_read_external_storage => 'Allows the app to read files from storage.';
+
+  @override
+  String get permission_desc_write_external_storage => 'Allows the app to write files to storage.';
+
+  @override
+  String get permission_desc_manage_external_storage => 'Allows the app broad access to manage files on storage.';
+
+  @override
+  String get permission_desc_request_install_packages => 'Allows the app to request installation of packages.';
+
+  @override
+  String get permission_desc_post_notifications => 'Allows the app to show notifications.';
+
+  @override
+  String get permission_desc_vibrate => 'Allows the app to control vibration.';
+
+  @override
+  String get permission_desc_wake_lock => 'Allows the app to keep the device awake.';
+
+  @override
+  String get permission_desc_receive_boot_completed => 'Allows the app to run at device startup.';
+
+  @override
+  String get permission_desc_foreground_service => 'Allows the app to run foreground services.';
+
+  @override
+  String get permission_desc_camera => 'Allows the app to use the camera.';
+
+  @override
+  String get permission_desc_record_audio => 'Allows the app to record audio.';
+
+  @override
+  String get permission_desc_read_contacts => 'Allows the app to read contacts.';
+
+  @override
+  String get permission_desc_write_contacts => 'Allows the app to modify contacts.';
+
+  @override
+  String get permission_desc_access_fine_location => 'Allows the app to access precise location.';
+
+  @override
+  String get permission_desc_access_coarse_location => 'Allows the app to access approximate location.';
+
+  @override
+  String get permission_desc_bluetooth => 'Allows the app to connect to Bluetooth devices.';
+
+  @override
+  String get permission_desc_bluetooth_connect => 'Allows the app to connect to Bluetooth devices.';
+
+  @override
+  String get permission_desc_bluetooth_scan => 'Allows the app to discover nearby Bluetooth devices.';
+
+  @override
+  String get permission_desc_nfc => 'Allows the app to use NFC.';
+
+  @override
+  String get failed_to_check_installed_apps => 'Failed to check installed apps';
+
+  @override
+  String get unable_to_access_device_app_list => 'Unable to access device app list';
+
+  @override
+  String updates_available_count(Object count) {
+    return '$count updates available';
+  }
+
+  @override
+  String update_from_version(Object version) {
+    return 'Update from $version';
+  }
+
+  @override
+  String get no_fdroid_apps_installed => 'No F-Droid apps installed';
+
+  @override
+  String get no_fdroid_apps_installed_subtitle => 'No F-Droid apps are installed on this device';
+
+  @override
+  String get all_installed_apps_have_updates => 'All installed F-Droid apps already have updates available.';
+
+  @override
+  String updates_complete(Object successful) {
+    return 'Updates complete: $successful successful';
+  }
+
+  @override
+  String updates_complete_with_failures(Object successful, Object failed) {
+    return 'Updates complete: $successful successful, $failed failed';
+  }
+
+  @override
+  String installed_with_version(Object version) {
+    return 'Installed ($version)';
+  }
+
+  @override
+  String get no_downloadable_versions => 'This app doesn\'t have any downloadable versions available.';
+
+  @override
+  String downloading_percent(Object percent) {
+    return 'Downloading... $percent%';
+  }
+
+  @override
+  String get loading_izzy_stats => 'Loading IzzyOnDroid download stats...';
+
+  @override
+  String downloading_app_update(Object appName) {
+    return 'Downloading $appName update...';
+  }
+
+  @override
+  String get updates_ignored_for_app => 'Updates are ignored for this app.';
+
+  @override
+  String get include_unstable_versions => 'Include unstable versions';
+
+  @override
+  String get include_unstable_versions_subtitle => 'Show beta, alpha, and prerelease versions for this app';
+
+  @override
+  String loading_from_repository(Object name) {
+    return 'Loading $name...';
+  }
+
+  @override
+  String failed_to_load_from_repository(Object name) {
+    return 'Failed to load from $name.';
+  }
+
+  @override
+  String get failed_to_load => 'Failed to load';
+
+  @override
+  String get search_suggestions => 'Search suggestions';
+
+  @override
+  String get anonymous_telemetry_note => 'Your data is anonymous and never shared with third parties';
+
+  @override
+  String get initializing => 'Initializing...';
+
+  @override
+  String get install_permission_required_apk => 'Install permission is required to install APK files';
+
+  @override
+  String get download_channel_name => 'Download Progress';
+
+  @override
+  String get download_progress_channel_description => 'Download progress notifications';
+
+  @override
+  String get download_notifications_channel_description => 'Download notifications';
+
+  @override
+  String get download_error_channel_description => 'Download error notifications';
+
+  @override
+  String downloading_package_percent(Object percent, Object packageName) {
+    return '$percent% — Downloading $packageName';
+  }
+
+  @override
+  String download_complete_body(Object packageName) {
+    return 'Download complete — $packageName';
+  }
+
+  @override
+  String get updates_channel_name => 'App Updates';
+
+  @override
+  String get updates_channel_description => 'App update notifications';
+
+  @override
+  String get debug_update_check => 'Debug update check';
+
+  @override
+  String updates_available_title(Object count) {
+    return 'Updates available ($count)';
+  }
+
+  @override
+  String and_n_more(Object names, Object count) {
+    return '$names and $count more';
+  }
+
+  @override
+  String authenticate_to_install(Object appName) {
+    return 'Authenticate to install $appName';
+  }
+
+  @override
+  String last_synced(Object date) {
+    return 'Last synced: $date';
+  }
+
 }
 
 /// The translations for Chinese, as used in China (`zh_CN`).

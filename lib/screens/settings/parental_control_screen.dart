@@ -34,7 +34,8 @@ class _ParentalControlScreenState extends State<ParentalControlScreen> {
       }
 
       return await _localAuth.authenticate(
-        localizedReason: 'Authenticate to change installation settings',
+        localizedReason: AppLocalizations.of(context)!
+            .authenticate_to_change_install_settings,
         biometricOnly: false,
         persistAcrossBackgrounding: true,
       );
@@ -129,7 +130,7 @@ class _ParentalControlScreenState extends State<ParentalControlScreen> {
               },
               icon: Icon(SolarIconsOutline.altArrowLeft),
             ),
-            title: const Text('Parental Control'),
+            title: Text(localizations.parental_control),
           ),
           SliverToBoxAdapter(
             child: Padding(
@@ -161,7 +162,7 @@ class _ParentalControlScreenState extends State<ParentalControlScreen> {
                             ),
                           ),
                           Text(
-                            'Keep your family safe with parental controls. Manage app visibility and installation settings to ensure a secure experience for everyone.',
+                            localizations.parental_control_intro,
                             style: Theme.of(context).textTheme.bodyMedium
                                 ?.copyWith(
                                   color: Theme.of(
@@ -177,7 +178,7 @@ class _ParentalControlScreenState extends State<ParentalControlScreen> {
                   Column(
                     spacing: 4,
                     children: [
-                      const MListHeader(title: 'Parental Control'),
+                      MListHeader(title: localizations.parental_control),
                       MListView(
                         items: [
                           MListItemData(
@@ -186,9 +187,9 @@ class _ParentalControlScreenState extends State<ParentalControlScreen> {
                                   ? SolarIconsBold.eyeClosed
                                   : SolarIconsBold.eye,
                             ),
-                            title: 'Hide anti-feature apps',
+                            title: localizations.hide_anti_feature_apps,
                             subtitle:
-                                'Prevent apps with anti-features from appearing in app lists',
+                                localizations.hide_anti_feature_apps_subtitle,
                             onTap: () async {
                               await _setHideAntiFeatureAppsWithConfirmation(
                                 settings,
@@ -220,9 +221,9 @@ class _ParentalControlScreenState extends State<ParentalControlScreen> {
                               leading: const ListIcon(
                                 iconData: SolarIconsBold.lock,
                               ),
-                              title: 'Biometric Authentication',
+                              title: localizations.biometric_authentication,
                               subtitle:
-                                  'Require authentication before installations',
+                                  localizations.require_auth_before_installs,
                               onTap: () async {
                                 await _setInstallAuthEnabledWithVerification(
                                   settings,

@@ -9,6 +9,7 @@ import 'app_localizations_cs.dart';
 import 'app_localizations_de.dart';
 import 'app_localizations_en.dart';
 import 'app_localizations_it.dart';
+import 'app_localizations_ru.dart';
 import 'app_localizations_tr.dart';
 import 'app_localizations_zh.dart';
 
@@ -102,6 +103,7 @@ abstract class AppLocalizations {
     Locale('de'),
     Locale('en'),
     Locale('it'),
+    Locale('ru'),
     Locale('tr'),
     Locale('zh'),
     Locale('zh', 'CN'),
@@ -1774,7 +1776,179 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Ignore Future Updates'**
   String get ignore_future_updates;
+
+  String get general_settings;
+  String get view_favourite_apps;
+  String get theme_mode_and_style;
+  String get parental_control;
+  String get parental_control_subtitle;
+  String get app_content_language;
+  String get repositories_and_management;
+  String get add_or_remove_fdroid_repositories;
+  String get manage_installs_and_updates;
+  String get miscellaneous;
+  String get storage_cache_and_downloads;
+  String get a_modern_fdroid_client;
+  String get view_florid_source_github;
+  String get telegram;
+  String get join_community_telegram;
+  String get matrix;
+  String get join_community_matrix;
+  String get report_an_issue;
+  String get found_a_bug;
+  String get donate;
+  String get support_continued_development;
+  String get share_florid;
+  String get let_nerdy_friends_know;
+  String get check_out_florid;
+  String get share_florid_text;
+  String get select_language;
+  String language_changed_to(Object name);
+  String get export_favourites;
+  String get no_favourites_to_export;
+  String get unable_to_access_downloads;
+  String saved_to_downloads(Object path);
+  String get no_favourites_found_to_import;
+  String found_favourites_in_file(Object count, Object fileName);
+  String imported_favourites_count(Object count);
+  String get system_default_language;
+  String get authenticate_to_change_install_settings;
+  String get parental_control_intro;
+  String get hide_anti_feature_apps;
+  String get hide_anti_feature_apps_subtitle;
+  String get biometric_authentication;
+  String get require_auth_before_installs;
+
+  String get clear_repository_cache;
+  String get clear_repository_cache_subtitle;
+  String get clear_apk_downloads;
+  String get clear_apk_downloads_subtitle;
+  String get clear_image_cache;
+  String get clear_image_cache_subtitle;
+  String get repository_cache_cleared;
+  String get image_cache_cleared;
+  String get no_apk_downloads_to_delete;
+  String get dynamic_color_not_supported;
+  String get use_theme_color_palette_instead;
+  String get theme_color;
+  String get theme_color_subtitle;
+  String get show_navigation_labels;
+  String get thanks_for_updating;
+  String get enjoy_latest_improvements;
+  String get repository_url_already_exists;
+  String get invalid_url_format;
+  String get custom_repository;
+  String get install_permission_required_continue;
+  String get cancel_setup_question;
+  String get cancel_setup_message;
+  String get cancel_setup;
+  String get optional;
+  String get repository_name_label;
+  String get repository_url_label;
+  String get fingerprint_optional;
+  String get fingerprint_hint;
+  String get fingerprint_helper;
+  String get url_format_help;
+  String get repo_name_hint;
+  String get repo_url_hint;
+  String get open_settings;
+  String get more_actions;
+  String get unable_to_load_izzy_stats;
+  String get anti_features;
+  String get no_version_information_available;
+  String get no_app_for_donation_link;
+  String get shizuku_not_running;
+  String get shizuku_not_running_message;
+  String get unable_to_open_shizuku;
+  String get switched_to_system_installer;
+  String get storage_permission_dialog_title;
+  String get storage_permission_dialog_body;
+  String get no_suggestions_found;
+  String get failed_to_load_categories;
+
+  String deleted_apk_files(Object count);
+  String whats_new_in_version(Object version);
+  String unable_to_open_app(Object appName);
+  String invalid_donation_link(Object link);
+  String unable_to_open_donation_link(Object link);
+  String no_version_metadata_available(Object repositoryName);
+  String no_compatible_versions_available(Object repositoryName);
+  String starting_download_of_updates(Object count);
+  String izzy_stats_source(Object packageName);
+  String get no_detailed_version_info;
+  String get permission_required_by_app;
+  String get permission_group_location;
+  String get permission_group_storage;
+  String get permission_group_network;
+  String get permission_group_bluetooth;
+  String get permission_group_camera;
+  String get permission_group_audio;
+  String get permission_group_contacts;
+  String get permission_group_startup;
+  String get permission_group_nfc;
+  String get permission_desc_internet;
+  String get permission_desc_access_network_state;
+  String get permission_desc_access_wifi_state;
+  String get permission_desc_change_wifi_state;
+  String get permission_desc_read_external_storage;
+  String get permission_desc_write_external_storage;
+  String get permission_desc_manage_external_storage;
+  String get permission_desc_request_install_packages;
+  String get permission_desc_post_notifications;
+  String get permission_desc_vibrate;
+  String get permission_desc_wake_lock;
+  String get permission_desc_receive_boot_completed;
+  String get permission_desc_foreground_service;
+  String get permission_desc_camera;
+  String get permission_desc_record_audio;
+  String get permission_desc_read_contacts;
+  String get permission_desc_write_contacts;
+  String get permission_desc_access_fine_location;
+  String get permission_desc_access_coarse_location;
+  String get permission_desc_bluetooth;
+  String get permission_desc_bluetooth_connect;
+  String get permission_desc_bluetooth_scan;
+  String get permission_desc_nfc;
+  String get failed_to_check_installed_apps;
+  String get unable_to_access_device_app_list;
+  String updates_available_count(Object count);
+  String update_from_version(Object version);
+  String get no_fdroid_apps_installed;
+  String get no_fdroid_apps_installed_subtitle;
+  String get all_installed_apps_have_updates;
+  String updates_complete(Object successful);
+  String updates_complete_with_failures(Object successful, Object failed);
+  String installed_with_version(Object version);
+  String get no_downloadable_versions;
+  String downloading_percent(Object percent);
+  String get loading_izzy_stats;
+  String downloading_app_update(Object appName);
+  String get updates_ignored_for_app;
+  String get include_unstable_versions;
+  String get include_unstable_versions_subtitle;
+  String loading_from_repository(Object name);
+  String failed_to_load_from_repository(Object name);
+  String get failed_to_load;
+  String get search_suggestions;
+  String get anonymous_telemetry_note;
+  String get initializing;
+  String get install_permission_required_apk;
+  String get download_channel_name;
+  String get download_progress_channel_description;
+  String get download_notifications_channel_description;
+  String get download_error_channel_description;
+  String downloading_package_percent(Object percent, Object packageName);
+  String download_complete_body(Object packageName);
+  String get updates_channel_name;
+  String get updates_channel_description;
+  String get debug_update_check;
+  String updates_available_title(Object count);
+  String and_n_more(Object names, Object count);
+  String authenticate_to_install(Object appName);
+  String last_synced(Object date);
 }
+
+
 
 class _AppLocalizationsDelegate
     extends LocalizationsDelegate<AppLocalizations> {
@@ -1791,6 +1965,7 @@ class _AppLocalizationsDelegate
     'de',
     'en',
     'it',
+    'ru',
     'tr',
     'zh',
   ].contains(locale.languageCode);
@@ -1822,6 +1997,8 @@ AppLocalizations lookupAppLocalizations(Locale locale) {
       return AppLocalizationsEn();
     case 'it':
       return AppLocalizationsIt();
+    case 'ru':
+      return AppLocalizationsRu();
     case 'tr':
       return AppLocalizationsTr();
     case 'zh':

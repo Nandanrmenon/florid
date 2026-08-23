@@ -141,7 +141,8 @@ class _AppManagementScreenState extends State<AppManagementScreen> {
       }
 
       return await _localAuth.authenticate(
-        localizedReason: 'Authenticate to change installation settings',
+        localizedReason: AppLocalizations.of(context)!
+            .authenticate_to_change_install_settings,
         biometricOnly: false,
         persistAcrossBackgrounding: true,
       );

@@ -171,12 +171,12 @@ class _CategoriesScreenState extends State<CategoriesScreen>
             ),
             const SizedBox(height: 16),
             Text(
-              'Failed to load categories',
+              AppLocalizations.of(context)!.failed_to_load_categories,
               style: Theme.of(context).textTheme.headlineSmall,
             ),
             const SizedBox(height: 8),
             Text(
-              error ?? 'Unknown error occurred',
+              error ?? AppLocalizations.of(context)!.unknown_error_occurred,
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 color: Theme.of(context).colorScheme.onSurfaceVariant,

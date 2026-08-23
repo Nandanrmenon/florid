@@ -111,7 +111,13 @@ class _AppSectionViewerState extends State<AppSectionViewer>
         if (context.mounted) {
           ScaffoldMessenger.of(
             context,
-          ).showSnackBar(SnackBar(content: Text('Update failed: $errorMsg')));
+          ).showSnackBar(
+            SnackBar(
+              content: Text(
+                AppLocalizations.of(context)!.update_failed_with_error(errorMsg),
+              ),
+            ),
+          );
         }
       }
     }

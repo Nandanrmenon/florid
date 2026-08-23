@@ -173,7 +173,9 @@ class _FloridAppState extends State<FloridApp> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        "What's new in $currentVersion",
+                        AppLocalizations.of(context)!.whats_new_in_version(
+                          currentVersion,
+                        ),
                         style: Theme.of(context).textTheme.headlineSmall,
                       ),
                       Column(
@@ -189,7 +191,7 @@ class _FloridAppState extends State<FloridApp> {
                 onPressed: () {
                   Navigator.pop(context);
                 },
-                child: Text("Close"),
+                child: Text(AppLocalizations.of(context)!.close),
               ),
             ],
           ),
@@ -206,9 +208,10 @@ class _FloridAppState extends State<FloridApp> {
 
   List<Widget> _buildWhatsNewContent(BuildContext context, WhatsNewData? data) {
     if (data == null || data.sections.isEmpty) {
-      return const [
-        Text('Thanks for updating Florid!'),
-        Text('Enjoy the latest improvements.'),
+      final l10n = AppLocalizations.of(context)!;
+      return [
+        Text(l10n.thanks_for_updating),
+        Text(l10n.enjoy_latest_improvements),
       ];
     }
 

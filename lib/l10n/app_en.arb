@@ -449,5 +449,106 @@
   "hide_anti_feature_apps": "Hide anti-feature apps",
   "hide_anti_feature_apps_subtitle": "Prevent apps with anti-features from appearing in app lists",
   "biometric_authentication": "Biometric Authentication",
-  "require_auth_before_installs": "Require authentication before installations"
+  "require_auth_before_installs": "Require authentication before installations",
+  "clear_repository_cache": "Clear repository cache",
+  "clear_repository_cache_subtitle": "Refresh app list and metadata on next load",
+  "clear_apk_downloads": "Clear APK downloads",
+  "clear_apk_downloads_subtitle": "Remove downloaded installer files from storage",
+  "clear_image_cache": "Clear image cache",
+  "clear_image_cache_subtitle": "Remove cached icons and screenshots",
+  "repository_cache_cleared": "Repository cache cleared",
+  "image_cache_cleared": "Image cache cleared",
+  "deleted_apk_files": "Deleted {count} APK files",
+  "@deleted_apk_files": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "no_apk_downloads_to_delete": "No APK downloads to delete",
+  "dynamic_color_not_supported": "Dynamic color is not supported on this device",
+  "use_theme_color_palette_instead": "Use the theme color palette below instead.",
+  "theme_color": "Theme color",
+  "theme_color_subtitle": "Pick a custom accent color when dynamic color is disabled",
+  "show_navigation_labels": "Show navigation labels",
+  "whats_new_in_version": "What's new in {version}",
+  "@whats_new_in_version": {
+    "placeholders": {
+      "version": {}
+    }
+  },
+  "thanks_for_updating": "Thanks for updating Florid!",
+  "enjoy_latest_improvements": "Enjoy the latest improvements.",
+  "repository_url_already_exists": "This repository URL already exists",
+  "invalid_url_format": "Invalid URL format",
+  "custom_repository": "Custom repository",
+  "install_permission_required_continue": "App installation permission is required to continue.",
+  "cancel_setup_question": "Cancel setup?",
+  "cancel_setup_message": "Are you sure you want to cancel the setup? You can restart it later.",
+  "cancel_setup": "Cancel setup",
+  "optional": "Optional",
+  "repository_name_label": "Repository Name",
+  "repository_url_label": "Repository URL",
+  "fingerprint_optional": "Fingerprint (Optional)",
+  "fingerprint_hint": "13784BA6C80FF4E...",
+  "fingerprint_helper": "For enhanced security and verification",
+  "url_format_help": "URL format: https://repo.example.com (we'll add /repo/index-v2.json automatically)",
+  "repo_name_hint": "e.g., MyRepo",
+  "repo_url_hint": "https://example.com",
+  "open_settings": "Open Settings",
+  "more_actions": "More actions",
+  "unable_to_load_izzy_stats": "Unable to load IzzyOnDroid download stats right now.",
+  "anti_features": "Anti-features",
+  "no_version_information_available": "No Version Information Available",
+  "unable_to_open_app": "Unable to open {appName}.",
+  "@unable_to_open_app": {
+    "placeholders": {
+      "appName": {}
+    }
+  },
+  "invalid_donation_link": "Invalid donation link: {link}",
+  "@invalid_donation_link": {
+    "placeholders": {
+      "link": {}
+    }
+  },
+  "unable_to_open_donation_link": "Unable to open donation link: {link}",
+  "@unable_to_open_donation_link": {
+    "placeholders": {
+      "link": {}
+    }
+  },
+  "no_app_for_donation_link": "No app is available to handle this donation link.",
+  "no_version_metadata_available": "No version metadata available from {repositoryName}.",
+  "@no_version_metadata_available": {
+    "placeholders": {
+      "repositoryName": {}
+    }
+  },
+  "no_compatible_versions_available": "No compatible versions available in {repositoryName}.",
+  "@no_compatible_versions_available": {
+    "placeholders": {
+      "repositoryName": {}
+    }
+  },
+  "shizuku_not_running": "Shizuku is not running",
+  "shizuku_not_running_message": "Start the Shizuku app to continue, or switch to the system installer instead.",
+  "unable_to_open_shizuku": "Unable to open Shizuku app",
+  "switched_to_system_installer": "Switched to system installer",
+  "storage_permission_dialog_title": "Storage Permission Required",
+  "storage_permission_dialog_body": "Florid needs storage permission to download APK files.\n\nTo enable:\n1. Go to Settings (button below)\n2. Find \"Permissions\"\n3. Enable \"Files and media\" or \"Storage\"\n\nThen try downloading again.",
+  "starting_download_of_updates": "Starting download of {count} updates...",
+  "@starting_download_of_updates": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "no_suggestions_found": "No suggestions found",
+  "failed_to_load_categories": "Failed to load categories",
+  "izzy_stats_source": "Stats are pulled from IzzyOnDroid mirrors for {packageName} when available.",
+  "@izzy_stats_source": {
+    "placeholders": {
+      "packageName": {}
+    }
+  },
+  "no_detailed_version_info": "This app doesn't have detailed version information in the F-Droid repository."
 }

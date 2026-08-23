@@ -1071,4 +1071,200 @@ class AppLocalizationsIt extends AppLocalizations {
   String get require_auth_before_installs =>
       'Require authentication before installations';
 
+
+  @override
+  String get clear_repository_cache => 'Clear repository cache';
+
+  @override
+  String get clear_repository_cache_subtitle => 'Refresh app list and metadata on next load';
+
+  @override
+  String get clear_apk_downloads => 'Clear APK downloads';
+
+  @override
+  String get clear_apk_downloads_subtitle => 'Remove downloaded installer files from storage';
+
+  @override
+  String get clear_image_cache => 'Clear image cache';
+
+  @override
+  String get clear_image_cache_subtitle => 'Remove cached icons and screenshots';
+
+  @override
+  String get repository_cache_cleared => 'Repository cache cleared';
+
+  @override
+  String get image_cache_cleared => 'Image cache cleared';
+
+  @override
+  String get no_apk_downloads_to_delete => 'No APK downloads to delete';
+
+  @override
+  String get dynamic_color_not_supported => 'Dynamic color is not supported on this device';
+
+  @override
+  String get use_theme_color_palette_instead => 'Use the theme color palette below instead.';
+
+  @override
+  String get theme_color => 'Theme color';
+
+  @override
+  String get theme_color_subtitle => 'Pick a custom accent color when dynamic color is disabled';
+
+  @override
+  String get show_navigation_labels => 'Show navigation labels';
+
+  @override
+  String get thanks_for_updating => 'Thanks for updating Florid!';
+
+  @override
+  String get enjoy_latest_improvements => 'Enjoy the latest improvements.';
+
+  @override
+  String get repository_url_already_exists => 'This repository URL already exists';
+
+  @override
+  String get invalid_url_format => 'Invalid URL format';
+
+  @override
+  String get custom_repository => 'Custom repository';
+
+  @override
+  String get install_permission_required_continue => 'App installation permission is required to continue.';
+
+  @override
+  String get cancel_setup_question => 'Cancel setup?';
+
+  @override
+  String get cancel_setup_message => 'Are you sure you want to cancel the setup? You can restart it later.';
+
+  @override
+  String get cancel_setup => 'Cancel setup';
+
+  @override
+  String get optional => 'Optional';
+
+  @override
+  String get repository_name_label => 'Repository Name';
+
+  @override
+  String get repository_url_label => 'Repository URL';
+
+  @override
+  String get fingerprint_optional => 'Fingerprint (Optional)';
+
+  @override
+  String get fingerprint_hint => '13784BA6C80FF4E...';
+
+  @override
+  String get fingerprint_helper => 'For enhanced security and verification';
+
+  @override
+  String get url_format_help => 'URL format: https://repo.example.com (we\'ll add /repo/index-v2.json automatically)';
+
+  @override
+  String get repo_name_hint => 'e.g., MyRepo';
+
+  @override
+  String get repo_url_hint => 'https://example.com';
+
+  @override
+  String get open_settings => 'Open Settings';
+
+  @override
+  String get more_actions => 'More actions';
+
+  @override
+  String get unable_to_load_izzy_stats => 'Unable to load IzzyOnDroid download stats right now.';
+
+  @override
+  String get anti_features => 'Anti-features';
+
+  @override
+  String get no_version_information_available => 'No Version Information Available';
+
+  @override
+  String get no_app_for_donation_link => 'No app is available to handle this donation link.';
+
+  @override
+  String get shizuku_not_running => 'Shizuku is not running';
+
+  @override
+  String get shizuku_not_running_message => 'Start the Shizuku app to continue, or switch to the system installer instead.';
+
+  @override
+  String get unable_to_open_shizuku => 'Unable to open Shizuku app';
+
+  @override
+  String get switched_to_system_installer => 'Switched to system installer';
+
+  @override
+  String get storage_permission_dialog_title => 'Storage Permission Required';
+
+  @override
+  String get storage_permission_dialog_body =>
+      'Florid needs storage permission to download APK files.
+
+To enable:
+1. Go to Settings (button below)
+2. Find "Permissions"
+3. Enable "Files and media" or "Storage"
+
+Then try downloading again.';
+
+  @override
+  String get no_suggestions_found => 'No suggestions found';
+
+  @override
+  String get failed_to_load_categories => 'Failed to load categories';
+
+  @override
+  String deleted_apk_files(Object count) {
+    return 'Deleted $count APK files';
+  }
+
+  @override
+  String whats_new_in_version(Object version) {
+    return 'What\'s new in $version';
+  }
+
+  @override
+  String unable_to_open_app(Object appName) {
+    return 'Unable to open $appName.';
+  }
+
+  @override
+  String invalid_donation_link(Object link) {
+    return 'Invalid donation link: $link';
+  }
+
+  @override
+  String unable_to_open_donation_link(Object link) {
+    return 'Unable to open donation link: $link';
+  }
+
+  @override
+  String no_version_metadata_available(Object repositoryName) {
+    return 'No version metadata available from $repositoryName.';
+  }
+
+  @override
+  String no_compatible_versions_available(Object repositoryName) {
+    return 'No compatible versions available in $repositoryName.';
+  }
+
+  @override
+  String starting_download_of_updates(Object count) {
+    return 'Starting download of $count updates...';
+  }
+
+  @override
+  String izzy_stats_source(Object packageName) {
+    return 'Stats are pulled from IzzyOnDroid mirrors for $packageName when available.';
+  }
+
+  @override
+  String get no_detailed_version_info =>
+      'This app doesn\'t have detailed version information in the F-Droid repository.';
+
 }

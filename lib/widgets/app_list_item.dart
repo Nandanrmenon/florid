@@ -203,7 +203,9 @@ class AppListItem extends StatelessWidget {
                                           latestVersion.versionName,
                                         ),
                                     icon: const Icon(Symbols.close),
-                                    tooltip: 'Cancel download',
+                                    tooltip: AppLocalizations.of(
+                                      context,
+                                    )!.cancel_download,
                                   )
                                 : hasUpdate
                                 ? IconButton.filledTonal(
@@ -211,7 +213,9 @@ class AppListItem extends StatelessWidget {
                                     icon: Icon(
                                       SolarIconsBold.downloadMinimalistic,
                                     ),
-                                    tooltip: 'Update',
+                                    tooltip: AppLocalizations.of(
+                                      context,
+                                    )!.update,
                                   )
                                 : isInstalled
                                 ? Icon(

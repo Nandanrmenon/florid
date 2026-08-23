@@ -193,7 +193,13 @@ class _SearchScreenState extends State<SearchScreen> {
                       }
 
                       if (suggestions.isEmpty) {
-                        return [ListTile(title: Text('No suggestions found'))];
+                        return [
+                          ListTile(
+                            title: Text(
+                              AppLocalizations.of(context)!.no_suggestions_found,
+                            ),
+                          ),
+                        ];
                       }
 
                       return suggestions.map((suggestion) {

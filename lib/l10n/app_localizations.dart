@@ -1818,7 +1818,66 @@ abstract class AppLocalizations {
   String get hide_anti_feature_apps_subtitle;
   String get biometric_authentication;
   String get require_auth_before_installs;
+
+  String get clear_repository_cache;
+  String get clear_repository_cache_subtitle;
+  String get clear_apk_downloads;
+  String get clear_apk_downloads_subtitle;
+  String get clear_image_cache;
+  String get clear_image_cache_subtitle;
+  String get repository_cache_cleared;
+  String get image_cache_cleared;
+  String get no_apk_downloads_to_delete;
+  String get dynamic_color_not_supported;
+  String get use_theme_color_palette_instead;
+  String get theme_color;
+  String get theme_color_subtitle;
+  String get show_navigation_labels;
+  String get thanks_for_updating;
+  String get enjoy_latest_improvements;
+  String get repository_url_already_exists;
+  String get invalid_url_format;
+  String get custom_repository;
+  String get install_permission_required_continue;
+  String get cancel_setup_question;
+  String get cancel_setup_message;
+  String get cancel_setup;
+  String get optional;
+  String get repository_name_label;
+  String get repository_url_label;
+  String get fingerprint_optional;
+  String get fingerprint_hint;
+  String get fingerprint_helper;
+  String get url_format_help;
+  String get repo_name_hint;
+  String get repo_url_hint;
+  String get open_settings;
+  String get more_actions;
+  String get unable_to_load_izzy_stats;
+  String get anti_features;
+  String get no_version_information_available;
+  String get no_app_for_donation_link;
+  String get shizuku_not_running;
+  String get shizuku_not_running_message;
+  String get unable_to_open_shizuku;
+  String get switched_to_system_installer;
+  String get storage_permission_dialog_title;
+  String get storage_permission_dialog_body;
+  String get no_suggestions_found;
+  String get failed_to_load_categories;
+
+  String deleted_apk_files(Object count);
+  String whats_new_in_version(Object version);
+  String unable_to_open_app(Object appName);
+  String invalid_donation_link(Object link);
+  String unable_to_open_donation_link(Object link);
+  String no_version_metadata_available(Object repositoryName);
+  String no_compatible_versions_available(Object repositoryName);
+  String starting_download_of_updates(Object count);
+  String izzy_stats_source(Object packageName);
+  String get no_detailed_version_info;
 }
+
 
 class _AppLocalizationsDelegate
     extends LocalizationsDelegate<AppLocalizations> {

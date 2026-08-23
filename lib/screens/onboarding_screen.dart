@@ -144,7 +144,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     if (alreadyExists) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('This repository URL already exists')),
+        SnackBar(
+          content: Text(
+            AppLocalizations.of(context)!.repository_url_already_exists,
+          ),
+        ),
       );
       return;
     }
@@ -153,7 +157,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       _presets.add(<String, Object>{
         'name': name.trim().isEmpty ? Uri.parse(normalizedUrl).host : name,
         'url': normalizedUrl,
-        'description': 'Custom repository',
+        'description': AppLocalizations.of(context)!.custom_repository,
         'fingerprint': parsed.fingerprint,
         'default': false,
       });
@@ -209,7 +213,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               if (uri == null ||
                   !(url.startsWith('http://') || url.startsWith('https://'))) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Invalid URL format')),
+                  SnackBar(
+                    content: Text(
+                      AppLocalizations.of(context)!.invalid_url_format,
+                    ),
+                  ),
                 );
                 return;
               }
@@ -315,8 +323,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   void _startSetup() {
     if (!_installPermissionGranted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('App installation permission is required to continue.'),
+        SnackBar(
+          content: Text(
+            AppLocalizations.of(context)!.install_permission_required_continue,
+          ),
         ),
       );
       _pageController.animateToPage(
@@ -577,14 +587,22 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                           showDialog(
                             context: context,
                             builder: (context) => AlertDialog(
-                              title: const Text('Cancel setup?'),
-                              content: const Text(
-                                'Are you sure you want to cancel the setup? You can restart it later.',
+                              title: Text(
+                                AppLocalizations.of(
+                                  context,
+                                )!.cancel_setup_question,
+                              ),
+                              content: Text(
+                                AppLocalizations.of(
+                                  context,
+                                )!.cancel_setup_message,
                               ),
                               actions: [
                                 TextButton(
                                   onPressed: () => Navigator.pop(context),
-                                  child: const Text('Continue'),
+                                  child: Text(
+                                    AppLocalizations.of(context)!.continue_text,
+                                  ),
                                 ),
                                 FilledButton.tonal(
                                   onPressed: () {
@@ -594,7 +612,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                                     setState(() => _setupCancelled = true);
                                     Navigator.pop(context);
                                   },
-                                  child: const Text('Cancel setup'),
+                                  child: Text(
+                                    AppLocalizations.of(context)!.cancel_setup,
+                                  ),
                                 ),
                               ],
                             ),
@@ -1006,7 +1026,7 @@ class _PermissionsStep extends StatelessWidget {
             ),
             Column(
               children: [
-                MListHeader(title: 'Optional'),
+                MListHeader(title: AppLocalizations.of(context)!.optional),
                 MListView(
                   items: [
                     MListItemData(

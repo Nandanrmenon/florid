@@ -1059,4 +1059,200 @@ class AppLocalizationsRu extends AppLocalizations {
   String get require_auth_before_installs =>
       'Требовать подтверждение перед установкой';
 
+
+  @override
+  String get clear_repository_cache => 'Очистить кэш репозиториев';
+
+  @override
+  String get clear_repository_cache_subtitle => 'Список приложений и метаданные обновятся при следующей загрузке';
+
+  @override
+  String get clear_apk_downloads => 'Очистить скачанные APK';
+
+  @override
+  String get clear_apk_downloads_subtitle => 'Удалить установочные файлы с устройства';
+
+  @override
+  String get clear_image_cache => 'Очистить кэш изображений';
+
+  @override
+  String get clear_image_cache_subtitle => 'Удалить кэшированные значки и скриншоты';
+
+  @override
+  String get repository_cache_cleared => 'Кэш репозиториев очищен';
+
+  @override
+  String get image_cache_cleared => 'Кэш изображений очищен';
+
+  @override
+  String get no_apk_downloads_to_delete => 'Нет скачанных APK для удаления';
+
+  @override
+  String get dynamic_color_not_supported => 'Динамический цвет на этом устройстве не поддерживается';
+
+  @override
+  String get use_theme_color_palette_instead => 'Выберите цвет темы в палитре ниже.';
+
+  @override
+  String get theme_color => 'Цвет темы';
+
+  @override
+  String get theme_color_subtitle => 'Свой акцентный цвет, если динамический цвет выключен';
+
+  @override
+  String get show_navigation_labels => 'Подписи в навигации';
+
+  @override
+  String get thanks_for_updating => 'Спасибо, что обновили Florid!';
+
+  @override
+  String get enjoy_latest_improvements => 'Приятного знакомства с новыми улучшениями.';
+
+  @override
+  String get repository_url_already_exists => 'Репозиторий с таким URL уже добавлен';
+
+  @override
+  String get invalid_url_format => 'Неверный формат URL';
+
+  @override
+  String get custom_repository => 'Пользовательский репозиторий';
+
+  @override
+  String get install_permission_required_continue => 'Чтобы продолжить, нужно разрешение на установку приложений.';
+
+  @override
+  String get cancel_setup_question => 'Отменить настройку?';
+
+  @override
+  String get cancel_setup_message => 'Отменить настройку? Её можно будет запустить снова позже.';
+
+  @override
+  String get cancel_setup => 'Отменить настройку';
+
+  @override
+  String get optional => 'Необязательно';
+
+  @override
+  String get repository_name_label => 'Название репозитория';
+
+  @override
+  String get repository_url_label => 'URL репозитория';
+
+  @override
+  String get fingerprint_optional => 'Отпечаток (необязательно)';
+
+  @override
+  String get fingerprint_hint => '13784BA6C80FF4E...';
+
+  @override
+  String get fingerprint_helper => 'Для дополнительной проверки подлинности';
+
+  @override
+  String get url_format_help => 'Формат URL: https://repo.example.com (путь /repo/index-v2.json добавится сам)';
+
+  @override
+  String get repo_name_hint => 'например, MyRepo';
+
+  @override
+  String get repo_url_hint => 'https://example.com';
+
+  @override
+  String get open_settings => 'Открыть настройки';
+
+  @override
+  String get more_actions => 'Ещё действия';
+
+  @override
+  String get unable_to_load_izzy_stats => 'Сейчас не удалось загрузить статистику загрузок IzzyOnDroid.';
+
+  @override
+  String get anti_features => 'Антифункции';
+
+  @override
+  String get no_version_information_available => 'Нет сведений о версии';
+
+  @override
+  String get no_app_for_donation_link => 'Нет приложения, которое может открыть эту ссылку для пожертвования.';
+
+  @override
+  String get shizuku_not_running => 'Shizuku не запущен';
+
+  @override
+  String get shizuku_not_running_message => 'Запустите Shizuku, чтобы продолжить, или переключитесь на системный установщик.';
+
+  @override
+  String get unable_to_open_shizuku => 'Не удалось открыть приложение Shizuku';
+
+  @override
+  String get switched_to_system_installer => 'Переключено на системный установщик';
+
+  @override
+  String get storage_permission_dialog_title => 'Нужен доступ к хранилищу';
+
+  @override
+  String get storage_permission_dialog_body =>
+      'Florid нужен доступ к хранилищу, чтобы скачивать APK.
+
+Как включить:
+1. Откройте настройки (кнопка ниже)
+2. Найдите «Разрешения»
+3. Включите «Файлы и медиа» или «Хранилище»
+
+Затем повторите загрузку.';
+
+  @override
+  String get no_suggestions_found => 'Подсказок нет';
+
+  @override
+  String get failed_to_load_categories => 'Не удалось загрузить категории';
+
+  @override
+  String deleted_apk_files(Object count) {
+    return 'Удалено APK-файлов: $count';
+  }
+
+  @override
+  String whats_new_in_version(Object version) {
+    return 'Что нового в $version';
+  }
+
+  @override
+  String unable_to_open_app(Object appName) {
+    return 'Не удалось открыть $appName.';
+  }
+
+  @override
+  String invalid_donation_link(Object link) {
+    return 'Неверная ссылка для пожертвования: $link';
+  }
+
+  @override
+  String unable_to_open_donation_link(Object link) {
+    return 'Не удалось открыть ссылку для пожертвования: $link';
+  }
+
+  @override
+  String no_version_metadata_available(Object repositoryName) {
+    return 'Нет данных о версиях в $repositoryName.';
+  }
+
+  @override
+  String no_compatible_versions_available(Object repositoryName) {
+    return 'Нет совместимых версий в $repositoryName.';
+  }
+
+  @override
+  String starting_download_of_updates(Object count) {
+    return 'Начинается загрузка обновлений: $count…';
+  }
+
+  @override
+  String izzy_stats_source(Object packageName) {
+    return 'Статистика берётся с зеркал IzzyOnDroid для $packageName, если она есть.';
+  }
+
+  @override
+  String get no_detailed_version_info =>
+      'В репозитории F-Droid нет подробных сведений о версии этого приложения.';
+
 }

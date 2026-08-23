@@ -459,7 +459,7 @@ class _RepositoriesScreenState extends State<RepositoriesScreen> {
                         color: Theme.of(context).colorScheme.onPrimary,
                       ),
                       Text(
-                        'Add Repository',
+                        AppLocalizations.of(context)!.add_repository,
                         style: TextStyle(
                           color: Theme.of(context).colorScheme.onPrimary,
                         ),
@@ -759,11 +759,11 @@ Future<void> _toggleRepositoryWithDialog(
                 ),
                 SizedBox(height: 16),
                 Text(
-                  'Updating Repository',
+                  AppLocalizations.of(dialogContext)!.updating_repository,
                   style: Theme.of(dialogContext).textTheme.titleMedium,
                 ),
                 Text(
-                  'Now is a great time to touch grass!',
+                  AppLocalizations.of(dialogContext)!.touch_grass_message,
                   style: Theme.of(dialogContext).textTheme.bodyMedium,
                 ),
                 SizedBox(height: 16),
@@ -830,11 +830,11 @@ Future<void> _runRepositoryActionWithDialog(
                 ),
                 SizedBox(height: 16),
                 Text(
-                  'Updating Repository',
+                  AppLocalizations.of(dialogContext)!.updating_repository,
                   style: Theme.of(dialogContext).textTheme.titleMedium,
                 ),
                 Text(
-                  'Now is a great time to touch grass!',
+                  AppLocalizations.of(dialogContext)!.touch_grass_message,
                   style: Theme.of(dialogContext).textTheme.bodyMedium,
                 ),
                 SizedBox(height: 16),
@@ -901,33 +901,33 @@ class _AddRepositoryDialogState extends State<_AddRepositoryDialog> {
         TextField(
           controller: _nameController,
           decoration: InputDecoration(
-            labelText: 'Repository Name',
-            hintText: 'e.g., MyRepo',
+            labelText: AppLocalizations.of(context)!.repository_name_label,
+            hintText: AppLocalizations.of(context)!.repo_name_hint,
             border: OutlineInputBorder(),
           ),
         ),
         const SizedBox(height: 8),
         TextField(
           controller: _urlController,
-          decoration: const InputDecoration(
-            labelText: 'Repository URL',
-            hintText: 'https://example.com',
-            border: OutlineInputBorder(),
+          decoration: InputDecoration(
+            labelText: AppLocalizations.of(context)!.repository_url_label,
+            hintText: AppLocalizations.of(context)!.repo_url_hint,
+            border: const OutlineInputBorder(),
           ),
         ),
         const SizedBox(height: 8),
         TextField(
           controller: _fingerprintController,
-          decoration: const InputDecoration(
-            labelText: 'Fingerprint (Optional)',
-            hintText: '13784BA6C80FF4E...',
-            border: OutlineInputBorder(),
-            helperText: 'For enhanced security and verification',
+          decoration: InputDecoration(
+            labelText: AppLocalizations.of(context)!.fingerprint_optional,
+            hintText: AppLocalizations.of(context)!.fingerprint_hint,
+            border: const OutlineInputBorder(),
+            helperText: AppLocalizations.of(context)!.fingerprint_helper,
           ),
         ),
         const SizedBox(height: 16),
         Text(
-          'URL format: https://repo.example.com (we\'ll add /repo/index-v2.json automatically)',
+          AppLocalizations.of(context)!.url_format_help,
           style: Theme.of(context).textTheme.bodySmall,
           textAlign: TextAlign.center,
         ),
@@ -963,14 +963,18 @@ class _AddRepositoryDialogState extends State<_AddRepositoryDialog> {
 
     if (name.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter a repository name')),
+        SnackBar(
+          content: Text(AppLocalizations.of(context)!.enter_repository_name),
+        ),
       );
       return;
     }
 
     if (url.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter a repository URL')),
+        SnackBar(
+          content: Text(AppLocalizations.of(context)!.enter_repository_url),
+        ),
       );
       return;
     }
@@ -1020,27 +1024,27 @@ class _EditRepositoryDialogState extends State<_EditRepositoryDialog> {
       children: [
         TextField(
           controller: _nameController,
-          decoration: const InputDecoration(
-            labelText: 'Repository Name',
-            border: OutlineInputBorder(),
+          decoration: InputDecoration(
+            labelText: AppLocalizations.of(context)!.repository_name_label,
+            border: const OutlineInputBorder(),
           ),
         ),
         const SizedBox(height: 8),
         TextField(
           controller: _urlController,
-          decoration: const InputDecoration(
-            labelText: 'Repository URL',
-            border: OutlineInputBorder(),
+          decoration: InputDecoration(
+            labelText: AppLocalizations.of(context)!.repository_url_label,
+            border: const OutlineInputBorder(),
           ),
         ),
         const SizedBox(height: 8),
         TextField(
           controller: _fingerprintController,
-          decoration: const InputDecoration(
-            labelText: 'Fingerprint (Optional)',
-            hintText: '13784BA6C80FF4E...',
-            border: OutlineInputBorder(),
-            helperText: 'For enhanced security and verification',
+          decoration: InputDecoration(
+            labelText: AppLocalizations.of(context)!.fingerprint_optional,
+            hintText: AppLocalizations.of(context)!.fingerprint_hint,
+            border: const OutlineInputBorder(),
+            helperText: AppLocalizations.of(context)!.fingerprint_helper,
           ),
         ),
         const SizedBox(height: 16),
@@ -1075,14 +1079,18 @@ class _EditRepositoryDialogState extends State<_EditRepositoryDialog> {
 
     if (name.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter a repository name')),
+        SnackBar(
+          content: Text(AppLocalizations.of(context)!.enter_repository_name),
+        ),
       );
       return;
     }
 
     if (url.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter a repository URL')),
+        SnackBar(
+          content: Text(AppLocalizations.of(context)!.enter_repository_url),
+        ),
       );
       return;
     }

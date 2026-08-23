@@ -457,7 +457,13 @@ class _UpdatesScreenState extends State<UpdatesScreen>
         if (context.mounted) {
           ScaffoldMessenger.of(
             context,
-          ).showSnackBar(SnackBar(content: Text('Update failed: $errorMsg')));
+          ).showSnackBar(
+            SnackBar(
+              content: Text(
+                AppLocalizations.of(context)!.update_failed_with_error(errorMsg),
+              ),
+            ),
+          );
         }
       }
     }
@@ -482,7 +488,11 @@ class _UpdatesScreenState extends State<UpdatesScreen>
     if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Starting download of ${apps.length} updates...'),
+          content: Text(
+            AppLocalizations.of(
+              context,
+            )!.starting_download_of_updates(apps.length),
+          ),
           duration: const Duration(seconds: 2),
         ),
       );

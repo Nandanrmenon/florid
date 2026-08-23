@@ -447,5 +447,106 @@
   "hide_anti_feature_apps": "Скрывать приложения с антифункциями",
   "hide_anti_feature_apps_subtitle": "Не показывать такие приложения в списках",
   "biometric_authentication": "Биометрическая аутентификация",
-  "require_auth_before_installs": "Требовать подтверждение перед установкой"
+  "require_auth_before_installs": "Требовать подтверждение перед установкой",
+  "clear_repository_cache": "Очистить кэш репозиториев",
+  "clear_repository_cache_subtitle": "Список приложений и метаданные обновятся при следующей загрузке",
+  "clear_apk_downloads": "Очистить скачанные APK",
+  "clear_apk_downloads_subtitle": "Удалить установочные файлы с устройства",
+  "clear_image_cache": "Очистить кэш изображений",
+  "clear_image_cache_subtitle": "Удалить кэшированные значки и скриншоты",
+  "repository_cache_cleared": "Кэш репозиториев очищен",
+  "image_cache_cleared": "Кэш изображений очищен",
+  "deleted_apk_files": "Удалено APK-файлов: {count}",
+  "@deleted_apk_files": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "no_apk_downloads_to_delete": "Нет скачанных APK для удаления",
+  "dynamic_color_not_supported": "Динамический цвет на этом устройстве не поддерживается",
+  "use_theme_color_palette_instead": "Выберите цвет темы в палитре ниже.",
+  "theme_color": "Цвет темы",
+  "theme_color_subtitle": "Свой акцентный цвет, если динамический цвет выключен",
+  "show_navigation_labels": "Подписи в навигации",
+  "whats_new_in_version": "Что нового в {version}",
+  "@whats_new_in_version": {
+    "placeholders": {
+      "version": {}
+    }
+  },
+  "thanks_for_updating": "Спасибо, что обновили Florid!",
+  "enjoy_latest_improvements": "Приятного знакомства с новыми улучшениями.",
+  "repository_url_already_exists": "Репозиторий с таким URL уже добавлен",
+  "invalid_url_format": "Неверный формат URL",
+  "custom_repository": "Пользовательский репозиторий",
+  "install_permission_required_continue": "Чтобы продолжить, нужно разрешение на установку приложений.",
+  "cancel_setup_question": "Отменить настройку?",
+  "cancel_setup_message": "Отменить настройку? Её можно будет запустить снова позже.",
+  "cancel_setup": "Отменить настройку",
+  "optional": "Необязательно",
+  "repository_name_label": "Название репозитория",
+  "repository_url_label": "URL репозитория",
+  "fingerprint_optional": "Отпечаток (необязательно)",
+  "fingerprint_hint": "13784BA6C80FF4E...",
+  "fingerprint_helper": "Для дополнительной проверки подлинности",
+  "url_format_help": "Формат URL: https://repo.example.com (путь /repo/index-v2.json добавится сам)",
+  "repo_name_hint": "например, MyRepo",
+  "repo_url_hint": "https://example.com",
+  "open_settings": "Открыть настройки",
+  "more_actions": "Ещё действия",
+  "unable_to_load_izzy_stats": "Сейчас не удалось загрузить статистику загрузок IzzyOnDroid.",
+  "anti_features": "Антифункции",
+  "no_version_information_available": "Нет сведений о версии",
+  "unable_to_open_app": "Не удалось открыть {appName}.",
+  "@unable_to_open_app": {
+    "placeholders": {
+      "appName": {}
+    }
+  },
+  "invalid_donation_link": "Неверная ссылка для пожертвования: {link}",
+  "@invalid_donation_link": {
+    "placeholders": {
+      "link": {}
+    }
+  },
+  "unable_to_open_donation_link": "Не удалось открыть ссылку для пожертвования: {link}",
+  "@unable_to_open_donation_link": {
+    "placeholders": {
+      "link": {}
+    }
+  },
+  "no_app_for_donation_link": "Нет приложения, которое может открыть эту ссылку для пожертвования.",
+  "no_version_metadata_available": "Нет данных о версиях в {repositoryName}.",
+  "@no_version_metadata_available": {
+    "placeholders": {
+      "repositoryName": {}
+    }
+  },
+  "no_compatible_versions_available": "Нет совместимых версий в {repositoryName}.",
+  "@no_compatible_versions_available": {
+    "placeholders": {
+      "repositoryName": {}
+    }
+  },
+  "shizuku_not_running": "Shizuku не запущен",
+  "shizuku_not_running_message": "Запустите Shizuku, чтобы продолжить, или переключитесь на системный установщик.",
+  "unable_to_open_shizuku": "Не удалось открыть приложение Shizuku",
+  "switched_to_system_installer": "Переключено на системный установщик",
+  "storage_permission_dialog_title": "Нужен доступ к хранилищу",
+  "storage_permission_dialog_body": "Florid нужен доступ к хранилищу, чтобы скачивать APK.\n\nКак включить:\n1. Откройте настройки (кнопка ниже)\n2. Найдите «Разрешения»\n3. Включите «Файлы и медиа» или «Хранилище»\n\nЗатем повторите загрузку.",
+  "starting_download_of_updates": "Начинается загрузка обновлений: {count}…",
+  "@starting_download_of_updates": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "no_suggestions_found": "Подсказок нет",
+  "failed_to_load_categories": "Не удалось загрузить категории",
+  "izzy_stats_source": "Статистика берётся с зеркал IzzyOnDroid для {packageName}, если она есть.",
+  "@izzy_stats_source": {
+    "placeholders": {
+      "packageName": {}
+    }
+  },
+  "no_detailed_version_info": "В репозитории F-Droid нет подробных сведений о версии этого приложения."
 }

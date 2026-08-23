@@ -1,0 +1,389 @@
+{
+  "@@locale": "ru",
+  "app_name": "Florid",
+  "welcome": "Добро пожаловать в Florid",
+  "search": "Поиск",
+  "settings": "Настройки",
+  "home": "Главная",
+  "categories": "Категории",
+  "updates": "Обновления",
+  "installed": "Установленные",
+  "download": "Скачать",
+  "install": "Установить",
+  "uninstall": "Удалить",
+  "open": "Открыть",
+  "cancel": "Отмена",
+  "update_available": "Доступно обновление",
+  "downloading": "Загрузка…",
+  "install_permission_required": "Требуется разрешение на установку приложений",
+  "storage_permission_required": "Требуется разрешение на доступ к хранилищу",
+  "cancel_download": "Отменить загрузку",
+  "version": "Версия",
+  "size": "Размер",
+  "description": "Описание",
+  "permissions": "Разрешения",
+  "screenshots": "Скриншоты",
+  "no_version_available": "Нет доступных версий",
+  "app_information": "Сведения о приложении",
+  "package_name": "Имя пакета",
+  "license": "Лицензия",
+  "added": "Добавлено",
+  "last_updated": "Последнее обновление",
+  "version_information": "Сведения о версии",
+  "version_name": "Название версии",
+  "version_code": "Код версии",
+  "min_sdk": "Мин. SDK",
+  "target_sdk": "Целевой SDK",
+  "all_versions": "Все версии",
+  "latest": "Последняя",
+  "released": "Выпущено",
+  "loading": "Загрузка…",
+  "error": "Ошибка",
+  "retry": "Повторить",
+  "share": "Поделиться",
+  "website": "Сайт",
+  "source_code": "Исходный код",
+  "issue_tracker": "Трекер ошибок",
+  "whats_new": "Что нового",
+  "show_more": "Показать больше",
+  "show_less": "Свернуть",
+  "downloads_stats": "Статистика загрузок",
+  "last_day": "За сутки",
+  "last_30_days": "За 30 дней",
+  "last_365_days": "За 365 дней",
+  "not_available": "Недоступно",
+  "download_failed": "Не удалось скачать",
+  "installation_failed": "Не удалось установить",
+  "uninstall_failed": "Не удалось удалить",
+  "open_failed": "Не удалось открыть",
+  "device": "Устройство",
+  "recently_updated": "Недавно обновлённые",
+  "refresh": "Обновить",
+  "about": "О приложении",
+  "refreshing_data": "Обновление данных…",
+  "data_refreshed": "Данные обновлены",
+  "refresh_failed": "Не удалось обновить",
+  "loading_latest_apps": "Загрузка новых приложений…",
+  "latest_apps": "Новые приложения",
+  "no_apps_found": "Приложения не найдены",
+  "searching": "Поиск…",
+  "setup_failed": "Не удалось выполнить настройку",
+  "back": "Назад",
+  "allow": "Разрешить",
+  "manage_repositories": "Управление репозиториями",
+  "enable_disable": "Включить / выключить",
+  "edit": "Изменить",
+  "delete": "Удалить",
+  "delete_repository": "Удалить репозиторий",
+  "delete_repository_confirm": "Удалить «{name}»?",
+  "@delete_repository_confirm": {
+    "description": "Confirmation message for deleting a repository. {name} is the repository name.",
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "updating_repository": "Обновление репозитория",
+  "touch_grass_message": "Самое время прогуляться!",
+  "add_repository": "Добавить репозиторий",
+  "add": "Добавить",
+  "save": "Сохранить",
+  "enter_repository_name": "Введите название репозитория",
+  "enter_repository_url": "Введите URL репозитория",
+  "edit_repository": "Изменить репозиторий",
+  "loading_apps": "Загрузка приложений…",
+  "no_apps_in_category": "В категории «{category}» нет приложений",
+  "@no_apps_in_category": {
+    "description": "Message shown when no apps are found in a category. {category} is the category name.",
+    "placeholders": {
+      "category": {}
+    }
+  },
+  "loading_categories": "Загрузка категорий…",
+  "no_categories_found": "Категории не найдены",
+  "on_device": "На устройстве",
+  "favourites": "Избранное",
+  "loading_repository": "Загрузка репозитория…",
+  "unable_to_load_repository": "Не удалось загрузить репозиторий",
+  "repository_loading_error_descrption": "Проверьте подключение или настройки репозитория и попробуйте снова.",
+  "appUpdateAvailable": "Доступно обновление",
+  "releaseNotes": "Заметки о выпуске",
+  "dismiss": "Закрыть",
+  "viewOnGithub": "Открыть на GitHub",
+  "update": "Обновить",
+  "installing": "Установка…",
+  "downloadFailed": "Не удалось скачать APK",
+  "remove_from_favourites": "Удалить из избранного",
+  "add_to_favourites": "Добавить в избранное",
+  "view_details": "Подробнее",
+  "installation_started": "Начата установка {appName}!",
+  "@installation_started": {
+    "placeholders": {
+      "appName": {}
+    }
+  },
+  "installation_failed_with_error": "Ошибка установки: {error}",
+  "@installation_failed_with_error": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "download_started": "Начата загрузка {appName}!",
+  "@download_started": {
+    "placeholders": {
+      "appName": {}
+    }
+  },
+  "download_failed_with_error": "Ошибка загрузки: {error}",
+  "@download_failed_with_error": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "start_setup": "Начать настройку",
+  "continue_text": "Продолжить",
+  "loading_changelog": "Загрузка списка изменений…",
+  "appearance": "Оформление",
+  "theme_mode": "Тема",
+  "follow_system_theme": "Как в системе",
+  "light_theme": "Светлая тема",
+  "dark_theme": "Тёмная тема",
+  "dynamic_color": "Динамический цвет",
+  "material_you_dynamic": "Material You",
+  "use_system_colors_supported_android": "Использовать системные цвета на поддерживаемых устройствах Android",
+  "theme_style": "Стиль темы",
+  "material_style": "Стиль Material",
+  "dark_knight": "Тёмный рыцарь",
+  "dark_knight_subtitle": "Тёмная высококонтрастная тема в духе Florid",
+  "florid_style": "Стиль Florid",
+  "beta": "Бета",
+  "other": "Другое",
+  "show_whats_new": "Показывать «Что нового»",
+  "show_monthly_top_apps": "Показывать лучшие приложения месяца",
+  "feedback_on_florid_theme": "Отзыв о теме Florid",
+  "help_improve_florid_theme_feedback": "Помогите улучшить тему Florid — оставьте отзыв",
+  "system_installer": "Системный установщик",
+  "shizuku": "Shizuku",
+  "installation_method": "Способ установки",
+  "requires_shizuku_running": "Требуется запущенный Shizuku",
+  "uses_standard_system_installer": "Используется стандартный системный установщик",
+  "open_shizuku": "Открыть Shizuku",
+  "use_system_installer": "Использовать системный установщик",
+  "close": "Закрыть",
+  "wifi_only": "Только Wi-Fi",
+  "wifi_and_charging": "Wi-Fi и зарядка",
+  "mobile_data_or_wifi": "Мобильная сеть или Wi-Fi",
+  "every_1_hour": "Каждый час",
+  "every_2_hours": "Каждые 2 часа",
+  "every_3_hours": "Каждые 3 часа",
+  "every_6_hours": "Каждые 6 часов",
+  "every_12_hours": "Каждые 12 часов",
+  "daily": "Ежедневно",
+  "every_hours": "Каждые {hours} ч",
+  "@every_hours": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      }
+    }
+  },
+  "update_network": "Сеть для обновлений",
+  "update_interval": "Интервал проверки",
+  "app_management": "Управление приложениями",
+  "alpha": "Альфа",
+  "privacy": "Конфиденциальность",
+  "opt_out_of_telemetry": "Отключить телеметрию",
+  "opt_out_of_telemetry_subtitle": "Помогает нам узнать, сколько пользователей (анонимно) активно пользуются приложением",
+  "downloads_and_storage": "Загрузки и хранилище",
+  "auto_install_after_download": "Устанавливать после загрузки",
+  "auto_install_after_download_subtitle": "Автоматически устанавливать APK после завершения загрузки",
+  "delete_apk_after_install": "Удалять APK после установки",
+  "delete_apk_after_install_subtitle": "Удалять установочные файлы после успешной установки",
+  "background_updates": "Фоновые обновления",
+  "check_updates_in_background": "Проверять обновления в фоне",
+  "notify_when_updates_available": "Уведомлять о доступных обновлениях",
+  "reliability": "Надёжность",
+  "disable_battery_optimization": "Отключить оптимизацию батареи",
+  "allow_background_checks_reliably": "Чтобы фоновые проверки работали стабильно",
+  "run_debug_check_10s": "Тестовая проверка через 10 с",
+  "run_debug_check_10s_subtitle": "Покажет тестовое уведомление и запустится через 10 секунд",
+  "debug_check_scheduled": "Тестовая проверка запланирована",
+  "debug_update_check_runs_10s": "Проверка обновлений запустится через 10 секунд",
+  "no_recently_updated_apps": "Нет недавно обновлённых приложений",
+  "no_new_apps": "Нет новых приложений",
+  "monthly_top_apps": "Лучшие за месяц",
+  "from_izzyondroid": "из IzzyOnDroid",
+  "sync_required": "Требуется синхронизация",
+  "izzyondroid_sync_required_message": "Чтобы показать лучшие приложения, нужно синхронизировать репозиторий IzzyOnDroid.",
+  "go_to_settings": "К настройкам",
+  "keep_android_open": "Оставьте Android открытым",
+  "keep_android_open_message": "С 2026–2027 годов Google потребует проверку разработчика для всех приложений Android на сертифицированных устройствах, в том числе установленных вне Play Store.",
+  "ignore": "Пропустить",
+  "learn_more": "Подробнее",
+  "search_fdroid_apps": "Поиск приложений F-Droid…",
+  "filters": "Фильтры",
+  "search_apps": "Поиск приложений",
+  "search_failed": "Ошибка поиска",
+  "unknown_error_occurred": "Произошла неизвестная ошибка",
+  "try_different_keywords": "Попробуйте другие слова или проверьте написание",
+  "popular_searches": "Популярные запросы:",
+  "clear_all": "Очистить всё",
+  "sort_by": "Сортировка",
+  "relevance": "По релевантности",
+  "name_az": "Имя (А–Я)",
+  "name_za": "Имя (Я–А)",
+  "recently_added": "Недавно добавленные",
+  "no_categories_available": "Нет доступных категорий",
+  "repositories": "Репозитории",
+  "apply_filters": "Применить фильтры",
+  "search_results_for_query": "{count} результатов по запросу «{query}»",
+  "@search_results_for_query": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "query": {}
+    }
+  },
+  "loading_top_apps": "Загрузка лучших приложений…",
+  "failed_to_load_apps": "Не удалось загрузить приложения",
+  "try_again": "Попробовать снова",
+  "no_apps_from_izzyondroid": "Нет приложений из IzzyOnDroid",
+  "no_favourites_yet": "В избранном пока пусто",
+  "tap_star_to_save": "Нажмите звезду на карточке приложения, чтобы сохранить его здесь",
+  "update_failed_with_error": "Ошибка обновления: {error}",
+  "@update_failed_with_error": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "user": "Пользователь",
+  "auto_install_failed_with_error": "Автоустановка не удалась: {error}",
+  "@auto_install_failed_with_error": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "installing_app": "Установка {appName}…",
+  "@installing_app": {
+    "placeholders": {
+      "appName": {}
+    }
+  },
+  "install_from_repository": "Установить из репозитория",
+  "download_from_repository": "Скачать из репозитория",
+  "choose_repository_for_action": "Выберите репозиторий, из которого {action} это приложение.",
+  "@choose_repository_for_action": {
+    "placeholders": {
+      "action": {}
+    }
+  },
+  "unknown": "Неизвестно",
+  "previously_installed_from": "Ранее установлено из: {repositoryName}",
+  "@previously_installed_from": {
+    "placeholders": {
+      "repositoryName": {}
+    }
+  },
+  "previously_installed_from_here": "Ранее установлено отсюда",
+  "default_repository": "По умолчанию",
+  "by_author": "автор: {author}",
+  "@by_author": {
+    "placeholders": {
+      "author": {}
+    }
+  },
+  "check_out_on_fdroid": "Посмотрите {appName} на F-Droid: https://f-droid.org/packages/{packageName}/",
+  "@check_out_on_fdroid": {
+    "placeholders": {
+      "appName": {},
+      "packageName": {}
+    }
+  },
+  "rebuild_repositories": "Пересобрать репозитории",
+  "preset": "Готовый набор",
+  "your_repositories": "Ваши репозитории",
+  "no_custom_repositories": "Пользовательские репозитории не добавлены",
+  "add_custom_repository_to_start": "Добавьте свой репозиторий F-Droid, чтобы начать",
+  "scan": "Сканировать",
+  "point_camera_qr": "Наведите камеру на QR-код",
+  "tap_keyboard_enter_url": "Нажмите клавиатуру, чтобы ввести URL вручную",
+  "loading_repository_configuration": "Загрузка конфигурации репозиториев…",
+  "adding_selected_repositories": "Добавление выбранных репозиториев…",
+  "fetching_fdroid_repository_index": "Загрузка индекса репозитория F-Droid…",
+  "importing_apps_to_database": "Импорт приложений в базу данных…",
+  "importing_apps_to_database_seconds": "Импорт приложений в базу данных… ({seconds} с)",
+  "@importing_apps_to_database_seconds": {
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
+  "loading_custom_repositories": "Загрузка пользовательских репозиториев…",
+  "setup_complete": "Настройка завершена!",
+  "welcome_to": "Добро пожаловать в",
+  "onboarding_intro_subtitle": "Современный клиент F-Droid: удобный просмотр, поиск и загрузка открытых приложений для Android.",
+  "curated_open_source_apps": "Подборка открытых приложений",
+  "safe_downloads": "Безопасные загрузки",
+  "updates_and_notifications": "Обновления и уведомления",
+  "add_extra_repositories": "Добавить дополнительные репозитории",
+  "repos_step_description": "Florid уже содержит официальный репозиторий F-Droid. Можно добавить проверенные сообщества, чтобы получить больше приложений.",
+  "available_repositories": "Доступные репозитории",
+  "manage_repositories_anytime": "Репозитории можно добавлять и удалять в любой момент в настройках.",
+  "request_permissions": "Запросить разрешения",
+  "permissions_step_description": "Florid нужны несколько разрешений, чтобы работать как следует.",
+  "notifications": "Уведомления",
+  "get_notified_updates": "Получать уведомления об обновлениях приложений",
+  "app_installation": "Установка приложений",
+  "allow_florid_install_apps": "Разрешить Florid устанавливать скачанные приложения",
+  "enable_permissions_anytime": "Эти разрешения можно включить позже в настройках.",
+  "setting_up_florid": "Настройка Florid",
+  "no_antifeature_listed": "Антифункции не указаны",
+  "open_link": "Открыть ссылку",
+  "loading_recently_updated_apps": "Загрузка недавно обновлённых приложений…",
+  "checking_for_updates": "Проверка обновлений",
+  "import_favourites": "Импорт избранного",
+  "merge": "Объединить",
+  "update_all": "Обновить все",
+  "apps": "Приложения",
+  "troubleshooting": "Устранение неполадок",
+  "replace": "Заменить",
+  "your_name": "Ваше имя",
+  "enter_your_name": "Введите имя",
+  "top_apps": "Лучшие приложения",
+  "games": "Игры",
+  "auth_all_apps": "Все приложения",
+  "auth_all_apps_desc": "Требовать подтверждение для всех установок",
+  "auth_all_apps_w_anti_feat": "Приложения с антифункциями",
+  "auth_all_apps_w_anti_feat_desc": "Требовать подтверждение только для приложений с антифункциями.",
+  "support_the_developer": "Поддержать разработчика",
+  "available_on_repository": "Доступно в: {repositoryName}",
+  "@available_on_repository": {
+    "description": "Label showing the primary repository name for an app.",
+    "placeholders": {
+      "repositoryName": {}
+    }
+  },
+  "also_available_from_repositories": "Также доступно в: {repositoryNames}",
+  "@also_available_from_repositories": {
+    "description": "Label listing additional repository names where the app is available.",
+    "placeholders": {
+      "repositoryNames": {}
+    }
+  },
+  "onboarding_setup_type": "Тип настройки",
+  "onboarding_setup_type_desc": "Выберите, как настроить Florid",
+  "onboarding_setup_basic": "Базовая настройка",
+  "onboarding_setup_basic_desc": "Быстрый старт с рекомендованными репозиториями",
+  "onboarding_setup_advanced": "Расширенная настройка",
+  "onboarding_setup_advanced_desc": "Свои репозитории и параметры",
+  "help_us_improve_florid": "Помогите улучшить Florid",
+  "section_app_count": "{appCount} приложений",
+  "@section_app_count": {
+    "description": "Label showing the number of apps in a category",
+    "placeholders": {
+      "appCount": {}
+    }
+  },
+  "ignore_future_updates": "Игнорировать будущие обновления"
+}

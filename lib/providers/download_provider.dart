@@ -10,6 +10,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shizuku_api/shizuku_api.dart';
 
+import '../l10n/current_l10n.dart';
 import '../models/fdroid_app.dart';
 import '../providers/settings_provider.dart';
 import '../services/app_preferences_service.dart';
@@ -688,7 +689,7 @@ class DownloadProvider extends ChangeNotifier {
       }
 
       return await _localAuth.authenticate(
-        localizedReason: 'Authenticate to install $appName',
+        localizedReason: currentL10n().authenticate_to_install(appName),
         biometricOnly: false,
         persistAcrossBackgrounding: true,
       );

@@ -4,12 +4,12 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
+import '../l10n/current_l10n.dart';
 import '../utils/app_navigator.dart';
 
 class NotificationService {
   static final NotificationService _instance = NotificationService._internal();
   static const String downloadChannelId = 'com.florid.download';
-  static const String downloadChannelName = 'Download Progress';
   static const int downloadNotificationId = 1;
 
   late FlutterLocalNotificationsPlugin _flutterLocalNotificationsPlugin;
@@ -73,10 +73,11 @@ class NotificationService {
   }
 
   Future<void> _createDownloadChannel() async {
-    const AndroidNotificationChannel channel = AndroidNotificationChannel(
+    final l10n = currentL10n();
+    final AndroidNotificationChannel channel = AndroidNotificationChannel(
       downloadChannelId,
-      downloadChannelName,
-      description: 'Download progress notifications',
+      l10n.download_channel_name,
+      description: l10n.download_progress_channel_description,
       importance: Importance.low,
       enableVibration: false,
       playSound: false,
@@ -98,27 +99,12 @@ class NotificationService {
   }) async {
     final percent = ((progress / maxProgress) * 100).toStringAsFixed(0);
 
-    const AndroidNotificationDetails androidPlatformChannelSpecifics =
-        AndroidNotificationDetails(
-          downloadChannelId,
-          downloadChannelName,
-          channelDescription: 'Download progress notifications',
-          importance: Importance.high,
-          priority: Priority.high,
-          progress: 100,
-          indeterminate: false,
-          showProgress: true,
-          maxProgress: 100,
-          enableVibration: false,
-          playSound: false,
-          channelShowBadge: false,
-        );
-
+    final l10n = currentL10n();
     final NotificationDetails platformChannelSpecifics = NotificationDetails(
       android: AndroidNotificationDetails(
         downloadChannelId,
-        downloadChannelName,
-        channelDescription: 'Download progress notifications',
+        l10n.download_channel_name,
+        channelDescription: l10n.download_progress_channel_description,
         importance: Importance.high,
         priority: Priority.high,
         showProgress: true,
@@ -136,7 +122,7 @@ class NotificationService {
     await _flutterLocalNotificationsPlugin.show(
       id: downloadNotificationId,
       title: title,
-      body: '$percent% - Downloading $packageName',
+      body: l10n.downloading_package_percent(percent, packageName),
       notificationDetails: platformChannelSpecifics,
       payload: packageName,
     );
@@ -146,24 +132,12 @@ class NotificationService {
     required String title,
     required String packageName,
   }) async {
-    const AndroidNotificationDetails androidPlatformChannelSpecifics =
-        AndroidNotificationDetails(
-          downloadChannelId,
-          downloadChannelName,
-          channelDescription: 'Download notifications',
-          importance: Importance.defaultImportance,
-          priority: Priority.defaultPriority,
-          showProgress: false,
-          enableVibration: true,
-          playSound: true,
-          channelShowBadge: true,
-        );
-
+    final l10n = currentL10n();
     final NotificationDetails platformChannelSpecifics = NotificationDetails(
       android: AndroidNotificationDetails(
         downloadChannelId,
-        downloadChannelName,
-        channelDescription: 'Download notifications',
+        l10n.download_channel_name,
+        channelDescription: l10n.download_notifications_channel_description,
         importance: Importance.defaultImportance,
         priority: Priority.defaultPriority,
         showProgress: false,
@@ -177,7 +151,7 @@ class NotificationService {
     await _flutterLocalNotificationsPlugin.show(
       id: downloadNotificationId,
       title: title,
-      body: 'Download complete - $packageName',
+      body: l10n.download_complete_body(packageName),
       notificationDetails: platformChannelSpecifics,
       payload: packageName,
     );
@@ -188,24 +162,12 @@ class NotificationService {
     required String packageName,
     required String error,
   }) async {
-    const AndroidNotificationDetails androidPlatformChannelSpecifics =
-        AndroidNotificationDetails(
-          downloadChannelId,
-          downloadChannelName,
-          channelDescription: 'Download error notifications',
-          importance: Importance.defaultImportance,
-          priority: Priority.defaultPriority,
-          showProgress: false,
-          enableVibration: true,
-          playSound: true,
-          channelShowBadge: true,
-        );
-
+    final l10n = currentL10n();
     final NotificationDetails platformChannelSpecifics = NotificationDetails(
       android: AndroidNotificationDetails(
         downloadChannelId,
-        downloadChannelName,
-        channelDescription: 'Download error notifications',
+        l10n.download_channel_name,
+        channelDescription: l10n.download_error_channel_description,
         importance: Importance.defaultImportance,
         priority: Priority.defaultPriority,
         showProgress: false,
@@ -219,7 +181,7 @@ class NotificationService {
     await _flutterLocalNotificationsPlugin.show(
       id: downloadNotificationId,
       title: title,
-      body: 'Download failed: $error',
+      body: l10n.download_failed_with_error(error),
       notificationDetails: platformChannelSpecifics,
       payload: packageName,
     );

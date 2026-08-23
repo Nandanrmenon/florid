@@ -548,5 +548,153 @@
       "packageName": {}
     }
   },
-  "no_detailed_version_info": "В репозитории F-Droid нет подробных сведений о версии этого приложения."
+  "no_detailed_version_info": "В репозитории F-Droid нет подробных сведений о версии этого приложения.",
+  "permission_required_by_app": "Разрешение, запрошенное приложением.",
+  "permission_group_location": "Геолокация",
+  "permission_group_storage": "Хранилище",
+  "permission_group_network": "Сеть",
+  "permission_group_bluetooth": "Bluetooth",
+  "permission_group_camera": "Камера",
+  "permission_group_audio": "Микрофон",
+  "permission_group_contacts": "Контакты",
+  "permission_group_startup": "Автозапуск",
+  "permission_group_nfc": "NFC",
+  "permission_desc_internet": "Приложение может устанавливать сетевые соединения.",
+  "permission_desc_access_network_state": "Приложение может просматривать состояние сети.",
+  "permission_desc_access_wifi_state": "Приложение может просматривать состояние Wi-Fi.",
+  "permission_desc_change_wifi_state": "Приложение может изменять подключение Wi-Fi.",
+  "permission_desc_read_external_storage": "Приложение может читать файлы из хранилища.",
+  "permission_desc_write_external_storage": "Приложение может записывать файлы в хранилище.",
+  "permission_desc_manage_external_storage": "Приложение получает широкий доступ к управлению файлами.",
+  "permission_desc_request_install_packages": "Приложение может запрашивать установку пакетов.",
+  "permission_desc_post_notifications": "Приложение может показывать уведомления.",
+  "permission_desc_vibrate": "Приложение может управлять вибрацией.",
+  "permission_desc_wake_lock": "Приложение может не давать устройству уснуть.",
+  "permission_desc_receive_boot_completed": "Приложение может запускаться вместе с устройством.",
+  "permission_desc_foreground_service": "Приложение может работать как служба переднего плана.",
+  "permission_desc_camera": "Приложение может использовать камеру.",
+  "permission_desc_record_audio": "Приложение может записывать звук.",
+  "permission_desc_read_contacts": "Приложение может читать контакты.",
+  "permission_desc_write_contacts": "Приложение может изменять контакты.",
+  "permission_desc_access_fine_location": "Приложение может определять точное местоположение.",
+  "permission_desc_access_coarse_location": "Приложение может определять приблизительное местоположение.",
+  "permission_desc_bluetooth": "Приложение может подключаться к устройствам Bluetooth.",
+  "permission_desc_bluetooth_connect": "Приложение может подключаться к устройствам Bluetooth.",
+  "permission_desc_bluetooth_scan": "Приложение может находить ближайшие устройства Bluetooth.",
+  "permission_desc_nfc": "Приложение может использовать NFC.",
+  "failed_to_check_installed_apps": "Не удалось проверить установленные приложения",
+  "unable_to_access_device_app_list": "Нет доступа к списку приложений на устройстве",
+  "updates_available_count": "Доступно обновлений: {count}",
+  "@updates_available_count": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "update_from_version": "Обновление с {version}",
+  "@update_from_version": {
+    "placeholders": {
+      "version": {}
+    }
+  },
+  "no_fdroid_apps_installed": "Нет установленных приложений F-Droid",
+  "no_fdroid_apps_installed_subtitle": "На устройстве нет приложений из F-Droid",
+  "all_installed_apps_have_updates": "Для всех установленных приложений F-Droid уже есть обновления.",
+  "updates_complete": "Обновления завершены: успешно {successful}",
+  "@updates_complete": {
+    "placeholders": {
+      "successful": {}
+    }
+  },
+  "updates_complete_with_failures": "Обновления завершены: успешно {successful}, с ошибкой {failed}",
+  "@updates_complete_with_failures": {
+    "placeholders": {
+      "successful": {},
+      "failed": {}
+    }
+  },
+  "installed_with_version": "Установлено ({version})",
+  "@installed_with_version": {
+    "placeholders": {
+      "version": {}
+    }
+  },
+  "no_downloadable_versions": "У этого приложения нет версий, которые можно скачать.",
+  "downloading_percent": "Загрузка… {percent}%",
+  "@downloading_percent": {
+    "placeholders": {
+      "percent": {}
+    }
+  },
+  "loading_izzy_stats": "Загрузка статистики IzzyOnDroid…",
+  "downloading_app_update": "Загрузка обновления {appName}…",
+  "@downloading_app_update": {
+    "placeholders": {
+      "appName": {}
+    }
+  },
+  "updates_ignored_for_app": "Обновления этого приложения игнорируются.",
+  "include_unstable_versions": "Показывать нестабильные версии",
+  "include_unstable_versions_subtitle": "Бета, альфа и предварительные сборки этого приложения",
+  "loading_from_repository": "Загрузка {name}…",
+  "@loading_from_repository": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "failed_to_load_from_repository": "Не удалось загрузить из {name}.",
+  "@failed_to_load_from_repository": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "failed_to_load": "Не удалось загрузить",
+  "search_suggestions": "Подсказки поиска",
+  "anonymous_telemetry_note": "Данные анонимны и не передаются третьим лицам",
+  "initializing": "Подготовка…",
+  "install_permission_required_apk": "Чтобы устанавливать APK, нужно разрешение на установку",
+  "download_channel_name": "Ход загрузки",
+  "download_progress_channel_description": "Уведомления о ходе загрузки",
+  "download_notifications_channel_description": "Уведомления о загрузках",
+  "download_error_channel_description": "Уведомления об ошибках загрузки",
+  "downloading_package_percent": "{percent}% — загрузка {packageName}",
+  "@downloading_package_percent": {
+    "placeholders": {
+      "percent": {},
+      "packageName": {}
+    }
+  },
+  "download_complete_body": "Загрузка завершена — {packageName}",
+  "@download_complete_body": {
+    "placeholders": {
+      "packageName": {}
+    }
+  },
+  "updates_channel_name": "Обновления приложений",
+  "updates_channel_description": "Уведомления об обновлениях приложений",
+  "debug_update_check": "Отладочная проверка обновлений",
+  "updates_available_title": "Доступны обновления ({count})",
+  "@updates_available_title": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "and_n_more": "{names} и ещё {count}",
+  "@and_n_more": {
+    "placeholders": {
+      "names": {},
+      "count": {}
+    }
+  },
+  "authenticate_to_install": "Подтвердите личность, чтобы установить {appName}",
+  "@authenticate_to_install": {
+    "placeholders": {
+      "appName": {}
+    }
+  },
+  "last_synced": "Последняя синхронизация: {date}",
+  "@last_synced": {
+    "placeholders": {
+      "date": {}
+    }
+  }
 }

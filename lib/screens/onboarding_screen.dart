@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:florid/constants.dart';
 import 'package:florid/l10n/app_localizations.dart';
+import 'package:florid/l10n/current_l10n.dart';
 import 'package:florid/services/usage_analytics_service.dart';
 import 'package:florid/widgets/list_icon.dart';
 import 'package:florid/widgets/onboarding_button.dart';
@@ -47,7 +48,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   @override
   void initState() {
     super.initState();
-    _progressStatus = 'Initializing...';
+    _progressStatus = currentL10n().initializing;
     // Ensure repositories are loaded so duplicate checks work
     Future.microtask(() {
       final repos = context.read<RepositoriesProvider>();
@@ -1374,7 +1375,7 @@ class _TelemetryStepState extends State<_TelemetryStep> {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16.0),
               child: Text(
-                'Your data is anonymous and never shared with third parties',
+                AppLocalizations.of(context)!.anonymous_telemetry_note,
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
                   color: colorScheme.onSurfaceVariant,
                 ),

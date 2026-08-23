@@ -195,7 +195,11 @@ class _AppDetailsScreenState extends State<AppDetailsScreen>
                                 ? Symbols.install_mobile
                                 : SolarIconsBold.download,
                           ),
-                          label: Text(isDownloaded ? 'Install' : 'Download'),
+                          label: Text(
+                            isDownloaded
+                                ? AppLocalizations.of(context)!.install
+                                : AppLocalizations.of(context)!.download,
+                          ),
                           style: FilledButton.styleFrom(),
                         ),
                       ),
@@ -235,7 +239,11 @@ class _AppDetailsScreenState extends State<AppDetailsScreen>
                           ? Symbols.install_mobile
                           : SolarIconsBold.download,
                     ),
-                    label: Text(isDownloaded ? 'Install' : 'Download'),
+                    label: Text(
+                      isDownloaded
+                          ? AppLocalizations.of(context)!.install
+                          : AppLocalizations.of(context)!.download,
+                    ),
                   ),
                 ),
         );
@@ -280,9 +288,11 @@ class _AppDetailsScreenState extends State<AppDetailsScreen>
             }
             if (context.mounted) {
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
+                SnackBar(
                   content: Text(
-                    'Install permission is required to install APK files',
+                    AppLocalizations.of(
+                      context,
+                    )!.install_permission_required_apk,
                   ),
                 ),
               );
@@ -1000,7 +1010,13 @@ class _AppDetailsScreenState extends State<AppDetailsScreen>
                                 visualDensity: VisualDensity.compact,
                                 avatar: Icon(Symbols.check_circle, fill: 1),
                                 label: Text(
-                                  'Installed${installedApp?.versionName != null ? ' (${installedApp!.versionName})' : ''}',
+                                  installedApp?.versionName != null
+                                      ? AppLocalizations.of(
+                                          context,
+                                        )!.installed_with_version(
+                                          installedApp!.versionName!,
+                                        )
+                                      : AppLocalizations.of(context)!.installed,
                                 ),
                               ).animate().fadeIn(
                                 delay: Duration(milliseconds: 300),
@@ -1450,7 +1466,7 @@ class _DownloadSectionState extends State<_DownloadSection> {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      'This app doesn\'t have any downloadable versions available.',
+                      AppLocalizations.of(context)!.no_downloadable_versions,
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                         color: Theme.of(context).colorScheme.onErrorContainer,
                       ),
@@ -1504,7 +1520,9 @@ class _DownloadSectionState extends State<_DownloadSection> {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Text(
-                                'Downloading... ${(progress * 100).toInt()}%',
+                                AppLocalizations.of(
+                                  context,
+                                )!.downloading_percent((progress * 100).toInt()),
                                 style: Theme.of(context).textTheme.bodySmall
                                     ?.copyWith(
                                       color: Theme.of(
@@ -1608,7 +1626,7 @@ class _IzzyStatsSection extends StatelessWidget {
                     color: Theme.of(context).colorScheme.primary,
                   ),
                   Text(
-                    'Downloads stats',
+                    AppLocalizations.of(context)!.downloads_stats,
                     style: textTheme.labelMedium?.copyWith(
                       // fontWeight: FontWeight.w600,
                     ),
@@ -1674,7 +1692,9 @@ class _IzzyStatTile extends StatelessWidget {
       children: [
         Text(label, style: textTheme.bodySmall?.copyWith(color: subColor)),
         Text(
-          value != null ? _formatCount(value!) : 'Not available',
+          value != null
+              ? _formatCount(value!)
+              : AppLocalizations.of(context)!.not_available,
           style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
           textAlign: TextAlign.center,
         ),
@@ -1698,18 +1718,18 @@ class _IzzyStatsLoadingCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Padding(
-      padding: EdgeInsets.symmetric(horizontal: 16.0),
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0),
       child: Card.outlined(
         child: Padding(
-          padding: EdgeInsets.all(16.0),
+          padding: const EdgeInsets.all(16.0),
           child: Row(
             spacing: 12,
             children: [
-              CircularProgressIndicator(),
+              const CircularProgressIndicator(),
               Expanded(
                 child: Text(
-                  'Loading IzzyOnDroid download stats...',
+                  AppLocalizations.of(context)!.loading_izzy_stats,
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
@@ -1951,7 +1971,11 @@ class _InstallActionsSection extends StatelessWidget {
                                         ).showSnackBar(
                                           SnackBar(
                                             content: Text(
-                                              'Downloading ${app.name} update...',
+                                              AppLocalizations.of(
+                                                context,
+                                              )!.downloading_app_update(
+                                                app.name,
+                                              ),
                                             ),
                                           ),
                                         );
@@ -2040,7 +2064,9 @@ class _InstallActionsSection extends StatelessWidget {
                                         ).showSnackBar(
                                           SnackBar(
                                             content: Text(
-                                              'Uninstall failed: ${e.toString()}',
+                                              AppLocalizations.of(
+                                                context,
+                                              )!.uninstall_failed,
                                             ),
                                           ),
                                         );
@@ -2085,7 +2111,9 @@ class _InstallActionsSection extends StatelessWidget {
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     SnackBar(
                                       content: Text(
-                                        'Uninstall failed: ${e.toString()}',
+                                        AppLocalizations.of(
+                                          context,
+                                        )!.uninstall_failed,
                                       ),
                                     ),
                                   );
@@ -2162,7 +2190,9 @@ class _InstallActionsSection extends StatelessWidget {
                                 const SizedBox(width: 12),
                                 Expanded(
                                   child: Text(
-                                    'Updates are ignored for this app.',
+                                    AppLocalizations.of(
+                                      context,
+                                    )!.updates_ignored_for_app,
                                     style: Theme.of(
                                       context,
                                     ).textTheme.bodyMedium,
@@ -2678,12 +2708,16 @@ class _IncludeUnstableSectionState extends State<IncludeUnstableSection> {
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 Text(
-                                  'Include unstable versions',
+                                  AppLocalizations.of(
+                                    context,
+                                  )!.include_unstable_versions,
                                   style: Theme.of(context).textTheme.bodyMedium
                                       ?.copyWith(fontWeight: FontWeight.w500),
                                 ),
                                 Text(
-                                  'Show beta, alpha, and prerelease versions for this app',
+                                  AppLocalizations.of(
+                                    context,
+                                  )!.include_unstable_versions_subtitle,
                                   style: Theme.of(context).textTheme.bodySmall
                                       ?.copyWith(
                                         color: Theme.of(
@@ -2736,7 +2770,7 @@ class _NoVersionInfoSection extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Version Information',
+            AppLocalizations.of(context)!.version_information,
             style: Theme.of(
               context,
             ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
@@ -3452,7 +3486,11 @@ class _AllVersionsSectionState extends State<_AllVersionsSection> {
                             ),
                             Expanded(
                               child: Text(
-                                'Loading ${selectedTab.repo.name}...',
+                                AppLocalizations.of(
+                                  context,
+                                )!.loading_from_repository(
+                                  selectedTab.repo.name,
+                                ),
                                 style: Theme.of(context).textTheme.bodySmall,
                               ),
                             ),
@@ -3470,7 +3508,11 @@ class _AllVersionsSectionState extends State<_AllVersionsSection> {
                       child: Padding(
                         padding: const EdgeInsets.all(12.0),
                         child: Text(
-                          'Failed to load from ${selectedTab.repo.name}.',
+                          AppLocalizations.of(
+                            context,
+                          )!.failed_to_load_from_repository(
+                            selectedTab.repo.name,
+                          ),
                           style: Theme.of(context).textTheme.bodySmall,
                         ),
                       ),
@@ -3614,7 +3656,9 @@ class _AllVersionsSectionState extends State<_AllVersionsSection> {
                                           ).showSnackBar(
                                             SnackBar(
                                               content: Text(
-                                                'Download failed: $e',
+                                                AppLocalizations.of(
+                                                  context,
+                                                )!.download_failed_with_error(e),
                                               ),
                                             ),
                                           );
@@ -3867,7 +3911,7 @@ class _ScreenshotsSectionState extends State<_ScreenshotsSection> {
                                   Padding(
                                     padding: const EdgeInsets.all(8.0),
                                     child: Text(
-                                      'Failed to load',
+                                      AppLocalizations.of(context)!.failed_to_load,
                                       style: Theme.of(
                                         context,
                                       ).textTheme.bodySmall,

@@ -563,7 +563,9 @@ class _RepositoryListItem extends StatelessWidget {
                   ),
                   if (repository.lastSyncedAt != null)
                     Text(
-                      'Last synced: ${_formatDate(repository.lastSyncedAt!)}',
+                      AppLocalizations.of(context)!.last_synced(
+                        _formatDate(repository.lastSyncedAt!),
+                      ),
                       style: const TextStyle(fontSize: 11),
                     ),
                 ],

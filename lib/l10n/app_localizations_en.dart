@@ -1250,4 +1250,245 @@ Then try downloading again.';
   String get no_detailed_version_info =>
       'This app doesn\'t have detailed version information in the F-Droid repository.';
 
+
+  @override
+  String get permission_required_by_app => 'Permission required by app.';
+
+  @override
+  String get permission_group_location => 'Location';
+
+  @override
+  String get permission_group_storage => 'Storage';
+
+  @override
+  String get permission_group_network => 'Network';
+
+  @override
+  String get permission_group_bluetooth => 'Bluetooth';
+
+  @override
+  String get permission_group_camera => 'Camera';
+
+  @override
+  String get permission_group_audio => 'Audio';
+
+  @override
+  String get permission_group_contacts => 'Contacts';
+
+  @override
+  String get permission_group_startup => 'Startup';
+
+  @override
+  String get permission_group_nfc => 'NFC';
+
+  @override
+  String get permission_desc_internet => 'Allows the app to create network connections.';
+
+  @override
+  String get permission_desc_access_network_state => 'Allows the app to view network connections.';
+
+  @override
+  String get permission_desc_access_wifi_state => 'Allows the app to view Wi-Fi connection status.';
+
+  @override
+  String get permission_desc_change_wifi_state => 'Allows the app to change Wi-Fi connectivity.';
+
+  @override
+  String get permission_desc_read_external_storage => 'Allows the app to read files from storage.';
+
+  @override
+  String get permission_desc_write_external_storage => 'Allows the app to write files to storage.';
+
+  @override
+  String get permission_desc_manage_external_storage => 'Allows the app broad access to manage files on storage.';
+
+  @override
+  String get permission_desc_request_install_packages => 'Allows the app to request installation of packages.';
+
+  @override
+  String get permission_desc_post_notifications => 'Allows the app to show notifications.';
+
+  @override
+  String get permission_desc_vibrate => 'Allows the app to control vibration.';
+
+  @override
+  String get permission_desc_wake_lock => 'Allows the app to keep the device awake.';
+
+  @override
+  String get permission_desc_receive_boot_completed => 'Allows the app to run at device startup.';
+
+  @override
+  String get permission_desc_foreground_service => 'Allows the app to run foreground services.';
+
+  @override
+  String get permission_desc_camera => 'Allows the app to use the camera.';
+
+  @override
+  String get permission_desc_record_audio => 'Allows the app to record audio.';
+
+  @override
+  String get permission_desc_read_contacts => 'Allows the app to read contacts.';
+
+  @override
+  String get permission_desc_write_contacts => 'Allows the app to modify contacts.';
+
+  @override
+  String get permission_desc_access_fine_location => 'Allows the app to access precise location.';
+
+  @override
+  String get permission_desc_access_coarse_location => 'Allows the app to access approximate location.';
+
+  @override
+  String get permission_desc_bluetooth => 'Allows the app to connect to Bluetooth devices.';
+
+  @override
+  String get permission_desc_bluetooth_connect => 'Allows the app to connect to Bluetooth devices.';
+
+  @override
+  String get permission_desc_bluetooth_scan => 'Allows the app to discover nearby Bluetooth devices.';
+
+  @override
+  String get permission_desc_nfc => 'Allows the app to use NFC.';
+
+  @override
+  String get failed_to_check_installed_apps => 'Failed to check installed apps';
+
+  @override
+  String get unable_to_access_device_app_list => 'Unable to access device app list';
+
+  @override
+  String updates_available_count(Object count) {
+    return '$count updates available';
+  }
+
+  @override
+  String update_from_version(Object version) {
+    return 'Update from $version';
+  }
+
+  @override
+  String get no_fdroid_apps_installed => 'No F-Droid apps installed';
+
+  @override
+  String get no_fdroid_apps_installed_subtitle => 'No F-Droid apps are installed on this device';
+
+  @override
+  String get all_installed_apps_have_updates => 'All installed F-Droid apps already have updates available.';
+
+  @override
+  String updates_complete(Object successful) {
+    return 'Updates complete: $successful successful';
+  }
+
+  @override
+  String updates_complete_with_failures(Object successful, Object failed) {
+    return 'Updates complete: $successful successful, $failed failed';
+  }
+
+  @override
+  String installed_with_version(Object version) {
+    return 'Installed ($version)';
+  }
+
+  @override
+  String get no_downloadable_versions => 'This app doesn\'t have any downloadable versions available.';
+
+  @override
+  String downloading_percent(Object percent) {
+    return 'Downloading... $percent%';
+  }
+
+  @override
+  String get loading_izzy_stats => 'Loading IzzyOnDroid download stats...';
+
+  @override
+  String downloading_app_update(Object appName) {
+    return 'Downloading $appName update...';
+  }
+
+  @override
+  String get updates_ignored_for_app => 'Updates are ignored for this app.';
+
+  @override
+  String get include_unstable_versions => 'Include unstable versions';
+
+  @override
+  String get include_unstable_versions_subtitle => 'Show beta, alpha, and prerelease versions for this app';
+
+  @override
+  String loading_from_repository(Object name) {
+    return 'Loading $name...';
+  }
+
+  @override
+  String failed_to_load_from_repository(Object name) {
+    return 'Failed to load from $name.';
+  }
+
+  @override
+  String get failed_to_load => 'Failed to load';
+
+  @override
+  String get search_suggestions => 'Search suggestions';
+
+  @override
+  String get anonymous_telemetry_note => 'Your data is anonymous and never shared with third parties';
+
+  @override
+  String get initializing => 'Initializing...';
+
+  @override
+  String get install_permission_required_apk => 'Install permission is required to install APK files';
+
+  @override
+  String get download_channel_name => 'Download Progress';
+
+  @override
+  String get download_progress_channel_description => 'Download progress notifications';
+
+  @override
+  String get download_notifications_channel_description => 'Download notifications';
+
+  @override
+  String get download_error_channel_description => 'Download error notifications';
+
+  @override
+  String downloading_package_percent(Object percent, Object packageName) {
+    return '$percent% — Downloading $packageName';
+  }
+
+  @override
+  String download_complete_body(Object packageName) {
+    return 'Download complete — $packageName';
+  }
+
+  @override
+  String get updates_channel_name => 'App Updates';
+
+  @override
+  String get updates_channel_description => 'App update notifications';
+
+  @override
+  String get debug_update_check => 'Debug update check';
+
+  @override
+  String updates_available_title(Object count) {
+    return 'Updates available ($count)';
+  }
+
+  @override
+  String and_n_more(Object names, Object count) {
+    return '$names and $count more';
+  }
+
+  @override
+  String authenticate_to_install(Object appName) {
+    return 'Authenticate to install $appName';
+  }
+
+  @override
+  String last_synced(Object date) {
+    return 'Last synced: $date';
+  }
+
 }

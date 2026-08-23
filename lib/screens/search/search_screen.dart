@@ -500,7 +500,7 @@ class _SearchSuggestions extends StatelessWidget {
     final displaySuggestions = suggestions ?? _suggestions;
     final title = suggestions == null
         ? localizations.popular_searches
-        : 'Search suggestions';
+        : localizations.search_suggestions;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -517,7 +517,7 @@ class _SearchSuggestions extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 16.0),
             child: Text(
-              'No suggestions found',
+              localizations.no_suggestions_found,
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.bodyMedium,
             ),

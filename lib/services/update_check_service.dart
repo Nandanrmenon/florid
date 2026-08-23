@@ -8,6 +8,7 @@ import 'package:installed_apps/installed_apps.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:workmanager/workmanager.dart';
 
+import '../l10n/current_l10n.dart';
 import '../models/fdroid_app.dart';
 import '../providers/settings_provider.dart';
 import '../services/app_preferences_service.dart';
@@ -26,7 +27,6 @@ const Duration _updateNotificationMinInterval = Duration(hours: 24);
 
 class UpdateCheckService {
   static const String updatesChannelId = 'com.florid.updates';
-  static const String updatesChannelName = 'App Updates';
 
   static Future<void> initialize() async {
     await Workmanager().initialize(
@@ -330,10 +330,11 @@ Future<void> _recordUpdateNotification(String signature) async {
 Future<void> _showDebugNotification(String message) async {
   final plugin = await _initNotifications();
 
-  const AndroidNotificationChannel channel = AndroidNotificationChannel(
+  final l10n = currentL10n();
+  final AndroidNotificationChannel channel = AndroidNotificationChannel(
     UpdateCheckService.updatesChannelId,
-    UpdateCheckService.updatesChannelName,
-    description: 'App update notifications',
+    l10n.updates_channel_name,
+    description: l10n.updates_channel_description,
     importance: Importance.defaultImportance,
   );
 
@@ -346,8 +347,8 @@ Future<void> _showDebugNotification(String message) async {
   final details = NotificationDetails(
     android: AndroidNotificationDetails(
       UpdateCheckService.updatesChannelId,
-      UpdateCheckService.updatesChannelName,
-      channelDescription: 'App update notifications',
+      l10n.updates_channel_name,
+      channelDescription: l10n.updates_channel_description,
       importance: Importance.defaultImportance,
       priority: Priority.defaultPriority,
     ),
@@ -355,7 +356,7 @@ Future<void> _showDebugNotification(String message) async {
 
   await plugin.show(
     id: 2002,
-    title: 'Debug update check',
+    title: l10n.debug_update_check,
     body: message,
     notificationDetails: details,
     payload: jsonEncode({'type': 'debug_update_check', 'message': message}),
@@ -434,10 +435,11 @@ Future<FDroidRepository?> _loadRepositoryFromDatabase(
 Future<void> _showUpdateNotification(List<FDroidApp> apps) async {
   final plugin = await _initNotifications();
 
-  const AndroidNotificationChannel channel = AndroidNotificationChannel(
+  final l10n = currentL10n();
+  final AndroidNotificationChannel channel = AndroidNotificationChannel(
     UpdateCheckService.updatesChannelId,
-    UpdateCheckService.updatesChannelName,
-    description: 'App update notifications',
+    l10n.updates_channel_name,
+    description: l10n.updates_channel_description,
     importance: Importance.defaultImportance,
   );
 
@@ -449,13 +451,15 @@ Future<void> _showUpdateNotification(List<FDroidApp> apps) async {
 
   final count = apps.length;
   final names = apps.take(3).map((app) => app.name).join(', ');
-  final summary = count <= 3 ? names : '$names and ${count - 3} more';
+  final summary = count <= 3
+      ? names
+      : l10n.and_n_more(names, count - 3);
 
   final details = NotificationDetails(
     android: AndroidNotificationDetails(
       UpdateCheckService.updatesChannelId,
-      UpdateCheckService.updatesChannelName,
-      channelDescription: 'App update notifications',
+      l10n.updates_channel_name,
+      channelDescription: l10n.updates_channel_description,
       importance: Importance.defaultImportance,
       priority: Priority.defaultPriority,
       styleInformation: BigTextStyleInformation(summary),
@@ -464,7 +468,7 @@ Future<void> _showUpdateNotification(List<FDroidApp> apps) async {
 
   await plugin.show(
     id: 2001,
-    title: 'Updates available ($count)',
+    title: l10n.updates_available_title(count),
     body: summary,
     notificationDetails: details,
     payload: jsonEncode({'type': 'updates', 'count': count}),

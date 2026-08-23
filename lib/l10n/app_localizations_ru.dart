@@ -1255,4 +1255,245 @@ class AppLocalizationsRu extends AppLocalizations {
   String get no_detailed_version_info =>
       'В репозитории F-Droid нет подробных сведений о версии этого приложения.';
 
+
+  @override
+  String get permission_required_by_app => 'Разрешение, запрошенное приложением.';
+
+  @override
+  String get permission_group_location => 'Геолокация';
+
+  @override
+  String get permission_group_storage => 'Хранилище';
+
+  @override
+  String get permission_group_network => 'Сеть';
+
+  @override
+  String get permission_group_bluetooth => 'Bluetooth';
+
+  @override
+  String get permission_group_camera => 'Камера';
+
+  @override
+  String get permission_group_audio => 'Микрофон';
+
+  @override
+  String get permission_group_contacts => 'Контакты';
+
+  @override
+  String get permission_group_startup => 'Автозапуск';
+
+  @override
+  String get permission_group_nfc => 'NFC';
+
+  @override
+  String get permission_desc_internet => 'Приложение может устанавливать сетевые соединения.';
+
+  @override
+  String get permission_desc_access_network_state => 'Приложение может просматривать состояние сети.';
+
+  @override
+  String get permission_desc_access_wifi_state => 'Приложение может просматривать состояние Wi-Fi.';
+
+  @override
+  String get permission_desc_change_wifi_state => 'Приложение может изменять подключение Wi-Fi.';
+
+  @override
+  String get permission_desc_read_external_storage => 'Приложение может читать файлы из хранилища.';
+
+  @override
+  String get permission_desc_write_external_storage => 'Приложение может записывать файлы в хранилище.';
+
+  @override
+  String get permission_desc_manage_external_storage => 'Приложение получает широкий доступ к управлению файлами.';
+
+  @override
+  String get permission_desc_request_install_packages => 'Приложение может запрашивать установку пакетов.';
+
+  @override
+  String get permission_desc_post_notifications => 'Приложение может показывать уведомления.';
+
+  @override
+  String get permission_desc_vibrate => 'Приложение может управлять вибрацией.';
+
+  @override
+  String get permission_desc_wake_lock => 'Приложение может не давать устройству уснуть.';
+
+  @override
+  String get permission_desc_receive_boot_completed => 'Приложение может запускаться вместе с устройством.';
+
+  @override
+  String get permission_desc_foreground_service => 'Приложение может работать как служба переднего плана.';
+
+  @override
+  String get permission_desc_camera => 'Приложение может использовать камеру.';
+
+  @override
+  String get permission_desc_record_audio => 'Приложение может записывать звук.';
+
+  @override
+  String get permission_desc_read_contacts => 'Приложение может читать контакты.';
+
+  @override
+  String get permission_desc_write_contacts => 'Приложение может изменять контакты.';
+
+  @override
+  String get permission_desc_access_fine_location => 'Приложение может определять точное местоположение.';
+
+  @override
+  String get permission_desc_access_coarse_location => 'Приложение может определять приблизительное местоположение.';
+
+  @override
+  String get permission_desc_bluetooth => 'Приложение может подключаться к устройствам Bluetooth.';
+
+  @override
+  String get permission_desc_bluetooth_connect => 'Приложение может подключаться к устройствам Bluetooth.';
+
+  @override
+  String get permission_desc_bluetooth_scan => 'Приложение может находить ближайшие устройства Bluetooth.';
+
+  @override
+  String get permission_desc_nfc => 'Приложение может использовать NFC.';
+
+  @override
+  String get failed_to_check_installed_apps => 'Не удалось проверить установленные приложения';
+
+  @override
+  String get unable_to_access_device_app_list => 'Нет доступа к списку приложений на устройстве';
+
+  @override
+  String updates_available_count(Object count) {
+    return 'Доступно обновлений: $count';
+  }
+
+  @override
+  String update_from_version(Object version) {
+    return 'Обновление с $version';
+  }
+
+  @override
+  String get no_fdroid_apps_installed => 'Нет установленных приложений F-Droid';
+
+  @override
+  String get no_fdroid_apps_installed_subtitle => 'На устройстве нет приложений из F-Droid';
+
+  @override
+  String get all_installed_apps_have_updates => 'Для всех установленных приложений F-Droid уже есть обновления.';
+
+  @override
+  String updates_complete(Object successful) {
+    return 'Обновления завершены: успешно $successful';
+  }
+
+  @override
+  String updates_complete_with_failures(Object successful, Object failed) {
+    return 'Обновления завершены: успешно $successful, с ошибкой $failed';
+  }
+
+  @override
+  String installed_with_version(Object version) {
+    return 'Установлено ($version)';
+  }
+
+  @override
+  String get no_downloadable_versions => 'У этого приложения нет версий, которые можно скачать.';
+
+  @override
+  String downloading_percent(Object percent) {
+    return 'Загрузка… $percent%';
+  }
+
+  @override
+  String get loading_izzy_stats => 'Загрузка статистики IzzyOnDroid…';
+
+  @override
+  String downloading_app_update(Object appName) {
+    return 'Загрузка обновления $appName…';
+  }
+
+  @override
+  String get updates_ignored_for_app => 'Обновления этого приложения игнорируются.';
+
+  @override
+  String get include_unstable_versions => 'Показывать нестабильные версии';
+
+  @override
+  String get include_unstable_versions_subtitle => 'Бета, альфа и предварительные сборки этого приложения';
+
+  @override
+  String loading_from_repository(Object name) {
+    return 'Загрузка $name…';
+  }
+
+  @override
+  String failed_to_load_from_repository(Object name) {
+    return 'Не удалось загрузить из $name.';
+  }
+
+  @override
+  String get failed_to_load => 'Не удалось загрузить';
+
+  @override
+  String get search_suggestions => 'Подсказки поиска';
+
+  @override
+  String get anonymous_telemetry_note => 'Данные анонимны и не передаются третьим лицам';
+
+  @override
+  String get initializing => 'Подготовка…';
+
+  @override
+  String get install_permission_required_apk => 'Чтобы устанавливать APK, нужно разрешение на установку';
+
+  @override
+  String get download_channel_name => 'Ход загрузки';
+
+  @override
+  String get download_progress_channel_description => 'Уведомления о ходе загрузки';
+
+  @override
+  String get download_notifications_channel_description => 'Уведомления о загрузках';
+
+  @override
+  String get download_error_channel_description => 'Уведомления об ошибках загрузки';
+
+  @override
+  String downloading_package_percent(Object percent, Object packageName) {
+    return '$percent% — загрузка $packageName';
+  }
+
+  @override
+  String download_complete_body(Object packageName) {
+    return 'Загрузка завершена — $packageName';
+  }
+
+  @override
+  String get updates_channel_name => 'Обновления приложений';
+
+  @override
+  String get updates_channel_description => 'Уведомления об обновлениях приложений';
+
+  @override
+  String get debug_update_check => 'Отладочная проверка обновлений';
+
+  @override
+  String updates_available_title(Object count) {
+    return 'Доступны обновления ($count)';
+  }
+
+  @override
+  String and_n_more(Object names, Object count) {
+    return '$names и ещё $count';
+  }
+
+  @override
+  String authenticate_to_install(Object appName) {
+    return 'Подтвердите личность, чтобы установить $appName';
+  }
+
+  @override
+  String last_synced(Object date) {
+    return 'Последняя синхронизация: $date';
+  }
+
 }

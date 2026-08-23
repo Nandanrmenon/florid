@@ -550,5 +550,153 @@
       "packageName": {}
     }
   },
-  "no_detailed_version_info": "This app doesn't have detailed version information in the F-Droid repository."
+  "no_detailed_version_info": "This app doesn't have detailed version information in the F-Droid repository.",
+  "permission_required_by_app": "Permission required by app.",
+  "permission_group_location": "Location",
+  "permission_group_storage": "Storage",
+  "permission_group_network": "Network",
+  "permission_group_bluetooth": "Bluetooth",
+  "permission_group_camera": "Camera",
+  "permission_group_audio": "Audio",
+  "permission_group_contacts": "Contacts",
+  "permission_group_startup": "Startup",
+  "permission_group_nfc": "NFC",
+  "permission_desc_internet": "Allows the app to create network connections.",
+  "permission_desc_access_network_state": "Allows the app to view network connections.",
+  "permission_desc_access_wifi_state": "Allows the app to view Wi-Fi connection status.",
+  "permission_desc_change_wifi_state": "Allows the app to change Wi-Fi connectivity.",
+  "permission_desc_read_external_storage": "Allows the app to read files from storage.",
+  "permission_desc_write_external_storage": "Allows the app to write files to storage.",
+  "permission_desc_manage_external_storage": "Allows the app broad access to manage files on storage.",
+  "permission_desc_request_install_packages": "Allows the app to request installation of packages.",
+  "permission_desc_post_notifications": "Allows the app to show notifications.",
+  "permission_desc_vibrate": "Allows the app to control vibration.",
+  "permission_desc_wake_lock": "Allows the app to keep the device awake.",
+  "permission_desc_receive_boot_completed": "Allows the app to run at device startup.",
+  "permission_desc_foreground_service": "Allows the app to run foreground services.",
+  "permission_desc_camera": "Allows the app to use the camera.",
+  "permission_desc_record_audio": "Allows the app to record audio.",
+  "permission_desc_read_contacts": "Allows the app to read contacts.",
+  "permission_desc_write_contacts": "Allows the app to modify contacts.",
+  "permission_desc_access_fine_location": "Allows the app to access precise location.",
+  "permission_desc_access_coarse_location": "Allows the app to access approximate location.",
+  "permission_desc_bluetooth": "Allows the app to connect to Bluetooth devices.",
+  "permission_desc_bluetooth_connect": "Allows the app to connect to Bluetooth devices.",
+  "permission_desc_bluetooth_scan": "Allows the app to discover nearby Bluetooth devices.",
+  "permission_desc_nfc": "Allows the app to use NFC.",
+  "failed_to_check_installed_apps": "Failed to check installed apps",
+  "unable_to_access_device_app_list": "Unable to access device app list",
+  "updates_available_count": "{count} updates available",
+  "@updates_available_count": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "update_from_version": "Update from {version}",
+  "@update_from_version": {
+    "placeholders": {
+      "version": {}
+    }
+  },
+  "no_fdroid_apps_installed": "No F-Droid apps installed",
+  "no_fdroid_apps_installed_subtitle": "No F-Droid apps are installed on this device",
+  "all_installed_apps_have_updates": "All installed F-Droid apps already have updates available.",
+  "updates_complete": "Updates complete: {successful} successful",
+  "@updates_complete": {
+    "placeholders": {
+      "successful": {}
+    }
+  },
+  "updates_complete_with_failures": "Updates complete: {successful} successful, {failed} failed",
+  "@updates_complete_with_failures": {
+    "placeholders": {
+      "successful": {},
+      "failed": {}
+    }
+  },
+  "installed_with_version": "Installed ({version})",
+  "@installed_with_version": {
+    "placeholders": {
+      "version": {}
+    }
+  },
+  "no_downloadable_versions": "This app doesn't have any downloadable versions available.",
+  "downloading_percent": "Downloading... {percent}%",
+  "@downloading_percent": {
+    "placeholders": {
+      "percent": {}
+    }
+  },
+  "loading_izzy_stats": "Loading IzzyOnDroid download stats...",
+  "downloading_app_update": "Downloading {appName} update...",
+  "@downloading_app_update": {
+    "placeholders": {
+      "appName": {}
+    }
+  },
+  "updates_ignored_for_app": "Updates are ignored for this app.",
+  "include_unstable_versions": "Include unstable versions",
+  "include_unstable_versions_subtitle": "Show beta, alpha, and prerelease versions for this app",
+  "loading_from_repository": "Loading {name}...",
+  "@loading_from_repository": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "failed_to_load_from_repository": "Failed to load from {name}.",
+  "@failed_to_load_from_repository": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "failed_to_load": "Failed to load",
+  "search_suggestions": "Search suggestions",
+  "anonymous_telemetry_note": "Your data is anonymous and never shared with third parties",
+  "initializing": "Initializing...",
+  "install_permission_required_apk": "Install permission is required to install APK files",
+  "download_channel_name": "Download Progress",
+  "download_progress_channel_description": "Download progress notifications",
+  "download_notifications_channel_description": "Download notifications",
+  "download_error_channel_description": "Download error notifications",
+  "downloading_package_percent": "{percent}% — Downloading {packageName}",
+  "@downloading_package_percent": {
+    "placeholders": {
+      "percent": {},
+      "packageName": {}
+    }
+  },
+  "download_complete_body": "Download complete — {packageName}",
+  "@download_complete_body": {
+    "placeholders": {
+      "packageName": {}
+    }
+  },
+  "updates_channel_name": "App Updates",
+  "updates_channel_description": "App update notifications",
+  "debug_update_check": "Debug update check",
+  "updates_available_title": "Updates available ({count})",
+  "@updates_available_title": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "and_n_more": "{names} and {count} more",
+  "@and_n_more": {
+    "placeholders": {
+      "names": {},
+      "count": {}
+    }
+  },
+  "authenticate_to_install": "Authenticate to install {appName}",
+  "@authenticate_to_install": {
+    "placeholders": {
+      "appName": {}
+    }
+  },
+  "last_synced": "Last synced: {date}",
+  "@last_synced": {
+    "placeholders": {
+      "date": {}
+    }
+  }
 }

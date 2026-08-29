@@ -580,26 +580,9 @@ class _AppDetailsScreenState extends State<AppDetailsScreen>
                   },
                   suffix: Visibility(
                     visible: isPrimary,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 2,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Theme.of(
-                          dialogContext,
-                        ).colorScheme.primaryContainer,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Text(
-                        AppLocalizations.of(context)!.default_repository,
-                        style: Theme.of(dialogContext).textTheme.labelSmall
-                            ?.copyWith(
-                              color: Theme.of(
-                                dialogContext,
-                              ).colorScheme.onPrimaryContainer,
-                            ),
-                      ),
+                    child: HChip(
+                      type: ChipType.tertiary,
+                      label: AppLocalizations.of(context)!.default_repository,
                     ),
                   ),
                 );
@@ -607,8 +590,8 @@ class _AppDetailsScreenState extends State<AppDetailsScreen>
             ),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              child: FilledButton.tonal(
-                child: Text(AppLocalizations.of(context)!.cancel),
+              child: HButton.outlined(
+                label: AppLocalizations.of(context)!.cancel,
                 onPressed: () => Navigator.of(dialogContext).pop(),
               ),
             ),
@@ -1840,14 +1823,15 @@ class _InstallActionsSection extends StatelessWidget {
               return SizedBox(
                 width: double.infinity,
                 height: 48,
-                child: FilledButton.tonal(
+                child: HButton.tonal(
                   onPressed: () {
                     downloadProvider.cancelDownload(
                       app.packageName,
                       downloadingVersionName,
                     );
                   },
-                  child: const Text('Cancel Download'),
+                  color: Theme.of(context).colorScheme.error,
+                  label: AppLocalizations.of(context)!.cancel_download,
                 ),
               );
             }
@@ -1883,7 +1867,7 @@ class _InstallActionsSection extends StatelessWidget {
                             Expanded(
                               child: SizedBox(
                                 height: 48,
-                                child: FilledButton.icon(
+                                child: HButton.filled(
                                   onPressed: () async {
                                     final hasPermission = await downloadProvider
                                         .requestPermissions();
@@ -1960,17 +1944,16 @@ class _InstallActionsSection extends StatelessWidget {
                                       }
                                     }
                                   },
-                                  icon: Icon(SolarIconsBold.download),
-                                  label: Text(
-                                    AppLocalizations.of(context)!.update,
-                                  ),
+                                  showIcon: true,
+                                  icon: SolarIconsBold.download,
+                                  label: AppLocalizations.of(context)!.update,
                                 ),
                               ),
                             ),
                             if (!isFloridApp)
                               SizedBox(
                                 height: 48,
-                                child: FilledButton.tonalIcon(
+                                child: HButton.tonal(
                                   onPressed: () async {
                                     try {
                                       final opened = await appProvider
@@ -2000,16 +1983,15 @@ class _InstallActionsSection extends StatelessWidget {
                                       }
                                     }
                                   },
-                                  icon: Icon(SolarIconsOutline.squareBottomUp),
-                                  label: Text(
-                                    AppLocalizations.of(context)!.open,
-                                  ),
+                                  showIcon: true,
+                                  icon: SolarIconsOutline.squareBottomUp,
+                                  label: AppLocalizations.of(context)!.open,
                                 ),
                               ),
                             if (!isFloridApp)
                               SizedBox(
                                 height: 48,
-                                child: FilledButton.tonal(
+                                child: HIconButton.filled(
                                   onPressed: () async {
                                     try {
                                       await downloadProvider.uninstallApp(
@@ -2033,15 +2015,21 @@ class _InstallActionsSection extends StatelessWidget {
                                       }
                                     }
                                   },
-                                  style: FilledButton.styleFrom(
-                                    foregroundColor: Theme.of(
-                                      context,
-                                    ).colorScheme.onErrorContainer,
-                                    backgroundColor: Theme.of(
-                                      context,
-                                    ).colorScheme.errorContainer,
-                                  ),
-                                  child: Icon(SolarIconsBold.trashBin2),
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.errorContainer,
+                                  foregroundColor: Theme.of(
+                                    context,
+                                  ).colorScheme.onErrorContainer,
+                                  // style: FilledButton.styleFrom(
+                                  //   foregroundColor: Theme.of(
+                                  //     context,
+                                  //   ).colorScheme.onErrorContainer,
+                                  //   backgroundColor: Theme.of(
+                                  //     context,
+                                  //   ).colorScheme.errorContainer,
+                                  // ),
+                                  icon: SolarIconsBold.trashBin2,
                                 ),
                               ),
                           ],
@@ -2056,7 +2044,7 @@ class _InstallActionsSection extends StatelessWidget {
                       Expanded(
                         child: SizedBox(
                           height: 48,
-                          child: FilledButton.tonalIcon(
+                          child: HButton.filled(
                             onPressed: () async {
                               try {
                                 await downloadProvider.uninstallApp(
@@ -2078,25 +2066,20 @@ class _InstallActionsSection extends StatelessWidget {
                                 }
                               }
                             },
-                            icon: Icon(SolarIconsBold.trashBin2),
-                            label: Text(
-                              AppLocalizations.of(context)!.uninstall,
-                            ),
-                            style: FilledButton.styleFrom(
-                              foregroundColor: Theme.of(
-                                context,
-                              ).colorScheme.onErrorContainer,
-                              backgroundColor: Theme.of(
-                                context,
-                              ).colorScheme.errorContainer,
-                            ),
+                            showIcon: true,
+                            icon: SolarIconsBold.trashBin2,
+                            label: AppLocalizations.of(context)!.uninstall,
+                            color: Theme.of(context).colorScheme.error,
+                            foregroundColor: Theme.of(
+                              context,
+                            ).colorScheme.onError,
                           ),
                         ),
                       ),
                       Expanded(
                         child: SizedBox(
                           height: 48,
-                          child: FilledButton.icon(
+                          child: HButton.filled(
                             onPressed: () async {
                               try {
                                 final opened = await appProvider
@@ -2122,8 +2105,9 @@ class _InstallActionsSection extends StatelessWidget {
                                 }
                               }
                             },
-                            icon: Icon(SolarIconsOutline.squareBottomUp),
-                            label: Text(AppLocalizations.of(context)!.open),
+                            showIcon: true,
+                            icon: SolarIconsBold.squareBottomUp,
+                            label: AppLocalizations.of(context)!.open,
                           ),
                         ),
                       ),
@@ -3666,14 +3650,14 @@ Future<void> _handleShizukuUnavailable(
               },
               child: Text(AppLocalizations.of(context)!.open_shizuku),
             ),
-            FilledButton.tonal(
+            HButton.filled(
               onPressed: () =>
                   Navigator.of(context).pop(_ShizukuAction.switchToSystem),
-              child: Text(AppLocalizations.of(context)!.use_system_installer),
+              label: AppLocalizations.of(context)!.use_system_installer,
             ),
-            TextButton(
+            HButton.text(
               onPressed: () => Navigator.of(context).pop(_ShizukuAction.cancel),
-              child: Text(AppLocalizations.of(context)!.cancel),
+              label: AppLocalizations.of(context)!.cancel,
             ),
           ],
         ),

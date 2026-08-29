@@ -1,5 +1,5 @@
 import 'package:florid/l10n/app_localizations.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:qr_code_scanner_plus/qr_code_scanner_plus.dart';
 
 class RepositoryQRScanner extends StatefulWidget {

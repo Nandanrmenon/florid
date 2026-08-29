@@ -1,5 +1,5 @@
 import 'package:florid/providers/settings_provider.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:provider/provider.dart';
 
 /// Theme-aware TabBar using Flutter's built-in TabBar.

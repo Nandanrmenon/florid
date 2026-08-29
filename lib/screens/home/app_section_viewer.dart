@@ -5,7 +5,7 @@ import 'package:florid/providers/download_provider.dart';
 import 'package:florid/providers/settings_provider.dart';
 import 'package:florid/screens/app_details/app_details_screen.dart';
 import 'package:florid/widgets/app_list_item.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:m3e_core/m3e_core.dart';
 import 'package:material_symbols_icons/symbols.dart';

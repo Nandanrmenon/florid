@@ -5,11 +5,11 @@ import 'package:florid/l10n/app_localizations.dart';
 import 'package:florid/services/usage_analytics_service.dart';
 import 'package:florid/widgets/list_icon.dart';
 import 'package:florid/widgets/onboarding_button.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:hornbill/hornbill.dart';
 import 'package:material_symbols_icons/symbols.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 
@@ -850,7 +850,7 @@ class _ReposStep extends StatelessWidget {
                     final preset = presets[index];
                     final url = preset['url'] as String;
                     return HCheckboxListItemData(
-                      title: preset['name'],
+                      title: Text(preset['name'] as String),
                       subtitle: preset['description'],
                       value: selectedRepos[url] ?? false,
                     );
@@ -987,7 +987,7 @@ class _PermissionsStep extends StatelessWidget {
             HListView(
               items: [
                 HListItemData(
-                  title: localizations.app_installation,
+                  title: Text(localizations.app_installation),
                   subtitle: localizations.allow_florid_install_apps,
                   leading: ListIcon(
                     iconData: Symbols.install_mobile,
@@ -1010,7 +1010,7 @@ class _PermissionsStep extends StatelessWidget {
                 HListView(
                   items: [
                     HListItemData(
-                      title: localizations.notifications,
+                      title: Text(localizations.notifications),
                       subtitle: localizations.get_notified_updates,
                       leading: ListIcon(
                         iconData: Symbols.notifications,
@@ -1331,7 +1331,9 @@ class _TelemetryStepState extends State<_TelemetryStep> {
             HListView(
               items: [
                 HListItemData(
-                  title: AppLocalizations.of(context)!.opt_out_of_telemetry,
+                  title: Text(
+                    AppLocalizations.of(context)!.opt_out_of_telemetry,
+                  ),
                   subtitle: AppLocalizations.of(
                     context,
                   )!.opt_out_of_telemetry_subtitle,

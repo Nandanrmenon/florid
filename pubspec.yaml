@@ -38,7 +38,7 @@ dependencies:
   material_symbols_icons: ^4.2960.0
 
   # Material You dynamic color
-  dynamic_color: ^1.8.1
+  dynamic_color: ^2.1.0
 
   # Local key-value storage for settings
   shared_preferences: ^2.5.5
@@ -47,7 +47,7 @@ dependencies:
   sqflite: ^2.4.3
 
   # Permission handler for Android permissions
-  permission_handler: ^13.0.0
+  permission_handler: ^13.0.1
 
   # Package info for app version checking
   package_info_plus: ^10.2.1
@@ -56,21 +56,21 @@ dependencies:
   device_info_plus: ^13.2.0
 
   # Cached network image for app icons
-  cached_network_image: ^3.4.1
+  cached_network_image: ^4.0.0
 
   # Cache manager used by cached_network_image
   flutter_cache_manager: ^3.4.2
 
   # File picker and downloads
   dio: ^5.11.0
-  file_picker: ^12.0.0-beta.7
-  workmanager: ^0.10.6
+  file_picker: ^12.1.2
+  workmanager: ^0.10.9
 
   # App installer for APK installation
-  app_installer: ^1.3.1
+  android_package_installer: ^0.0.3
 
   # Shizuku-based installer
-  shizuku_api: 1.2.2
+  shizuku_api: ^1.2.3
 
   # Share plus for sharing apps
   share_plus: ^13.3.0
@@ -82,12 +82,12 @@ dependencies:
   android_intent_plus: ^6.1.0
 
   # Local notifications for download progress
-  flutter_local_notifications: ^22.2.0
+  flutter_local_notifications: ^22.3.0
   flutter_native_splash: ^2.4.8
   flutter_animate: ^4.5.2
 
   # HTML rendering
-  flutter_html: ^3.0.0
+  flutter_widget_from_html_core: ^0.17.2
   markdown: ^7.3.1
   flutter_localizations:
     sdk: flutter
@@ -97,10 +97,12 @@ dependencies:
   local_auth: ^3.0.2
   iconify_flutter: ^0.0.7
   solar_icons: ^0.1.0
-  flutter_m3shapes_extended: ^1.2.0
-  m3e_core: ^0.1.5
-  hornbill: ^1.2.0
+  flutter_m3shapes_extended: ^2.0.0
+  m3e_core: ^1.1.1
+  hornbill: ^1.3.3
+  motor: ^1.1.0
 
+  material_ui: any
 dev_dependencies:
   flutter_test:
     sdk: flutter

@@ -9,13 +9,12 @@ import 'package:florid/widgets/changelog_preview.dart';
 import 'package:florid/widgets/f_tabbar.dart';
 import 'package:florid/widgets/list_icon.dart';
 import 'package:florid/widgets/markup_content.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:flutter_html/flutter_html.dart';
 import 'package:hornbill/hornbill.dart';
 import 'package:m3e_core/m3e_core.dart';
 import 'package:material_symbols_icons/symbols.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
@@ -181,7 +180,7 @@ class _AppDetailsScreenState extends State<AppDetailsScreen>
                     Expanded(
                       child: SizedBox(
                         height: 48,
-                        child: FilledButton.icon(
+                        child: HButton.filled(
                           onPressed: () => _handleInstall(
                             context,
                             downloadProvider,
@@ -191,13 +190,10 @@ class _AppDetailsScreenState extends State<AppDetailsScreen>
                             version,
                             defaultRepoUrl,
                           ),
-                          icon: Icon(
-                            isDownloaded
-                                ? Symbols.install_mobile
-                                : SolarIconsBold.download,
-                          ),
-                          label: Text(isDownloaded ? 'Install' : 'Download'),
-                          style: FilledButton.styleFrom(),
+                          icon: isDownloaded
+                              ? Symbols.install_mobile
+                              : SolarIconsBold.download,
+                          label: isDownloaded ? 'Install' : 'Download',
                         ),
                       ),
                     ),
@@ -221,7 +217,7 @@ class _AppDetailsScreenState extends State<AppDetailsScreen>
                   key: const ValueKey('simple-button'),
                   height: 48,
                   width: double.infinity,
-                  child: FilledButton.icon(
+                  child: HButton.filled(
                     onPressed: () => _handleInstall(
                       context,
                       downloadProvider,
@@ -231,12 +227,10 @@ class _AppDetailsScreenState extends State<AppDetailsScreen>
                       version,
                       defaultRepoUrl,
                     ),
-                    icon: Icon(
-                      isDownloaded
-                          ? Symbols.install_mobile
-                          : SolarIconsBold.download,
-                    ),
-                    label: Text(isDownloaded ? 'Install' : 'Download'),
+                    icon: isDownloaded
+                        ? Symbols.install_mobile
+                        : SolarIconsBold.download,
+                    label: isDownloaded ? 'Install' : 'Download',
                   ),
                 ),
         );
@@ -358,16 +352,16 @@ class _AppDetailsScreenState extends State<AppDetailsScreen>
                 'Then try downloading again.',
               ),
               actions: [
-                TextButton(
+                HButton.text(
                   onPressed: () => Navigator.of(context).pop(),
-                  child: const Text('Cancel'),
+                  label: 'Cancel',
                 ),
-                FilledButton(
+                HButton.filled(
                   onPressed: () async {
                     Navigator.of(context).pop();
                     await openAppSettings();
                   },
-                  child: const Text('Open Settings'),
+                  label: 'Open Settings',
                 ),
               ],
             ),
@@ -566,7 +560,7 @@ class _AppDetailsScreenState extends State<AppDetailsScreen>
                   leading: (isPrimary || isTracked)
                       ? Icon(Symbols.check)
                       : null,
-                  title: repo.name,
+                  title: Text(repo.name),
                   subtitle: isTracked
                       ? AppLocalizations.of(
                           context,
@@ -1317,29 +1311,35 @@ class _DetailsSheetsSection extends StatelessWidget {
                     HListView(
                       items: [
                         HListItemData(
-                          title: AppLocalizations.of(context)!.version_name,
+                          title: Text(
+                            AppLocalizations.of(context)!.version_name,
+                          ),
                           subtitle: version.versionName,
                           onTap: () {},
                         ),
                         HListItemData(
-                          title: AppLocalizations.of(context)!.version_code,
+                          title: Text(
+                            AppLocalizations.of(context)!.version_code,
+                          ),
                           subtitle: version.versionCode.toString(),
                           onTap: () {},
                         ),
                         HListItemData(
-                          title: AppLocalizations.of(context)!.size,
+                          title: Text(AppLocalizations.of(context)!.size),
                           subtitle: version.sizeString,
                           onTap: () {},
                         ),
                         if (version.minSdkVersion != null)
                           HListItemData(
-                            title: AppLocalizations.of(context)!.min_sdk,
+                            title: Text(AppLocalizations.of(context)!.min_sdk),
                             subtitle: version.minSdkVersion!,
                             onTap: () {},
                           ),
                         if (version.targetSdkVersion != null)
                           HListItemData(
-                            title: AppLocalizations.of(context)!.target_sdk,
+                            title: Text(
+                              AppLocalizations.of(context)!.target_sdk,
+                            ),
                             subtitle: version.targetSdkVersion!,
                             onTap: () {},
                           ),
@@ -1380,21 +1380,21 @@ class _DetailsSheetsSection extends StatelessWidget {
     return HListView(
       items: [
         HListItemData(
-          title: AppLocalizations.of(context)!.app_information,
+          title: Text(AppLocalizations.of(context)!.app_information),
           subtitle: '',
           leading: ListIcon(iconData: SolarIconsBold.infoSquare),
           suffix: Icon(SolarIconsOutline.altArrowRight),
           onTap: () => _showAppInfoSheet(context),
         ),
         HListItemData(
-          title: AppLocalizations.of(context)!.version_information,
+          title: Text(AppLocalizations.of(context)!.version_information),
           subtitle: '',
           leading: ListIcon(iconData: SolarIconsBold.document),
           suffix: Icon(SolarIconsOutline.altArrowRight),
           onTap: () => _showVersionInfoSheet(context),
         ),
         HListItemData(
-          title: AppLocalizations.of(context)!.all_versions,
+          title: Text(AppLocalizations.of(context)!.all_versions),
           subtitle: '',
           leading: ListIcon(iconData: SolarIconsBold.history),
           suffix: Icon(SolarIconsOutline.altArrowRight),
@@ -2392,34 +2392,40 @@ class _AppInfoSection extends StatelessWidget {
                       items: [
                         HListItemData(
                           leading: ListIcon(iconData: Symbols.package_rounded),
-                          title: AppLocalizations.of(context)!.package_name,
+                          title: Text(
+                            AppLocalizations.of(context)!.package_name,
+                          ),
                           subtitle: app.packageName,
                           onTap: () {},
                         ),
                         HListItemData(
                           leading: ListIcon(iconData: Symbols.license_rounded),
-                          title: AppLocalizations.of(context)!.license,
+                          title: Text(AppLocalizations.of(context)!.license),
                           subtitle: app.license,
                           onTap: () {},
                         ),
                         if (app.added != null)
                           HListItemData(
                             leading: ListIcon(iconData: Symbols.add),
-                            title: AppLocalizations.of(context)!.added,
+                            title: Text(AppLocalizations.of(context)!.added),
                             subtitle: _formatDate(app.added!),
                             onTap: () {},
                           ),
                         if (app.added != null)
                           HListItemData(
                             leading: ListIcon(iconData: Symbols.update),
-                            title: AppLocalizations.of(context)!.last_updated,
+                            title: Text(
+                              AppLocalizations.of(context)!.last_updated,
+                            ),
                             subtitle: _formatDate(app.lastUpdated!),
                             onTap: () {},
                           ),
                         if (latestVersion?.permissions?.isNotEmpty == true)
                           HListItemData(
                             leading: ListIcon(iconData: Symbols.security),
-                            title: AppLocalizations.of(context)!.permissions,
+                            title: Text(
+                              AppLocalizations.of(context)!.permissions,
+                            ),
                             subtitle: '(${latestVersion!.permissions!.length})',
                             suffix: Icon(SolarIconsOutline.altArrowRight),
                             onTap: () {
@@ -2565,40 +2571,40 @@ class _DescriptionSectionState extends State<_DescriptionSection>
                 child: MarkupContent(
                   data: description,
                   shrinkWrap: true,
-                  style: {
-                    "body": Style(
-                      margin: Margins.zero,
-                      padding: HtmlPaddings.zero,
-                      fontSize: FontSize(
-                        Theme.of(context).textTheme.bodyMedium?.fontSize ?? 14,
-                      ),
-                      color: Theme.of(context).textTheme.bodyMedium?.color,
-                      maxLines: _isExpanded ? null : 3,
-                      textOverflow: _isExpanded ? null : TextOverflow.ellipsis,
-                    ),
-                    "p": Style(
-                      margin: Margins.only(bottom: 8),
-                      color: Theme.of(context).textTheme.bodyMedium?.color,
-                    ),
-                    "ul": Style(
-                      margin: Margins.only(bottom: 8),
-                      padding: HtmlPaddings.only(left: 20),
-                      color: Theme.of(context).textTheme.bodyMedium?.color,
-                    ),
-                    "ol": Style(
-                      margin: Margins.only(bottom: 8),
-                      padding: HtmlPaddings.only(left: 20),
-                      color: Theme.of(context).textTheme.bodyMedium?.color,
-                    ),
-                    "li": Style(
-                      margin: Margins.only(bottom: 4),
-                      color: Theme.of(context).textTheme.bodyMedium?.color,
-                    ),
-                    "a": Style(
-                      color: Theme.of(context).colorScheme.primary,
-                      textDecoration: TextDecoration.underline,
-                    ),
-                  },
+                  // style: {
+                  //   "body": Style(
+                  //     margin: Margins.zero,
+                  //     padding: HtmlPaddings.zero,
+                  //     fontSize: FontSize(
+                  //       Theme.of(context).textTheme.bodyMedium?.fontSize ?? 14,
+                  //     ),
+                  //     color: Theme.of(context).textTheme.bodyMedium?.color,
+                  //     maxLines: _isExpanded ? null : 3,
+                  //     textOverflow: _isExpanded ? null : TextOverflow.ellipsis,
+                  //   ),
+                  //   "p": Style(
+                  //     margin: Margins.only(bottom: 8),
+                  //     color: Theme.of(context).textTheme.bodyMedium?.color,
+                  //   ),
+                  //   "ul": Style(
+                  //     margin: Margins.only(bottom: 8),
+                  //     padding: HtmlPaddings.only(left: 20),
+                  //     color: Theme.of(context).textTheme.bodyMedium?.color,
+                  //   ),
+                  //   "ol": Style(
+                  //     margin: Margins.only(bottom: 8),
+                  //     padding: HtmlPaddings.only(left: 20),
+                  //     color: Theme.of(context).textTheme.bodyMedium?.color,
+                  //   ),
+                  //   "li": Style(
+                  //     margin: Margins.only(bottom: 4),
+                  //     color: Theme.of(context).textTheme.bodyMedium?.color,
+                  //   ),
+                  //   "a": Style(
+                  //     color: Theme.of(context).colorScheme.primary,
+                  //     textDecoration: TextDecoration.underline,
+                  //   ),
+                  // },
                 ),
               ),
             ),
@@ -2676,7 +2682,7 @@ class _IncludeUnstableSectionState extends State<IncludeUnstableSection> {
                               ],
                             ),
                           ),
-                          Switch(
+                          HSwitch(
                             value: includeUnstable,
                             onChanged: (value) async {
                               await context
@@ -3064,7 +3070,7 @@ class _AppExtraInfoSectionState extends State<AppExtraInfoSection> {
                 if (widget.app.webSite != null)
                   HListItemData(
                     leading: ListIcon(iconData: SolarIconsOutline.global),
-                    title: AppLocalizations.of(context)!.website,
+                    title: Text(AppLocalizations.of(context)!.website),
                     onTap: () async {
                       if (widget.app.webSite != null) {
                         await launchUrl(Uri.parse(widget.app.webSite!));
@@ -3075,7 +3081,7 @@ class _AppExtraInfoSectionState extends State<AppExtraInfoSection> {
                 if (widget.app.sourceCode != null)
                   HListItemData(
                     leading: ListIcon(iconData: SolarIconsOutline.code),
-                    title: AppLocalizations.of(context)!.source_code,
+                    title: Text(AppLocalizations.of(context)!.source_code),
                     onTap: () async {
                       if (widget.app.sourceCode != null) {
                         await launchUrl(Uri.parse(widget.app.sourceCode!));
@@ -3086,7 +3092,7 @@ class _AppExtraInfoSectionState extends State<AppExtraInfoSection> {
                 if (widget.app.issueTracker != null)
                   HListItemData(
                     leading: ListIcon(iconData: SolarIconsOutline.bug),
-                    title: AppLocalizations.of(context)!.issue_tracker,
+                    title: Text(AppLocalizations.of(context)!.issue_tracker),
                     onTap: () async {
                       if (widget.app.issueTracker != null) {
                         await launchUrl(Uri.parse(widget.app.issueTracker!));
@@ -3108,7 +3114,7 @@ class _AppExtraInfoSectionState extends State<AppExtraInfoSection> {
             items: [
               for (final item in donationItems)
                 HListItemData(
-                  title: item.key,
+                  title: Text(item.key),
                   subtitle: item.value,
                   suffix: Icon(SolarIconsOutline.squareBottomUp),
                   onTap: () => _openDonateLink(context, item.key, item.value),
@@ -3496,7 +3502,7 @@ class _AllVersionsSectionState extends State<_AllVersionsSection> {
                             ? installedApp.versionCode == version.versionCode
                             : installedApp.versionName == version.versionName);
                     return HListItemData(
-                      title: version.versionName,
+                      title: Text(version.versionName),
                       subtitle: version.sizeString,
                       suffix: Row(
                         mainAxisSize: MainAxisSize.min,

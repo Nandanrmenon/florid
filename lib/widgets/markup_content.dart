@@ -1,18 +1,18 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_html/flutter_html.dart';
+import 'package:material_ui/material_ui.dart';
+import 'package:flutter_widget_from_html_core/flutter_widget_from_html_core.dart';
 import 'package:markdown/markdown.dart' as md;
 import 'package:url_launcher/url_launcher.dart';
 
 class MarkupContent extends StatelessWidget {
   final String? data;
   final bool shrinkWrap;
-  final Map<String, Style> style;
+  final TextStyle? textStyle;
 
   const MarkupContent({
     super.key,
     required this.data,
     this.shrinkWrap = false,
-    this.style = const <String, Style>{},
+    this.textStyle,
   });
 
   @override
@@ -22,15 +22,16 @@ class MarkupContent extends StatelessWidget {
       return const SizedBox.shrink();
     }
 
-    return Html(
-      data: md.markdownToHtml(content, extensionSet: md.ExtensionSet.gitHubWeb),
-      shrinkWrap: shrinkWrap,
-      style: style,
-      onLinkTap: (url, attributes, element) {
-        final uri = url != null ? Uri.tryParse(url) : null;
+    return HtmlWidget(
+      md.markdownToHtml(content, extensionSet: md.ExtensionSet.gitHubWeb),
+      textStyle: textStyle,
+      onTapUrl: (url) async {
+        final uri = Uri.tryParse(url);
         if (uri != null) {
-          launchUrl(uri);
+          await launchUrl(uri);
+          return true;
         }
+        return false;
       },
     );
   }

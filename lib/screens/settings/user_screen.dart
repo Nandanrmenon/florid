@@ -17,13 +17,13 @@ import 'package:florid/screens/settings/troubleshooting_screen.dart';
 import 'package:florid/services/fdroid_api_service.dart';
 import 'package:florid/widgets/app_list_item.dart';
 import 'package:florid/widgets/list_icon.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:hornbill/hornbill.dart';
 import 'package:iconify_flutter/icons/bxl.dart';
 import 'package:iconify_flutter/icons/simple_icons.dart';
 import 'package:material_symbols_icons/symbols.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
@@ -304,7 +304,7 @@ class _UserSettingsContentState extends State<_UserSettingsContent> {
                   items: [
                     HListItemData(
                       leading: ListIcon(iconData: SolarIconsBold.heart),
-                      title: 'Favourites',
+                      title: Text('Favourites'),
                       subtitle: 'View your favourite apps',
                       onTap: () {
                         Navigator.push(
@@ -318,7 +318,7 @@ class _UserSettingsContentState extends State<_UserSettingsContent> {
                     ),
                     HListItemData(
                       leading: ListIcon(iconData: SolarIconsBold.palette),
-                      title: 'Appearance',
+                      title: Text('Appearance'),
                       subtitle: 'Theme mode and style',
                       onTap: () {
                         Navigator.push(
@@ -332,7 +332,7 @@ class _UserSettingsContentState extends State<_UserSettingsContent> {
                     ),
                     HListItemData(
                       leading: ListIcon(iconData: SolarIconsBold.shield),
-                      title: 'Parental Control',
+                      title: Text('Parental Control'),
                       subtitle: 'Hide anti-feature apps and protect installs',
                       onTap: () {
                         Navigator.push(
@@ -346,7 +346,7 @@ class _UserSettingsContentState extends State<_UserSettingsContent> {
                     ),
                     HListItemData(
                       leading: ListIcon(iconData: SolarIconsBold.globus),
-                      title: 'App content language',
+                      title: Text('App content language'),
                       onTap: () => _showLanguageDialog(context, settings),
                       subtitle: SettingsProvider.getLocaleDisplayName(
                         settings.locale,
@@ -369,7 +369,7 @@ class _UserSettingsContentState extends State<_UserSettingsContent> {
                   items: [
                     HListItemData(
                       leading: ListIcon(iconData: SolarIconsBold.cloud),
-                      title: 'Manage repositories',
+                      title: Text('Manage repositories'),
                       onTap: () {
                         Navigator.push(
                           context,
@@ -385,7 +385,7 @@ class _UserSettingsContentState extends State<_UserSettingsContent> {
                       leading: ListIcon(
                         iconData: SolarIconsBold.settingsMinimalistic,
                       ),
-                      title: 'App Management',
+                      title: Text('App Management'),
                       subtitle:
                           'Manage settings regarding installs and updates',
                       onTap: () {
@@ -463,7 +463,7 @@ class _UserSettingsContentState extends State<_UserSettingsContent> {
                   items: [
                     HListItemData(
                       leading: ListIcon(iconData: SolarIconsBold.sledgehammer),
-                      title: 'Troubleshooting',
+                      title: Text('Troubleshooting'),
                       subtitle: 'Storage, cache, and downloads',
                       onTap: () {
                         Navigator.push(
@@ -481,7 +481,7 @@ class _UserSettingsContentState extends State<_UserSettingsContent> {
                   items: [
                     HListItemData(
                       leading: ListIcon(iconData: SolarIconsBold.infoSquare),
-                      title: AppLocalizations.of(context)!.version,
+                      title: Text(AppLocalizations.of(context)!.version),
                       subtitle: _appVersion.isEmpty ? 'Loading…' : _appVersion,
                       onTap: () {
                         showAboutDialog(
@@ -503,7 +503,7 @@ class _UserSettingsContentState extends State<_UserSettingsContent> {
                     ),
                     HListItemData(
                       leading: SocialListIcon(icon: Bxl.git),
-                      title: 'Source code',
+                      title: Text('Source code'),
                       subtitle: 'View the Florid source code on GitHub',
                       suffix: Icon(SolarIconsOutline.squareBottomUp),
                       onTap: () async {
@@ -517,7 +517,7 @@ class _UserSettingsContentState extends State<_UserSettingsContent> {
                     ),
                     HListItemData(
                       leading: SocialListIcon(icon: Bxl.telegram),
-                      title: 'Telegram',
+                      title: Text('Telegram'),
                       subtitle: 'Join the community on Telegram',
                       suffix: Icon(SolarIconsOutline.squareBottomUp),
                       onTap: () async {
@@ -529,7 +529,7 @@ class _UserSettingsContentState extends State<_UserSettingsContent> {
                     ),
                     HListItemData(
                       leading: SocialListIcon(icon: SimpleIcons.matrix),
-                      title: 'Matrix',
+                      title: Text('Matrix'),
                       subtitle: 'Join the community on Matrix',
                       suffix: Icon(SolarIconsOutline.squareBottomUp),
                       onTap: () async {
@@ -545,7 +545,7 @@ class _UserSettingsContentState extends State<_UserSettingsContent> {
                       leading: ListIcon(
                         iconData: SolarIconsBold.roundedMagnifierBug,
                       ),
-                      title: 'Report an issue',
+                      title: Text('Report an issue'),
                       subtitle: 'Found a bug? Let us know!',
                       suffix: Icon(SolarIconsOutline.squareBottomUp),
                       onTap: () async {
@@ -559,7 +559,7 @@ class _UserSettingsContentState extends State<_UserSettingsContent> {
                     ),
                     HListItemData(
                       leading: ListIcon(iconData: SolarIconsBold.heartShine),
-                      title: 'Donate',
+                      title: Text('Donate'),
                       subtitle: 'Support continued development of Florid',
                       suffix: Icon(SolarIconsOutline.squareBottomUp),
                       onTap: () async {
@@ -571,7 +571,7 @@ class _UserSettingsContentState extends State<_UserSettingsContent> {
                     ),
                     HListItemData(
                       leading: ListIcon(iconData: SolarIconsBold.share),
-                      title: 'Share Florid',
+                      title: Text('Share Florid'),
                       subtitle: 'Let your nerdy friends know about Florid!',
                       onTap: () {
                         SharePlus.instance.share(
@@ -739,19 +739,19 @@ class _FavoriteAppsScreenState extends State<_FavoriteAppsScreen> {
 
   Future<void> _importFavorites(BuildContext context) async {
     final appProvider = context.read<AppProvider>();
+
     final picked = await FilePicker.pickFiles(
       type: FileType.custom,
       allowedExtensions: ['json'],
-      withData: true,
     );
-    if (picked == null || picked.files.isEmpty) return;
+    if (picked.isEmpty) return;
 
-    final file = picked.files.first;
-    final raw = file.bytes != null
-        ? utf8.decode(file.bytes!)
-        : file.path != null
-        ? await File(file.path!).readAsString()
-        : '';
+    final file = picked.first;
+    final raw = await file.readAsBytes().then(utf8.decode);
+    // or, if file.path is more reliable on desktop:
+    // final raw = file.path != null
+    //     ? await File(file.path!).readAsString()
+    //     : utf8.decode(await file.readAsBytes());
 
     final parsed = _parseFavoritesPayload(raw);
     if (parsed.isEmpty) {

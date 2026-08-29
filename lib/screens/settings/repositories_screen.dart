@@ -2,7 +2,7 @@ import 'dart:convert';
 
 import 'package:florid/l10n/app_localizations.dart';
 import 'package:florid/screens/settings/repository_qr_scanner.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:hornbill/hornbill.dart';
 import 'package:m3e_core/m3e_core.dart';
 import 'package:material_symbols_icons/symbols.dart';
@@ -149,10 +149,10 @@ class _RepositoriesScreenState extends State<RepositoriesScreen> {
                               );
 
                               return HListItemData(
-                                title: preset['name']!,
+                                title: Text(preset['name']!),
                                 subtitle: preset['description']!,
                                 onTap: () {},
-                                suffix: Switch(
+                                suffix: HSwitch(
                                   value: isAdded,
                                   onChanged: (newValue) async {
                                     if (newValue) {
@@ -293,12 +293,12 @@ class _RepositoriesScreenState extends State<RepositoriesScreen> {
                                       .toList();
                                   final repo = customRepos[index];
                                   return HListItemData(
-                                    title: repo.name,
+                                    title: Text(repo.name),
                                     subtitle: repo.url,
                                     suffix: Row(
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
-                                        Switch(
+                                        HSwitch(
                                           value: repo.isEnabled,
                                           onChanged: (_) async {
                                             await _toggleRepositoryWithDialog(
@@ -575,7 +575,7 @@ class _RepositoryListItem extends StatelessWidget {
               trailing: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Switch(
+                  HSwitch(
                     value: repository.isEnabled,
                     onChanged: (_) async {
                       await _toggleRepositoryWithDialog(

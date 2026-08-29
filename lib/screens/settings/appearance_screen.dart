@@ -2,7 +2,7 @@ import 'package:dynamic_color/dynamic_color.dart';
 import 'package:florid/l10n/app_localizations.dart';
 import 'package:florid/providers/settings_provider.dart';
 import 'package:florid/widgets/list_icon.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:hornbill/hornbill.dart';
 import 'package:material_symbols_icons/symbols.dart';
@@ -50,19 +50,21 @@ class AppearanceScreen extends StatelessWidget {
                               HRadioListView(
                                 items: [
                                   HRadioListItemData<ThemeMode>(
-                                    title: localizations.follow_system_theme,
+                                    title: Text(
+                                      localizations.follow_system_theme,
+                                    ),
                                     subtitle: '',
                                     value: ThemeMode.system,
                                     suffix: Icon(SolarIconsBold.devices),
                                   ),
                                   HRadioListItemData<ThemeMode>(
-                                    title: localizations.light_theme,
+                                    title: Text(localizations.light_theme),
                                     subtitle: '',
                                     value: ThemeMode.light,
                                     suffix: Icon(SolarIconsBold.sun),
                                   ),
                                   HRadioListItemData<ThemeMode>(
-                                    title: localizations.dark_theme,
+                                    title: Text(localizations.dark_theme),
                                     subtitle: '',
                                     value: ThemeMode.dark,
                                     suffix: Icon(SolarIconsBold.moonStars),
@@ -84,7 +86,9 @@ class AppearanceScreen extends StatelessWidget {
                                 HListView(
                                   items: [
                                     HListItemData(
-                                      title: localizations.material_you_dynamic,
+                                      title: Text(
+                                        localizations.material_you_dynamic,
+                                      ),
                                       subtitle: localizations
                                           .use_system_colors_supported_android,
                                       onTap: () {
@@ -92,7 +96,7 @@ class AppearanceScreen extends StatelessWidget {
                                           !settings.dynamicColorEnabled,
                                         );
                                       },
-                                      suffix: Switch(
+                                      suffix: HSwitch(
                                         value: settings.dynamicColorEnabled,
                                         onChanged: (value) {
                                           settings.setDynamicColorEnabled(
@@ -107,8 +111,9 @@ class AppearanceScreen extends StatelessWidget {
                                 HListView(
                                   items: [
                                     HListItemData(
-                                      title:
-                                          'Dynamic color is not supported on this device',
+                                      title: Text(
+                                        'Dynamic color is not supported on this device',
+                                      ),
                                       subtitle:
                                           'Use the theme color palette below instead.',
                                       onTap: () {},
@@ -213,13 +218,13 @@ class AppearanceScreen extends StatelessWidget {
                               HListView(
                                 items: [
                                   HListItemData(
-                                    title: localizations.show_whats_new,
+                                    title: Text(localizations.show_whats_new),
                                     onTap: () {
                                       settings.setShowWhatsNew(
                                         !settings.showWhatsNew,
                                       );
                                     },
-                                    suffix: Switch(
+                                    suffix: HSwitch(
                                       value: settings.showWhatsNew,
                                       onChanged: (value) {
                                         settings.setShowWhatsNew(value);
@@ -227,13 +232,15 @@ class AppearanceScreen extends StatelessWidget {
                                     ),
                                   ),
                                   HListItemData(
-                                    title: localizations.show_monthly_top_apps,
+                                    title: Text(
+                                      localizations.show_monthly_top_apps,
+                                    ),
                                     onTap: () {
                                       settings.setShowMonthlyTopApps(
                                         !settings.showMonthlyTopApps,
                                       );
                                     },
-                                    suffix: Switch(
+                                    suffix: HSwitch(
                                       value: settings.showMonthlyTopApps,
                                       onChanged: (value) {
                                         settings.setShowMonthlyTopApps(value);
@@ -241,13 +248,13 @@ class AppearanceScreen extends StatelessWidget {
                                     ),
                                   ),
                                   HListItemData(
-                                    title: 'Show navigation labels',
+                                    title: Text('Show navigation labels'),
                                     onTap: () {
                                       settings.setShowNavigationLabels(
                                         !settings.showNavigationLabels,
                                       );
                                     },
-                                    suffix: Switch(
+                                    suffix: HSwitch(
                                       value: settings.showNavigationLabels,
                                       onChanged: (value) {
                                         settings.setShowNavigationLabels(value);
@@ -262,7 +269,9 @@ class AppearanceScreen extends StatelessWidget {
                             items: [
                               HListItemData(
                                 leading: ListIcon(iconData: Symbols.feedback),
-                                title: localizations.feedback_on_florid_theme,
+                                title: Text(
+                                  localizations.feedback_on_florid_theme,
+                                ),
                                 subtitle: localizations
                                     .help_improve_florid_theme_feedback,
                                 onTap: () {

@@ -1,7 +1,7 @@
 import 'package:florid/l10n/app_localizations.dart';
 import 'package:florid/providers/settings_provider.dart';
 import 'package:florid/widgets/app_list_item.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:hornbill/hornbill.dart';
 import 'package:m3e_core/m3e_core.dart';

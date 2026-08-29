@@ -3,7 +3,7 @@ import 'package:florid/providers/download_provider.dart';
 import 'package:florid/providers/settings_provider.dart';
 import 'package:florid/services/fdroid_api_service.dart';
 import 'package:florid/widgets/list_icon.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:hornbill/hornbill.dart';
 import 'package:material_symbols_icons/symbols.dart';
@@ -134,7 +134,7 @@ class TroubleshootingScreen extends StatelessWidget {
                           HListView(
                             items: [
                               HListItemData(
-                                title: 'Installation method',
+                                title: Text('Installation method'),
                                 subtitle: _installMethodLabel(
                                   settings.installMethod,
                                 ),
@@ -143,7 +143,7 @@ class TroubleshootingScreen extends StatelessWidget {
                                 suffix: const Icon(Symbols.chevron_right),
                               ),
                               HListItemData(
-                                title: 'Auto-install after download',
+                                title: Text('Auto-install after download'),
                                 onTap: () {
                                   settings.setAutoInstallApk(
                                     !settings.autoInstallApk,
@@ -151,7 +151,7 @@ class TroubleshootingScreen extends StatelessWidget {
                                 },
                                 subtitle:
                                     'Install APKs automatically once download finishes',
-                                suffix: Switch(
+                                suffix: HSwitch(
                                   value: settings.autoInstallApk,
                                   onChanged: (value) {
                                     settings.setAutoInstallApk(value);
@@ -159,7 +159,7 @@ class TroubleshootingScreen extends StatelessWidget {
                                 ),
                               ),
                               HListItemData(
-                                title: 'Delete APK after install',
+                                title: Text('Delete APK after install'),
                                 onTap: () {
                                   settings.setAutoInstallApk(
                                     !settings.autoInstallApk,
@@ -167,7 +167,7 @@ class TroubleshootingScreen extends StatelessWidget {
                                 },
                                 subtitle:
                                     'Remove installer files after successful installation',
-                                suffix: Switch(
+                                suffix: HSwitch(
                                   value: settings.autoDeleteApk,
                                   onChanged: (value) {
                                     settings.setAutoDeleteApk(value);
@@ -182,7 +182,7 @@ class TroubleshootingScreen extends StatelessWidget {
                                 leading: ListIcon(
                                   iconData: Symbols.cleaning_services,
                                 ),
-                                title: 'Clear repository cache',
+                                title: Text('Clear repository cache'),
                                 onTap: () => _clearRepoCache(context),
                                 subtitle:
                                     'Refresh app list and metadata on next load',
@@ -191,7 +191,7 @@ class TroubleshootingScreen extends StatelessWidget {
                                 leading: ListIcon(
                                   iconData: Symbols.delete_sweep,
                                 ),
-                                title: 'Clear APK downloads',
+                                title: Text('Clear APK downloads'),
                                 onTap: () => _clearApkDownloads(context),
                                 subtitle:
                                     'Remove downloaded installer files from storage',
@@ -200,7 +200,7 @@ class TroubleshootingScreen extends StatelessWidget {
                                 leading: ListIcon(
                                   iconData: Symbols.image_not_supported,
                                 ),
-                                title: 'Clear image cache',
+                                title: Text('Clear image cache'),
                                 onTap: () => _clearImageCache(context),
                                 subtitle: 'Remove cached icons and screenshots',
                               ),

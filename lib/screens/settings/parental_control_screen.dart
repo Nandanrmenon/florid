@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:florid/l10n/app_localizations.dart';
 import 'package:florid/providers/settings_provider.dart';
 import 'package:florid/widgets/list_icon.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_m3shapes_extended/flutter_m3shapes_extended.dart';
 import 'package:hornbill/hornbill.dart';
@@ -186,7 +186,7 @@ class _ParentalControlScreenState extends State<ParentalControlScreen> {
                                   ? SolarIconsBold.eyeClosed
                                   : SolarIconsBold.eye,
                             ),
-                            title: 'Hide anti-feature apps',
+                            title: Text('Hide anti-feature apps'),
                             subtitle:
                                 'Prevent apps with anti-features from appearing in app lists',
                             onTap: () async {
@@ -195,7 +195,7 @@ class _ParentalControlScreenState extends State<ParentalControlScreen> {
                                 !settings.hideAntiFeatureApps,
                               );
                             },
-                            suffix: Switch(
+                            suffix: HSwitch(
                               value: settings.hideAntiFeatureApps,
                               onChanged: (value) async {
                                 await _setHideAntiFeatureAppsWithConfirmation(
@@ -220,7 +220,7 @@ class _ParentalControlScreenState extends State<ParentalControlScreen> {
                               leading: const ListIcon(
                                 iconData: SolarIconsBold.lock,
                               ),
-                              title: 'Biometric Authentication',
+                              title: Text('Biometric Authentication'),
                               subtitle:
                                   'Require authentication before installations',
                               onTap: () async {
@@ -229,7 +229,7 @@ class _ParentalControlScreenState extends State<ParentalControlScreen> {
                                   !settings.installAuthEnabled,
                                 );
                               },
-                              suffix: Switch(
+                              suffix: HSwitch(
                                 value: settings.installAuthEnabled,
                                 onChanged: (value) async {
                                   await _setInstallAuthEnabledWithVerification(
@@ -246,7 +246,7 @@ class _ParentalControlScreenState extends State<ParentalControlScreen> {
                             items: [
                               HRadioListItemData<InstallAuthPolicy>(
                                 leading: const Icon(Symbols.apps),
-                                title: localizations.auth_all_apps,
+                                title: Text(localizations.auth_all_apps),
                                 subtitle: '',
                                 value: InstallAuthPolicy.all,
                                 suffix: IconButton(
@@ -262,7 +262,9 @@ class _ParentalControlScreenState extends State<ParentalControlScreen> {
                               ),
                               HRadioListItemData<InstallAuthPolicy>(
                                 leading: const Icon(Symbols.warning),
-                                title: localizations.auth_all_apps_w_anti_feat,
+                                title: Text(
+                                  localizations.auth_all_apps_w_anti_feat,
+                                ),
                                 subtitle: '',
                                 value: InstallAuthPolicy.antiFeatures,
                                 suffix: IconButton(

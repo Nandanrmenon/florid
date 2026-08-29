@@ -6,7 +6,8 @@ import 'package:florid/screens/settings/user_screen.dart';
 import 'package:florid/utils/responsive.dart';
 import 'package:florid/utils/whats_new.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
+import 'package:hornbill/hornbill.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:provider/provider.dart';
@@ -481,7 +482,7 @@ class _FloridAppState extends State<FloridApp> {
         },
       ),
       bottomNavigationBar: Visibility(
-        visible: MediaQuery.sizeOf(context).width < Responsive.largeWidth,
+        // visible: MediaQuery.sizeOf(context).width < Responsive.largeWidth,
         child: Consumer2<AppProvider, SettingsProvider>(
           builder: (context, appProvider, settings, child) {
             return FutureBuilder<List<FDroidApp>>(
@@ -491,69 +492,88 @@ class _FloridAppState extends State<FloridApp> {
                 final localizations = AppLocalizations.of(context)!;
 
                 final destinations = [
-                  NavigationDestination(
-                    icon: Icon(SolarIconsOutline.home2),
-                    selectedIcon: Icon(SolarIconsBold.home2),
+                  HNavigationBarItem(
+                    icon: SolarIconsOutline.home2,
                     label: localizations.home,
                   ),
-                  NavigationDestination(
-                    icon: Icon(SolarIconsOutline.roundedMagnifier),
-                    selectedIcon: Icon(SolarIconsBold.roundedMagnifier),
+                  HNavigationBarItem(
+                    icon: SolarIconsOutline.roundedMagnifier,
                     label: localizations.search,
                   ),
-                  NavigationDestination(
-                    icon: updatableAppsCount > 0
-                        ? Badge.count(
-                            count: updatableAppsCount,
-                            child: const Icon(SolarIconsOutline.smartphone),
-                          )
-                        : const Icon(SolarIconsOutline.smartphone),
-                    selectedIcon: updatableAppsCount > 0
-                        ? Badge.count(
-                            count: updatableAppsCount,
-                            child: const Icon(SolarIconsBold.smartphone),
-                          )
-                        : const Icon(SolarIconsBold.smartphone),
+                  HNavigationBarItem(
+                    icon: SolarIconsOutline.smartphone,
                     label: localizations.device,
                   ),
-                  NavigationDestination(
-                    icon: Icon(SolarIconsOutline.user),
-                    selectedIcon: Icon(
-                      SolarIconsBold.user,
-                      fill: 1,
-                      weight: 600,
-                    ),
+                  HNavigationBarItem(
+                    icon: SolarIconsOutline.user,
                     label: settings.userName.isNotEmpty
                         ? (settings.userName.length > 10
                               ? '${settings.userName.substring(0, 10)}...'
                               : settings.userName)
                         : 'User',
                   ),
+                  // NavigationDestination(
+                  //   icon: updatableAppsCount > 0
+                  //       ? Badge.count(
+                  //           count: updatableAppsCount,
+                  //           child: const Icon(SolarIconsOutline.smartphone),
+                  //         )
+                  //       : const Icon(SolarIconsOutline.smartphone),
+                  //   selectedIcon: updatableAppsCount > 0
+                  //       ? Badge.count(
+                  //           count: updatableAppsCount,
+                  //           child: const Icon(SolarIconsBold.smartphone),
+                  //         )
+                  //       : const Icon(SolarIconsBold.smartphone),
+                  //   label: localizations.device,
+                  // ),
+                  // NavigationDestination(
+                  //   icon: Icon(SolarIconsOutline.user),
+                  //   selectedIcon: Icon(
+                  //     SolarIconsBold.user,
+                  //     fill: 1,
+                  //     weight: 600,
+                  //   ),f
+                  //   label: settings.userName.isNotEmpty
+                  //       ? (settings.userName.length > 10
+                  //             ? '${settings.userName.substring(0, 10)}...'
+                  //             : settings.userName)
+                  //       : 'User',
+                  // ),
                 ];
-
-                return Material(
-                  shape: LinearBorder(
-                    top: LinearBorderEdge(),
-                    side: BorderSide(
-                      width: 2,
-                      color: Theme.of(context).colorScheme.surfaceContainerLow,
-                    ),
-                  ),
-                  color: Colors.transparent,
-                  child: NavigationBar(
-                    selectedIndex: _currentIndex,
-                    labelBehavior: settings.showNavigationLabels
-                        ? NavigationDestinationLabelBehavior.alwaysShow
-                        : NavigationDestinationLabelBehavior.alwaysHide,
-                    onDestinationSelected: (index) {
-                      setState(() {
-                        _currentIndex = index;
-                      });
-                      _tabNotifier.value = index;
-                    },
-                    destinations: destinations,
-                  ),
+                return HNavigationBar(
+                  items: destinations,
+                  currentIndex: _currentIndex,
+                  onTap: (value) {
+                    setState(() {
+                      _currentIndex = value;
+                    });
+                    _tabNotifier.value = value;
+                  },
                 );
+                // return Material(
+                //   shape: LinearBorder(
+                //     top: LinearBorderEdge(),
+                //     side: BorderSide(
+                //       width: 2,
+                //       color: Theme.of(context).colorScheme.surfaceContainerLow,
+                //     ),
+                //   ),
+                //   color: Colors.transparent,
+                //   child: NavigationBar(
+                //     selectedIndex: _currentIndex,
+                //     labelBehavior: settings.showNavigationLabels
+                //         ? NavigationDestinationLabelBehavior.alwaysShow
+                //         : NavigationDestinationLabelBehavior.alwaysHide,
+                //     onDestinationSelected: (index) {
+                //       setState(() {
+                //         _currentIndex = index;
+                //       });
+                //       _tabNotifier.value = index;
+                //     },
+                //     destinations: destinations,
+                //   ),
+                // );
               },
             );
           },

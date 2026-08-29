@@ -4,10 +4,10 @@ import 'package:dynamic_color/dynamic_color.dart';
 import 'package:florid/l10n/app_localizations.dart';
 import 'package:florid/providers/settings_provider.dart';
 import 'package:florid/screens/florid_app.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hornbill/hornbill.dart';
 import 'package:m3e_core/m3e_core.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:provider/provider.dart';
 
 import 'providers/app_provider.dart';
@@ -128,13 +128,16 @@ class MainApp extends StatelessWidget {
                 'Light seed: ${lightScheme.primary}, Dark seed: ${darkScheme.primary}',
               );
 
-              final ThemeData lightTheme = HornbillTheme(
-                seedColor: lightScheme.primary,
+              final ThemeData lightTheme = HTheme(
+                colourScheme: HColourScheme.custom(lightScheme.primary),
+                // dynamicSchemeVariant: DynamicSchemeVariant.expressive,
+                appBarFontFamily: 'Google Sans Flex',
               ).lightTheme();
-              final ThemeData darkThemeData = HornbillTheme(
-                seedColor: darkScheme.primary,
+              final ThemeData darkThemeData = HTheme(
+                colourScheme: HColourScheme.custom(darkScheme.primary),
+                // dynamicSchemeVariant: DynamicSchemeVariant.expressive,
+                appBarFontFamily: 'Google Sans Flex',
               ).darkTheme();
-
               return MaterialApp(
                 title: 'Florid - F-Droid Client',
                 debugShowCheckedModeBanner: false,

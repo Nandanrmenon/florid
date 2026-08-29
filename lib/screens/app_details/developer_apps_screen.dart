@@ -2,7 +2,7 @@ import 'package:florid/l10n/app_localizations.dart';
 import 'package:florid/models/fdroid_app.dart';
 import 'package:florid/providers/download_provider.dart';
 import 'package:florid/widgets/app_details_icon.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:m3e_core/m3e_core.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:provider/provider.dart';

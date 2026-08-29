@@ -7,7 +7,7 @@ import 'package:florid/services/update_check_service.dart';
 import 'package:florid/services/usage_analytics_service.dart';
 import 'package:florid/widgets/list_icon.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 import 'package:hornbill/hornbill.dart';
 import 'package:local_auth/local_auth.dart';
@@ -313,9 +313,11 @@ class _AppManagementScreenState extends State<AppManagementScreen> {
                             items: InstallMethod.values
                                 .map(
                                   (method) => HRadioListItemData<InstallMethod>(
-                                    title: _installMethodLabel(
-                                      localizations,
-                                      method,
+                                    title: Text(
+                                      _installMethodLabel(
+                                        localizations,
+                                        method,
+                                      ),
                                     ),
                                     subtitle: method == InstallMethod.shizuku
                                         ? localizations.requires_shizuku_running
@@ -369,7 +371,7 @@ class _AppManagementScreenState extends State<AppManagementScreen> {
                             items: [
                               HListItemData(
                                 leading: ListIcon(iconData: Symbols.security),
-                                title: localizations.opt_out_of_telemetry,
+                                title: Text(localizations.opt_out_of_telemetry),
                                 onTap: () async {
                                   await UsageAnalyticsService().setOptIn(
                                     !_telemetryOptedOut,
@@ -414,8 +416,9 @@ class _AppManagementScreenState extends State<AppManagementScreen> {
                           HListView(
                             items: [
                               HListItemData(
-                                title:
-                                    localizations.auto_install_after_download,
+                                title: Text(
+                                  localizations.auto_install_after_download,
+                                ),
                                 onTap: () {
                                   settings.setAutoInstallApk(
                                     !settings.autoInstallApk,
@@ -423,7 +426,7 @@ class _AppManagementScreenState extends State<AppManagementScreen> {
                                 },
                                 subtitle: localizations
                                     .auto_install_after_download_subtitle,
-                                suffix: Switch(
+                                suffix: HSwitch(
                                   value: settings.autoInstallApk,
                                   onChanged: (value) {
                                     settings.setAutoInstallApk(value);
@@ -431,7 +434,9 @@ class _AppManagementScreenState extends State<AppManagementScreen> {
                                 ),
                               ),
                               HListItemData(
-                                title: localizations.delete_apk_after_install,
+                                title: Text(
+                                  localizations.delete_apk_after_install,
+                                ),
                                 onTap: () {
                                   settings.setAutoDeleteApk(
                                     !settings.autoDeleteApk,
@@ -439,7 +444,7 @@ class _AppManagementScreenState extends State<AppManagementScreen> {
                                 },
                                 subtitle: localizations
                                     .delete_apk_after_install_subtitle,
-                                suffix: Switch(
+                                suffix: HSwitch(
                                   value: settings.autoDeleteApk,
                                   onChanged: (value) {
                                     settings.setAutoDeleteApk(value);
@@ -460,8 +465,9 @@ class _AppManagementScreenState extends State<AppManagementScreen> {
                                 leading: ListIcon(
                                   iconData: Symbols.notifications,
                                 ),
-                                title:
-                                    localizations.check_updates_in_background,
+                                title: Text(
+                                  localizations.check_updates_in_background,
+                                ),
                                 subtitle:
                                     localizations.notify_when_updates_available,
                                 onTap: () async {
@@ -470,7 +476,7 @@ class _AppManagementScreenState extends State<AppManagementScreen> {
                                   );
                                   await UpdateCheckService.scheduleFromPrefs();
                                 },
-                                suffix: Switch(
+                                suffix: HSwitch(
                                   value: settings.backgroundUpdatesEnabled,
                                   onChanged: (value) async {
                                     await settings.setBackgroundUpdatesEnabled(
@@ -484,7 +490,7 @@ class _AppManagementScreenState extends State<AppManagementScreen> {
                                 leading: ListIcon(
                                   iconData: Symbols.network_check,
                                 ),
-                                title: localizations.update_network,
+                                title: Text(localizations.update_network),
                                 subtitle: _updateNetworkPolicyLabel(
                                   localizations,
                                   settings.updateNetworkPolicy,
@@ -497,7 +503,7 @@ class _AppManagementScreenState extends State<AppManagementScreen> {
                               ),
                               HListItemData(
                                 leading: ListIcon(iconData: Symbols.schedule),
-                                title: localizations.update_interval,
+                                title: Text(localizations.update_interval),
                                 subtitle: _updateIntervalLabel(
                                   localizations,
                                   settings.updateIntervalHours,
@@ -528,8 +534,9 @@ class _AppManagementScreenState extends State<AppManagementScreen> {
                                     fill: 1,
                                     color: Theme.of(context).colorScheme.error,
                                   ),
-                                  title: localizations
-                                      .disable_battery_optimization,
+                                  title: Text(
+                                    localizations.disable_battery_optimization,
+                                  ),
                                   subtitle: localizations
                                       .allow_background_checks_reliably,
                                   onTap: _requestDisableBatteryOptimizations,
@@ -537,7 +544,9 @@ class _AppManagementScreenState extends State<AppManagementScreen> {
                               if (kDebugMode)
                                 HListItemData(
                                   leading: Icon(Symbols.bolt),
-                                  title: localizations.run_debug_check_10s,
+                                  title: Text(
+                                    localizations.run_debug_check_10s,
+                                  ),
                                   subtitle: localizations
                                       .run_debug_check_10s_subtitle,
                                   onTap: () async {

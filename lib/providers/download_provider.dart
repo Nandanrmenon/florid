@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:android_intent_plus/android_intent.dart';
-import 'package:app_installer/app_installer.dart';
+import 'package:android_package_installer/android_package_installer.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
@@ -699,7 +699,19 @@ class DownloadProvider extends ChangeNotifier {
   }
 
   Future<void> _installWithSystemInstaller(String filePath) async {
-    await AppInstaller.installApk(filePath);
+    final statusCode = await AndroidPackageInstaller.installApk(
+      apkFilePath: filePath,
+    );
+
+    if (statusCode != null) {
+      final status = PackageInstallerStatus.byCode(statusCode);
+      debugPrint('[DownloadProvider] System installer status: ${status.name}');
+
+      if (status != PackageInstallerStatus.success &&
+          status != PackageInstallerStatus.failure) {
+        throw Exception('System install failed: ${status.name}');
+      }
+    }
   }
 
   Future<void> _installWithShizuku(String filePath) async {

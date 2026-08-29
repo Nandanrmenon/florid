@@ -1,6 +1,6 @@
 import 'package:florid/constants.dart';
 import 'package:florid/screens/settings/settings_screen.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 class MenuActions {
   /// Shows the settings dialog/screen

@@ -9,7 +9,7 @@ import 'package:florid/screens/home/app_section_viewer.dart';
 import 'package:florid/screens/home/categories_screen.dart';
 import 'package:florid/screens/home/home_screen.dart';
 import 'package:florid/widgets/f_tabbar.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:material_symbols_icons/material_symbols_icons.dart';

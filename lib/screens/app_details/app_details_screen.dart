@@ -971,12 +971,11 @@ class _AppDetailsScreenState extends State<AppDetailsScreen>
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
                             if (isInstalled)
-                              Chip(
-                                visualDensity: VisualDensity.compact,
-                                avatar: Icon(Symbols.check_circle, fill: 1),
-                                label: Text(
-                                  'Installed${installedApp?.versionName != null ? ' (${installedApp!.versionName})' : ''}',
-                                ),
+                              HChip(
+                                type: ChipType.primaryContainer,
+                                iconData: Symbols.check_circle,
+                                label:
+                                    'Installed${installedApp?.versionName != null ? ' (${installedApp!.versionName})' : ''}',
                               ).animate().fadeIn(
                                 delay: Duration(milliseconds: 300),
                                 duration: Duration(milliseconds: 300),

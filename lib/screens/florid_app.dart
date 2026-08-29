@@ -6,9 +6,9 @@ import 'package:florid/screens/settings/user_screen.dart';
 import 'package:florid/utils/responsive.dart';
 import 'package:florid/utils/whats_new.dart';
 import 'package:flutter/foundation.dart';
-import 'package:material_ui/material_ui.dart';
 import 'package:hornbill/hornbill.dart';
 import 'package:material_symbols_icons/symbols.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:provider/provider.dart';
 import 'package:solar_icons/solar_icons.dart';
@@ -542,6 +542,7 @@ class _FloridAppState extends State<FloridApp> {
                   // ),
                 ];
                 return HNavigationBar(
+                  height: 84,
                   items: destinations,
                   currentIndex: _currentIndex,
                   onTap: (value) {

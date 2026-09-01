@@ -2,7 +2,7 @@ stages:
   - analyze
   - build
 
-image: ghcr.io/cirruslabs/flutter:latest
+image: ghcr.io/gmeligio/flutter-android:3.47.1
 
 variables:
   PUB_CACHE: "$CI_PROJECT_DIR/.pub-cache"
